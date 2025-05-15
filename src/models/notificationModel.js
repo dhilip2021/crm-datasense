@@ -66,4 +66,4 @@ const NotificationSchema = new Schema(
   { strict: false, versionKey: false, timestamps: true }
 );
 
-export const Notification = mongoose.models.Notification || mongoose.model("Notification", NotificationSchema,"notification");
+export const Notification = mongoose.models.Notification || mongoose.model("Notification", NotificationSchema,"notifications");
