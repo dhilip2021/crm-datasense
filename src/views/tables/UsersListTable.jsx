@@ -1,0 +1,222 @@
+'use client'
+import { useEffect, useState } from 'react'
+
+import Cookies from 'js-cookie'
+
+// MUI Imports
+import Typography from '@mui/material/Typography'
+import Card from '@mui/material/Card'
+import Chip from '@mui/material/Chip'
+
+// Third-party Imports
+import classnames from 'classnames'
+
+// Components Imports
+import CustomAvatar from '@core/components/mui/Avatar'
+
+// Styles Imports
+import tableStyles from '@core/styles/table.module.css'
+import { allUserListApi } from '@/apiFunctions/ApiAction'
+import { Box, Button, InputAdornment, TablePagination, TextField } from '@mui/material'
+import Image from 'next/image'
+import LoaderGif from '@assets/gif/loader.gif'
+import Link from 'next/link'
+
+const UsersListTable = () => {
+  const organization_id = Cookies.get('organization_id')
+  const getToken = Cookies.get('_token')
+
+  const [isClient, setIsClient] = useState(false)
+  const [usersList, setUsersList] = useState([])
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
+  const [loader, setLoader] = useState(false)
+  const [search, setSearch] = useState('')
+  const [count, setCount] = useState(0)
+  const [callFlag, setCallFlag] = useState(false)
+
+  const handleOnChange = e => {
+    const { name, value } = e.target
+    setSearch(value)
+  }
+
+  const GetAllUserList = async () => {
+    setLoader(true)
+    const header = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken}`
+    }
+
+    try {
+      setUsersList([])
+      const body = {
+        n_page: page + 1,
+        n_limit: rowsPerPage,
+        c_search_term: search ? search : '',
+        organization_id: organization_id
+      }
+
+      const results = await allUserListApi(body, header)
+
+      setLoader(false)
+
+      if (results.payloadJson.length > 0) {
+        setUsersList(results?.payloadJson[0]?.data)
+        setCount(results?.payloadJson?.at(0)?.total_count?.at(0)?.count)
+      } else {
+        setUsersList([])
+        setCount(0)
+      }
+    } catch (err) {
+      setLoader(false)
+      console.log(err)
+    }
+  }
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (search?.length > 0) {
+        GetAllUserList()
+      } else if (search?.length == 0) {
+        setCallFlag(true)
+        GetAllUserList()
+      }
+    }, 500) // waits 500ms after typing stops
+
+    return () => clearTimeout(delayDebounce) // clean up on new keystroke
+  }, [search])
+
+  useEffect(() => {
+    if (callFlag) {
+      GetAllUserList()
+    }
+  }, [page])
+
+  useEffect(() => {
+    if (callFlag) {
+      GetAllUserList()
+    }
+  }, [rowsPerPage])
+
+  return (
+    <Box>
+      <Box display={'flex'} justifyContent={'space-between'} mb={4}>
+        <TextField
+          autoComplete='off'
+          placeholder='Search'
+          name='search'
+          value={search}
+          onChange={e => handleOnChange(e)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position='start'>
+                <i className='ri-search-line'></i>
+              </InputAdornment>
+            ),
+            endAdornment: search?.length > 0 && (
+              <InputAdornment position='start' sx={{ cursor: 'pointer' }}>
+                <i className='ri-close-line' onClick={() => setSearch('')}></i>
+              </InputAdornment>
+            )
+          }}
+          size='small'
+        />
+        <Link href={'/add-user'}>
+          <Button startIcon={<i className='ri-add-line'></i>} variant='contained' className='mis-4'>
+            Add user
+          </Button>
+        </Link>
+      </Box>
+
+      <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
+        {loader && (
+          <Box textAlign={'center'} width={'100%'} mt={'200px'} mb={'100px'}>
+            <Image src={LoaderGif} alt='My GIF' width={200} height={100} />
+          </Box>
+        )}
+
+        {!loader && usersList?.length === 0 && (
+          <Box textAlign={'center'} width={'100%'} mt={'100px'} mb={'100px'}>
+            <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Users Found</p>
+          </Box>
+        )}
+      </Box>
+
+      <Card>
+        <div className='overflow-x-auto'>
+          <table className={tableStyles.table}>
+            {Array.isArray(usersList) && usersList?.length > 0 && (
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+            )}
+
+            <tbody>
+              {Array.isArray(usersList) &&
+                usersList?.map((row, index) => (
+                  <tr key={index}>
+                    <td className='!plb-1'>
+                      <div className='flex items-center gap-3'>
+                        {/* <CustomAvatar src={row.avatarSrc} size={34} /> */}
+                        <CustomAvatar skin='light' color='primary'>
+                          {row.user_name
+                            .split(' ')
+                            .map(n => n[0])
+                            .join(' ')
+                            .toUpperCase()}
+                        </CustomAvatar>
+                        <div className='flex flex-col'>
+                          <Typography color='text.primary' className='font-medium'>
+                            {row.first_name}
+                          </Typography>
+                          <Typography variant='body2'>{row.user_name}</Typography>
+                        </div>
+                      </div>
+                    </td>
+                    <td className='!plb-1'>
+                      <Typography>{row.email}</Typography>
+                    </td>
+                    <td className='!plb-1'>
+                      <div className='flex gap-2'>
+                        <Typography color='text.primary'>{row.c_role_name}</Typography>
+                      </div>
+                    </td>
+                    <td className='!pb-1'>
+                      <Chip
+                        className='capitalize'
+                        variant='tonal'
+                        color={row.n_status === 1 ? 'success' : 'secondary'}
+                        label={row.n_status === 1 ? 'active' : 'in-active'}
+                        size='small'
+                      />
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+          {Array.isArray(usersList) && usersList?.length > 0 && (
+            <TablePagination
+              component='div'
+              count={count}
+              page={page}
+              onPageChange={(event, newPage) => setPage(newPage)}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={event => {
+                setRowsPerPage(parseInt(event.target.value, 10))
+                setPage(0) // reset to first page
+              }}
+              rowsPerPageOptions={[5, 10, 25, 50]}
+            />
+          )}
+        </div>
+      </Card>
+    </Box>
+  )
+}
+
+export default UsersListTable
