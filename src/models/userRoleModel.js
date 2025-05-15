@@ -5,7 +5,6 @@ var validator = require("validator");
 
 const UserRoleSchema = new Schema(
   {
-
     c_role_name: {
       type: String,
       required: [true, "Role name is required"],
@@ -52,4 +51,4 @@ const UserRoleSchema = new Schema(
 );
 
 
-export const UserRole = mongoose.models.UserRole || mongoose.model("UserRole", UserRoleSchema, "userrole");
+export const UserRole = mongoose.models.UserRole || mongoose.model("UserRole",UserRoleSchema,"userrole");

@@ -5,9 +5,9 @@ import bcrypt from "bcryptjs";
 
 import { Organization } from "@/models/organizationModel";
 import { UserPrivileges } from "@/models/userPrivilegesModel";
-import { UserRole } from "@/models/userRoleModel";
 import { Consolelog } from "@/models/consoleModel";
 import { User } from "@/models/userModel";
+import { UserRole } from "@/models/userRoleModel";
 
 import connectMongoDB from "@/libs/mongodb";
 import { generateAccessToken, getDateTime } from "@/helper/helper";
@@ -38,19 +38,26 @@ export async function POST(request) {
    
 
     if ((email) && password) {
+      
       await User.findOne({
         email: email,
         n_status: 1,
         n_published: 1
       }).then(async (data) => {
-        console.log(data.c_role_id,"<<< DATAAAA RESSS")
+        console.log(data.c_role_id.trim(),"<<< DATAAAA ROLE IDDD")
+
+      
+        const listRes = await UserRole.findOne({ c_role_id: data.c_role_id.trim() });
+
+        console.log(listRes,"<<< LISTTT RESPONSE")
+
         const orgData = await Organization.findOne({ organization_id: data.organization_id });
 
         console.log(orgData,"<<< ORG DATA")
 
-          await UserRole.findOne({ c_role_id: data.c_role_id}).then(async(listRes) => {
+         
 
-            console.log(listRes,"<<< LISTTT RESPONSE")
+            
 
               await bcrypt.compare(password, data.password).then(async (response) => {
 
@@ -59,6 +66,8 @@ export async function POST(request) {
                 if (response) {
 
                   const UserPrivilege = await UserPrivileges.findOne({c_role_id: data.c_role_id})
+
+                 
 
                   const date_time = getDateTime();
 
@@ -117,7 +126,7 @@ export async function POST(request) {
   
                     consolelogdata.save();
                     sendResponse["appStatusCode"] = 0;
-                    sendResponse["message"] = `${listRes.c_role_name} login successfully`;
+                    sendResponse["message"] = `login successfully`;
                     sendResponse["error"] = "";
                     sendResponse["payloadJson"] = dataResults;
                   } else {
@@ -140,12 +149,7 @@ export async function POST(request) {
                 sendResponse["error"] = "Invalid credential";
               });
 
-            }).catch((err) => {
-              sendResponse["appStatusCode"] = 4;
-              sendResponse["message"] = "";
-              sendResponse["payloadJson"] = [];
-              sendResponse["error"] = "Invalid credential";
-            });
+          
         }).catch((err) => {
           sendResponse["appStatusCode"] = 4;
           sendResponse["message"] = "";
