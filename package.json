@@ -1,6 +1,7 @@
 {
   "name": "crm-admin-datasense",
   "version": "0.1.0",
+  "type": "module",
   "license": "Commercial",
   "private": true,
   "scripts": {
