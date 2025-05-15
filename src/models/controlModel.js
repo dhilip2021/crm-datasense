@@ -66,8 +66,5 @@ const ControlSchema = new Schema(
   { strict: false, versionKey: false, timestamps: true }
 );
 
-const Control =
-  mongoose.models.Control ||
-  mongoose.model("Control", ControlSchema);
 
-module.exports = { Control };
+export const Control = mongoose.models.Control || mongoose.model("Control", ControlSchema);

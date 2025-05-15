@@ -91,6 +91,6 @@ const UserSchema = new Schema(
   { strict: false, versionKey: false, timestamps: true }
 );
 
-const User = mongoose.models.User || mongoose.model("User", UserSchema);
 
-module.exports = { User };
+export const User = mongoose.models.User || mongoose.model("User", UserSchema);
+

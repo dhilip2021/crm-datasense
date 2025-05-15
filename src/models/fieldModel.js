@@ -84,6 +84,4 @@ const FieldSchema = new Schema(
 );
 
 // Export the model
-const Field = mongoose.models.Field || mongoose.model("Field", FieldSchema);
-
-module.exports = { Field };
+export const Field = mongoose.models.Field || mongoose.model("Field", FieldSchema);

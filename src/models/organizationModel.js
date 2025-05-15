@@ -54,6 +54,5 @@ const OrganizationSchema = new Schema(
   { strict: false, versionKey: false, timestamps: true }
 );
 
-const Organization = mongoose.models.Organization || mongoose.model("Organization", OrganizationSchema);
 
-module.exports = { Organization };
+export const Organization = mongoose.models.Organization || mongoose.model("Organization", OrganizationSchema);

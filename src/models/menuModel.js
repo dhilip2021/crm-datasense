@@ -49,7 +49,4 @@ const MenusSchema = new Schema(
   { strict: false, versionKey: false, timestamps: true }
 );
 
-const Menus =
-  mongoose.models.Menus || mongoose.model("Menus", MenusSchema);
-
-module.exports = { Menus };
+export const Menus = mongoose.models.Menus || mongoose.model("Menus", MenusSchema);

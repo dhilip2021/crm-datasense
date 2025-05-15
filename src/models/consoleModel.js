@@ -34,8 +34,4 @@ const ConsolelogSchema = new Schema(
 );
 
 
-
-
-const Consolelog = mongoose.models.Consolelog || mongoose.model("Consolelog", ConsolelogSchema, "consolelog");
-
-module.exports = { Consolelog };
+export const Consolelog = mongoose.models.Consolelog || mongoose.model("Consolelog", ConsolelogSchema);

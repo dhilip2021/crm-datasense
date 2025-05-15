@@ -51,6 +51,5 @@ const UserRoleSchema = new Schema(
   { strict: false, versionKey: false, timestamps: true }
 );
 
-const UserRole = mongoose.models.UserRole || mongoose.model("UserRole", UserRoleSchema, "userrole");
 
-module.exports = { UserRole };
+export const UserRole = mongoose.models.UserRole || mongoose.model("UserRole", UserRoleSchema);

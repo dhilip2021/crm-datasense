@@ -30,6 +30,5 @@ const OtpSchema = new Schema(
   { strict: false, versionKey: false, timestamps: true }
 );
 
-const OTP = mongoose.models.OTP || mongoose.model("OTP", OtpSchema);
 
-module.exports = { OTP };
+export const OTP = mongoose.models.OTP || mongoose.model("OTP", OtpSchema);

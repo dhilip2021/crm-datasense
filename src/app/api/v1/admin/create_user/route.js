@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 
 import slugify from "slugify";
 
-import { User } from "../../../../../models/userModel";
 import connectMongoDB from "../../../../../libs/mongodb";
 
-import { create_UUID,transporter } from "../../../../../helper/helper";
+import { User } from "@/models/userModel";
+import { create_UUID, transporter } from "@/helper/helper";
 
 const bcrypt = require("bcryptjs");
 

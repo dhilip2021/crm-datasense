@@ -11,8 +11,7 @@ const { accessTokenKey, forgetToken } = require("./access");
 
 
 
-
-module.exports.create_UUID = () => {
+export function create_UUID(){
   var dt = new Date().getTime();
   var uuid = `xxxxxxxxxxxx`.replace(/[xy]/g, function (c) {
     var r = (dt + Math.random() * 16) % 16 | 0;
@@ -23,17 +22,17 @@ module.exports.create_UUID = () => {
   });
 
   return uuid;
-};
+}
 
-module.exports.generateAccessToken = (user) => {
+export function generateAccessToken(user){
   const expirationTime = Math.floor(Date.now() / 1000) + 15 * 60; 
 
   return jwt.sign(user, accessTokenKey, { expiresIn: "10d" });
-};
+}
 
-module.exports.generateAccessTokenForget = (user) => {
+export function generateAccessTokenForget(user){
   return jwt.sign(user, forgetToken, { expiresIn: "1h" });
-};
+}
 
 const formatBytes = (bytes, decimals = 2) => {
   if (!+bytes) return "0 Bytes";
@@ -47,7 +46,7 @@ const formatBytes = (bytes, decimals = 2) => {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 };
 
-module.exports.transporter = nodemailer.createTransport({
+export const transporter = nodemailer.createTransport({
   port: 465, // true for 465, false for other ports
   host: "smtp.gmail.com",
   auth: {
@@ -55,28 +54,13 @@ module.exports.transporter = nodemailer.createTransport({
     pass: "qqbleftjomqsihxi",
   },
   secure: true,
-});
+})
 
-module.exports.validateImageSize = (size, required) => {
-  let convertedSize = formatBytes(size);
-  let fileSize = convertedSize.split(" ")[0];
-  let fileEtx = convertedSize.split(" ")[1];
-
-  if (fileEtx.includes("MB") && parseInt(fileSize) >= 50) {
-    return false;
-  } else if (fileEtx.includes("KB") || fileEtx.includes("Bytes")) {
-    return true;
-  } else {
-    return true;
-  }
-};
-
-module.exports.getRandomNumber = () => {
+export function getRandomNumber(){
   return Math.random().toFixed(16).split(".")[1];
-};
+}
 
-
-module.exports.generatePassword=(length = 10)=>{
+export function generatePassword(length = 10){
   const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const numbers = "0123456789";
   const specialChars = "!@#$%^&*()_+{}[]<>?/|";
@@ -104,28 +88,27 @@ module.exports.generatePassword=(length = 10)=>{
 
 
 
-
-module.exports.encryptResponse = (data) => {
-  const secretKey = "NEWSPOLIMER";
+export function encryptResponse(data){
+  const secretKey = "NEWSPRODUCT";
   const encryptedResults = urlEncoder(secretKey, JSON.stringify(data));
 
   return encryptedResults;
-};
+}
 
-module.exports.decryptRequest = (data) => {
-  const secretKey = "NEWSPOLIMER";
+export function decryptRequest(data){
+  const secretKey = "NEWSPRODUCT";
   const decryptedResults = urlDecoder(secretKey, data);
 
   return decryptedResults;
-};
+}
 
-module.exports.dateToTimestamp = (data) => {
+export function dateToTimestamp(data){
   let timestamp = Date.parse(data) / 1000;
 
   return parseInt(timestamp);
-};
+}
 
-module.exports.convertDate = (value) => {
+export function convertDate(value){
   var monthNames = [
     "Jan",
     "Feb",
@@ -150,9 +133,9 @@ module.exports.convertDate = (value) => {
   year = date_value.getFullYear();
 
   return `${date}-${monthNames[month]}-${year}`;
-};
+}
 
-module.exports.getDateTime = () => {
+export function getDateTime(){
   var now = new Date();
   var year = now.getFullYear();
   var month = now.getMonth() + 1;
@@ -185,9 +168,9 @@ module.exports.getDateTime = () => {
     year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
 
   return dateTime;
-};
+}
 
-module.exports.verifyAccessToken = () => {
+export function verifyAccessToken() {
   const headersList = headers();
   const authToken = headersList.get("authorization");
 
@@ -214,9 +197,9 @@ module.exports.verifyAccessToken = () => {
   } catch (error) {
     return { success: false, error: error.message };
   }
-};
+}
 
-module.exports.mobilePagination = (data, n_page, n_limit) => {
+export function mobilePagination(data, n_page, n_limit) {
   let dummyArray = [];
   let paginationCount = n_page / n_limit;
   let n_page_limit = 0;
@@ -240,11 +223,10 @@ module.exports.mobilePagination = (data, n_page, n_limit) => {
   });
 
   return dummyArray;
-};
+}
 
 
-
-module.exports.mobilePaginations = (n_page, n_limit) => {
+export function mobilePaginations(n_page, n_limit) {
 
   let data = {
     n_page : ((n_page) + 1),
@@ -255,34 +237,34 @@ module.exports.mobilePaginations = (n_page, n_limit) => {
 
 }
 
-function getNormalSize({ width, height, orientation }) {
+export function getNormalSize({ width, height, orientation }) {
   return (orientation || 0) >= 5
     ? { width: height, height: width }
     : { width, height };
 }
 
-module.exports.imageTowebp = (file) => {
+
+export function imageTowebp(file) {
 
   return file;
+}
 
-};
-
-module.exports.encryptCryptoResponse = (data) => {
+export function encryptCryptoResponse(data) {
   const secretPassphrase = `${process.env.NEXT_PUBLIC_ENCY_DECY_SECRET}`;
   const encryptedResponse = CryptoJS.AES.encrypt(JSON.stringify(data),secretPassphrase).toString();
 
   return encryptedResponse;
-};
+}
 
-module.exports.decrypCryptoRequest = (data) => {
+export function decrypCryptoRequest(data) {
   const secretPassphrase = `${process.env.NEXT_PUBLIC_ENCY_DECY_SECRET}`;
   const decrypted = CryptoJS.AES.decrypt(data, secretPassphrase).toString(CryptoJS.enc.Utf8);
   const decryptedResponse = JSON.parse(decrypted);
 
   return decryptedResponse;
-};
+}
 
-module.exports.checkFileType = (fileType) => {
+export function checkFileType(fileType) {
 
   if(fileType ==="image/png"){
     return true
@@ -295,15 +277,9 @@ module.exports.checkFileType = (fileType) => {
   }else{
     return false;
   }
-};
+}
 
-module.exports.getBase64=(file)=>{
-  // var reader = new FileReader();
-  // reader.readAsDataURL(file);
-  // reader.onload = function () {
-  //   return reader.result;
-  // };
-  // reader.onerror = function (error) {};
+export function getBase64(file) {
   let reader = new FileReader();
 
   if (file !== undefined) {

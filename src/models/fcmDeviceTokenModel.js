@@ -40,6 +40,5 @@ const FcmDeviceTokenSchema = new Schema(
   { strict: false, versionKey: false, timestamps: true }
 );
 
-const FcmDeviceToken =  mongoose.models.FcmDeviceToken ||  mongoose.model("FcmDeviceToken", FcmDeviceTokenSchema);
 
-module.exports = { FcmDeviceToken };
+export const FcmDeviceToken = mongoose.models.FcmDeviceToken || mongoose.model("FcmDeviceToken", FcmDeviceTokenSchema);
