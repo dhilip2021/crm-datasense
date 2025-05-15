@@ -1,5 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 import { useEffect, useState } from 'react'
+
+import Link from 'next/link'
+import Image from 'next/image'
 
 import Cookies from 'js-cookie'
 
@@ -7,9 +11,8 @@ import Cookies from 'js-cookie'
 import Typography from '@mui/material/Typography'
 import Card from '@mui/material/Card'
 import Chip from '@mui/material/Chip'
+import { Box, Button, InputAdornment, TablePagination, TextField } from '@mui/material'
 
-// Third-party Imports
-import classnames from 'classnames'
 
 // Components Imports
 import CustomAvatar from '@core/components/mui/Avatar'
@@ -17,10 +20,7 @@ import CustomAvatar from '@core/components/mui/Avatar'
 // Styles Imports
 import tableStyles from '@core/styles/table.module.css'
 import { allUserListApi } from '@/apiFunctions/ApiAction'
-import { Box, Button, InputAdornment, TablePagination, TextField } from '@mui/material'
-import Image from 'next/image'
 import LoaderGif from '@assets/gif/loader.gif'
-import Link from 'next/link'
 
 const UsersListTable = () => {
   const organization_id = Cookies.get('organization_id')
@@ -36,19 +36,22 @@ const UsersListTable = () => {
   const [callFlag, setCallFlag] = useState(false)
 
   const handleOnChange = e => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
+
     setSearch(value)
   }
 
   const GetAllUserList = async () => {
-    setLoader(true)
+    setLoader(true);
+
     const header = {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${getToken}`
     }
 
     try {
-      setUsersList([])
+      setUsersList([]);
+      
       const body = {
         n_page: page + 1,
         n_limit: rowsPerPage,
