@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 
-
-import { verifyAccessToken } from "../../../../../helper/helper";
 import connectMongoDB from "@/libs/mongodb";
-
+import { verifyAccessToken } from "@/helper/helper";
 import { User } from "@/models/userModel";
 
 const bcrypt = require("bcryptjs");
