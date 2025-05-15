@@ -47,7 +47,6 @@ export default function AddNotesPopup(props) {
         TransitionComponent={Transition}
         keepMounted
         aria-labelledby="responsive-dialog-title"
-        // className="web-story-pop"
         PaperProps={{
           sx: {
             width: "50%", // Half screen width
@@ -142,7 +141,6 @@ export default function AddNotesPopup(props) {
             <Button
               color="primary"
               variant="outlined"
-                // disabled={imageLoader}
               onClick={close}
             >
               Cancel

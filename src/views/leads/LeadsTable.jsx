@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // ** React Imports
 'use client'
 import { useCallback, useEffect, useState } from 'react'
