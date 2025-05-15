@@ -1,3 +1,6 @@
+import { accessTokenKey, forgetToken } from "./access";
+
+
 const { headers } = require("next/headers");
 
 const jwt = require("jsonwebtoken");
@@ -6,7 +9,7 @@ const  CryptoJS  = require("crypto-js");
 
 const { urlEncoder, urlDecoder } = require("encryptdecrypt-everytime/src");
 
-const { accessTokenKey, forgetToken } = require("./access");
+
 
 
 
@@ -89,14 +92,14 @@ export function generatePassword(length = 10){
 
 
 export function encryptResponse(data){
-  const secretKey = "NEWSPRODUCT";
+  const secretKey = "NEWSPOLIMER";
   const encryptedResults = urlEncoder(secretKey, JSON.stringify(data));
 
   return encryptedResults;
 }
 
 export function decryptRequest(data){
-  const secretKey = "NEWSPRODUCT";
+  const secretKey = "NEWSPOLIMER";
   const decryptedResults = urlDecoder(secretKey, data);
 
   return decryptedResults;

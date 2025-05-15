@@ -203,4 +203,4 @@ const LeadSchema = new Schema(
   { strict: false, versionKey: false, timestamps: true }
 );
 
-export const Lead = mongoose.models.Lead || mongoose.model("Lead", LeadSchema);
+export const Lead = mongoose.models.Lead || mongoose.model("Lead", LeadSchema,"Lead");

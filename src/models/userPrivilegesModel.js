@@ -76,4 +76,4 @@ const UserPrivilegesSchema = new Schema(
 );
 
 
-export const UserPrivileges = mongoose.models.UserPrivileges || mongoose.model("UserPrivileges", UserPrivilegesSchema);
+export const UserPrivileges = mongoose.models.UserPrivileges || mongoose.model("UserPrivileges", UserPrivilegesSchema,"UserPrivileges");

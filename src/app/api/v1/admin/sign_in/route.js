@@ -1,19 +1,24 @@
 import { NextResponse } from "next/server";
 
-import { User } from "../../../../../models/userModel";
-import { Consolelog } from "../../../../../models/consoleModel";
-import { UserRole } from "@/models/userRoleModel";
-import { UserPrivileges } from "@/models/userPrivilegesModel";
-import connectMongoDB from "@/libs/mongodb";
+import {urlEncoder} from "encryptdecrypt-everytime/src";
+import bcrypt from "bcryptjs";
 
-// eslint-disable-next-line import/named
-import { generateAccessToken, getDateTime } from "../../../../../helper/helper";
 import { Organization } from "@/models/organizationModel";
+import { UserPrivileges } from "@/models/userPrivilegesModel";
+import { UserRole } from "@/models/userRoleModel";
+import { Consolelog } from "@/models/consoleModel";
+import { User } from "@/models/userModel";
+
+import connectMongoDB from "@/libs/mongodb";
+import { generateAccessToken, getDateTime } from "@/helper/helper";
 
 
 
-const { urlEncoder } = require("encryptdecrypt-everytime/src");
-const bcrypt = require("bcryptjs");
+
+
+
+
+
 
 
 let sendResponse = {
@@ -38,14 +43,22 @@ export async function POST(request) {
         n_status: 1,
         n_published: 1
       }).then(async (data) => {
+        console.log(data.c_role_id,"<<< DATAAAA RESSS")
         const orgData = await Organization.findOne({ organization_id: data.organization_id });
 
-          await UserRole.findOne({
-            c_role_id: data.c_role_id,
-          }).then(async (list) => {
+        console.log(orgData,"<<< ORG DATA")
+
+          await UserRole.findOne({ c_role_id: data.c_role_id}).then(async(listRes) => {
+
+            console.log(listRes,"<<< LISTTT RESPONSE")
+
               await bcrypt.compare(password, data.password).then(async (response) => {
+
+                console.log(response,"<<< RESPONNSE")
+
                 if (response) {
-                  const UserPrivilege = await UserPrivileges.findOne({c_role_id: list.c_role_id})
+
+                  const UserPrivilege = await UserPrivileges.findOne({c_role_id: data.c_role_id})
 
                   const date_time = getDateTime();
 
@@ -87,7 +100,7 @@ export async function POST(request) {
                       email: data.email,
                       c_role_id: data.c_role_id,
                       user_id: data.user_id,
-                      role:list.c_role_name,
+                      role:listRes.c_role_name,
                       tokenAccess: encryptedResults,
                       tokenExpiry: nextTenDays,
                       privileges: UserPrivilege.c_role_privileges
@@ -104,7 +117,7 @@ export async function POST(request) {
   
                     consolelogdata.save();
                     sendResponse["appStatusCode"] = 0;
-                    sendResponse["message"] = `${list.c_role_name} login successfully`;
+                    sendResponse["message"] = `${listRes.c_role_name} login successfully`;
                     sendResponse["error"] = "";
                     sendResponse["payloadJson"] = dataResults;
                   } else {

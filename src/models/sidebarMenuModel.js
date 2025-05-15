@@ -75,4 +75,4 @@ const SideBarMenuSchema = new Schema(
   { strict: false, versionKey: false, timestamps: true }
 );
 
-export const SideBarMenu = mongoose.models.SideBarMenu || mongoose.model("SideBarMenu", SideBarMenuSchema);
+export const SideBarMenu = mongoose.models.SideBarMenu || mongoose.model("SideBarMenu", SideBarMenuSchema, "SideBarMenu");
