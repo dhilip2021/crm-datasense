@@ -199,7 +199,7 @@ module.exports.verifyAccessToken = () => {
     } else if (authToken.length <= 6) {
       return { success: false, error: "token is empty!" };
     } else {
-      const secretKey = process.env.ENCY_DECY_SECRET;
+      const secretKey = process.env.NEXT_PUBLIC_ENCY_DECY_SECRET;
 
       const token = (headersList.get("authorization") || "")
         .split("Bearer ")
@@ -207,7 +207,7 @@ module.exports.verifyAccessToken = () => {
 
       const decryptedResults = urlDecoder(secretKey, token);
       const tokenlist = JSON.parse(decryptedResults).toString();
-      const verified = jwt.verify(tokenlist, process.env.JWT_SECRET);
+      const verified = jwt.verify(tokenlist, process.env.NEXT_PUBLIC_JWT_SECRET);
 
       return { success: true, data: verified };
     }
@@ -268,14 +268,14 @@ module.exports.imageTowebp = (file) => {
 };
 
 module.exports.encryptCryptoResponse = (data) => {
-  const secretPassphrase = `${process.env.ENCY_DECY_SECRET}`;
+  const secretPassphrase = `${process.env.NEXT_PUBLIC_ENCY_DECY_SECRET}`;
   const encryptedResponse = CryptoJS.AES.encrypt(JSON.stringify(data),secretPassphrase).toString();
 
   return encryptedResponse;
 };
 
 module.exports.decrypCryptoRequest = (data) => {
-  const secretPassphrase = `${process.env.ENCY_DECY_SECRET}`;
+  const secretPassphrase = `${process.env.NEXT_PUBLIC_ENCY_DECY_SECRET}`;
   const decrypted = CryptoJS.AES.decrypt(data, secretPassphrase).toString(CryptoJS.enc.Utf8);
   const decryptedResponse = JSON.parse(decrypted);
 

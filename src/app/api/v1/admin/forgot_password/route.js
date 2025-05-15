@@ -55,7 +55,7 @@ export async function POST(request) {
         
 
         const sampleData = [token];
-        const secretKey = process.env.ENCY_DECY_SECRET;
+        const secretKey = process.env.NEXT_PUBLIC_ENCY_DECY_SECRET;
 
         const encryptedToken = urlEncoder(
           secretKey,
