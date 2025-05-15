@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 
 import connectMongoDB from "@/libs/mongodb";
 import { create_UUID, verifyAccessToken } from "@/helper/helper";
-import { Field } from "../../../../../../models/fieldModel";
+import { Field } from "@/models/fieldModel";
+
 
 let sendResponse = {
   appStatusCode: "",

@@ -4,8 +4,9 @@ import slugify from "slugify";
 
 import connectMongoDB from "@/libs/mongodb";
 import { create_UUID, verifyAccessToken } from "@/helper/helper";
+import { Lead } from "@/models/leadModel";
 
-import { Lead } from "../../../../../../models/leadModel";
+
 
 
 

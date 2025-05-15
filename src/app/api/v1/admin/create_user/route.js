@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import slugify from "slugify";
 
-import connectMongoDB from "../../../../../libs/mongodb";
+import connectMongoDB from "@/libs/mongodb";
 
 import { User } from "@/models/userModel";
 import { create_UUID, transporter } from "@/helper/helper";

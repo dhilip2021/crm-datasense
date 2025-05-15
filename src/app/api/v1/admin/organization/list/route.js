@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 
-import { Organization } from "../../../../../../models/organizationModel";
-import connectMongoDB from "../../../../../../libs/mongodb";
+import { Organization } from "@/models/organizationModel";
+import connectMongoDB from "@/libs/mongodb";
+
+
 
 let sendResponse = {
   appStatusCode: "",

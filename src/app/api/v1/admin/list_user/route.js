@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { User } from "../../../../../models/userModel";
-import { UserRole } from "../../../../../models/userRoleModel";
-import connectMongoDB from "../../../../../libs/mongodb";
+import { UserRole } from "@/models/userRoleModel";
+import { User } from "@/models/userModel";
+
 import { verifyAccessToken } from "@/helper/helper";
+import connectMongoDB from "@/libs/mongodb";
+
 
 
 let sendResponse = {

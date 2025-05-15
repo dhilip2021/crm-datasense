@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 
-import { UserRole } from "../../../../../../models/userRoleModel";
-import connectMongoDB from "../../../../../../libs/mongodb";
+import { UserRole } from "@/models/userRoleModel";
+import connectMongoDB from "@/libs/mongodb";
+import { create_UUID } from "@/helper/helper";
 
-// eslint-disable-next-line import/named
-import { create_UUID } from "../../../../../../helper/helper";
+
 
 let sendResponse = {
   appStatusCode: "",

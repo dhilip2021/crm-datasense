@@ -1,16 +1,13 @@
 import { NextResponse } from "next/server";
 
-import { User } from "../../../../../models/userModel";
+import {urlEncoder} from "encryptdecrypt-everytime/src"
 
-import connectMongoDB from "../../../../../libs/mongodb";
+import { generateAccessTokenForget, transporter } from "@/helper/helper";
+
+import { User } from "@/models/userModel";
+import connectMongoDB from "@/libs/mongodb";
 
 
-import {
-    generateAccessTokenForget,
-    transporter,
-} from "../../../../../helper/helper";
-
-const { urlEncoder } = require("encryptdecrypt-everytime/src");
 
 let sendResponse = {
   appStatusCode: "",

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { User } from "../../../../../models/userModel";
+import { User } from "@/models/userModel";
+
 import connectMongoDB from "@/libs/mongodb";
 
 let sendResponse = {

@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 
-import connectMongoDB from "../../../../../../libs/mongodb";
-import { create_UUID } from "../../../../../../helper/helper";
-import { Organization } from "../../../../../../models/organizationModel";
+
+import { Organization } from "@/models/organizationModel";
+import { create_UUID } from "@/helper/helper";
+import connectMongoDB from "@/libs/mongodb";
 
 let sendResponse = {
   appStatusCode: "",
