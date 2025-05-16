@@ -10,7 +10,7 @@ import Cookies from 'js-cookie'
 import { ToastContainer, toast } from 'react-toastify'
 import { Box, Button, Card, CardContent, Container, InputAdornment, TextField } from '@mui/material'
 
-import { getFieldListApi } from '@/apiFunctions/ApiAction'
+import { addFieldApi, getFieldListApi } from '@/apiFunctions/ApiAction'
 
 import FieldListPage from './FieldListPage'
 
@@ -157,6 +157,63 @@ function FieldListPageContainer() {
     }
   }
 
+  
+  const handleAction = (option, item,index) => {
+    if (option === 'Edit') {
+      console.log('Edit clicked for:', item)
+
+      // navigateToEdit(item)
+    } else if (option === 'Delete') {
+      console.log('Delete clicked for:', item)
+
+      let arr = [...fieldDataList];
+      arr.splice(index, 1);
+      setFieldDataList(arr);
+      handleEditSubmit(arr);
+
+    }
+  }
+
+  const handleEditSubmit =async(arr)=>{
+    try {
+
+      const body  = {
+        organization_id: organization_id,
+        fields : arr?.length > 0 ? arr : []
+      };
+      if (inputs?.id !== "") {
+        body["Id"] = inputs?.id;
+      }
+      setLoader(true)
+
+      const header = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getToken}`
+      }
+
+      const results = await addFieldApi(body, header);
+
+      if (results?.appStatusCode !== 0) {
+        setOpen(false);
+        toast?.error(results?.message);
+        getFieldList();
+        setLoader(false)
+      } else {
+        setLoader(false)
+        toast?.success(results?.message);
+        setOpen(false);
+        setErrors([]);
+        getFieldList();
+      }
+
+
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+
+
   const handleOnChange = e => {
     const { name, value } = e.target
 
@@ -237,9 +294,9 @@ function FieldListPageContainer() {
         
 
         <Card>
-          {Array.isArray(fieldDataList) && fieldDataList?.length > 0 && (
+          {!loader && Array.isArray(fieldDataList) && fieldDataList?.length > 0 && (
             <CardContent className='pt-0'>
-              <FieldListPage fieldDataList={fieldDataList} editFlag={editFlag} handleDelete={handleDelete} />
+              <FieldListPage fieldDataList={fieldDataList} editFlag={editFlag} handleDelete={handleDelete} handleAction={handleAction} />
             </CardContent>
           )}
         </Card>

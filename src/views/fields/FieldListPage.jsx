@@ -1,13 +1,15 @@
 import React, { useEffect } from "react";
 
-import { Box, Grid, MenuItem, TextField } from "@mui/material";
+import { Box, CardHeader, Grid, MenuItem, TextField } from "@mui/material";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import CardActionArea from "@mui/material/CardActionArea";
 
+import OptionsMenu from '@core/components/option-menu'
+
 const FieldListPage = (props) => {
-  const { fieldDataList, editFlag, handleDelete } = props;
+  const { fieldDataList, editFlag, handleDelete, handleAction } = props;
 
   return (
     <Box mt={4}>
@@ -15,6 +17,7 @@ const FieldListPage = (props) => {
         {Array.isArray(fieldDataList) && fieldDataList?.map((data, index) => (
           <Grid item xs={3} key={index}>
             <Card>
+               
               <CardActionArea
                 sx={{
                   height: "100%",
@@ -26,6 +29,23 @@ const FieldListPage = (props) => {
                   },
                 }}
               >
+                <CardHeader
+                                  title={
+                                    <Typography variant="h5" sx={{ fontSize: '14px' }}>
+                                      {data.label}
+                                    </Typography>
+                                  }
+                                  sx={{
+                                    fontSize:"14px"
+                                  }}
+                                  action={
+                                    <OptionsMenu
+                                      iconClassName='text-textPrimary'
+                                      options={['Edit', 'Delete']}
+                                      onOptionClick={(option, e) => handleAction(option, data, index)}
+                                    />
+                                  }
+                                />
                 <CardContent sx={{ height: "100%" }}>
                     {
                         editFlag && 
@@ -93,7 +113,7 @@ const FieldListPage = (props) => {
 
 
                   <Typography mt={1} variant="body2" color="text.secondary">
-                    name : {data?.slug_label}
+                    slug-name : {data?.slug_label}
                   </Typography>
                 </CardContent>
               </CardActionArea>
