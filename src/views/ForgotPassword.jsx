@@ -107,11 +107,11 @@ const ForgotPassword = ({ mode }) => {
     }
   };
 
-  const handleBlur = () => {
+  const handleBlur = (e) => {
     if (!error?.email && isEmail(email) && !toastFlag) {
       setCheckFlag(true);
-      
     }
+    setEmail(e.target.value.toLowerCase())
   };
 const handleChange =(e)=>{
   
@@ -135,7 +135,7 @@ const handleChange =(e)=>{
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      if(email?.length > 0){
+      if(isEmail(email) && email?.length > 0){
         checkMailFn();
       }
     }, 1000) 
@@ -158,18 +158,17 @@ const handleChange =(e)=>{
             <Typography className='mbs-1'>
               Enter your email and we&#39;ll send you instructions to reset your password
             </Typography>
-            <Form noValidate autoComplete='off' className='flex flex-col gap-5'>
+           
               {/* <TextField autoFocus fullWidth label='Email' /> */}
-
-              <FormGroup>
+              <form noValidate autoComplete='off' onSubmit={e => e.preventDefault()} className='flex flex-col gap-5'>
               <TextField
                 autoFocus
                 fullWidth
-                type="email"
+                type="text"
                 name="email"
                 defaultValue={email}
                 disabled={successFlag}
-                onBlur={() => handleBlur()}
+                onBlur={handleBlur}
                 onChange={handleChange}
                 label="Enter your email"
                 placeholder="eg: test123@gmail.com"
@@ -192,7 +191,7 @@ const handleChange =(e)=>{
              
 
               
-          </FormGroup>
+         
 
 
               <Button 
@@ -209,7 +208,10 @@ const handleChange =(e)=>{
                   <span>Back to Login</span>
                 </Link>
               </Typography>
-            </Form>
+                </form>
+            
+             
+           
           </div>
         </CardContent>
       </Card>
