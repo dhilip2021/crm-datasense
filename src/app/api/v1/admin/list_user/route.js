@@ -1,127 +1,122 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server'
 
-import { UserRole } from "@/models/userRoleModel";
-import { User } from "@/models/userModel";
+import { UserRole } from '@/models/userRoleModel'
+import { User } from '@/models/userModel'
 
-import { verifyAccessToken } from "@/helper/helper";
-import connectMongoDB from "@/libs/mongodb";
-
-
+import { verifyAccessToken } from '@/helper/helper'
+import connectMongoDB from '@/libs/mongodb'
 
 let sendResponse = {
-  appStatusCode: "",
-  message: "",
+  appStatusCode: '',
+  message: '',
   payloadJson: [],
-  error: "",
-};
+  error: ''
+}
 
 export async function POST(request) {
-  const { organization_id,n_page, n_limit, c_search_term } = await request.json();
+  const { organization_id, n_page, n_limit, c_search_term } = await request.json()
 
-  const verified = verifyAccessToken();
-  
-  await connectMongoDB();
+  const verified = verifyAccessToken()
 
-  const userRoleData = await UserRole.findOne({c_role_id : verified.data.c_role_id  });
+  console.log(verified.data.c_role_id, '<<< VERIFIED ')
+
+  await connectMongoDB()
+
+  const userRoleData = await UserRole.findOne({ c_role_id: verified.data.c_role_id })
+
+  console.log(userRoleData, '<<< userRoleData ')
 
   const RoleData = await UserRole.find({
     c_role_priority: { $gt: userRoleData.c_role_priority }
   })
-  
-  const checkArray = [];
 
-  RoleData.map((data) =>{
+  const checkArray = []
+
+  RoleData.map(data => {
     checkArray.push(data.c_role_id)
   })
 
-
-
   try {
-    
-
     if (verified.success) {
       
-      let _search = {};
-      let n_limitTerm = n_limit;
-      let n_pageTerm = n_page === 1 ? 0 : (n_page - 1) * n_limit;
-      let searchTerm = c_search_term ? c_search_term : "";
 
-      if (searchTerm !== "") {
-        _search["$and"] = [
-          {
-            $and: [
-              { organization_id: organization_id},
-              { user_name: { $regex: searchTerm, $options: "i" } },
-              { n_status: 1 },
-              { n_published: 1 },
-            ],
-          },
-        ];
+      let _search = {}
+      let n_limitTerm = n_limit
+      let n_pageTerm = n_page === 1 ? 0 : (n_page - 1) * n_limit
+      let searchTerm = c_search_term ? c_search_term : ''
+
+      const hasRoles = checkArray.length > 0
+
+      if (searchTerm !== '') {
+        console.log(checkArray, '<<< checkArray 1')
+        _search = {
+          organization_id,
+          user_name: { $regex: searchTerm, $options: 'i' },
+          n_status: 1,
+          n_published: 1,
+          ...(hasRoles && { c_role_id: { $in: checkArray } })
+        }
       } else {
-        _search["$and"] = [
-          {
-            $and: [
-              { organization_id: organization_id},
-              { n_status: 1 }, 
-              { n_published: 1 },
-              { c_role_id: {$in: checkArray}}
-
-            ],
-          },
-        ];
+        console.log(checkArray, '<<< checkArray 2')
+        _search = {
+          organization_id,
+          n_status: 1,
+          n_published: 1,
+          ...(hasRoles && { c_role_id: { $in: checkArray } })
+        }
       }
 
-      if (n_limitTerm !== "" && n_pageTerm !== "") {
+      if (n_limitTerm !== '' && n_pageTerm !== '') {
         await User.aggregate([
           {
-            $match: _search,
+            $match: _search
           },
           {
             $group: {
-              _id: "$_id",
-              first_name: { $first: "$first_name" },
-              last_name: { $first: "$last_name" },
-              user_name: { $first: "$user_name" },
-              user_id: { $first: "$user_id" },
-              email: { $first: "$email" },
-              c_about_user: { $first: "$c_about_user" },
-              password: { $first: "$password" },
-              role: { $first: "$role" },
-              c_user_img_url: { $first: "$c_user_img_url" },
-              c_role_id: { $first: "$c_role_id" },
-              n_status: { $first: "$n_status" },
-              n_published: { $first: "$n_published" },
-              createdAt: { $first: "$createdAt" },
-              c_createdBy: { $first: "$c_createdBy" },
-            },
+              _id: '$_id',
+              first_name: { $first: '$first_name' },
+              last_name: { $first: '$last_name' },
+              user_name: { $first: '$user_name' },
+              user_id: { $first: '$user_id' },
+              email: { $first: '$email' },
+              c_about_user: { $first: '$c_about_user' },
+              password: { $first: '$password' },
+              role: { $first: '$role' },
+              c_user_img_url: { $first: '$c_user_img_url' },
+              c_role_id: { $first: '$c_role_id' },
+              n_status: { $first: '$n_status' },
+              n_published: { $first: '$n_published' },
+              createdAt: { $first: '$createdAt' },
+              c_createdBy: { $first: '$c_createdBy' }
+            }
           },
           {
             $lookup: {
-              from: "users",
-              localField: "c_createdBy",
-              foreignField: "user_id",
-              as: "createdById",
-            },
+              from: 'users',
+              localField: 'c_createdBy',
+              foreignField: 'user_id',
+              as: 'createdById'
+            }
           },
           {
             $unwind: {
-              path: "$createdById",
-              preserveNullAndEmptyArrays: true,
-            },
+              path: '$createdById',
+              preserveNullAndEmptyArrays: true
+            }
           },
           {
             $lookup: {
-              from: "userrole",
-              localField: "c_role_id",
-              foreignField: "c_role_id",
-              as: "userroleList",
-            },
+              from: 'userroles',
+              localField: 'c_role_id',
+              foreignField: 'c_role_id',
+              as: 'userroleList'
+            }
           },
           {
             $unwind: {
-              path: "$userroleList",
-              preserveNullAndEmptyArrays: true,
-            },
+              path: '$userroleList',
+              preserveNullAndEmptyArrays: true
+            }
           },
           {
             $project: {
@@ -140,141 +135,139 @@ export async function POST(request) {
               n_published: 1,
               createdAt: 1,
               c_createdBy: 1,
-              createdName: "$createdById.user_name",
-              c_role_name: "$userroleList.c_role_name",
-            },
+              createdName: '$createdById.user_name',
+              c_role_name: '$userroleList.c_role_name'
+            }
           },
           {
-            $sort: { createdAt: -1 },
+            $sort: { createdAt: -1 }
           },
           {
             $facet: {
               data: [{ $skip: n_pageTerm }, { $limit: n_limitTerm }],
               total_count: [
                 {
-                  $count: "count",
-                },
-              ],
-            },
-          },
+                  $count: 'count'
+                }
+              ]
+            }
+          }
         ])
-          .then((data) => {
+          .then(data => {
+            console.log(data, '<<< DATAAAAA')
             if (data[0].data.length > 0) {
-              sendResponse["appStatusCode"] = 0;
-              sendResponse["message"] = "";
-              sendResponse["payloadJson"] = data;
-              sendResponse["error"] = [];
+              sendResponse['appStatusCode'] = 0
+              sendResponse['message'] = ''
+              sendResponse['payloadJson'] = data
+              sendResponse['error'] = []
             } else {
-              sendResponse["appStatusCode"] = 0;
-              sendResponse["message"] = "Record not found!";
-              sendResponse["payloadJson"] = [];
-              sendResponse["error"] = [];
+              sendResponse['appStatusCode'] = 0
+              sendResponse['message'] = 'Record not found!'
+              sendResponse['payloadJson'] = []
+              sendResponse['error'] = []
             }
           })
-          .catch((err) => {
-            sendResponse["appStatusCode"] = 4;
-            sendResponse["message"] = "";
-            sendResponse["payloadJson"] = [];
-            sendResponse["error"] = err;
-          });
+          .catch(err => {
+            sendResponse['appStatusCode'] = 4
+            sendResponse['message'] = ''
+            sendResponse['payloadJson'] = []
+            sendResponse['error'] = err
+          })
 
-        return NextResponse.json(sendResponse, { status: 200 });
+        return NextResponse.json(sendResponse, { status: 200 })
       } else {
-        sendResponse["appStatusCode"] = 3;
-        sendResponse["message"] = "";
-        sendResponse["payloadJson"] = [];
-        sendResponse["error"] = "Invalid Payload";
+        sendResponse['appStatusCode'] = 3
+        sendResponse['message'] = ''
+        sendResponse['payloadJson'] = []
+        sendResponse['error'] = 'Invalid Payload'
 
-        return NextResponse.json(sendResponse, { status: 200 });
+        return NextResponse.json(sendResponse, { status: 200 })
       }
     } else {
-      sendResponse["appStatusCode"] = 4;
-      sendResponse["message"] = [];
-      sendResponse["payloadJson"] = [];
-      sendResponse["error"] = verified.error;
+      sendResponse['appStatusCode'] = 4
+      sendResponse['message'] = []
+      sendResponse['payloadJson'] = []
+      sendResponse['error'] = verified.error
 
-      return NextResponse.json(sendResponse, { status: 200 });
+      return NextResponse.json(sendResponse, { status: 200 })
     }
   } catch (error) {
-    sendResponse["appStatusCode"] = 4;
-    sendResponse["message"] = [];
-    sendResponse["payloadJson"] = [];
-    sendResponse["error"] = "Something went wrong!";
+    sendResponse['appStatusCode'] = 4
+    sendResponse['message'] = []
+    sendResponse['payloadJson'] = []
+    sendResponse['error'] = 'Something went wrong!'
 
-    return NextResponse.json(sendResponse, { status: 400 });
+    return NextResponse.json(sendResponse, { status: 400 })
   }
 }
 
 export async function GET(request) {
-  const id = request.nextUrl.searchParams.get("id");
-  const verified = verifyAccessToken();
+  const id = request.nextUrl.searchParams.get('id')
+  const verified = verifyAccessToken()
 
   try {
-    await connectMongoDB();
+    await connectMongoDB()
 
     if (verified.success) {
-      let _search = {};
+      let _search = {}
 
       if (id) {
-
-        
-        _search["$and"] = [
+        _search['$and'] = [
           {
-            $and: [{ n_status: 1 }, { n_published: 1 }, { user_id: id }],
-          },
-        ];
+            $and: [{ n_status: 1 }, { n_published: 1 }, { user_id: id }]
+          }
+        ]
 
-        
         await User.aggregate([
           {
-            $match: _search,
+            $match: _search
           },
           {
             $group: {
-              _id: "$_id",
-              first_name: { $first: "$first_name" },
-              last_name: { $first: "$last_name" },
-              user_name: { $first: "$user_name" },
-              user_id: { $first: "$user_id" },
-              email: { $first: "$email" },
-              c_about_user: { $first: "$c_about_user" },
-              password: { $first: "$password" },
-              role: { $first: "$role" },
-              c_user_img_url: { $first: "$c_user_img_url" },
-              c_role_id: { $first: "$c_role_id" },
-              n_status: { $first: "$n_status" },
-              n_published: { $first: "$n_published" },
-              createdAt: { $first: "$createdAt" },
-              c_createdBy: { $first: "$c_createdBy" },
-            },
+              _id: '$_id',
+              first_name: { $first: '$first_name' },
+              last_name: { $first: '$last_name' },
+              user_name: { $first: '$user_name' },
+              user_id: { $first: '$user_id' },
+              email: { $first: '$email' },
+              c_about_user: { $first: '$c_about_user' },
+              password: { $first: '$password' },
+              role: { $first: '$role' },
+              c_user_img_url: { $first: '$c_user_img_url' },
+              c_role_id: { $first: '$c_role_id' },
+              n_status: { $first: '$n_status' },
+              n_published: { $first: '$n_published' },
+              createdAt: { $first: '$createdAt' },
+              c_createdBy: { $first: '$c_createdBy' }
+            }
           },
           {
             $lookup: {
-              from: "users",
-              localField: "c_createdBy",
-              foreignField: "user_id",
-              as: "createdById",
-            },
+              from: 'users',
+              localField: 'c_createdBy',
+              foreignField: 'user_id',
+              as: 'createdById'
+            }
           },
           {
             $unwind: {
-              path: "$createdById",
-              preserveNullAndEmptyArrays: true,
-            },
+              path: '$createdById',
+              preserveNullAndEmptyArrays: true
+            }
           },
           {
             $lookup: {
-              from: "userrole",
-              localField: "c_role_id",
-              foreignField: "c_role_id",
-              as: "userroleList",
-            },
+              from: 'userroles',
+              localField: 'c_role_id',
+              foreignField: 'c_role_id',
+              as: 'userroleLists'
+            }
           },
           {
             $unwind: {
-              path: "$userroleList",
-              preserveNullAndEmptyArrays: true,
-            },
+              path: '$userroleLists',
+              preserveNullAndEmptyArrays: true
+            }
           },
           {
             $project: {
@@ -293,94 +286,92 @@ export async function GET(request) {
               n_published: 1,
               createdAt: 1,
               c_createdBy: 1,
-              createdName: "$createdById.user_name",
-              c_role_name: "$userroleList.c_role_name",
-            },
+              createdName: '$createdById.user_name',
+              c_role_name: '$userroleLists.c_role_name'
+            }
           },
           {
-            $sort: { createdAt: -1 },
-          },
+            $sort: { createdAt: -1 }
+          }
         ])
-          .then((data) => {
+          .then(data => {
             if (data.length > 0) {
-              sendResponse["appStatusCode"] = 0;
-              sendResponse["message"] = "";
-              sendResponse["payloadJson"] = data;
-              sendResponse["error"] = [];
+              sendResponse['appStatusCode'] = 0
+              sendResponse['message'] = ''
+              sendResponse['payloadJson'] = data
+              sendResponse['error'] = []
             } else {
-              sendResponse["appStatusCode"] = 0;
-              sendResponse["message"] = "Record not found!";
-              sendResponse["payloadJson"] = [];
-              sendResponse["error"] = [];
+              sendResponse['appStatusCode'] = 0
+              sendResponse['message'] = 'Record not found!'
+              sendResponse['payloadJson'] = []
+              sendResponse['error'] = []
             }
           })
-          .catch((err) => {
-            sendResponse["appStatusCode"] = 4;
-            sendResponse["message"] = "";
-            sendResponse["payloadJson"] = [];
-            sendResponse["error"] = err;
-          });
+          .catch(err => {
+            sendResponse['appStatusCode'] = 4
+            sendResponse['message'] = ''
+            sendResponse['payloadJson'] = []
+            sendResponse['error'] = err
+          })
 
-        return NextResponse.json(sendResponse, { status: 200 });
+        return NextResponse.json(sendResponse, { status: 200 })
       } else {
-        
-        _search["$and"] = [
+        _search['$and'] = [
           {
-            $and: [{ n_status: 1 }, { n_published: 1 }],
-          },
-        ];
+            $and: [{ n_status: 1 }, { n_published: 1 }]
+          }
+        ]
 
-       
         await User.aggregate([
           {
-            $match: _search,
+            $match: _search
           },
           {
             $group: {
-              _id: "$_id",
-              first_name: { $first: "$first_name" },
-              last_name: { $first: "$last_name" },
-              user_name: { $first: "$user_name" },
-              user_id: { $first: "$user_id" },
-              email: { $first: "$email" },
-              c_about_user: { $first: "$c_about_user" },
-              password: { $first: "$password" },
-              role: { $first: "$role" },
-              c_user_img_url: { $first: "$c_user_img_url" },
-              c_role_id: { $first: "$c_role_id" },
-              n_status: { $first: "$n_status" },
-              n_published: { $first: "$n_published" },
-              createdAt: { $first: "$createdAt" },
-              c_createdBy: { $first: "$c_createdBy" },
-            },
+              _id: '$_id',
+              first_name: { $first: '$first_name' },
+              last_name: { $first: '$last_name' },
+              user_name: { $first: '$user_name' },
+              user_id: { $first: '$user_id' },
+              email: { $first: '$email' },
+              c_about_user: { $first: '$c_about_user' },
+              password: { $first: '$password' },
+              role: { $first: '$role' },
+              c_user_img_url: { $first: '$c_user_img_url' },
+              c_role_id: { $first: '$c_role_id' },
+              n_status: { $first: '$n_status' },
+              n_published: { $first: '$n_published' },
+              createdAt: { $first: '$createdAt' },
+              c_createdBy: { $first: '$c_createdBy' }
+            }
           },
           {
             $lookup: {
-              from: "users",
-              localField: "c_createdBy",
-              foreignField: "user_id",
-              as: "createdById",
-            },
+              from: 'users',
+              localField: 'c_createdBy',
+              foreignField: 'user_id',
+              as: 'createdById'
+            }
           },
           {
             $unwind: {
-              path: "$createdById",
-              preserveNullAndEmptyArrays: true,
-            },
+              path: '$createdById',
+              preserveNullAndEmptyArrays: true
+            }
           },
           {
             $lookup: {
-              from: "userrole",
-              localField: "c_role_id",
-              foreignField: "c_role_id",
-              as: "userroleList",
-            },
+              from: 'userroles',
+              localField: 'c_role_id',
+              foreignField: 'c_role_id',
+              as: 'userroleList'
+            }
           },
           {
             $unwind: {
-              path: "$userroleList",
-              preserveNullAndEmptyArrays: true,
-            },
+              path: '$userroleList',
+              preserveNullAndEmptyArrays: true
+            }
           },
           {
             $project: {
@@ -399,52 +390,50 @@ export async function GET(request) {
               n_published: 1,
               createdAt: 1,
               c_createdBy: 1,
-              createdName: "$createdById.user_name",
-              c_role_name: "$userroleList.c_role_name",
-            },
+              createdName: '$createdById.user_name',
+              c_role_name: '$userroleList.c_role_name'
+            }
           },
           {
-            $sort: { createdAt: -1 },
-          },
+            $sort: { createdAt: -1 }
+          }
         ])
-          .then((data) => {
-
-              
+          .then(data => {
             if (data.length > 0) {
-              sendResponse["appStatusCode"] = 0;
-              sendResponse["message"] = "";
-              sendResponse["payloadJson"] = data;
-              sendResponse["error"] = [];
+              sendResponse['appStatusCode'] = 0
+              sendResponse['message'] = ''
+              sendResponse['payloadJson'] = data
+              sendResponse['error'] = []
             } else {
-              sendResponse["appStatusCode"] = 0;
-              sendResponse["message"] = "Record not found!";
-              sendResponse["payloadJson"] = [];
-              sendResponse["error"] = [];
+              sendResponse['appStatusCode'] = 0
+              sendResponse['message'] = 'Record not found!'
+              sendResponse['payloadJson'] = []
+              sendResponse['error'] = []
             }
           })
-          .catch((err) => {
-            sendResponse["appStatusCode"] = 4;
-            sendResponse["message"] = "";
-            sendResponse["payloadJson"] = [];
-            sendResponse["error"] = err;
-          });
+          .catch(err => {
+            sendResponse['appStatusCode'] = 4
+            sendResponse['message'] = ''
+            sendResponse['payloadJson'] = []
+            sendResponse['error'] = err
+          })
 
-        return NextResponse.json(sendResponse, { status: 200 });
+        return NextResponse.json(sendResponse, { status: 200 })
       }
     } else {
-      sendResponse["appStatusCode"] = 4;
-      sendResponse["message"] = [];
-      sendResponse["payloadJson"] = [];
-      sendResponse["error"] = verified.error;
+      sendResponse['appStatusCode'] = 4
+      sendResponse['message'] = []
+      sendResponse['payloadJson'] = []
+      sendResponse['error'] = verified.error
 
-      return NextResponse.json(sendResponse, { status: 200 });
+      return NextResponse.json(sendResponse, { status: 200 })
     }
   } catch (error) {
-    sendResponse["appStatusCode"] = 4;
-    sendResponse["message"] = [];
-    sendResponse["payloadJson"] = [];
-    sendResponse["error"] = "Something went wrong!";
+    sendResponse['appStatusCode'] = 4
+    sendResponse['message'] = []
+    sendResponse['payloadJson'] = []
+    sendResponse['error'] = 'Something went wrong!'
 
-    return NextResponse.json(sendResponse, { status: 400 });
+    return NextResponse.json(sendResponse, { status: 400 })
   }
 }
