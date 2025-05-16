@@ -232,3 +232,14 @@ export async function GET(request) {
   
 }
 
+
+export async function POST() {
+  sendResponse["appStatusCode"] = 0;
+  sendResponse["message"] = "";
+  sendResponse["payloadJson"] = [];
+  sendResponse["error"] = "";
+
+  return NextResponse.json(sendResponse, { status: 200 });
+
+}
+
