@@ -5,16 +5,12 @@ import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 
-
 import slugify from 'slugify'
 import Cookies from 'js-cookie'
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify'
 import { Box, Button, Card, CardContent, Container, InputAdornment, TextField } from '@mui/material'
 
 import { getFieldListApi } from '@/apiFunctions/ApiAction'
-
-
-
 
 import FieldListPage from './FieldListPage'
 
@@ -161,14 +157,10 @@ function FieldListPageContainer() {
     }
   }
 
-
-
-
-  const handleOnChange = (e) => {
-    const { name, value } = e.target;
+  const handleOnChange = e => {
+    const { name, value } = e.target
 
     setSearch(value)
-
   }
 
   const handleInputChange = e => {
@@ -176,7 +168,6 @@ function FieldListPageContainer() {
 
     setInputs({ ...inputs, [name]: capitalizeWords(value) })
   }
-
 
   useEffect(() => {
     if (open === false) {
@@ -200,63 +191,60 @@ function FieldListPageContainer() {
 
   return (
     <div>
-        <Box>
-          <Box display={'flex'} justifyContent={'space-between'}  alignItems={'center'} mb={3}>
-             <TextField
-                          autoComplete='off'
-                          placeholder='Search'
-                          name='search'
-                          value={search}
-                          onChange={e => handleOnChange(e)}
-                          InputProps={{
-                            startAdornment: (
-                              <InputAdornment position='start'>
-                                <i className='ri-search-line'></i>
-                              </InputAdornment>
-                            ),
-                            endAdornment: search?.length > 0 && (
-                              <InputAdornment position='start' sx={{ cursor: 'pointer' }}>
-                                <i className='ri-close-line' onClick={() => setSearch('')}></i>
-                              </InputAdornment>
-                            )
-                          }}
-                          size='small'
-                        />
-            {!editFlag && (
-              <Link href={'/fields/add-field'}>
-                <Button startIcon={<i className='ri-add-line'></i>} variant='contained' className='mis-4'>
-                  Add Field
-                </Button>
-              </Link>
-            )}
-          </Box>
-          <Card>
-          <CardContent className='pt-0'>
+      <Box>
+        <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} mb={3}>
+          <TextField
+            autoComplete='off'
+            placeholder='Search'
+            name='search'
+            value={search}
+            onChange={e => handleOnChange(e)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position='start'>
+                  <i className='ri-search-line'></i>
+                </InputAdornment>
+              ),
+              endAdornment: search?.length > 0 && (
+                <InputAdornment position='start' sx={{ cursor: 'pointer' }}>
+                  <i className='ri-close-line' onClick={() => setSearch('')}></i>
+                </InputAdornment>
+              )
+            }}
+            size='small'
+          />
+          {!editFlag && (
+            <Link href={'/fields/add-field'}>
+              <Button startIcon={<i className='ri-add-line'></i>} variant='contained' className='mis-4'>
+                Add Field
+              </Button>
+            </Link>
+          )}
+        </Box>
+          <Box>
           {loader && (
-                              <Box textAlign={'center'} width={'100%'} mt={'200px'} mb={'100px'}>
-                                <Image src={LoaderGif} alt='My GIF' width={200} height={100} />
-                              </Box>
-                            )}
-          {fieldDataList?.length === 0 && (
-                <Box textAlign={'center'} width={'100%'} mt={'100px'} mb={'100px'}>
+              <Box textAlign={'center'} width={'100%'} mt={'200px'} mb={'100px'}>
+                <Image src={LoaderGif} alt='My GIF' width={200} height={100} />
+              </Box>
+            )}
+            {fieldDataList?.length === 0 && (
+              <Box textAlign={'center'} width={'100%'} mt={'100px'} mb={'100px'}>
                 <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Field Found</p>
               </Box>
-              )}
-            </CardContent>
-            </Card>
-         
-          <Card>
+            )}
+          </Box>
+           
+        
+
+        <Card>
           {Array.isArray(fieldDataList) && fieldDataList?.length > 0 && (
             <CardContent className='pt-0'>
-
-
-
               <FieldListPage fieldDataList={fieldDataList} editFlag={editFlag} handleDelete={handleDelete} />
             </CardContent>
           )}
-          </Card>
-        </Box>
-     
+        </Card>
+      </Box>
+
       <ToastContainer />
     </div>
   )
