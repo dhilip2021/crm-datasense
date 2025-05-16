@@ -15,7 +15,7 @@ import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import { FormGroup, IconButton, InputAdornment } from '@mui/material'
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify'
 
 // Component Imports
 import Form from '@components/Form'
@@ -30,101 +30,93 @@ import { checkMailApi, forgotPasswordApi } from '@/apiFunctions/ApiAction'
 import LoaderGif2 from '@assets/gif/loader2.gif'
 
 const ForgotPassword = ({ mode }) => {
-
-  const [toastFlag, setToastFlag] = useState(false);
-  const [email, setEmail] = useState("");
-  const [statusCode, setstatusCode] = useState();
-  const [loader, setLoader] = useState(false);
-  const [loaderEmail, setLoaderEmail] = useState(false);
-  const [successFlag, setSuccessFlag] = useState(false);
-  const [checkFlag, setCheckFlag] = useState(false);
+  const [toastFlag, setToastFlag] = useState(false)
+  const [email, setEmail] = useState('')
+  const [statusCode, setstatusCode] = useState()
+  const [loader, setLoader] = useState(false)
+  const [loaderEmail, setLoaderEmail] = useState(false)
+  const [successFlag, setSuccessFlag] = useState(false)
+  const [checkFlag, setCheckFlag] = useState(false)
 
   const [error, setError] = useState({
     email: false,
-    password: false,
-  });
+    password: false
+  })
 
+  const isEmail = email => {
+    var emailFormat = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/
 
-  const isEmail = (email) => {
-    var emailFormat = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
-
-    if (email !== "" && email.match(emailFormat)) {
-      return true;
+    if (email !== '' && email.match(emailFormat)) {
+      return true
     }
 
-    return false;
-  };
+    return false
+  }
 
-  
   const formSubmitHandle = () => {
     // window.location.reload();
     if (!isEmail(email)) {
-      setError({ ...error, email: true });
+      setError({ ...error, email: true })
     } else {
-      setLoader(true);
-      forgetPasswordFn();
+      setLoader(true)
+      forgetPasswordFn()
     }
-  };
+  }
 
   const forgetPasswordFn = async () => {
     const body = {
       email: email,
-      c_redirect: `${window.location.origin}/change-password`,
-    };
+      c_redirect: `${window.location.origin}/change-password`
+    }
 
-    let results = await forgotPasswordApi(body);
+    let results = await forgotPasswordApi(body)
 
     if (results.appStatusCode !== 0) {
-      setLoader(false);
-      toast.error(results?.error);
+      setLoader(false)
+      toast.error(results?.error)
     } else {
-      setLoader(false);
-      setstatusCode(results.appStatusCode);
-      toast.success(results?.message);
-      setSuccessFlag(true);
+      setLoader(false)
+      setstatusCode(results.appStatusCode)
+      toast.success(results?.message)
+      setSuccessFlag(true)
     }
-  };
+  }
 
   const checkMailFn = async () => {
     const body = {
-      email: email,
-    };
-    
-    setLoaderEmail(true);
+      email: email
+    }
 
-    let results = await checkMailApi(body);
+    setLoaderEmail(true)
+
+    let results = await checkMailApi(body)
 
     if (results?.appStatusCode !== 4) {
       setLoaderEmail(false)
-      setCheckFlag(false);
-      toast.error("This email is not registered with us");
-      setToastFlag(true);
-      setstatusCode(results?.appStatusCode);
+      setCheckFlag(false)
+      toast.error('This email is not registered with us')
+      setToastFlag(true)
+      setstatusCode(results?.appStatusCode)
     } else {
       setLoaderEmail(false)
-      setCheckFlag(false);
-      setstatusCode(results?.appStatusCode);
+      setCheckFlag(false)
+      setstatusCode(results?.appStatusCode)
     }
-  };
+  }
 
-  const handleBlur = (e) => {
+  const handleBlur = () => {
     if (!error?.email && isEmail(email) && !toastFlag) {
-      setCheckFlag(true);
+      setCheckFlag(true)
     }
-    setEmail(e.target.value.toLowerCase())
-  };
-const handleChange =(e)=>{
-  
-
-
-  setEmail(e.target.value.toLowerCase());
-
-    setError({ ...error, email: false, password: false });
-    setToastFlag(false);
-  
-}
-
-
+  }
+  const handleChange = e => {
+    const { name, value } = e.target
+    if (name === 'email') {
+      setEmail(value.toLowerCase())
+      setError({ ...error, email: false, password: false })
+      setToastFlag(false)
+    }
+  }
 
   // Vars
   const darkImg = '/images/pages/auth-v1-mask-dark.png'
@@ -135,16 +127,13 @@ const handleChange =(e)=>{
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      if(isEmail(email) && email?.length > 0){
-        checkMailFn();
+      if (isEmail(email) && email?.length > 0) {
+        checkMailFn()
       }
-    }, 1000) 
+    }, 1000)
 
-    return () => clearTimeout(delayDebounce) 
+    return () => clearTimeout(delayDebounce)
   }, [email])
-
-
-  
 
   return (
     <div className='flex flex-col justify-center items-center min-bs-[100dvh] relative p-6'>
@@ -158,48 +147,38 @@ const handleChange =(e)=>{
             <Typography className='mbs-1'>
               Enter your email and we&#39;ll send you instructions to reset your password
             </Typography>
-           
-              {/* <TextField autoFocus fullWidth label='Email' /> */}
-              <form noValidate autoComplete='off' onSubmit={e => e.preventDefault()} className='flex flex-col gap-5'>
+
+            {/* <TextField autoFocus fullWidth label='Email' /> */}
+            <form noValidate autoComplete='off' onSubmit={e => e.preventDefault()} className='flex flex-col gap-5'>
               <TextField
                 autoFocus
                 fullWidth
-                type="text"
-                name="email"
-                defaultValue={email}
+                type='text'
+                name='email'
+                value={email} // <-- controlled input
                 disabled={successFlag}
                 onBlur={handleBlur}
                 onChange={handleChange}
-                label="Enter your email"
-                placeholder="eg: test123@gmail.com"
+                label='Enter your email'
+                placeholder='eg: test123@gmail.com'
                 error={error.email}
-                helperText={error.email && email !== "" ?  "Please enter valid email" :( error.email &&  email === "" && "Please check this email")}
+                helperText={
+                  error.email && email !== ''
+                    ? 'Please enter valid email'
+                    : error.email && email === '' && 'Please check this email'
+                }
                 InputProps={{
-                                    endAdornment: (
-                                      <InputAdornment position='end'>
-                                        <IconButton
-                                          size='small'
-                                          edge='end'
-                                          aria-label='toggle password visibility'
-                                        >
-                                         { loaderEmail && <Image src={LoaderGif2} width={30} height={30} alt='loader'/>}
-                                        </IconButton>
-                                      </InputAdornment>
-                                    )
-                                  }}
+                  endAdornment: (
+                    <InputAdornment position='end'>
+                      <IconButton size='small' edge='end' aria-label='toggle password visibility'>
+                        {loaderEmail && <Image src={LoaderGif2} width={30} height={30} alt='loader' />}
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
               />
-             
 
-              
-         
-
-
-              <Button 
-              disabled={loaderEmail}
-              fullWidth 
-              variant='contained' 
-              type='submit'  
-              onClick={formSubmitHandle}>
+              <Button disabled={loaderEmail} fullWidth variant='contained' type='submit' onClick={formSubmitHandle}>
                 Send reset link
               </Button>
               <Typography className='flex justify-center items-center' color='primary'>
@@ -208,10 +187,7 @@ const handleChange =(e)=>{
                   <span>Back to Login</span>
                 </Link>
               </Typography>
-                </form>
-            
-             
-           
+            </form>
           </div>
         </CardContent>
       </Card>
