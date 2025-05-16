@@ -48,7 +48,10 @@ const VerticalMenu = ({ scrollMenu }) => {
     Cookies.remove('organization_id')
     Cookies.remove('organization_name')
     Cookies.remove('user_id')
+    Cookies.remove("c_version");
+    Cookies.remove("endedAt");
     router.push('/login')
+
   }
 
   return (
