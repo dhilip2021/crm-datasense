@@ -13,7 +13,7 @@ import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import CardContent from '@mui/material/CardContent'
 import InputAdornment from '@mui/material/InputAdornment'
-import { FormControl, IconButton, InputLabel, MenuItem, OutlinedInput, Select } from '@mui/material'
+import { Box, FormControl, IconButton, InputLabel, MenuItem, OutlinedInput, Select } from '@mui/material'
 
 
 //3rd Party api
@@ -36,6 +36,7 @@ const router = useRouter()
 // States
   const [isPasswordShown, setIsPasswordShown] = useState(false)
   const [menuList, setMenuList] = useState([]);
+  const [loader, setLoader] = useState(false)
 
   const [inputs, setInputs] = useState({
     first_name:"",
@@ -94,10 +95,11 @@ const handleSubmit =async() =>{
 const GetAllRoleList = async () => {
 
   try {
+    setLoader(true)
     const results = await userPrivilegeApi({
       role: "",
     });
-    
+    setLoader(false)
     setMenuList(results?.payloadJson);
 
   } catch (err) {
@@ -112,7 +114,8 @@ useEffect(() => {
 
 
   return (
-    <Card>
+    <Box style={loader ? { opacity: 0.3, pointerEvents: "none" } : { opacity: 1 }}>
+       <Card>
       {/* <CardHeader title='Add user details' /> */}
       <CardContent>
         <Form>
@@ -262,6 +265,8 @@ useEffect(() => {
       </CardContent>
       <ToastContainer />
     </Card>
+    </Box>
+   
   )
 }
 
