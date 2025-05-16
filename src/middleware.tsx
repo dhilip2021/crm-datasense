@@ -20,5 +20,23 @@ export default function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/dashboard/:path*', '/profile/:path*', '/login'],
-  }
+  matcher: [
+    '/profile/:path*',
+    '/login',
+    '/users-list',
+    '/add-user',
+    '/fields/list-fields',
+    '/fields/add-field',
+    '/leads',
+    '/leads/create-lead',
+    '/notes',
+    '/tasks',
+    '/organization',
+    '/calls',
+    '/emails',
+    '/comments',
+    '/deals',
+    '/profile-settings',
+    '/leads/edit-lead/:path*'
+  ]
+}

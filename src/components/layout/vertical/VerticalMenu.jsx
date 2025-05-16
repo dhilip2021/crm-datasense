@@ -37,7 +37,7 @@ const VerticalMenu = ({ scrollMenu }) => {
   const ScrollWrapper = isBreakpointReached ? 'div' : PerfectScrollbar
 
   const logoutFn = () => {
-    router.push('/login')
+    
     Cookies.remove('riho_token')
     Cookies.remove('_token')
     Cookies.remove('_token_expiry')
@@ -48,6 +48,7 @@ const VerticalMenu = ({ scrollMenu }) => {
     Cookies.remove('organization_id')
     Cookies.remove('organization_name')
     Cookies.remove('user_id')
+    router.push('/login')
   }
 
   return (

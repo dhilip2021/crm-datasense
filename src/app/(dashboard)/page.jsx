@@ -1,9 +1,7 @@
 "use client"
-import { useRouter } from 'next/navigation'
 
 // MUI Imports
 import Grid from '@mui/material/Grid'
-import Cookies from 'js-cookie'
 
 // Components Imports
 import Award from '@views/dashboard/Award'
@@ -18,13 +16,7 @@ import CardStatVertical from '@components/card-statistics/Vertical'
 import Table from '@views/dashboard/Table'
 
 const DashboardAnalytics = () => {
-  const organization_id = Cookies.get('organization_id');
 
-  const router = useRouter()
-
-  if(organization_id === undefined ){
-    return (router.push("/login"))
-  }
 
 
 

@@ -4,7 +4,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
 import Image from 'next/image'
 
@@ -64,7 +63,6 @@ function activeColor(value) {
 
 const DealsTable = () => {
   const organization_id = Cookies.get('organization_id')
-  const router = useRouter()
 
   const getToken = Cookies.get('_token')
   const [callFlag, setCallFlag] = useState(false)

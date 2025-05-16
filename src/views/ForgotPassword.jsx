@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react'
 
 // Next Imports
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
 import Image from 'next/image'
 
@@ -45,7 +44,6 @@ const ForgotPassword = ({ mode }) => {
     password: false,
   });
 
-  const router = useRouter();
 
   const isEmail = (email) => {
     var emailFormat = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;

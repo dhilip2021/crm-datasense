@@ -1,10 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // ** React Imports
 'use client'
-import { useCallback, useEffect, useState } from 'react'
+import {  useEffect, useState } from 'react'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
 import Image from 'next/image'
 
@@ -62,7 +61,6 @@ function activeColor(value) {
 
 const LeadsTable = () => {
   const organization_id = Cookies.get('organization_id')
-  const router = useRouter()
 
   const getToken = Cookies.get('_token')
   const [callFlag, setCallFlag] = useState(false)

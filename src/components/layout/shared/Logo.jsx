@@ -3,7 +3,7 @@
 // Third-party Imports
 import styled from '@emotion/styled'
 
-import Cookies from 'js-cookie'
+// import Cookies from 'js-cookie'
 import { Box } from '@mui/material'
 
 // Component Imports
@@ -26,8 +26,8 @@ const LogoText = styled.span`
 `
 
 const Logo = ({ color }) => {
-  Cookies
-  const orgName = Cookies.get("organization_name");
+  
+  // const orgName = Cookies.get("organization_name");
 
   return (
     <Box>
@@ -35,7 +35,7 @@ const Logo = ({ color }) => {
        <MaterioLogo className='text-[22px] text-primary' />
        <LogoText color={color}>{themeConfig.templateName}</LogoText>
        </div>
-       <h4> <span style={{color:"#a7a7a7"}}></span>  {orgName}</h4>
+       {/* <h4> <span style={{color:"#a7a7a7"}}></span>  {orgName}</h4> */}
     </Box>
 
   )
