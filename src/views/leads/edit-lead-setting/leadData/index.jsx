@@ -125,7 +125,7 @@ const LeadData = () => {
   const dispatch = useDispatch()
   const org = useSelector(state => state.organization)
 
-
+  console.log(org,"<<< ORG")
   const organization_id = Cookies.get('organization_id')
   const organization_id1 = org?.payloadJson[0]?.organization_id
   const getToken = Cookies.get('_token')
