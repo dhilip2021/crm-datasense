@@ -25,6 +25,7 @@ import Logo from '@components/layout/shared/Logo'
 // Hook Imports
 import { useImageVariant } from '@core/hooks/useImageVariant'
 import { addOrganizationApi, checkMailApi, craeteUserApi, getOrganizationApi } from '@/apiFunctions/ApiAction'
+import { Box } from '@mui/material'
 
 
 
@@ -156,18 +157,28 @@ const Register = ({ mode }) => {
         c_user_img_url: '',
         organization_id: result?.payloadJson?.organization_id
       }
-
+      setLoader(true);
       const resultData = await craeteUserApi(body1)
 
       if (resultData?.appStatusCode === 0) {
-        toast.success('Organization successfully created!')
-        toast.success('Please check your email.. your password send your mail!')
+        // toast.success('Organization successfully created!',{
+        //   autoClose: 2000, 
+        // })
+        toast.success('Please check your email.. your password send your mail!',{
+          autoClose: 3000, // closes in 3 seconds
+        })
         router.push("/login")
+        setLoader(false);
       } else {
-        toast.error('Something Went wrong, Please try after some time')
+        toast.error('Something Went wrong, Please try after some time',{
+          autoClose: 3000, // closes in 3 seconds
+        })
+        setLoader(false);
       }
     } else {
-      toast.error('Something Went wrong, Please try after some time')
+      toast.error('Something Went wrong, Please try after some time',{
+        autoClose: 3000, // closes in 3 seconds
+      })
     }
   }
 
@@ -200,7 +211,8 @@ const checkMail =async (mail)=>{
   }, [inputs?.email])
 
   return (
-    <div className='flex flex-col justify-center items-center min-bs-[100dvh] relative p-6'>
+    <Box style={loader ? { opacity: 0.3, pointerEvents: "none" } : { opacity: 1 }}>
+ <div className='flex flex-col justify-center items-center min-bs-[100dvh] relative p-6'>
       <Card className='flex flex-col sm:is-[450px]'>
         <CardContent className='p-6 sm:!p-12'>
           <Link href='/' className='flex justify-center items-start mbe-6'>
@@ -208,7 +220,7 @@ const checkMail =async (mail)=>{
           </Link>
           <Typography variant='h4'>Adventure starts here 🚀</Typography>
           <div className='flex flex-col gap-5'>
-            <Typography className='mbs-1'>Make your app management easy and fun!</Typography>
+            <Typography className='mbs-1'>Make your app management easy</Typography>
             <form noValidate autoComplete='off' onSubmit={e => e.preventDefault()} className='flex flex-col gap-5'>
               <TextField
                 autoFocus
@@ -338,6 +350,8 @@ const checkMail =async (mail)=>{
       <Illustrations maskImg={{ src: authBackground }} />
       <ToastContainer />
     </div>
+    </Box>
+   
   )
 }
 
