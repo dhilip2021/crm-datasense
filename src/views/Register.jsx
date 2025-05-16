@@ -123,10 +123,10 @@ const Register = ({ mode }) => {
     } else if (name === 'email') {
       if (!isEmail(value)) {
         setErrorInputs({ ...errorInputs, email: true })
-        setInputs({ ...inputs, [name]: normalizeEmail(value) })
+        setInputs({ ...inputs, [name]: normalizeEmail(value.toLowerCase()) })
       } else {
         setErrorInputs({ ...errorInputs, email: false })
-        setInputs({ ...inputs, [name]: normalizeEmail(value) })
+        setInputs({ ...inputs, [name]: normalizeEmail(value.toLowerCase()) })
       }
     }
   }

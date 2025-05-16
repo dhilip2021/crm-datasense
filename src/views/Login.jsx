@@ -103,7 +103,7 @@ const Login = ({ mode }) => {
     const {name, value} = e.target;
 
     if(name === "email"){
-      setEmail(value)
+      setEmail(value.toLowerCase())
       setError({ ...error, [name]: false });
     }else if(name === "password"){
       setPassword(value)

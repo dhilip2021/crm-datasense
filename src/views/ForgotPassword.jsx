@@ -113,7 +113,16 @@ const ForgotPassword = ({ mode }) => {
       
     }
   };
+const handleChange =(e)=>{
+  
 
+
+  setEmail(e.target.value.toLowerCase());
+
+    setError({ ...error, email: false, password: false });
+    setToastFlag(false);
+  
+}
 
 
 
@@ -129,9 +138,9 @@ const ForgotPassword = ({ mode }) => {
       if(email?.length > 0){
         checkMailFn();
       }
-    }, 1000) // waits 500ms after typing stops
+    }, 1000) 
 
-    return () => clearTimeout(delayDebounce) // clean up on new keystroke
+    return () => clearTimeout(delayDebounce) 
   }, [email])
 
 
@@ -157,14 +166,11 @@ const ForgotPassword = ({ mode }) => {
                 autoFocus
                 fullWidth
                 type="email"
+                name="email"
                 defaultValue={email}
                 disabled={successFlag}
                 onBlur={() => handleBlur()}
-                onChange={(event) => {
-                  setEmail(event.target.value);
-                  setError({ ...error, email: false, password: false });
-                  setToastFlag(false);
-                }}
+                onChange={handleChange}
                 label="Enter your email"
                 placeholder="eg: test123@gmail.com"
                 error={error.email}
