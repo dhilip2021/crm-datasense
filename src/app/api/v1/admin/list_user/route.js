@@ -30,6 +30,8 @@ export async function POST(request) {
     c_role_priority: { $gt: userRoleData.c_role_priority }
   })
 
+  console.log(RoleData, '<<< RoleData ')
+
   const checkArray = []
 
   RoleData.map(data => {
