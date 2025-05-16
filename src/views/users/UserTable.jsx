@@ -81,12 +81,15 @@ const handleSubmit =async() =>{
   }
 
   const results = await craeteUserApi(body);
-
+    setLoader(true)
   if (results?.appStatusCode !== 0) {
+    setLoader(false)
     toast?.error(results?.message);
-    router.push("/users-list")
+    
   } else {
+    setLoader(false)
     toast?.success(results?.message);
+    router.push("/users-list")
   }
 
 
