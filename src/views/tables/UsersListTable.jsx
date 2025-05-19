@@ -122,10 +122,20 @@ const UsersListTable = () => {
             )
           }}
           size='small'
+            // sx={{
+            //   width: { xs: '50%', sm: 'auto' },
+            //   fontSize: { xs: '0.85rem', sm: '1rem' }
+            // }}
         />
         <Link href={'/add-user'}>
-          <Button startIcon={<i className='ri-add-line'></i>} variant='contained' className='mis-4'>
-            Add user
+          <Button startIcon={<i className='ri-add-line'></i>} variant='contained' className='mis-4'
+          //  sx={{
+          //   fontSize: { xs: '1.25rem', sm: '0.875rem' },
+          //   padding: { xs: '4px 8px', sm: '6px 16px' },
+          //   minWidth: { xs: 'unset', sm: 'auto' }
+          // }}
+          >
+            Add user 
           </Button>
         </Link>
       </Box>

@@ -28,7 +28,7 @@ const NavbarContent = ({c_version, endedAt}) => {
         <NavSearch />
       </div>
       {c_version === "Trial" && (
-        <div className='flex items-center'>
+       <div className='hidden md:flex items-center'>
           <p
             style={{
               color: 'red',

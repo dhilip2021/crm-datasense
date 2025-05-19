@@ -119,7 +119,6 @@ useEffect(() => {
   return (
     <Box style={loader ? { opacity: 0.3, pointerEvents: "none" } : { opacity: 1 }}>
        <Card>
-      {/* <CardHeader title='Add user details' /> */}
       <CardContent>
         <Form>
           <Grid container spacing={6}>
