@@ -39,6 +39,7 @@ import 'react-toastify/dist/ReactToastify.css'
 // eslint-disable-next-line import/order
 import { useDispatch } from 'react-redux'
 import { loginData } from '@/app/store/loginSlice'
+import ErrorPopup from './ErrorPopup'
 
 const isEmail = email => {
   var emailFormat = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/
@@ -51,12 +52,12 @@ const isEmail = email => {
 }
 
 const Login = ({ mode }) => {
-   // Vars
-   const darkImg = '/images/pages/auth-v1-mask-dark.png'
-   const lightImg = '/images/pages/auth-v1-mask-light.png'
+  // Vars
+  const darkImg = '/images/pages/auth-v1-mask-dark.png'
+  const lightImg = '/images/pages/auth-v1-mask-light.png'
 
   // Hooks
-  const router = useRouter();
+  const router = useRouter()
   const authBackground = useImageVariant(mode, lightImg, darkImg)
 
   const dispatch = useDispatch()
@@ -70,6 +71,11 @@ const Login = ({ mode }) => {
   const [loader, setLoader] = useState(false)
   const [isChecked, setIsChecked] = useState(false)
 
+  const [open, setOpen] = useState(false)
+  const [title, setTitle] = useState("")
+  const [trailVal, setTrailVal] = useState("")
+  
+
   const [values, setValues] = useState({
     showPassword: false
   })
@@ -79,8 +85,12 @@ const Login = ({ mode }) => {
     password: false
   })
 
- 
-
+  const handlePopupClose=(val)=>{
+    setOpen(false)
+    setLoader(false)
+    setTitle("")
+    
+  }
 
   const handleChange = e => {
     const { name, value } = e.target
@@ -95,8 +105,8 @@ const Login = ({ mode }) => {
   }
 
   const handleSuccess = () => {
-    window.location.reload(); // full reload
-  };
+    window.location.reload() // full reload
+  }
 
   const handleClickShowPassword = () => {
     setValues({ ...values, showPassword: !values.showPassword })
@@ -125,40 +135,93 @@ const Login = ({ mode }) => {
         setIsChecked(false)
       }
     } else if (results?.appStatusCode === 0) {
-      if (isChecked) {
-        localStorage.setItem('user_checked', '1')
-        localStorage.setItem('user_email', email)
-        localStorage.setItem('user_password', password)
+      if (results?.payloadJson?.c_version === 'Trial') {
+        const localDateStr = new Date()
+        const isoUtc = new Date(localDateStr).toISOString()
+        const today = new Date(isoUtc)
+        const endDate = new Date(results?.payloadJson?.endedAt)
+
+        if (today < endDate) {
+          if (isChecked) {
+            localStorage.setItem('user_checked', '1')
+            localStorage.setItem('user_email', email)
+            localStorage.setItem('user_password', password)
+          } else {
+            localStorage.setItem('user_checked', '')
+            localStorage.setItem('user_email', '')
+            localStorage.setItem('user_password', '')
+          }
+  
+          let dummyArray = []
+  
+          results?.payloadJson?.privileges.map(data => dummyArray.push(data?.role_privileage))
+  
+          Cookies.set('_token', results?.payloadJson?.tokenAccess)
+          Cookies.set('_token_expiry', results?.payloadJson?.tokenExpiry)
+          Cookies.set('role_id', results?.payloadJson?.c_role_id)
+          Cookies.set('user_id', results?.payloadJson?.user_id)
+          Cookies.set('organization_id', results?.payloadJson?.organization_id)
+          Cookies.set('organization_name', results?.payloadJson?.organization_name)
+          Cookies.set('c_version', results?.payloadJson?.c_version)
+          Cookies.set('endedAt', results?.payloadJson?.endedAt)
+          Cookies.set('role_name', results?.payloadJson?.role)
+          Cookies.set('user_name', results?.payloadJson?.user_name)
+          Cookies.set('privileges', JSON.stringify(dummyArray))
+  
+          router.push('/')
+          router.refresh()
+          handleSuccess()
+  
+          toast.success('login successful', {
+            autoClose: 1000
+          })
+          setLoader(false)
+        } else if (today > endDate) {
+          
+          setTitle("Sorry ! Your trial period has ended. Please get in touch with your administrator.")
+          setOpen(true)
+          setTrailVal("1")
+        } else {
+          setTitle("Today is the last day of your trial period. Contacting your administrator is necessary.")
+          setOpen(true)
+          setTrailVal("2")
+        }
       } else {
-        localStorage.setItem('user_checked', '')
-        localStorage.setItem('user_email', '')
-        localStorage.setItem('user_password', '')
+        if (isChecked) {
+          localStorage.setItem('user_checked', '1')
+          localStorage.setItem('user_email', email)
+          localStorage.setItem('user_password', password)
+        } else {
+          localStorage.setItem('user_checked', '')
+          localStorage.setItem('user_email', '')
+          localStorage.setItem('user_password', '')
+        }
+
+        let dummyArray = []
+
+        results?.payloadJson?.privileges.map(data => dummyArray.push(data?.role_privileage))
+
+        Cookies.set('_token', results?.payloadJson?.tokenAccess)
+        Cookies.set('_token_expiry', results?.payloadJson?.tokenExpiry)
+        Cookies.set('role_id', results?.payloadJson?.c_role_id)
+        Cookies.set('user_id', results?.payloadJson?.user_id)
+        Cookies.set('organization_id', results?.payloadJson?.organization_id)
+        Cookies.set('organization_name', results?.payloadJson?.organization_name)
+        Cookies.set('c_version', results?.payloadJson?.c_version)
+        Cookies.set('endedAt', results?.payloadJson?.endedAt)
+        Cookies.set('role_name', results?.payloadJson?.role)
+        Cookies.set('user_name', results?.payloadJson?.user_name)
+        Cookies.set('privileges', JSON.stringify(dummyArray))
+
+        router.push('/')
+        router.refresh()
+        handleSuccess()
+
+        toast.success('login successful', {
+          autoClose: 1000
+        })
+        setLoader(false)
       }
-
-      let dummyArray = []
-
-      results?.payloadJson?.privileges.map(data => dummyArray.push(data?.role_privileage))
-
-      Cookies.set('_token', results?.payloadJson?.tokenAccess)
-      Cookies.set('_token_expiry', results?.payloadJson?.tokenExpiry)
-      Cookies.set('role_id', results?.payloadJson?.c_role_id)
-      Cookies.set('user_id', results?.payloadJson?.user_id)
-      Cookies.set('organization_id', results?.payloadJson?.organization_id)
-      Cookies.set('organization_name', results?.payloadJson?.organization_name)
-      Cookies.set('c_version', results?.payloadJson?.c_version)
-      Cookies.set('endedAt', results?.payloadJson?.endedAt)
-      Cookies.set('role_name', results?.payloadJson?.role)
-      Cookies.set('user_name', results?.payloadJson?.user_name)
-      Cookies.set('privileges', JSON.stringify(dummyArray))
-      router.push('/')
-      router.refresh();
-      handleSuccess();
-
-      toast.success('login successful', {
-        autoClose: 1000
-      })
-      setLoader(false)
-      
     } else {
       setLoader(false)
       toast.error('Something Went wrong, Please try after some time')
@@ -237,7 +300,7 @@ const Login = ({ mode }) => {
                   error={error.password}
                   helperText={error.password && 'Please enter valid password'}
                   type={values.showPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
+                  autoComplete='new-password'
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position='end'>
@@ -279,6 +342,12 @@ const Login = ({ mode }) => {
         <Illustrations maskImg={{ src: authBackground }} />
       </div>
       <ToastContainer />
+      <ErrorPopup 
+      open={open}
+      close={handlePopupClose}
+      title={title}
+      trailVal={trailVal}
+      />
     </Box>
   )
 }
