@@ -11,6 +11,8 @@ import OptionsMenu from '@core/components/option-menu'
 const FieldListPage = (props) => {
   const { fieldDataList, editFlag, handleDelete, handleAction } = props;
 
+  console.log(fieldDataList,"<<< FILED LISSSSS")
+
   return (
     <Box mt={4}>
       <Grid container spacing={2}>
@@ -113,7 +115,7 @@ const FieldListPage = (props) => {
 
 
                   <Typography mt={1} variant="body2" color="text.secondary">
-                    slug-name : {data?.slug_label}
+                    slug-name1 : {data?.slug_label}
                   </Typography>
                 </CardContent>
               </CardActionArea>

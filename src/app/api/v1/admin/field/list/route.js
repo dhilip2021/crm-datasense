@@ -15,7 +15,6 @@ let sendResponse = {
 
 export async function GET(request) {
   const verified = verifyAccessToken();
-  console.log(verified,"<<< VERIFIEDDDD Field")
   const id = request.nextUrl.searchParams.get("id");
 
 
@@ -62,7 +61,7 @@ export async function GET(request) {
               },
             },
             {
-              $sort: { createdAt: 1 },
+              $sort: { position: -1 },
             },
           ])
             .then((data) => {

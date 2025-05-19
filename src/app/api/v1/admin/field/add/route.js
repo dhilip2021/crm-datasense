@@ -42,6 +42,7 @@ export async function POST(request) {
                   slug_label: data.slug_label,
                   type: data.type,
                   mandatory: data.mandatory,
+                  position: data.position,
                   items: data.items || [],
                 }))
               : [{}];
@@ -88,9 +89,16 @@ export async function POST(request) {
 
           return NextResponse.json(sendResponse, { status: 200 });
         } else if (FieldData) {
+          console.log(FieldData,"<<< FIELDS DATA>>>>")
           const dummyAddArray = [];
 
-          fields.map((data) => {
+           // Step 1: Get the last known position from existing fields
+  const existingFields = FieldData.fields || [];
+  let maxPosition = existingFields.length > 0
+    ? Math.max(...existingFields.map(f => f.position || 0))
+    : 0;
+
+          fields.map((data, index) => {
             dummyAddArray.push({
               item_id: data.item_id,
               label: data.label,
@@ -98,6 +106,7 @@ export async function POST(request) {
               type: data.type,
               mandatory: data.mandatory,
               items: data.items || [], // Make sure to include items if present
+              position: maxPosition + index + 1, // Increment from last known
             });
           });
           console.log("field update")
@@ -129,6 +138,7 @@ export async function POST(request) {
             dummyAddArray.push({
               item_id: data.item_id,
               label: data.label,
+              position: 1,
               slug_label: data.slug_label,
               type: data.type,
               mandatory: data.mandatory,

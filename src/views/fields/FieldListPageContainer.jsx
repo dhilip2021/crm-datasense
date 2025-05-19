@@ -147,7 +147,6 @@ function FieldListPageContainer() {
     }
 
     setEditFlag(false)
-    console.log(header, 'call1')
     const results = await getFieldListApi(organization_id, header)
 
     if (results?.appStatusCode === 0) {
