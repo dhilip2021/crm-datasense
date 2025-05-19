@@ -437,11 +437,16 @@ const LeadData = () => {
 
   useEffect(() => {
     console.log(isFetched.current,"<<< isFetched.current")
+    console.log(callFlag,"<<< callFlag")
+    console.log(organization_id1,"<<< organization_id1")
     if (!isFetched.current && callFlag && organization_id1) {
-      isFetched.current = true;
       getFieldList();
+      isFetched.current = true;
+    }else if(!isFetched.current && callFlag && organization_id){
+      getFieldList();
+      isFetched.current = true;
     }
-  }, [organization_id1, callFlag]);
+  }, [callFlag]);
 
   return (
     <Box>
