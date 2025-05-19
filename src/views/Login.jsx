@@ -145,7 +145,7 @@ const Login = ({ mode }) => {
 
 
     } else if (results?.appStatusCode === 0) {
-      setLoader(false);
+      
 
       if(isChecked){
         localStorage.setItem("user_checked", "1"); 
@@ -162,7 +162,7 @@ const Login = ({ mode }) => {
       results?.payloadJson?.privileges.map((data) => 
         dummyArray.push(data?.role_privileage)
       )
-
+     
       Cookies.set("_token", results?.payloadJson?.tokenAccess);
       Cookies.set("_token_expiry", results?.payloadJson?.tokenExpiry);
       Cookies.set("role_id", results?.payloadJson?.c_role_id);
@@ -174,10 +174,13 @@ const Login = ({ mode }) => {
       Cookies.set("role_name", results?.payloadJson?.role);
       Cookies.set("user_name", results?.payloadJson?.user_name);
       Cookies.set("privileges", JSON.stringify(dummyArray));
-      router.push(`/`);
+      // router.push(`/`);
       toast.success("login successful",{
         autoClose: 2000, // closes in 2 seconds
       });
+      setLoader(false);
+      return (router.push("/"))
+
     } else {
       setLoader(false);
       toast.error("Something Went wrong, Please try after some time");
