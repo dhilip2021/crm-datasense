@@ -94,6 +94,10 @@ const Login = ({ mode }) => {
     }
   }
 
+  const handleSuccess = () => {
+    window.location.reload(); // full reload
+  };
+
   const handleClickShowPassword = () => {
     setValues({ ...values, showPassword: !values.showPassword })
   }
@@ -148,6 +152,8 @@ const Login = ({ mode }) => {
       Cookies.set('privileges', JSON.stringify(dummyArray))
       router.push('/')
       router.refresh();
+      handleSuccess();
+
       toast.success('login successful', {
         autoClose: 1000
       })
