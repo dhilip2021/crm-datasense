@@ -121,6 +121,7 @@ function removeDuplicatesByKey(data) {
 }
 
 const LeadData = () => {
+  const desiredOrder = ['salutation', 'first-name', 'last-name', 'email','mobile','phone','gender','organization','website','no-of-employees','annual-revenue','industry','job-title','lead-source','status'];
   const isFetched = useRef(false);
   const router = useRouter()
   const dispatch = useDispatch()
@@ -320,6 +321,7 @@ const LeadData = () => {
       resArr.map(data => {
         dumArr.push({
           label: data?.label,
+          position: data?.position,
           slug_label: data?.slug_label,
           mandatory: data?.mandatory,
           value: '',
@@ -327,8 +329,12 @@ const LeadData = () => {
           items: data?.items
         })
       })
+      console.log(dumArr,"<<< DUMMM ARRR")
 
-      setInputs(dumArr)
+      const sortedInputs = desiredOrder.map(slug => dumArr.find(input => input.slug_label === slug)).filter(Boolean);
+      console.log(sortedInputs,"<<< sortedInputs")
+
+      setInputs(sortedInputs)
 
       getParticularLeadFn()
     } else {

@@ -51,8 +51,8 @@ function activeColor(value) {
   }
 }
 
-const LeadSingleDetails = ({ loader, inputs, handleChange, errors, handleBlur, handleClick, handleSubmit }) => {
- 
+const LeadSingleDetails = ({ loader, inputs }) => {
+
   return (
     <Box style={loader ? { opacity: 0.3, pointerEvents: 'none' } : { opacity: 1 }}>
       {!loader && Array.isArray(inputs) && inputs?.length > 0 && (
@@ -66,15 +66,15 @@ const LeadSingleDetails = ({ loader, inputs, handleChange, errors, handleBlur, h
                       <Typography variant='h5'>Person</Typography>
                       <Button variant='contained'
                        sx={{
-                                                    backgroundColor: activeColor(inputs[12]?.value),
+                                                    backgroundColor: activeColor(inputs[14]?.value),
                                                     color: '#fff',
                                                     '&:hover': {
-                                                      backgroundColor: activeColor(inputs[12]?.value)
+                                                      backgroundColor: activeColor(inputs[14]?.value)
                                                     }
                                                   }}
                        >
                         {' '}
-                        {inputs[12]?.value}
+                        {inputs[13]?.value}
                       </Button>
                     </Box>
                     <Divider />
@@ -146,13 +146,6 @@ const LeadSingleDetails = ({ loader, inputs, handleChange, errors, handleBlur, h
                     </Box>
                   </Grid>
 
-                  {/* ****************************************** DETAILS ********************************************** */}
-
-                  <Grid item xs={12}>
-                    <Typography variant='h5'>Details</Typography>
-                    <Divider />
-                  </Grid>
-
                   <Grid item xs={6}>
                     <Box display={'flex'} gap={2}>
                       <Grid item xs={4}>
@@ -168,6 +161,15 @@ const LeadSingleDetails = ({ loader, inputs, handleChange, errors, handleBlur, h
                       </Grid>
                     </Box>
                   </Grid>
+
+                  {/* ****************************************** DETAILS ********************************************** */}
+
+                  <Grid item xs={12}>
+                    <Typography variant='h5'>Details</Typography>
+                    <Divider />
+                  </Grid>
+
+                 
 
                   <Grid item xs={6}>
                     <Box display={'flex'} gap={2}>
@@ -245,6 +247,22 @@ const LeadSingleDetails = ({ loader, inputs, handleChange, errors, handleBlur, h
                       </Grid>
                       <Grid item xs={8}>
                         <Typography variant='h6'>{inputs[11]?.value} </Typography>
+                      </Grid>
+                    </Box>
+                  </Grid>
+
+                  <Grid item xs={6}>
+                    <Box display={'flex'} gap={2}>
+                      <Grid item xs={4}>
+                        <Typography variant='h6' color={'#a7a7a7'}>
+                          <Box display={'flex'} justifyContent={'space-between'}>
+                            <span>{inputs[12]?.label}</span>
+                            <span>:</span>
+                          </Box>
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography variant='h6'>{inputs[12]?.value} </Typography>
                       </Grid>
                     </Box>
                   </Grid>
