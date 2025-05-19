@@ -216,7 +216,7 @@ const Login = ({ mode }) => {
                 <Typography variant='h4'>{`Welcome to ${themeConfig.templateName}!`}</Typography>
                 <Typography className='mbs-1'>Please sign-in to your account and start the adventure</Typography>
               </div>
-              <form noValidate autoComplete='new-password' className='flex flex-col gap-5'>
+              <form noValidate autoComplete='off' className='flex flex-col gap-5'>
                 <TextField
                   autoFocus
                   fullWidth

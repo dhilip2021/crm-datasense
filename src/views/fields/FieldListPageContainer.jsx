@@ -8,6 +8,21 @@ import Link from 'next/link'
 import slugify from 'slugify'
 import Cookies from 'js-cookie'
 import { ToastContainer, toast } from 'react-toastify'
+
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy
+} from '@dnd-kit/sortable';
+
 import { Box, Button, Card, CardContent, Container, InputAdornment, TextField } from '@mui/material'
 
 import { addFieldApi, getFieldListApi } from '@/apiFunctions/ApiAction'
@@ -15,6 +30,8 @@ import { addFieldApi, getFieldListApi } from '@/apiFunctions/ApiAction'
 import FieldListPage from './FieldListPage'
 
 import LoaderGif from '@assets/gif/loader.gif'
+
+
 
 function capitalizeWords(str) {
   return str
@@ -28,10 +45,10 @@ function normalizeEmail(email) {
 }
 
 function FieldListPageContainer() {
-  const isFetched = useRef(false);
+  const isFetched = useRef(false)
   const organization_id = Cookies.get('organization_id')
   const getToken = Cookies.get('_token')
-
+  const sensors = useSensors(useSensor(PointerSensor));
   const [loader, setLoader] = useState(false)
   const [open, setOpen] = useState(false)
   const [title, setTitle] = useState('')
@@ -49,7 +66,8 @@ function FieldListPageContainer() {
       menu_value: ''
     }
   ])
-
+  const [fields, setFields] = useState([])
+  const [shouldSubmit, setShouldSubmit] = useState(false)
   const [fieldArr, setFieldArr] = useState([
     {
       label: '',
@@ -182,25 +200,30 @@ function FieldListPageContainer() {
         body['Id'] = inputs?.id
       }
       setLoader(true)
-
+      
       const header = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${getToken}`
       }
 
       const results = await addFieldApi(body, header)
+     
 
       if (results?.appStatusCode !== 0) {
         setOpen(false)
-        toast?.error(results?.message)
+        toast?.error(results?.message, {
+        autoClose: 1000
+      })
         getFieldList()
         setLoader(false)
+        setShouldSubmit(false)
       } else {
         setLoader(false)
         toast?.success(results?.message)
         setOpen(false)
         setErrors([])
         getFieldList()
+        setShouldSubmit(false)
       }
     } catch (err) {
       console.log(err)
@@ -212,6 +235,26 @@ function FieldListPageContainer() {
 
     setSearch(value)
   }
+
+
+  
+    const handleDragEnd = (event) => {
+      const { active, over } = event;
+  
+      if (active.id !== over.id) {
+        const oldIndex = fields.findIndex((item) => item.slug_label === active.id);
+        const newIndex = fields.findIndex((item) => item.slug_label === over.id);
+  
+        const newFields = arrayMove(fields, oldIndex, newIndex).map((item, idx) => ({
+          ...item,
+          position: idx + 1
+        }));
+  
+        setFields(newFields);
+        setShouldSubmit(true)
+        // optionally call props.onReorder(newFields)
+      }
+    };
 
   const handleInputChange = e => {
     const { name, value } = e.target
@@ -231,19 +274,24 @@ function FieldListPageContainer() {
     }
   }, [open])
 
-
-
   useEffect(() => {
     setFieldArr(prev => prev.map((field, idx) => (idx === 0 ? { ...field, items: menusArr } : field)))
   }, [menusArr])
 
-    useEffect(() => {
-      if(!isFetched.current && callFlag && organization_id){
-        getFieldList();
-        isFetched.current = true;
-        setCallFlag(false)
-      }
-    }, [callFlag]);
+  useEffect(() => {
+    if (!isFetched.current && callFlag && organization_id) {
+      getFieldList()
+      isFetched.current = true
+      setCallFlag(false)
+    }
+  }, [callFlag])
+
+  useEffect(() => {
+    if(fields?.length > 0 && shouldSubmit){
+      handleEditSubmit(fields)
+    }
+   
+  }, [shouldSubmit])
 
   return (
     <div>
@@ -310,6 +358,10 @@ function FieldListPageContainer() {
                 editFlag={editFlag}
                 handleDelete={handleDelete}
                 handleAction={handleAction}
+                fields={fields}
+                setFields={setFields}
+                handleDragEnd={handleDragEnd}
+                sensors={sensors}
               />
             </CardContent>
           )}
