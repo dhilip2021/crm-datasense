@@ -100,7 +100,7 @@ export async function POST(request) {
               items: data.items || [], // Make sure to include items if present
             });
           });
-
+          console.log("field update")
           await Field.findByIdAndUpdate(
             FieldData._id, // just the ID here
             {
@@ -142,7 +142,7 @@ export async function POST(request) {
             fields: dummyAddArray,
             c_createdBy: verified.data.user_id,
           });
-
+          console.log("field created")
           await FieldDataSave.save()
             .then(() => {
               sendResponse["appStatusCode"] = 0;

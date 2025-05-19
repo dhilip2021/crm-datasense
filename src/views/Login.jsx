@@ -237,6 +237,7 @@ const Login = ({ mode }) => {
                   error={error.password}
                   helperText={error.password && 'Please enter valid password'}
                   type={values.showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position='end'>

@@ -19,6 +19,10 @@ const FieldItemSchema = new Schema(
         type: Number,
         trim: true,
       },
+    position :{
+      type: String,
+      trim: true,
+    },
     label: {
       type: String,
       trim: true,
