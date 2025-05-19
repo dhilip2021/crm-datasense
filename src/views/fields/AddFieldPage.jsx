@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 
 import { useRouter } from 'next/navigation'
 
@@ -37,6 +37,7 @@ function capitalizeWords(str) {
 }
 
 const AddFieldPage = () => {
+   const isFetched = useRef(false);
   const organization_id = Cookies.get('organization_id')
   const getToken = Cookies.get('_token')
 
@@ -46,7 +47,7 @@ const AddFieldPage = () => {
   const [open, setOpen] = useState(false)
   const [title, setTitle] = useState('')
   const [editFlag, setEditFlag] = useState(false)
-
+  const [callFlag, setCallFlag] = useState(true)
   const [inputs, setInputs] = useState({
     id: '',
     organization_id: organization_id,
@@ -158,6 +159,7 @@ const AddFieldPage = () => {
 
 
   const getFieldList = async() => {
+    console.log("call function")
     const header = {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${getToken}`
@@ -217,14 +219,6 @@ const AddFieldPage = () => {
    
   }
 
- 
-
-  useEffect(() => {
-    if(organization_id !== undefined){
-      getFieldList()
-    }
-   
-  }, [organization_id])
 
   useEffect(() => {
     if(menusArr?.length > 0){
@@ -232,6 +226,14 @@ const AddFieldPage = () => {
     }
     
   }, [menusArr])
+
+  useEffect(() => {
+    if(!isFetched.current && callFlag && organization_id){
+      getFieldList();
+      isFetched.current = true;
+      setCallFlag(false)
+    }
+  }, [callFlag]);
 
   return (
     <Box style={loader ? { opacity: 0.3, pointerEvents: "none" } : { opacity: 1 }}>

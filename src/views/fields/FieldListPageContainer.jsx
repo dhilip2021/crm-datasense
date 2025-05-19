@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -28,6 +28,7 @@ function normalizeEmail(email) {
 }
 
 function FieldListPageContainer() {
+  const isFetched = useRef(false);
   const organization_id = Cookies.get('organization_id')
   const getToken = Cookies.get('_token')
 
@@ -36,7 +37,7 @@ function FieldListPageContainer() {
   const [title, setTitle] = useState('')
   const [editFlag, setEditFlag] = useState(false)
   const [search, setSearch] = useState('')
-
+  const [callFlag, setCallFlag] = useState(true)
   const [inputs, setInputs] = useState({
     id: '',
     organization_id: organization_id,
@@ -231,13 +232,19 @@ function FieldListPageContainer() {
     }
   }, [open])
 
-  useEffect(() => {
-    getFieldList()
-  }, [organization_id])
+
 
   useEffect(() => {
     setFieldArr(prev => prev.map((field, idx) => (idx === 0 ? { ...field, items: menusArr } : field)))
   }, [menusArr])
+
+    useEffect(() => {
+      if(!isFetched.current && callFlag && organization_id){
+        getFieldList();
+        isFetched.current = true;
+        setCallFlag(false)
+      }
+    }, [callFlag]);
 
   return (
     <div>
