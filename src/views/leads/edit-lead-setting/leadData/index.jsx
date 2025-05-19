@@ -14,7 +14,7 @@ import Grid from '@mui/material/Grid'
 import Cookies from 'js-cookie'
 import { ToastContainer, toast } from 'react-toastify'
 import slugify from 'slugify'
-import { Box } from '@mui/material'
+import { Box, Card, CardContent } from '@mui/material'
 
 import { createLead, getFieldListApi, getLeadListApi } from '@/apiFunctions/ApiAction'
 
@@ -126,7 +126,10 @@ const LeadData = () => {
   const org = useSelector(state => state.organization)
 
   const organization_id = Cookies.get('organization_id')
-  const organization_id1 = (Array.isArray(org?.payloadJson) && org?.payloadJson[0]?.organization_id) ? org?.payloadJson[0]?.organization_id : undefined;
+  const organization_id1 =
+    Array.isArray(org?.payloadJson) && org?.payloadJson[0]?.organization_id
+      ? org?.payloadJson[0]?.organization_id
+      : undefined
   const getToken = Cookies.get('_token')
 
   const [loader, setLoader] = useState(false)
@@ -407,8 +410,6 @@ const LeadData = () => {
   }
 
   useEffect(() => {
-   
-
     const fallbackKeyMap = {
       no_of_employees: 'no-of-empoyees' // Fix typo
     }
@@ -447,48 +448,49 @@ const LeadData = () => {
     <Box>
       <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
         {loader && (
-          <Box textAlign={'center'} width={'100%'} mt={'200px'} mb={'100px'}>
-            <Image src={LoaderGif} alt='My GIF' width={200} height={100} />
+          <Box textAlign={'center'} width={'100%'}>
+            <Card className='w-full shadow-md rounded-lg'>
+              <CardContent className='text-center'>
+                <Box p={40}>
+                  <Image src={LoaderGif} alt='My GIF' width={200} height={100} />
+                </Box>
+              </CardContent>
+            </Card>
           </Box>
         )}
       </Box>
-      {
-        !loader && inputs?.length >0 && 
+      {!loader && inputs?.length > 0 && (
         <Grid container spacing={6}>
-        <Grid item xs={12} md={8} lg={8}>
-          <LeadSingleDetails
-            loader={loader}
-            inputs={inputs}
-            handleChange={handleChange}
-            errors={errors}
-            handleBlur={handleBlur}
-            handleClick={handleClick}
-            handleSubmit={handleSubmit}
-          />
-          <NotesDetails 
-          loader={loader}
-          leadDatas={leadDatas}
-          />
-        </Grid>
+          <Grid item xs={12} md={8} lg={8}>
+            <LeadSingleDetails
+              loader={loader}
+              inputs={inputs}
+              handleChange={handleChange}
+              errors={errors}
+              handleBlur={handleBlur}
+              handleClick={handleClick}
+              handleSubmit={handleSubmit}
+            />
+            <NotesDetails loader={loader} leadDatas={leadDatas} />
+          </Grid>
 
-        <Grid item xs={12} md={4}>
-          <LeadDetails
-            loader={loader}
-            inputs={inputs}
-            handleChange={handleChange}
-            errors={errors}
-            handleBlur={handleBlur}
-            handleClick={handleClick}
-            handleSubmit={handleSubmit}
-            leadDatas={leadDatas}
-            convertDealFn={convertDealFn}
-          />
-        </Grid>
+          <Grid item xs={12} md={4}>
+            <LeadDetails
+              loader={loader}
+              inputs={inputs}
+              handleChange={handleChange}
+              errors={errors}
+              handleBlur={handleBlur}
+              handleClick={handleClick}
+              handleSubmit={handleSubmit}
+              leadDatas={leadDatas}
+              convertDealFn={convertDealFn}
+            />
+          </Grid>
 
-        <ToastContainer />
-      </Grid>
-      }
-      
+          <ToastContainer />
+        </Grid>
+      )}
     </Box>
   )
 }

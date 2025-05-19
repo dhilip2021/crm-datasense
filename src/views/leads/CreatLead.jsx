@@ -268,7 +268,8 @@ const CreatLead = () => {
     } else {
       setLoader(false);
       toast?.success(results?.message);
-      router.push(`/leads/edit-lead/${results?.payloadJson?.lead_slug_name}`)
+      router.push("/leads")
+      // router.push(`/leads/edit-lead/${results?.payloadJson?.lead_slug_name}`)
     }
   };
   

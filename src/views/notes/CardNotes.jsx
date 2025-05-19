@@ -288,7 +288,7 @@ const CardNotes = () => {
 
           {!loader && !filterStatus(notesArr) && (
             <Box textAlign={'center'} width={'100%'} mt={'100px'} mb={'100px'}>
-              <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Notes Found</p>
+              <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Notes Found!</p>
             </Box>
           )}
         </Box>

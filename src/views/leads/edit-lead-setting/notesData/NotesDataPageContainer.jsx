@@ -11,7 +11,7 @@ import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
 import { Box, Button, CardHeader, Grid, InputAdornment, TextField } from '@mui/material'
 import Cookies from 'js-cookie'
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify'
 
 // Components Imports
 import OptionsMenu from '@core/components/option-menu'
@@ -50,7 +50,7 @@ function filterStatus(data) {
 
 const NotesDataPageContainer = () => {
   const organization_id = Cookies.get('organization_id')
-  const getToken = Cookies.get("_token");
+  const getToken = Cookies.get('_token')
 
   const [callFag, setCallFlag] = React.useState(true)
   const [loader, setLoader] = React.useState(false)
@@ -101,9 +101,9 @@ const NotesDataPageContainer = () => {
   }
 
   const leadNotesCreation = async body => {
-    const header ={
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getToken}`,
+    const header = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken}`
     }
 
     setLoader(true)
@@ -113,10 +113,10 @@ const NotesDataPageContainer = () => {
       toast?.error(results?.error)
       setLoader(false)
       setOpen(false)
-      console.log("call 22")
+      console.log('call 22')
       getParticularLeadFn(organization_id)
     } else {
-      console.log("call 33")
+      console.log('call 33')
       getParticularLeadFn(organization_id)
       setLoader(false)
       toast?.success(results?.message)
@@ -133,12 +133,9 @@ const NotesDataPageContainer = () => {
   }
 
   const handleSubmit = () => {
-    
-
     if (inputs?.title === '') {
       setErrors(prev => ({ ...prev, ['title']: true }))
     } else {
-     
       if (inputs._id === '') {
         const body = {
           Id: leadData[0]?._id,
@@ -161,13 +158,9 @@ const NotesDataPageContainer = () => {
     }
   }
 
-
-
   const handleDElClose = () => {
     setAnchorEl(null)
   }
-
-
 
   // const removeMenuData = (index)=>{
   //   let arr = [...menusArr];
@@ -175,12 +168,10 @@ const NotesDataPageContainer = () => {
   //   setMenusArr(arr);
   // }
 
-  const getParticularLeadFn = async (organization_id) => {
+  const getParticularLeadFn = async organization_id => {
     const getId = window.location.pathname?.split('/')?.at(-1)
-    
-    setLoader(true)
 
-   
+    setLoader(true)
 
     const results = await getParticularLeadListApi(organization_id, getId)
 
@@ -226,9 +217,8 @@ const NotesDataPageContainer = () => {
         c_notes: obj,
         c_activities: `Notes deleted ${item?.title}`
       }
-      
-      leadNotesCreation(body)
 
+      leadNotesCreation(body)
 
       // showConfirmDeleteModal(item)
     }
@@ -246,17 +236,15 @@ const NotesDataPageContainer = () => {
 
   React.useEffect(() => {
     if (callFag) {
-      console.log("call 11")
+      console.log('call 11')
       getParticularLeadFn(organization_id)
       setCallFlag(false)
     }
   }, [callFag])
 
   return (
-    <Box style={loader ? { opacity: 0.3, pointerEvents: "none" } : { opacity: 1 }}>
-      <Card>
-        <CardContent>
-        <Box display={'flex'} justifyContent={'space-between'} mb={4} mt={4}>
+    <Box style={loader ? { opacity: 0.3, pointerEvents: 'none' } : { opacity: 1 }}>
+      <Box display={'flex'} justifyContent={'space-between'} mb={4} mt={4}>
         <TextField
           autoComplete='off'
           placeholder='Search'
@@ -289,16 +277,27 @@ const NotesDataPageContainer = () => {
       </Box>
 
       <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
-       
-          {loader && (
-          <Box textAlign={'center'} width={'100%'} mt={'100px'} mb={'100px'}>
-            <Image src={LoaderGif} alt='My GIF' width={200} height={100} />
+        {loader && (
+          <Box textAlign={'center'} width={'100%'}>
+            <Card className='w-full shadow-md rounded-lg'>
+              <CardContent className='text-center'>
+                <Box p={40}>
+                  <Image src={LoaderGif} alt='My GIF' width={200} height={100} />
+                </Box>
+              </CardContent>
+            </Card>
           </Box>
         )}
 
         {!loader && !filterStatus(notesArr) && (
-          <Box textAlign={'center'} width={'100%'} mt={'100px'} mb={'100px'}>
-            <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Notes Found</p>
+          <Box textAlign={'center'} width={'100%'}>
+            <Card className='w-full shadow-md rounded-lg'>
+              <CardContent className='text-center'>
+                <Box p={40}>
+                  <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Notes Found !!</p>
+                </Box>
+              </CardContent>
+            </Card>
           </Box>
         )}
       </Box>
@@ -309,35 +308,40 @@ const NotesDataPageContainer = () => {
             notesArr.map(
               (item, index) =>
                 item.status === 1 && (
-                  <Grid item xs={12} sm={12} md={3} key={index}>
-                    <Card>
-                      <CardHeader
-                        title={`${item.title}`}
-                        action={
-                          <OptionsMenu
-                            iconClassName='text-textPrimary'
-                            options={['Edit', 'Delete']}
-                            onOptionClick={(option, e) => handleAction(option, item)}
+                  <Card>
+                    <CardContent>
+                      <Grid item xs={12} sm={12} md={3} key={index}>
+                        <Card>
+                          <CardHeader
+                            title={`${item.title}`}
+                            action={
+                              <OptionsMenu
+                                iconClassName='text-textPrimary'
+                                options={['Edit', 'Delete']}
+                                onOptionClick={(option, e) => handleAction(option, item)}
+                              />
+                            }
                           />
-                        }
-                      />
-                      <CardContent>
-                        <div className='flex flex-col items-start'>
-                          <Typography>{item.comment}</Typography>
-                        </div>
-                        <div className='flex justify-between items-center flex-wrap gap-x-4 gap-y-2 mbe-5 mbs-[30px]'>
-                          <div className='flex justify-between items-center flex-wrap gap-x-4 gap-y-2'>
-                            <Typography variant='subtitle2' color='text.disabled'>
-                              {getHours(item.createdAt)}
-                            </Typography>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Grid>
+                          <CardContent>
+                            <div className='flex flex-col items-start'>
+                              <Typography>{item.comment}</Typography>
+                            </div>
+                            <div className='flex justify-between items-center flex-wrap gap-x-4 gap-y-2 mbe-5 mbs-[30px]'>
+                              <div className='flex justify-between items-center flex-wrap gap-x-4 gap-y-2'>
+                                <Typography variant='subtitle2' color='text.disabled'>
+                                  {getHours(item.createdAt)}
+                                </Typography>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    </CardContent>
+                  </Card>
                 )
             )}
         </Grid>
+
         <NotesDataPopup
           open={open}
           close={handleClose}
@@ -350,8 +354,7 @@ const NotesDataPageContainer = () => {
           loader={loader}
         />
       </Box>
-        </CardContent>
-      </Card>
+
       <ToastContainer />
     </Box>
   )
