@@ -54,7 +54,7 @@ const Login = ({ mode }) => {
    // Vars
    const darkImg = '/images/pages/auth-v1-mask-dark.png'
    const lightImg = '/images/pages/auth-v1-mask-light.png'
-   
+
   // Hooks
   const router = useRouter();
   const authBackground = useImageVariant(mode, lightImg, darkImg)
@@ -124,6 +124,7 @@ const Login = ({ mode }) => {
       if (results.error !== 'Invalid credential') {
         setEmail('')
         setPassword('')
+        setIsChecked(false)
       }
     } else if (results?.appStatusCode === 0) {
       if (isChecked) {
