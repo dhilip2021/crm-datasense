@@ -147,6 +147,7 @@ const Login = ({ mode }) => {
       Cookies.set('user_name', results?.payloadJson?.user_name)
       Cookies.set('privileges', JSON.stringify(dummyArray))
       router.push('/')
+      router.refresh();
       toast.success('login successful', {
         autoClose: 1000
       })
