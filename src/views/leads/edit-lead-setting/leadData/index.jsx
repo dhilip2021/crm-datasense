@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -121,6 +121,7 @@ function removeDuplicatesByKey(data) {
 }
 
 const LeadData = () => {
+  const isFetched = useRef(false);
   const router = useRouter()
   const dispatch = useDispatch()
   const org = useSelector(state => state.organization)
@@ -294,17 +295,19 @@ const LeadData = () => {
   }
 
   const getFieldList = async () => {
+    setCallFlag(false)
     const orgId = organization_id1 === undefined ? organization_id : organization_id1
 
     const header = {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${getToken}`
     }
+    console.log("call edit list")
 
     setLoader(true)
     const results = await getFieldListApi(orgId, header)
 
-    setCallFlag(false)
+   
 
     setLoader(false)
 
@@ -433,16 +436,12 @@ const LeadData = () => {
   }, [leadDatas])
 
   useEffect(() => {
-    if (callFlag) {
-      getFieldList()
+    if (!isFetched.current && callFlag && organization_id1) {
+      isFetched.current = true;
+      getFieldList();
+      setCallFlag(false);
     }
-  }, [organization_id])
-
-  useEffect(() => {
-    if (callFlag) {
-      getFieldList()
-    }
-  }, [organization_id1])
+  }, [organization_id1, callFlag]);
 
   return (
     <Box>

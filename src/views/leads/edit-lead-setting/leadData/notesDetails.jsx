@@ -124,8 +124,6 @@ const NotesDetails = ({ loader, leadDatas }) => {
 
   React.useEffect(() => {
     if (Array.isArray(leadDatas)) {
-      console.log(leadDatas, "<<< LEAD DATAS");
-  
       // Collect all notes across all leads
       const allNotes = leadDatas
         .flatMap(item => item?.c_notes || []) // Safely get c_notes or empty array
