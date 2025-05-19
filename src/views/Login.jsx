@@ -81,12 +81,6 @@ const Login = ({ mode }) => {
 
  
 
-  // ** State
-
-  const handleSubmit = e => {
-    e.preventDefault()
-    router.push('/')
-  }
 
   const handleChange = e => {
     const { name, value } = e.target
@@ -152,12 +146,12 @@ const Login = ({ mode }) => {
       Cookies.set('role_name', results?.payloadJson?.role)
       Cookies.set('user_name', results?.payloadJson?.user_name)
       Cookies.set('privileges', JSON.stringify(dummyArray))
-      // router.push(`/`);
+      router.push('/')
       toast.success('login successful', {
-        autoClose: 1000 // closes in 2 seconds
+        autoClose: 1000
       })
       setLoader(false)
-      await router.push('/')
+      
     } else {
       setLoader(false)
       toast.error('Something Went wrong, Please try after some time')
