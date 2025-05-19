@@ -157,8 +157,7 @@ function FieldListPageContainer() {
     }
   }
 
-  
-  const handleAction = (option, item,index) => {
+  const handleAction = (option, item, index) => {
     if (option === 'Edit') {
       console.log('Edit clicked for:', item)
 
@@ -166,23 +165,21 @@ function FieldListPageContainer() {
     } else if (option === 'Delete') {
       console.log('Delete clicked for:', item)
 
-      let arr = [...fieldDataList];
-      arr.splice(index, 1);
-      setFieldDataList(arr);
-      handleEditSubmit(arr);
-
+      let arr = [...fieldDataList]
+      arr.splice(index, 1)
+      setFieldDataList(arr)
+      handleEditSubmit(arr)
     }
   }
 
-  const handleEditSubmit =async(arr)=>{
+  const handleEditSubmit = async arr => {
     try {
-
-      const body  = {
+      const body = {
         organization_id: organization_id,
-        fields : arr?.length > 0 ? arr : []
-      };
-      if (inputs?.id !== "") {
-        body["Id"] = inputs?.id;
+        fields: arr?.length > 0 ? arr : []
+      }
+      if (inputs?.id !== '') {
+        body['Id'] = inputs?.id
       }
       setLoader(true)
 
@@ -191,28 +188,24 @@ function FieldListPageContainer() {
         Authorization: `Bearer ${getToken}`
       }
 
-      const results = await addFieldApi(body, header);
+      const results = await addFieldApi(body, header)
 
       if (results?.appStatusCode !== 0) {
-        setOpen(false);
-        toast?.error(results?.message);
-        getFieldList();
+        setOpen(false)
+        toast?.error(results?.message)
+        getFieldList()
         setLoader(false)
       } else {
         setLoader(false)
-        toast?.success(results?.message);
-        setOpen(false);
-        setErrors([]);
-        getFieldList();
+        toast?.success(results?.message)
+        setOpen(false)
+        setErrors([])
+        getFieldList()
       }
-
-
     } catch (err) {
-      console.log(err);
+      console.log(err)
     }
   }
-
-
 
   const handleOnChange = e => {
     const { name, value } = e.target
@@ -278,25 +271,40 @@ function FieldListPageContainer() {
             </Link>
           )}
         </Box>
-          <Box>
+        <Box>
           {loader && (
-              <Box textAlign={'center'} width={'100%'} mt={'200px'} mb={'100px'}>
-                <Image src={LoaderGif} alt='My GIF' width={200} height={100} />
-              </Box>
-            )}
-            {fieldDataList?.length === 0 && (
-              <Box textAlign={'center'} width={'100%'} mt={'100px'} mb={'100px'}>
-                <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Field Found</p>
-              </Box>
-            )}
-          </Box>
-           
-        
+            <Box textAlign={'center'} width={'100%'}>
+              <Card className='w-full shadow-md rounded-lg'>
+                <CardContent className='text-center'>
+                  <Box p={40}>
+                    <Image src={LoaderGif} alt='My GIF' width={200} height={100} />
+                  </Box>
+                </CardContent>
+              </Card>
+            </Box>
+          )}
+          {fieldDataList?.length === 0 && (
+            <Box textAlign={'center'} width={'100%'}>
+              <Card className='w-full shadow-md rounded-lg'>
+                <CardContent className='text-center'>
+                  <Box p={40}>
+                    <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Field Found</p>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Box>
+          )}
+        </Box>
 
         <Card>
           {!loader && Array.isArray(fieldDataList) && fieldDataList?.length > 0 && (
             <CardContent className='pt-0'>
-              <FieldListPage fieldDataList={fieldDataList} editFlag={editFlag} handleDelete={handleDelete} handleAction={handleAction} />
+              <FieldListPage
+                fieldDataList={fieldDataList}
+                editFlag={editFlag}
+                handleDelete={handleDelete}
+                handleAction={handleAction}
+              />
             </CardContent>
           )}
         </Card>

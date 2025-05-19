@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // ** React Imports
 'use client'
-import {  useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import Link from 'next/link'
 
@@ -23,7 +23,6 @@ import { Box, Button, Card, CardContent, InputAdornment, TextField } from '@mui/
 import { postLeadListApi } from '@/apiFunctions/ApiAction'
 
 import LoaderGif from '@assets/gif/loader.gif'
-
 
 function activeColor(value) {
   switch (value) {
@@ -146,51 +145,63 @@ const LeadsTable = () => {
 
   return (
     <Box>
-      <Card className='bs-full'>
-        <CardContent>
-          <Box display={'flex'} justifyContent={'space-between'} mb={4}>
-            <TextField
-              autoComplete='off'
-              placeholder='Search'
-              name='search'
-              value={search}
-              onChange={e => handleOnChange(e)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position='start'>
-                    <i className='ri-search-line'></i>
-                  </InputAdornment>
-                ),
-                endAdornment: search?.length > 0 && (
-                  <InputAdornment position='start' sx={{ cursor: 'pointer' }}>
-                    <i className='ri-close-line' onClick={() => setSearch('')}></i>
-                  </InputAdornment>
-                )
-              }}
-              size='small'
-            />
-            <Link href={'/leads/create-lead'}>
-              <Button startIcon={<i className='ri-add-line'></i>} variant='contained' className='mis-4'>
-                Create Lead
-              </Button>
-            </Link>
+      <Box display={'flex'} justifyContent={'space-between'} mb={4}>
+        <TextField
+          autoComplete='off'
+          placeholder='Search'
+          name='search'
+          value={search}
+          onChange={e => handleOnChange(e)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position='start'>
+                <i className='ri-search-line'></i>
+              </InputAdornment>
+            ),
+            endAdornment: search?.length > 0 && (
+              <InputAdornment position='start' sx={{ cursor: 'pointer' }}>
+                <i className='ri-close-line' onClick={() => setSearch('')}></i>
+              </InputAdornment>
+            )
+          }}
+          size='small'
+        />
+        <Link href={'/leads/create-lead'}>
+          <Button startIcon={<i className='ri-add-line'></i>} variant='contained' className='mis-4'>
+            Create Lead
+          </Button>
+        </Link>
+      </Box>
+
+      <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
+        {loader && (
+          <Box textAlign={'center'} width={'100%'}>
+            <Card className='w-full shadow-md rounded-lg'>
+              <CardContent className='text-center'>
+                <Box p={40}>
+                  <Image src={LoaderGif} alt='My GIF' width={200} height={100} />
+                </Box>
+              </CardContent>
+            </Card>
           </Box>
+        )}
 
-          <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
-            {loader && (
-              <Box textAlign={'center'} width={'100%'} mt={'200px'} mb={'100px'}>
-                <Image src={LoaderGif} alt='My GIF' width={200} height={100} />
-              </Box>
-            )}
-
-            {callFlag && !loader && leadDataList?.length === 0 && (
-              <Box textAlign={'center'} width={'100%'} mt={'100px'} mb={'100px'}>
-                <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Leads Found</p>
-              </Box>
-            )}
+        {callFlag && !loader && leadDataList?.length === 0 && (
+          <Box textAlign={'center'} width={'100%'}>
+            <Card className='w-full shadow-md rounded-lg'>
+              <CardContent className='text-center'>
+                <Box p={40}>
+                  <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Leads Found</p>
+                </Box>
+              </CardContent>
+            </Card>
           </Box>
+        )}
+      </Box>
 
-          {!loader && leadDataList?.length > 0 && (
+      {!loader && leadDataList?.length > 0 && (
+        <Card className='bs-full'>
+          <CardContent>
             <Paper sx={{ width: '100%', overflow: 'hidden' }}>
               <TableContainer sx={{ maxHeight: 440 }}>
                 <Table stickyHeader aria-label='sticky table'>
@@ -221,14 +232,16 @@ const LeadsTable = () => {
                         <TableCell>{row?.gender}</TableCell>
                         <TableCell>{row?.c_createdName}</TableCell>
                         <TableCell>
-                          <Button size='small' variant='contained' 
-                          sx={{
-                            backgroundColor: activeColor(row?.status),
-                            color: '#fff',
-                            '&:hover': {
-                              backgroundColor: activeColor(row?.status)
-                            }
-                          }}
+                          <Button
+                            size='small'
+                            variant='contained'
+                            sx={{
+                              backgroundColor: activeColor(row?.status),
+                              color: '#fff',
+                              '&:hover': {
+                                backgroundColor: activeColor(row?.status)
+                              }
+                            }}
                           >
                             {' '}
                             {row?.status}
@@ -255,9 +268,9 @@ const LeadsTable = () => {
                 onRowsPerPageChange={handleChangeRowsPerPage}
               />
             </Paper>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </Box>
   )
 }

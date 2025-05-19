@@ -9,8 +9,6 @@ import Image from 'next/image'
 
 import Cookies from 'js-cookie'
 
-
-
 // ** MUI Imports
 import Paper from '@mui/material/Paper'
 import Table from '@mui/material/Table'
@@ -25,7 +23,6 @@ import { Box, Button, Card, CardContent, InputAdornment, TextField } from '@mui/
 import { postDealListApi } from '@/apiFunctions/ApiAction'
 
 import LoaderGif from '@assets/gif/loader.gif'
-
 
 function activeColor(value) {
   switch (value) {
@@ -84,7 +81,7 @@ const DealsTable = () => {
 
   const handleOnChange = e => {
     const { name, value } = e.target
-    
+
     setSearch(value)
   }
 
@@ -140,123 +137,140 @@ const DealsTable = () => {
   }, [search])
 
   useEffect(() => {
-    if(callFlag){
+    if (callFlag) {
       setLoader(true)
       getLeadList()
     }
-      
   }, [page, rowsPerPage])
 
   return (
     <Box>
-      <Card className='bs-full'>
-        <CardContent>
-          <Box display={'flex'} justifyContent={'space-between'} mb={4}>
-            <TextField
-              autoComplete='off'
-              placeholder='Search'
-              name='search'
-              value={search}
-              onChange={e => handleOnChange(e)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position='start'>
-                    <i className='ri-search-line'></i>
-                  </InputAdornment>
-                ),
-                endAdornment: search?.length > 0 && (
-                  <InputAdornment position='start' sx={{ cursor: 'pointer' }}>
-                    <i className='ri-close-line' onClick={() => setSearch('')}></i>
-                  </InputAdornment>
-                )
-              }}
-              size='small'
-            />
-            <Link href={'/deals'}>
-              <Button startIcon={<i className='ri-add-line'></i>} variant='contained' className='mis-4'>
-                Create Deal
-              </Button>
-            </Link>
-          </Box>
+      <Box display={'flex'} justifyContent={'space-between'} mb={4}>
+        <TextField
+          autoComplete='off'
+          placeholder='Search'
+          name='search'
+          value={search}
+          onChange={e => handleOnChange(e)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position='start'>
+                <i className='ri-search-line'></i>
+              </InputAdornment>
+            ),
+            endAdornment: search?.length > 0 && (
+              <InputAdornment position='start' sx={{ cursor: 'pointer' }}>
+                <i className='ri-close-line' onClick={() => setSearch('')}></i>
+              </InputAdornment>
+            )
+          }}
+          size='small'
+        />
+        <Link href={'/deals'}>
+          <Button startIcon={<i className='ri-add-line'></i>} variant='contained' className='mis-4'>
+            Create Deal
+          </Button>
+        </Link>
+      </Box>
 
-          <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
-            {loader && (
-              <Box textAlign={'center'} width={'100%'} mt={'200px'} mb={'100px'}>
-                <Image src={LoaderGif} alt='My GIF' width={200} height={100} />
-              </Box>
-            )}
-
-            {callFlag && !loader && leadDataList?.length === 0 && (
-              <Box textAlign={'center'} width={'100%'} mt={'100px'} mb={'100px'}>
-                <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Leads Found</p>
-              </Box>
-            )}
+      <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
+        {loader && (
+          <Box textAlign={'center'} width={'100%'}>
+            <Card className='w-full shadow-md rounded-lg'>
+              <CardContent className='text-center'>
+                <Box p={40}>
+                  <Image src={LoaderGif} alt='My GIF' width={200} height={100} />
+                </Box>
+              </CardContent>
+            </Card>
           </Box>
-          
-          {!loader && leadDataList?.length > 0 && (
+        )}
+
+        {callFlag && !loader && leadDataList?.length === 0 && (
+          <Box textAlign={'center'} width={'100%'}>
+            <Card className='w-full shadow-md rounded-lg'>
+              <CardContent className='text-center'>
+                <Box p={40}>
+                  <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Leads Found</p>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
+        )}
+      </Box>
+
+      {!loader && leadDataList?.length > 0 && (
+        <Card className='bs-full'>
+          <CardContent>
             <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-            <TableContainer sx={{ maxHeight: 440 }}>
-              <Table stickyHeader aria-label='sticky table'>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Organization</TableCell>
-                    <TableCell>First Name </TableCell>
-                    <TableCell>Last Name</TableCell>
-                    <TableCell>Email</TableCell>
-                    <TableCell>Mobile</TableCell>
-                    <TableCell>Phone</TableCell>
-                    <TableCell>Gender</TableCell>
-                    <TableCell>Created By</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Action</TableCell>
-                  </TableRow>
-                </TableHead>
-
-                <TableBody>
-                  {leadDataList.map(row => (
-                    <TableRow hover role='checkbox' tabIndex={-1} key={row._id}>
-                      <TableCell>{row?.organization}</TableCell>
-                      <TableCell>{row?.first_name}</TableCell>
-                      <TableCell>{row?.last_name}</TableCell>
-                      <TableCell>{row?.email}</TableCell>
-                      <TableCell>{row?.mobile}</TableCell>
-                      <TableCell>{row?.phone}</TableCell>
-                      <TableCell>{row?.gender}</TableCell>
-                      <TableCell>{row?.c_createdName}</TableCell>
-                      <TableCell>
-                        <Button size='small' variant='contained' 
-                         sx={{
-                          backgroundColor: activeColor(row?.status),
-                          color: '#fff',
-                          '&:hover': {
-                            backgroundColor: activeColor(row?.status)
-                          }
-                        }}
-                        >
-                                  {' '}
-                                  {row?.status}
-                                </Button>
-                    </TableCell>
-                      <TableCell> <Link href={`/deals/edit-deal/${row?.lead_slug_name}`}><i className="ri-edit-box-line"></i></Link> </TableCell>
+              <TableContainer sx={{ maxHeight: 440 }}>
+                <Table stickyHeader aria-label='sticky table'>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Organization</TableCell>
+                      <TableCell>First Name </TableCell>
+                      <TableCell>Last Name</TableCell>
+                      <TableCell>Email</TableCell>
+                      <TableCell>Mobile</TableCell>
+                      <TableCell>Phone</TableCell>
+                      <TableCell>Gender</TableCell>
+                      <TableCell>Created By</TableCell>
+                      <TableCell>Status</TableCell>
+                      <TableCell>Action</TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <TablePagination
-              rowsPerPageOptions={[10, 25, 100]}
-              component='div'
-              count={count}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-          </Paper>
-          )}
-          
-        </CardContent>
-      </Card>
+                  </TableHead>
+
+                  <TableBody>
+                    {leadDataList.map(row => (
+                      <TableRow hover role='checkbox' tabIndex={-1} key={row._id}>
+                        <TableCell>{row?.organization}</TableCell>
+                        <TableCell>{row?.first_name}</TableCell>
+                        <TableCell>{row?.last_name}</TableCell>
+                        <TableCell>{row?.email}</TableCell>
+                        <TableCell>{row?.mobile}</TableCell>
+                        <TableCell>{row?.phone}</TableCell>
+                        <TableCell>{row?.gender}</TableCell>
+                        <TableCell>{row?.c_createdName}</TableCell>
+                        <TableCell>
+                          <Button
+                            size='small'
+                            variant='contained'
+                            sx={{
+                              backgroundColor: activeColor(row?.status),
+                              color: '#fff',
+                              '&:hover': {
+                                backgroundColor: activeColor(row?.status)
+                              }
+                            }}
+                          >
+                            {' '}
+                            {row?.status}
+                          </Button>
+                        </TableCell>
+                        <TableCell>
+                          {' '}
+                          <Link href={`/deals/edit-deal/${row?.lead_slug_name}`}>
+                            <i className='ri-edit-box-line'></i>
+                          </Link>{' '}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <TablePagination
+                rowsPerPageOptions={[10, 25, 100]}
+                component='div'
+                count={count}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </Paper>
+          </CardContent>
+        </Card>
+      )}
     </Box>
   )
 }

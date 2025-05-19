@@ -11,8 +11,7 @@ import Cookies from 'js-cookie'
 import Typography from '@mui/material/Typography'
 import Card from '@mui/material/Card'
 import Chip from '@mui/material/Chip'
-import { Box, Button, InputAdornment, TablePagination, TextField } from '@mui/material'
-
+import { Box, Button, CardContent, InputAdornment, TablePagination, TextField } from '@mui/material'
 
 // Components Imports
 import CustomAvatar from '@core/components/mui/Avatar'
@@ -36,13 +35,13 @@ const UsersListTable = () => {
   const [callFlag, setCallFlag] = useState(false)
 
   const handleOnChange = e => {
-    const { name, value } = e.target;
+    const { name, value } = e.target
 
     setSearch(value)
   }
 
   const GetAllUserList = async () => {
-    setLoader(true);
+    setLoader(true)
 
     const header = {
       'Content-Type': 'application/json',
@@ -50,8 +49,8 @@ const UsersListTable = () => {
     }
 
     try {
-      setUsersList([]);
-      
+      setUsersList([])
+
       const body = {
         n_page: page + 1,
         n_limit: rowsPerPage,
@@ -133,14 +132,26 @@ const UsersListTable = () => {
 
       <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
         {loader && (
-          <Box textAlign={'center'} width={'100%'} mt={'200px'} mb={'100px'}>
-            <Image src={LoaderGif} alt='My GIF' width={200} height={100} />
+          <Box textAlign={'center'} width={'100%'}>
+            <Card className='w-full shadow-md rounded-lg'>
+              <CardContent className='text-center'>
+                <Box p={40}>
+                  <Image src={LoaderGif} alt='My GIF' width={200} height={100} />
+                </Box>
+              </CardContent>
+            </Card>
           </Box>
         )}
 
         {!loader && usersList?.length === 0 && (
-          <Box textAlign={'center'} width={'100%'} mt={'100px'} mb={'100px'}>
-            <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Users Found</p>
+          <Box textAlign={'center'} width={'100%'}>
+            <Card className='w-full shadow-md rounded-lg'>
+              <CardContent className='text-center'>
+                <Box p={40}>
+                  <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Users Found</p>
+                </Box>
+              </CardContent>
+            </Card>
           </Box>
         )}
       </Box>
