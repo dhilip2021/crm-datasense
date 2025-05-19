@@ -176,10 +176,11 @@ const Login = ({ mode }) => {
       Cookies.set("privileges", JSON.stringify(dummyArray));
       // router.push(`/`);
       toast.success("login successful",{
-        autoClose: 2000, // closes in 2 seconds
+        autoClose: 1000, // closes in 2 seconds
       });
       setLoader(false);
-      return (router.push("/"))
+      await router.push("/");
+
 
     } else {
       setLoader(false);
