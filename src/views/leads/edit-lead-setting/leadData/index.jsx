@@ -436,10 +436,10 @@ const LeadData = () => {
   }, [leadDatas])
 
   useEffect(() => {
+    console.log(isFetched.current,"<<< isFetched.current")
     if (!isFetched.current && callFlag && organization_id1) {
       isFetched.current = true;
       getFieldList();
-      setCallFlag(false);
     }
   }, [organization_id1, callFlag]);
 
