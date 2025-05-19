@@ -87,7 +87,7 @@ export async function POST(request) {
         }
 
         await User.findByIdAndUpdate(Id, body)
-          .then(() => {
+          .then(async() => {
             if(password !== ""){      
               let mailData = {
                 from: '"No Reply" <polimertv2012@gmail.com>', // sender address
@@ -104,7 +104,7 @@ export async function POST(request) {
               <h2>your latest password : <b>${password} </b></h2>
               <h5><b>Thank you, </b> <br /> CRM Datasense</h5>
             `;
-              const result = emailSend(mailData)
+              const result = await emailSend(mailData)
               }
 
             sendResponse["appStatusCode"] = 0;
@@ -287,7 +287,7 @@ export async function POST(request) {
               password: hashPass,
             });
   
-            await userdata.save().then((result) => {
+            await userdata.save().then(async (result) => {
               if (result) {
 
 
@@ -306,7 +306,7 @@ export async function POST(request) {
               <h4>your password : <b>${passwordCheck} </b></h4>
               <h5><b>Thank you, </b> <br /> CRM Datasense Tech</h5>
             `;
-                const emailRes = emailSend(mailData)
+                const emailRes = await emailSend(mailData)
                 
                 console.log(mailData,"<< MAIL DATA")
   
