@@ -131,6 +131,14 @@ const handleSubmit =async() =>{
     setLoader(false)
     toast?.success(results?.message);
     router.push("/users-list")
+    setInputs({
+      first_name:"",
+    last_name:"",
+    email:"",
+    password: "",
+    c_role_id:"",
+    c_about_user:""
+    })
   }
   }
 
