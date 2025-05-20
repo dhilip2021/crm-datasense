@@ -86,8 +86,6 @@ const CardNotes = () => {
 
   const handleBlur = () => {}
 
-
-
   const handleClose = () => {
     setOpen(false)
     setErrors({ title: false, comment: false, status: false, _id: false })
@@ -150,8 +148,6 @@ const CardNotes = () => {
     }
   }
 
- 
-
   // const removeMenuData = (index)=>{
   //   let arr = [...menusArr];
   //   arr.splice(index, 1);
@@ -161,7 +157,7 @@ const CardNotes = () => {
   const getParticularLeadFn = async organization_id => {
     setLoader(true)
 
-    console.log("call 2")
+    console.log('call 2')
 
     const results = await getAllLeadListApi(organization_id)
 
@@ -226,16 +222,14 @@ const CardNotes = () => {
 
   React.useEffect(() => {
     if (Array.isArray(leadData)) {
-  
       // Collect all notes across all leads
       const allNotes = leadData
         .flatMap(item => item?.c_notes || []) // Safely get c_notes or empty array
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Sort by date descending
-  
-      setNotesArr(allNotes);
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // Sort by date descending
+
+      setNotesArr(allNotes)
     }
-  }, [leadData]);
-  
+  }, [leadData])
 
   React.useEffect(() => {
     if (callFag) {
@@ -246,52 +240,51 @@ const CardNotes = () => {
 
   return (
     <Box>
-       <Box display={'flex'} justifyContent={'space-between'} mb={4} mt={4}>
-          <TextField
-            autoComplete='off'
-            placeholder='Search'
-            name='search'
-            value={search}
-            onChange={e => handleOnChange(e)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <i className='ri-search-line'></i>
-                </InputAdornment>
-              ),
-              endAdornment: search?.length > 0 && (
-                <InputAdornment position='start' sx={{ cursor: 'pointer' }}>
-                  <i className='ri-close-line' onClick={() => setSearch('')}></i>
-                </InputAdornment>
-              )
-            }}
-            size='small'
-          />
+      <Box display={'flex'} justifyContent={'space-between'} mb={4} mt={4}>
+        <TextField
+          autoComplete='off'
+          placeholder='Search'
+          name='search'
+          value={search}
+          onChange={e => handleOnChange(e)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position='start'>
+                <i className='ri-search-line'></i>
+              </InputAdornment>
+            ),
+            endAdornment: search?.length > 0 && (
+              <InputAdornment position='start' sx={{ cursor: 'pointer' }}>
+                <i className='ri-close-line' onClick={() => setSearch('')}></i>
+              </InputAdornment>
+            )
+          }}
+          size='small'
+        />
 
-          <Button
-            onClick={() => setOpen(true)}
-            startIcon={<i className='ri-add-line'></i>}
-            variant='contained'
-            className='mis-4'
-          >
-            Create Note
-          </Button>
-        </Box>
-     
+        <Button
+          onClick={() => setOpen(true)}
+          startIcon={<i className='ri-add-line'></i>}
+          variant='contained'
+          className='mis-4'
+        >
+          Create Note
+        </Button>
+      </Box>
 
-<Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
-          {loader && (
-            <Box textAlign={'center'} width={'100%'} mt={'100px'} mb={'100px'}>
-              <Image src={LoaderGif} alt='My GIF' width={200} height={100} />
-            </Box>
-          )}
+      <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
+        {loader && (
+          <Box textAlign={'center'} width={'100%'} mt={'100px'} mb={'100px'}>
+            <Image src={LoaderGif} alt='My GIF' width={200} height={100} />
+          </Box>
+        )}
 
-          {!loader && !filterStatus(notesArr) && (
-            <Box textAlign={'center'} width={'100%'} mt={'100px'} mb={'100px'}>
-              <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Notes Found!</p>
-            </Box>
-          )}
-        </Box>
+        {!loader && !filterStatus(notesArr) && (
+          <Box textAlign={'center'} width={'100%'} mt={'100px'} mb={'100px'}>
+            <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Notes Found!</p>
+          </Box>
+        )}
+      </Box>
 
       <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
         <Grid container spacing={6}>

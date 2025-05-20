@@ -1,9 +1,12 @@
 // ** React Imports
 import React from 'react'
 
-import { Box, Card, CardContent, CardHeader, Divider, Grid, Typography } from '@mui/material'
+import { Box, Button, Card, CardContent, CardHeader, Divider, Grid, Typography } from '@mui/material'
 
 import OptionsMenu from '@core/components/option-menu'
+import NotesDataPopup from '../notesData/NotesDataPopup'
+import { createLead } from '@/apiFunctions/ApiAction'
+import { toast } from 'react-toastify'
 
 function getHours(value) {
   const givenTimestamp = new Date(value)
@@ -27,12 +30,10 @@ function getHours(value) {
   }
 }
 
-const NotesDetails = ({ loader, leadDatas }) => {
-  const [callFag, setCallFlag] = React.useState(true)
+const NotesDetails = ({ loader, setLoader, leadDatas, organization_id, getToken, getParticularLeadFn }) => {
   const [open, setOpen] = React.useState(false)
   const [titles, setTitles] = React.useState('Add your notes')
   const [search, setSearch] = React.useState('')
-
   const [inputs, setInputs] = React.useState({
     title: '',
     status: 1,
@@ -50,6 +51,7 @@ const NotesDetails = ({ loader, leadDatas }) => {
   })
 
   const handleAction = (option, item) => {
+    console.log(option, '<< OPTTTT')
     if (option === 'Edit') {
       setTitles('Edit your notes')
       setInputs({
@@ -80,9 +82,7 @@ const NotesDetails = ({ loader, leadDatas }) => {
         c_activities: `Notes deleted ${item?.title}`
       }
 
-      console.log(body)
-
-      //   leadNotesCreation(body)
+      leadNotesCreation(body)
     }
   }
 
@@ -100,81 +100,126 @@ const NotesDetails = ({ loader, leadDatas }) => {
     setInputs({ title: '', comment: '', status: 1, _id: '' })
   }
 
-  // const leadNotesCreation = async body => {
-  //   const header = {
-  //     'Content-Type': 'application/json',
-  //     Authorization: `Bearer ${getToken}`
-  //   }
+  const leadNotesCreation = async body => {
+    const header = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken}`
+    }
 
-  //   const results = await createLead(body, header)
+    const results = await createLead(body, header)
 
-  //   if (results?.appStatusCode !== 0) {
-  //     toast?.error(results?.error)
-  //     setLoader(false)
-  //     setOpen(false)
-  //     getParticularLeadFn(organization_id)
-  //   } else {
-  //     getParticularLeadFn(organization_id)
-  //     setLoader(false)
-  //     toast?.success(results?.message)
-  //     setOpen(false)
+    if (results?.appStatusCode !== 0) {
+      toast?.error(results?.error)
+      setLoader(false)
+      setOpen(false)
+      toast?.success(results?.error)
+      getParticularLeadFn(organization_id)
+    } else {
+      getParticularLeadFn(organization_id)
+      setLoader(false)
+      toast?.success(results?.message)
+      setOpen(false)
+    }
+  }
 
-  //   }
-  // }
+  const handleBlur = () => {}
+
+  const handleSubmit = () => {
+    if (inputs?.title === '') {
+      setErrors(prev => ({ ...prev, ['title']: true }))
+    } else {
+      if (inputs._id === '') {
+        const body = {
+          Id: leadDatas[0]?._id,
+          c_notes: inputs,
+          c_activities: `Notes created ${inputs?.title}`
+        }
+
+        leadNotesCreation(body)
+        setOpen(false)
+      } else {
+        const body = {
+          Id: leadDatas[0]?._id,
+          c_notes: inputs,
+          c_activities: `Notes updated ${inputs?.title}`
+        }
+
+        leadNotesCreation(body)
+        setOpen(false)
+      }
+    }
+  }
 
   React.useEffect(() => {
     if (Array.isArray(leadDatas)) {
       // Collect all notes across all leads
       const allNotes = leadDatas
         .flatMap(item => item?.c_notes || []) // Safely get c_notes or empty array
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Sort by date descending
-  
-      setNotesArr(allNotes);
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // Sort by date descending
+
+      setNotesArr(allNotes)
     }
-  }, [leadDatas]);
+  }, [leadDatas])
 
   return (
     <Box style={loader ? { opacity: 0.3, pointerEvents: 'none' } : { opacity: 1 }}>
-      <Box mt={3} mb={3}>
+      <Box mt={5} mb={5} display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
         <Typography variant='h5'>Notes</Typography>
+        <Button
+          onClick={() => setOpen(true)}
+          startIcon={<i className='ri-add-line'></i>}
+          variant='contained'
+          className='mis-4'
+        >
+          Create Note
+        </Button>
       </Box>
 
-      <Box display={"flex"} gap={4}>
-      {Array.isArray(notesArr) &&
-        notesArr.map(
-          (item, index) =>
-            item.status === 1 && (
-              <Grid item xs={12} sm={12} md={4} key={index}>
-                <Card>
-                  <CardHeader
-                    title={`${item.title}`}
-                    action={
-                      <OptionsMenu
-                        iconClassName='text-textPrimary'
-                        options={['Edit', 'Delete']}
-                        onOptionClick={(option, e) => handleAction(option, item)}
-                      />
-                    }
-                  />
-                  <CardContent>
-                    <div className='flex flex-col items-start'>
-                      <Typography>{item.comment}</Typography>
-                    </div>
-                    <div className='flex justify-between items-center flex-wrap gap-x-4 gap-y-2 mbe-5 mbs-[30px]'>
-                      <div className='flex justify-between items-center flex-wrap gap-x-4 gap-y-2'>
-                        <Typography variant='subtitle2' color='text.disabled'>
-                          {getHours(item.createdAt)}
-                        </Typography>
+      <Box display={'flex'} gap={4}>
+        {Array.isArray(notesArr) &&
+          notesArr.map(
+            (item, index) =>
+              item.status === 1 && (
+                <Grid item xs={12} sm={12} md={4} key={index}>
+                  <Card>
+                    <CardHeader
+                      title={`${item.title}`}
+                      action={
+                        <OptionsMenu
+                          iconClassName='text-textPrimary'
+                          options={['Edit', 'Delete']}
+                          onOptionClick={(option, e) => handleAction(option, item)}
+                        />
+                      }
+                    />
+                    <CardContent>
+                      <div className='flex flex-col items-start'>
+                        <Typography>{item.comment}</Typography>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Grid>
-            )
-        )}
+                      <div className='flex justify-between items-center flex-wrap gap-x-4 gap-y-2 mbe-5 mbs-[30px]'>
+                        <div className='flex justify-between items-center flex-wrap gap-x-4 gap-y-2'>
+                          <Typography variant='subtitle2' color='text.disabled'>
+                            {getHours(item.createdAt)}
+                          </Typography>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              )
+          )}
       </Box>
-
-     
+      <NotesDataPopup
+        open={open}
+        close={handleClose}
+        titles={titles}
+        inputs={inputs}
+        handleChange={handleChange}
+        handleSubmit={handleSubmit}
+        errors={errors}
+        handleBlur={handleBlur}
+        loader={loader}
+      />
     </Box>
   )
 }

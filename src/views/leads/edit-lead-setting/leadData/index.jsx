@@ -121,8 +121,24 @@ function removeDuplicatesByKey(data) {
 }
 
 const LeadData = () => {
-  const desiredOrder = ['salutation', 'first-name', 'last-name', 'email','mobile','phone','gender','organization','website','no-of-employees','annual-revenue','industry','job-title','lead-source','status'];
-  const isFetched = useRef(false);
+  const desiredOrder = [
+    'salutation',
+    'first-name',
+    'last-name',
+    'email',
+    'mobile',
+    'phone',
+    'gender',
+    'organization',
+    'website',
+    'no-of-employees',
+    'annual-revenue',
+    'industry',
+    'job-title',
+    'lead-source',
+    'status'
+  ]
+  const isFetched = useRef(false)
   const router = useRouter()
   const dispatch = useDispatch()
   const org = useSelector(state => state.organization)
@@ -303,12 +319,10 @@ const LeadData = () => {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${getToken}`
     }
-    console.log("call edit list")
+    console.log('call edit list')
 
     setLoader(true)
     const results = await getFieldListApi(orgId, header)
-
-   
 
     setLoader(false)
 
@@ -329,10 +343,10 @@ const LeadData = () => {
           items: data?.items
         })
       })
-      console.log(dumArr,"<<< DUMMM ARRR")
+      console.log(dumArr, '<<< DUMMM ARRR')
 
-      const sortedInputs = desiredOrder.map(slug => dumArr.find(input => input.slug_label === slug)).filter(Boolean);
-      console.log(sortedInputs,"<<< sortedInputs")
+      const sortedInputs = desiredOrder.map(slug => dumArr.find(input => input.slug_label === slug)).filter(Boolean)
+      console.log(sortedInputs, '<<< sortedInputs')
 
       setInputs(sortedInputs)
 
@@ -442,17 +456,14 @@ const LeadData = () => {
   }, [leadDatas])
 
   useEffect(() => {
-    console.log(isFetched.current,"<<< isFetched.current")
-    console.log(callFlag,"<<< callFlag")
-    console.log(organization_id1,"<<< organization_id1")
     if (!isFetched.current && callFlag && organization_id1) {
-      getFieldList();
-      isFetched.current = true;
-    }else if(!isFetched.current && callFlag && organization_id){
-      getFieldList();
-      isFetched.current = true;
+      getFieldList()
+      isFetched.current = true
+    } else if (!isFetched.current && callFlag && organization_id) {
+      getFieldList()
+      isFetched.current = true
     }
-  }, [callFlag]);
+  }, [callFlag])
 
   return (
     <Box>
@@ -481,7 +492,14 @@ const LeadData = () => {
               handleClick={handleClick}
               handleSubmit={handleSubmit}
             />
-            <NotesDetails loader={loader} leadDatas={leadDatas} />
+            <NotesDetails
+              loader={loader}
+              setLoader={setLoader}
+              leadDatas={leadDatas}
+              organization_id={organization_id}
+              getToken={getToken}
+              getParticularLeadFn={getParticularLeadFn}
+            />
           </Grid>
 
           <Grid item xs={12} md={4}>

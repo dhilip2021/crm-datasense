@@ -112,51 +112,12 @@ function FieldListPageContainer() {
     setFieldArr(updatedCredit)
   }
 
-  const handleMenuDescription = (e, index) => {
-    let { name, value } = e.target
-    const updatedCredit = [...menusArr]
+ 
 
-    if (name === 'menu_value') {
-      updatedCredit[index] = { ...updatedCredit[index], [name]: capitalizeWords(value) }
-    }
 
-    setMenusArr(updatedCredit)
-    setFieldArr(prev => prev.map((field, idx) => (idx === 0 ? { ...field, items: updatedCredit } : field)))
-  }
 
-  const handleDelete = index => {
-    let arr = [...fieldDataList]
+ 
 
-    arr.splice(index, 1)
-    setFieldDataList(arr)
-  }
-
-  const addSection = () => {
-    let obj = {
-      label: '',
-      slug_label: '',
-      type: '',
-      mandatory: 'no',
-      items: menusArr
-    }
-
-    setFieldArr(prev => [...prev, obj])
-  }
-
-  const addMenuData = () => {
-    let obj = {
-      menu_value: ''
-    }
-
-    setMenusArr(prev => [...prev, obj])
-  }
-
-  const removeMenuData = index => {
-    let arr = [...menusArr]
-
-    arr.splice(index, 1)
-    setMenusArr(arr)
-  }
 
   const getFieldList = async () => {
     const header = {
@@ -191,14 +152,7 @@ function FieldListPageContainer() {
     }
   }
 
-  const handleAction2 = (action, data, index) => {
-    if (action === 'Edit') {
-      alert(`Editing: ${data.label}`)
-    } else if (action === 'Delete') {
-      // handleDelete(index)
-      alert(`Delete: ${index}`)
-    }
-  }
+
 
   const handleEditSubmit = async arr => {
     try {
@@ -364,7 +318,6 @@ function FieldListPageContainer() {
               <FieldListPage
                 fieldDataList={fieldDataList}
                 editFlag={editFlag}
-                handleDelete={handleDelete}
                 handleAction={handleAction}
                 fields={fields}
                 setFields={setFields}

@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Box, Grid } from '@mui/material'
+import { Box, Grid, Typography } from '@mui/material'
 import { DndContext, closestCenter } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import SortableCard from './SortableCard'
@@ -9,7 +9,6 @@ export default function FieldListPage({
   setFields,
   fieldDataList,
   editFlag,
-  handleDelete,
   handleAction,
   handleDragEnd,
   sensors
@@ -25,13 +24,12 @@ export default function FieldListPage({
     <Box mt={4}>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={fields.map(f => f.slug_label)} strategy={verticalListSortingStrategy}>
-          <Grid container spacing={2}>
+          <Grid container spacing={4}>
             {fields.map((field, index) => (
               <SortableCard
                 key={field.slug_label}
                 data={field}
                 index={index}
-                handleDelete={handleDelete}
                 handleAction={handleAction}
                 editFlag={editFlag}
               />
