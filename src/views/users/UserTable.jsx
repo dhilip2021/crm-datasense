@@ -23,9 +23,20 @@ import { ToastContainer, toast } from 'react-toastify';
 import Form from '@components/Form'
 import { capitalizeWords, normalizeEmail } from '@/helper/frontendHelper'
 import { craeteUserApi, userPrivilegeApi } from '@/apiFunctions/ApiAction'
+import Link from 'next/link'
 
 
+const isEmail = email => {
+  var emailFormat = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/
 
+  if (email !== '' && email.match(emailFormat)) {
+    return true
+  }
+
+  return false
+}
+
+const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@.#$!%*?&^])[A-Za-z\d@.#$!%*?&]{8,15}$/
 
 
 
@@ -47,6 +58,15 @@ const router = useRouter()
     c_about_user:""
   })
 
+  const [errors, setErrors] = useState({
+    first_name:false,
+    last_name:false,
+    email:false,
+    password: false,
+    c_role_id:false,
+    c_about_user:false
+  })
+
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
 
 const handleOnChange =(e)=>{
@@ -54,15 +74,36 @@ const {name, value}= e.target;
 
 if(name === "first_name" || name === "last_name"){
   setInputs({ ...inputs, [name]: capitalizeWords(value)}); 
+  setErrors({ ...errors, [name]: false })
 }else if(name === "email"){
+
   setInputs({ ...inputs, [name]: normalizeEmail(value)}); 
+  setErrors({ ...errors, [name]: false })
 }else {
   setInputs({ ...inputs, [name]: value}); 
+  setErrors({ ...errors, [name]: false })
 }
 
 }
 
 const handleSubmit =async() =>{
+
+  if(inputs?.first_name === ""){
+    setErrors({ ...errors, first_name: true })
+  }else if(inputs?.last_name === ""){
+    setErrors({ ...errors, last_name: true })
+  }else if(inputs?.email === ""){
+    setErrors({ ...errors, email: true })
+  }if (!isEmail(inputs?.email)) {
+    setErrors({ ...errors, email: true })
+  }else if(inputs?.password === ""){
+    setErrors({ ...errors, password: true })
+  }else if (!inputs?.password.match(passRegex)) {
+    setErrors({ ...errors, password: true })
+  }else if(inputs?.c_role_id === ""){
+    setErrors({ ...errors, c_role_id: true })
+  }else{
+    
 
   const body  = {
     organization_id: organization_id,
@@ -91,6 +132,8 @@ const handleSubmit =async() =>{
     toast?.success(results?.message);
     router.push("/users-list")
   }
+  }
+
 
 
 }
@@ -128,11 +171,13 @@ useEffect(() => {
                 autoFocus
                 autoComplete='off'
                 fullWidth
-                label='First Name'
+                label='First Name *'
                 placeholder='John'
                 name="first_name"
                 value={inputs.first_name}
                 onChange={handleOnChange}
+                error={errors?.first_name}
+                helperText={errors?.first_name && 'Please enter first name'}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position='start'>
@@ -147,11 +192,13 @@ useEffect(() => {
               <TextField
                 autoComplete='off'
                 fullWidth
-                label='Last Name'
+                label='Last Name *'
                 placeholder='Doe'
                 name="last_name"
                 value={inputs.last_name}
                 onChange={handleOnChange}
+                error={errors?.last_name}
+                helperText={errors?.last_name && 'Please enter last name'}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position='start'>
@@ -166,11 +213,13 @@ useEffect(() => {
               <TextField
                 autoComplete='off'
                 fullWidth
-                type='email'
+                type='email *'
                 label='Email'
                 name="email"
                 value={inputs.email}
                 onChange={handleOnChange}
+                error={errors?.email}
+                helperText={errors?.email && 'Please enter valid Email'}
                 placeholder='johndoe@gmail.com'
                 InputProps={{
                   startAdornment: (
@@ -184,16 +233,17 @@ useEffect(() => {
             </Grid>
             <Grid item xs={12} md={4}>
               <TextField
-                autoComplete='off'
+                autoComplete='new-password'
                 fullWidth
-                label='Password'
+                label='Password *'
                 placeholder='············'
                 id='form-layout-basic-password'
                 name="password"
                 value={inputs.password}
                 onChange={handleOnChange}
+                error={errors?.password}
+                helperText={errors?.password && 'Use 8 or more characters with a mix of letters, numbers & symbols'}
                 type={isPasswordShown ? 'text' : 'password'}
-                helperText='Use 8 or more characters with a mix of letters, numbers & symbols'
                 InputProps={{
                     startAdornment: (
                         <InputAdornment position='start'>
@@ -219,11 +269,13 @@ useEffect(() => {
             </Grid>
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth>
-                <InputLabel id='form-layouts-separator-multiple-select-label'>Select Role</InputLabel>
+                <InputLabel id='form-layouts-separator-multiple-select-label'>Select Role *</InputLabel>
                 <Select
                   name='c_role_id'
                   value={inputs.c_role_id}
                   onChange={handleOnChange}
+                  error={errors?.c_role_id}
+                helperText={errors?.c_role_id && 'Please select role'}
                   id='form-layouts-separator-multiple-select'
                   labelId='form-layouts-separator-multiple-select-label'
                   input={<OutlinedInput label='Language' id='select-multiple-language' />}
@@ -259,9 +311,16 @@ useEffect(() => {
               />
             </Grid>
             <Grid item xs={12}>
+              <Box display={'flex'} justifyContent={'space-between'} width={'100%'} pl={2} pr={2} mt={4}>
+                              <Link href={"/users-list"}>
+                              <Button color='primary' variant='outlined'>
+                              Cancel
+                            </Button>
+                              </Link>
               <Button variant='contained' type='submit' onClick={handleSubmit}>
                 Submit
               </Button>
+              </Box>
             </Grid>
           </Grid>
         </Form>
