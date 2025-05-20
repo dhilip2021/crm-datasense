@@ -52,7 +52,7 @@ function activeColor(value) {
 }
 
 const LeadSingleDetails = ({ loader, inputs }) => {
-
+console.log(inputs,"<<< INPUTSSS")
   return (
     <Box style={loader ? { opacity: 0.3, pointerEvents: 'none' } : { opacity: 1 }}>
       {!loader && Array.isArray(inputs) && inputs?.length > 0 && (
@@ -63,7 +63,7 @@ const LeadSingleDetails = ({ loader, inputs }) => {
                 <Grid container spacing={6}>
                   <Grid item xs={12}>
                     <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} mb={2}>
-                      <Typography variant='h5'>Person</Typography>
+                      <Typography variant='h5'>Person Details:</Typography>
                       <Button variant='contained'
                        sx={{
                                                     backgroundColor: activeColor(inputs[14]?.value),
@@ -74,7 +74,7 @@ const LeadSingleDetails = ({ loader, inputs }) => {
                                                   }}
                        >
                         {' '}
-                        {inputs[13]?.value}
+                        {inputs[14]?.value}
                       </Button>
                     </Box>
                     <Divider />
@@ -165,7 +165,9 @@ const LeadSingleDetails = ({ loader, inputs }) => {
                   {/* ****************************************** DETAILS ********************************************** */}
 
                   <Grid item xs={12}>
-                    <Typography variant='h5'>Details</Typography>
+                  <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} mt={4} mb={2}>
+                    <Typography variant='h5'>Organization Details :</Typography>
+                    </Box>
                     <Divider />
                   </Grid>
 
