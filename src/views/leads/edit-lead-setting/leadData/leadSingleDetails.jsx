@@ -52,7 +52,7 @@ function activeColor(value) {
 }
 
 const LeadSingleDetails = ({ loader, inputs }) => {
-console.log(inputs,"<<< INPUTSSS")
+  console.log(inputs, '<<< INPUTSSS')
   return (
     <Box style={loader ? { opacity: 0.3, pointerEvents: 'none' } : { opacity: 1 }}>
       {!loader && Array.isArray(inputs) && inputs?.length > 0 && (
@@ -64,15 +64,17 @@ console.log(inputs,"<<< INPUTSSS")
                   <Grid item xs={12}>
                     <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} mb={2}>
                       <Typography variant='h5'>Person Details:</Typography>
-                      <Button variant='contained'
-                       sx={{
-                                                    backgroundColor: activeColor(inputs[14]?.value),
-                                                    color: '#fff',
-                                                    '&:hover': {
-                                                      backgroundColor: activeColor(inputs[14]?.value)
-                                                    }
-                                                  }}
-                       >
+
+                      <Button
+                        variant='contained'
+                        sx={{
+                          backgroundColor: activeColor(inputs[14]?.value),
+                          color: '#fff',
+                          '&:hover': {
+                            backgroundColor: activeColor(inputs[14]?.value)
+                          }
+                        }}
+                      >
                         {' '}
                         {inputs[14]?.value}
                       </Button>
@@ -80,212 +82,61 @@ console.log(inputs,"<<< INPUTSSS")
                     <Divider />
                   </Grid>
 
-                  <Grid item xs={6}>
-                    <Box display={'flex'} gap={2}>
-                      <Grid item xs={3}>
-                        <Typography variant='h6' color={'#a7a7a7'}>
-                          <Box display={'flex'} justifyContent={'space-between'}>
-                            <span>{inputs[1]?.label}</span>
-                            <span>:</span>
+                        {
+                          Array.isArray(inputs) && inputs?.slice(0,7)?.map((item, index) =>
+                            <Grid item xs={6} key={index}>
+                          <Box display={'flex'} gap={2}>
+                            <Grid item xs={3}>
+                              <Typography variant='h6' color={'#a7a7a7'}>
+                                <Box display={'flex'} justifyContent={'space-between'}>
+                                  <span>{item?.label}</span>
+                                  <span>:</span>
+                                </Box>
+                              </Typography>
+                            </Grid>
+                            <Grid item xs={9}>
+                              <Typography variant='h6'>
+                               {item?.value}
+                              </Typography>
+                            </Grid>
                           </Box>
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={9}>
-                        <Typography variant='h6'>
-                          {inputs[0]?.value}. {inputs[1]?.value} {inputs[2]?.value}
-                        </Typography>
-                      </Grid>
-                    </Box>
-                  </Grid>
+                        </Grid>
+                          )
+                        }
 
-                  <Grid item xs={6}>
-                    <Box display={'flex'} gap={2}>
-                      <Grid item xs={3}>
-                        <Typography variant='h6' color={'#a7a7a7'}>
-                          <Box display={'flex'} justifyContent={'space-between'}>
-                            <span>{inputs[3]?.label}</span>
-                            <span>:</span>
-                          </Box>
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={9}>
-                        <Typography variant='h6'>{inputs[3]?.value}</Typography>
-                      </Grid>
-                    </Box>
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <Box display={'flex'} gap={2}>
-                      <Grid item xs={3}>
-                        <Typography variant='h6' color={'#a7a7a7'}>
-                          <Box display={'flex'} justifyContent={'space-between'}>
-                            <span>{inputs[4]?.label}</span>
-                            <span>:</span>
-                          </Box>
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={9}>
-                        <Typography variant='h6'>{inputs[4]?.value} </Typography>
-                      </Grid>
-                    </Box>
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <Box display={'flex'} gap={2}>
-                      <Grid item xs={3}>
-                        <Typography variant='h6' color={'#a7a7a7'}>
-                          <Box display={'flex'} justifyContent={'space-between'}>
-                            <span>{inputs[5]?.label}</span>
-                            <span>:</span>
-                          </Box>
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={9}>
-                        <Typography variant='h6'>{inputs[5]?.value} </Typography>
-                      </Grid>
-                    </Box>
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <Box display={'flex'} gap={2}>
-                      <Grid item xs={4}>
-                        <Typography variant='h6' color={'#a7a7a7'}>
-                          <Box display={'flex'} justifyContent={'space-between'}>
-                            <span>{inputs[6]?.label}</span>
-                            <span>:</span>
-                          </Box>
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={8}>
-                        <Typography variant='h6'>{inputs[6]?.value} </Typography>
-                      </Grid>
-                    </Box>
-                  </Grid>
+                  
+                 
 
                   {/* ****************************************** DETAILS ********************************************** */}
 
                   <Grid item xs={12}>
-                  <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} mt={4} mb={2}>
-                    <Typography variant='h5'>Organization Details :</Typography>
+                    <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} mt={4} mb={2}>
+                      <Typography variant='h5'>Organization Details :</Typography>
                     </Box>
                     <Divider />
                   </Grid>
 
-                 
-
-                  <Grid item xs={6}>
-                    <Box display={'flex'} gap={2}>
-                      <Grid item xs={4}>
-                        <Typography variant='h6' color={'#a7a7a7'}>
-                          <Box display={'flex'} justifyContent={'space-between'}>
-                            <span>{inputs[7]?.label}</span>
-                            <span>:</span>
+                  {
+                          Array.isArray(inputs) && inputs?.slice(7,15)?.map((item, index) =>
+                            <Grid item xs={6} key={index}>
+                          <Box display={'flex'} gap={2}>
+                            <Grid item xs={3}>
+                              <Typography variant='h6' color={'#a7a7a7'}>
+                                <Box display={'flex'} justifyContent={'space-between'}>
+                                  <span>{item?.label}</span>
+                                  <span>:</span>
+                                </Box>
+                              </Typography>
+                            </Grid>
+                            <Grid item xs={9}>
+                              <Typography variant='h6'>
+                               {item?.value}
+                              </Typography>
+                            </Grid>
                           </Box>
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={8}>
-                        <Typography variant='h6'>{inputs[7]?.value} </Typography>
-                      </Grid>
-                    </Box>
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <Box display={'flex'} gap={2}>
-                      <Grid item xs={4}>
-                        <Typography variant='h6' color={'#a7a7a7'}>
-                          <Box display={'flex'} justifyContent={'space-between'}>
-                            <span>{inputs[8]?.label}</span>
-                            <span>:</span>
-                          </Box>
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={8}>
-                        <Typography variant='h6'>{inputs[8]?.value} </Typography>
-                      </Grid>
-                    </Box>
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <Box display={'flex'} gap={2}>
-                      <Grid item xs={4}>
-                        <Typography variant='h6' color={'#a7a7a7'}>
-                          <Box display={'flex'} justifyContent={'space-between'}>
-                            <span>{inputs[9]?.label}</span>
-                            <span>:</span>
-                          </Box>
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={8}>
-                        <Typography variant='h6'>{inputs[9]?.value} </Typography>
-                      </Grid>
-                    </Box>
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <Box display={'flex'} gap={2}>
-                      <Grid item xs={4}>
-                        <Typography variant='h6' color={'#a7a7a7'}>
-                          <Box display={'flex'} justifyContent={'space-between'}>
-                            <span>{inputs[10]?.label}</span>
-                            <span>:</span>
-                          </Box>
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={8}>
-                        <Typography variant='h6'>{inputs[10]?.value} </Typography>
-                      </Grid>
-                    </Box>
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <Box display={'flex'} gap={2}>
-                      <Grid item xs={4}>
-                        <Typography variant='h6' color={'#a7a7a7'}>
-                          <Box display={'flex'} justifyContent={'space-between'}>
-                            <span>{inputs[11]?.label}</span>
-                            <span>:</span>
-                          </Box>
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={8}>
-                        <Typography variant='h6'>{inputs[11]?.value} </Typography>
-                      </Grid>
-                    </Box>
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <Box display={'flex'} gap={2}>
-                      <Grid item xs={4}>
-                        <Typography variant='h6' color={'#a7a7a7'}>
-                          <Box display={'flex'} justifyContent={'space-between'}>
-                            <span>{inputs[12]?.label}</span>
-                            <span>:</span>
-                          </Box>
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={8}>
-                        <Typography variant='h6'>{inputs[12]?.value} </Typography>
-                      </Grid>
-                    </Box>
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <Box display={'flex'} gap={2}>
-                      <Grid item xs={4}>
-                        <Typography variant='h6' color={'#a7a7a7'}>
-                          <Box display={'flex'} justifyContent={'space-between'}>
-                            <span>{inputs[13]?.label}</span>
-                            <span>:</span>
-                          </Box>
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={8}>
-                        <Typography variant='h6'>{inputs[13]?.value} </Typography>
-                      </Grid>
-                    </Box>
-                  </Grid>
-
-
+                        </Grid>
+                          )
+                        }
                 </Grid>
               </Box>
             </Box>

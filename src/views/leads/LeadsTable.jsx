@@ -24,6 +24,7 @@ import { deleteLeadApi, postLeadListApi } from '@/apiFunctions/ApiAction'
 
 import LoaderGif from '@assets/gif/loader.gif'
 import { toast, ToastContainer } from 'react-toastify'
+import DeleteConformPopup from './DeleteConformPopup'
 
 function activeColor(value) {
   switch (value) {
@@ -80,6 +81,10 @@ const LeadsTable = () => {
   const [datas, setDatas] = useState([])
   const [columns, setColumns] = useState([])
 
+  const [delOpen, setDelOpen] = useState(false)
+  const [delId, setDelId] = useState('')
+  const [delTitle, setDelTitle] = useState('')
+
   const handleOnChange = e => {
     const { name, value } = e.target
 
@@ -95,26 +100,40 @@ const LeadsTable = () => {
     setPage(0)
   }
 
-  const deletefuntion =async(id)=>{
-    console.log(id,"<<< DLETE IDDD")
+  const delClose = () => {
+    setDelOpen(false)
+    setDelId('')
+    setDelTitle('')
+  }
+  const deleteFn = id => {
+    setDelOpen(true)
+    setDelId(id)
+    setDelTitle('Are you sure you want to delete this?')
+  }
+
+  const deleteConfirm = () => {
+    setDelOpen(false)
+    deletefuntion(delId)
+  }
+
+  const deletefuntion = async delId => {
     const header = {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${getToken}`
     }
     setLoader(true)
-    const deleteRes = await deleteLeadApi(id,header);
+    const deleteRes = await deleteLeadApi(delId, header)
 
-    if(deleteRes?.appStatusCode !== 0){
+    if (deleteRes?.appStatusCode !== 0) {
       setLoader(false)
       toast.success(deleteRes?.error)
       getLeadList()
-    }else{
+    } else {
       setLoader(false)
       getLeadList()
       toast.success(deleteRes?.message)
     }
-    console.log(deleteRes,"<<< deleteRes")
-
+    console.log(deleteRes, '<<< deleteRes')
   }
 
   const getLeadList = async () => {
@@ -271,17 +290,19 @@ const LeadsTable = () => {
                           </Button>
                         </TableCell>
                         <TableCell>
-                          <Box display={"flex"}>
-                          {' '}
-                          <Link href={`/leads/edit-lead/${row?.lead_slug_name}`}>
-                            <i className='ri-edit-box-line'></i>
-                          </Link>{' '}
-                          <Box>
-                          <i className='ri-delete-bin-3-fill' style={{color:"#ff5555",cursor:"pointer"}} onClick={()=>deletefuntion(row?._id)}></i>
+                          <Box display={'flex'}>
+                            {' '}
+                            <Link href={`/leads/edit-lead/${row?.lead_slug_name}`}>
+                              <i className='ri-edit-box-line'></i>
+                            </Link>{' '}
+                            <Box>
+                              <i
+                                className='ri-delete-bin-3-fill'
+                                style={{ color: '#ff5555', cursor: 'pointer' }}
+                                onClick={() => deleteFn(row?._id)}
+                              ></i>
+                            </Box>
                           </Box>
-                          </Box>
-                         
-                         
                         </TableCell>
                       </TableRow>
                     ))}
@@ -302,6 +323,7 @@ const LeadsTable = () => {
         </Card>
       )}
       <ToastContainer />
+      <DeleteConformPopup open={delOpen} title={delTitle} close={delClose} deleteConfirm={deleteConfirm} />
     </Box>
   )
 }

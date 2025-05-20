@@ -323,6 +323,7 @@ export async function POST(request) {
             last_name,
             email,
             mobile,
+            phone,
             gender,
             organization,
             website,

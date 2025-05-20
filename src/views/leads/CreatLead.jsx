@@ -281,6 +281,7 @@ const CreatLead = () => {
       }
 
       // Submit the form (uncomment this in actual use)
+      console.log(body,"<<< CREATE LEAD")
       funcreateLead(body)
     }
   }
