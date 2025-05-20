@@ -203,7 +203,7 @@ const AddFieldPage = () => {
         const results = await addFieldApi(body, header)
   
         if (results?.appStatusCode !== 0) {
-          toast?.error(results?.message)
+          toast?.error(results?.error)
           setLoader(false)
           
         } else {

@@ -211,9 +211,7 @@ function FieldListPageContainer() {
 
       if (results?.appStatusCode !== 0) {
         setOpen(false)
-        toast?.error(results?.message, {
-        autoClose: 1000
-      })
+        toast?.error(results?.error)
         getFieldList()
         setLoader(false)
         setShouldSubmit(false)

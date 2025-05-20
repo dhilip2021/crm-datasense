@@ -113,10 +113,8 @@ const NotesDataPageContainer = () => {
       toast?.error(results?.error)
       setLoader(false)
       setOpen(false)
-      console.log('call 22')
       getParticularLeadFn(organization_id)
     } else {
-      console.log('call 33')
       getParticularLeadFn(organization_id)
       setLoader(false)
       toast?.success(results?.message)

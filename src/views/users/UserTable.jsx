@@ -122,10 +122,11 @@ const handleSubmit =async() =>{
   }
 
   const results = await craeteUserApi(body);
+  console.log(results,"<<< RESULTSSS")
     setLoader(true)
   if (results?.appStatusCode !== 0) {
     setLoader(false)
-    toast?.error(results?.message);
+    toast?.error(results?.error);
     
   } else {
     setLoader(false)
