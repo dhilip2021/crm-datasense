@@ -138,7 +138,7 @@ export async function POST(request) {
             dummyAddArray.push({
               item_id: data.item_id,
               label: data.label,
-              position: 1,
+              position: data.position ? data.position : 1,
               slug_label: data.slug_label,
               type: data.type,
               mandatory: data.mandatory,

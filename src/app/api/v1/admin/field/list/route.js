@@ -71,7 +71,7 @@ export async function GET(request) {
                 sendResponse["payloadJson"] = data;
                 sendResponse["error"] = [];
               } else {
-                sendResponse["appStatusCode"] = 0;
+                sendResponse["appStatusCode"] = 4;
                 sendResponse["message"] = "Record not found!";
                 sendResponse["payloadJson"] = [];
                 sendResponse["error"] = [];
@@ -97,9 +97,9 @@ export async function GET(request) {
         sendResponse["appStatusCode"] = 4;
         sendResponse["message"] = "";
         sendResponse["payloadJson"] = [];
-        sendResponse["error"] = "Record not found!";
+        sendResponse["error"] = "Record not found!!";
 
-        return NextResponse.json(sendResponse, { status: 400 });
+        return NextResponse.json(sendResponse, { status: 200 });
       }
     } else {
       let _search = {};

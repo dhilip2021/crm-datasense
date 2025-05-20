@@ -24,7 +24,7 @@ import Logo from '@components/layout/shared/Logo'
 
 // Hook Imports
 import { useImageVariant } from '@core/hooks/useImageVariant'
-import { addOrganizationApi, checkMailApi, craeteUserApi, getOrganizationApi } from '@/apiFunctions/ApiAction'
+import { addFieldApi, addOrganizationApi, checkMailApi, craeteUserApi, getOrganizationApi } from '@/apiFunctions/ApiAction'
 import { Box } from '@mui/material'
 
 
@@ -41,6 +41,8 @@ function normalizeEmail(email) {
 }
 
 const Register = ({ mode }) => {
+
+ 
 
   const router = useRouter();
 
@@ -164,6 +166,11 @@ const Register = ({ mode }) => {
         // toast.success('Organization successfully created!',{
         //   autoClose: 2000, 
         // })
+
+      
+
+
+
         toast.success('Please check your email.. your password send your mail!',{
           autoClose: 3000, // closes in 3 seconds
         })
