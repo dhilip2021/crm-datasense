@@ -308,8 +308,7 @@ const NotesDataPageContainer = () => {
             notesArr.map(
               (item, index) =>
                 item.status === 1 && (
-                  <Card>
-                    <CardContent>
+               
                       <Grid item xs={12} sm={12} md={3} key={index}>
                         <Card>
                           <CardHeader
@@ -336,8 +335,7 @@ const NotesDataPageContainer = () => {
                           </CardContent>
                         </Card>
                       </Grid>
-                    </CardContent>
-                  </Card>
+                  
                 )
             )}
         </Grid>
