@@ -191,6 +191,15 @@ function FieldListPageContainer() {
     }
   }
 
+  const handleAction2 = (action, data, index) => {
+    if (action === 'Edit') {
+      alert(`Editing: ${data.label}`)
+    } else if (action === 'Delete') {
+      // handleDelete(index)
+      alert(`Delete: ${index}`)
+    }
+  }
+
   const handleEditSubmit = async arr => {
     try {
       const body = {
