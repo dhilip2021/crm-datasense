@@ -109,6 +109,19 @@ export const getParticularLeadListApi = async (body,name) => {
     });
 };
 
+export const deleteLeadApi = async (body,header) => {
+  return await axios
+    .delete(`/api/v1/admin/lead/delete?id=${body}`, {
+      headers: header,
+    })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
 
 
 // Deal Model apis
