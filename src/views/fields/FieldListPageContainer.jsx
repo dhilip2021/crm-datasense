@@ -176,6 +176,7 @@ function FieldListPageContainer() {
   }
 
   const handleAction = (option, item, index) => {
+    console.log(option,"<<< OPTIONSSS")
     if (option === 'Edit') {
       console.log('Edit clicked for:', item)
 
