@@ -94,7 +94,7 @@ const handleSubmit =async() =>{
     setErrors({ ...errors, last_name: true })
   }else if(inputs?.email === ""){
     setErrors({ ...errors, email: true })
-  }if (!isEmail(inputs?.email)) {
+  }else if (!isEmail(inputs?.email)) {
     setErrors({ ...errors, email: true })
   }else if(inputs?.password === ""){
     setErrors({ ...errors, password: true })
