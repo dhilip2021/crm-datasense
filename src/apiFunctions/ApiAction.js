@@ -52,6 +52,30 @@ export const craeteUserApi = async (body) => {
       });
   };
 
+  export const getUserListApi = async (body) => {
+    return await axios
+      .get(`/api/v1/admin/list_user?id=${body}`,{ headers: AppHeader })
+      .then((res) => {
+        return res.data;
+      })
+      .catch((err) => {
+        return err;
+      });
+  };
+
+  export const deleteUserApi = async (body,header) => {
+    return await axios
+      .delete(`/api/v1/admin/delete_user?id=${body}`, {
+        headers: header,
+      })
+      .then((res) => {
+        return res.data;
+      })
+      .catch((err) => {
+        return err;
+      });
+  };
+
 // Leads model api's
   
 export const createLead = async (body, header) => {

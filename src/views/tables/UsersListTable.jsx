@@ -18,8 +18,10 @@ import CustomAvatar from '@core/components/mui/Avatar'
 
 // Styles Imports
 import tableStyles from '@core/styles/table.module.css'
-import { allUserListApi } from '@/apiFunctions/ApiAction'
+import { allUserListApi, deleteUserApi } from '@/apiFunctions/ApiAction'
 import LoaderGif from '@assets/gif/loader.gif'
+import DeleteConformPopup from '../leads/DeleteConformPopup'
+import { toast, ToastContainer } from 'react-toastify'
 
 const UsersListTable = () => {
   const organization_id = Cookies.get('organization_id')
@@ -34,12 +36,55 @@ const UsersListTable = () => {
   const [count, setCount] = useState(0)
   const [callFlag, setCallFlag] = useState(false)
 
+    const [delOpen, setDelOpen] = useState(false)
+    const [delId, setDelId] = useState('')
+    const [delTitle, setDelTitle] = useState('')
+
   const handleOnChange = e => {
     const { name, value } = e.target
 
     setSearch(value)
   }
 
+
+
+
+  const delClose = () => {
+    setDelOpen(false)
+    setDelId('')
+    setDelTitle('')
+  }
+  const deleteFn = (id) => {
+    setDelOpen(true)
+    setDelId(id)
+    setDelTitle('Are you sure you want to delete this?')
+  }
+
+  const deleteConfirm = () => {
+    setDelOpen(false)
+    deleteUserFn(delId)
+  }
+
+
+
+  const deleteUserFn = async(id)=>{
+    const header = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken}`
+    }
+    setLoader(false)
+    const deleteRes = await deleteUserApi(id,header)
+     if (deleteRes?.appStatusCode !== 0) {
+          setLoader(false)
+          toast.success(deleteRes?.error)
+          GetAllUserList()
+        } else {
+          setLoader(false)
+          GetAllUserList()
+          toast.success(deleteRes?.message)
+        }
+
+  }
   const GetAllUserList = async () => {
     setLoader(true)
 
@@ -176,6 +221,7 @@ const UsersListTable = () => {
                   <th>Email</th>
                   <th>Role</th>
                   <th>Status</th>
+                  <th>Action</th>
                 </tr>
               </thead>
             )}
@@ -214,10 +260,25 @@ const UsersListTable = () => {
                       <Chip
                         className='capitalize'
                         variant='tonal'
-                        color={row.n_status === 1 ? 'success' : 'secondary'}
+                        color={row.n_status === 1 ? 'success' : 'error'}
                         label={row.n_status === 1 ? 'active' : 'in-active'}
                         size='small'
                       />
+                    </td>
+                    <td className='!pb-1'>
+                    <Box display={'flex'}>
+                            {' '}
+                            <Link href={`/edit-user/${row?.user_id}`}>
+                              <i className='ri-edit-box-line'></i>
+                            </Link>{' '}
+                            <Box>
+                              <i
+                                className='ri-delete-bin-3-fill'
+                                style={{ color: '#ff5555', cursor: 'pointer' }}
+                                onClick={() => deleteFn(row?._id)}
+                              ></i>
+                            </Box>
+                          </Box>
                     </td>
                   </tr>
                 ))}
@@ -239,6 +300,8 @@ const UsersListTable = () => {
           )}
         </div>
       </Card>
+      <ToastContainer />
+       <DeleteConformPopup open={delOpen} title={delTitle} close={delClose} deleteConfirm={deleteConfirm} />
     </Box>
   )
 }

@@ -12,6 +12,8 @@ const Layout = async ({ children }) => {
   // Vars
   const direction = 'ltr'
 
+  
+
   return (
     <Providers direction={direction}>
       <LayoutWrapper

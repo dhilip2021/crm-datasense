@@ -321,19 +321,18 @@ const LeadData = () => {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${getToken}`
     }
-    console.log('call edit list')
+   
 
     setLoader(true)
     const results = await getFieldListApi(orgId, header)
 
-    console.log(results,"<<< RESLTSSSSSS")
+  
 
     setLoader(false)
 
     if (results?.appStatusCode === 0) {
       const resArr = results?.payloadJson[0]?.fields
 
-      console.log(resArr,"<<< RESLTSSSSSS")
 
       setFieldDataList(resArr)
       const dumArr = []
@@ -349,7 +348,7 @@ const LeadData = () => {
           items: data?.items
         })
       })
-      console.log(dumArr, '<<< DUMMM ARRR')
+   
 
       // const sortedInputs = desiredOrder.map(slug => dumArr.find(input => input.slug_label === slug)).filter(Boolean)
       // console.log(sortedInputs, '<<< sortedInputs')

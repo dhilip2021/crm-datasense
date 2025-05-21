@@ -18,19 +18,15 @@ export async function POST(request) {
 
   const verified = verifyAccessToken()
 
-  console.log(verified.data.c_role_id, '<<< VERIFIED ')
-
   await connectMongoDB()
 
   const userRoleData = await UserRole.findOne({ c_role_id: verified.data.c_role_id })
 
-  console.log(userRoleData, '<<< userRoleData ')
 
   const RoleData = await UserRole.find({
     c_role_priority: { $gt: userRoleData.c_role_priority }
   })
 
-  console.log(RoleData, '<<< RoleData ')
 
   const checkArray = []
 
@@ -50,19 +46,15 @@ export async function POST(request) {
       const hasRoles = checkArray.length > 0
 
       if (searchTerm !== '') {
-        console.log(checkArray, '<<< checkArray 1')
         _search = {
           organization_id,
           user_name: { $regex: searchTerm, $options: 'i' },
-          n_status: 1,
           n_published: 1,
           ...(hasRoles && { c_role_id: { $in: checkArray } })
         }
       } else {
-        console.log(checkArray, '<<< checkArray 2')
         _search = {
           organization_id,
-          n_status: 1,
           n_published: 1,
           ...(hasRoles && { c_role_id: { $in: checkArray } })
         }
@@ -156,7 +148,6 @@ export async function POST(request) {
           }
         ])
           .then(data => {
-            console.log(data, '<<< DATAAAAA')
             if (data[0].data.length > 0) {
               sendResponse['appStatusCode'] = 0
               sendResponse['message'] = ''
@@ -216,7 +207,7 @@ export async function GET(request) {
       if (id) {
         _search['$and'] = [
           {
-            $and: [{ n_status: 1 }, { n_published: 1 }, { user_id: id }]
+            $and: [{ n_published: 1 }, { user_id: id }]
           }
         ]
 
@@ -320,7 +311,7 @@ export async function GET(request) {
       } else {
         _search['$and'] = [
           {
-            $and: [{ n_status: 1 }, { n_published: 1 }]
+            $and: [{ n_published: 1 }]
           }
         ]
 

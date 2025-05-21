@@ -6,7 +6,6 @@ import IconButton from '@mui/material/IconButton'
 // Third-party Imports
 import classnames from 'classnames'
 
-import Cookies from 'js-cookie'
 
 // Component Imports
 import NavToggle from './NavToggle'
@@ -19,7 +18,8 @@ import { verticalLayoutClasses } from '@layouts/utils/layoutClasses'
 import { converDayJsDatewithOutTime } from '@/helper/frontendHelper'
 
 const NavbarContent = ({c_version, endedAt}) => {
-
+ 
+  
 
   return (
     <div className={classnames(verticalLayoutClasses.navbarContent, 'flex items-center justify-between gap-4 is-full')}>

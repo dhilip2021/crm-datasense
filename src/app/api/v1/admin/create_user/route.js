@@ -31,7 +31,7 @@ function  emailSend(mailData) {
 }
 
 export async function POST(request) {
-  const { organization_id,first_name, last_name, email, role, c_role_id, c_user_img_url,c_about_user,Id,password
+  const { organization_id,first_name, last_name, email, role, c_role_id, c_user_img_url,c_about_user,Id,password,n_status
   } =
     await request.json();
 
@@ -79,16 +79,17 @@ export async function POST(request) {
           email:email,
           role:role,
           c_role_id:c_role_id,
-          c_user_img_url:c_user_img_url
+          c_user_img_url:c_user_img_url,
+          n_status: n_status
         }
         
-        if(password !== ""){
+        if(password !== "" && password !== undefined){
           body["password"] = hashPass
         }
 
         await User.findByIdAndUpdate(Id, body)
           .then(async() => {
-            if(password !== ""){      
+            if(password !== "" && password !== undefined){      
               let mailData = {
                 from: '"No Reply" <polimertv2012@gmail.com>', // sender address
                 to: `${email}`, // list of receivers
@@ -108,7 +109,7 @@ export async function POST(request) {
               }
 
             sendResponse["appStatusCode"] = 0;
-            sendResponse["message"] = "Updated Successfully!";
+            sendResponse["message"] = "Updated Successfully !!!";
             sendResponse["payloadJson"] = [];
             sendResponse["error"] = [];
           })
@@ -201,6 +202,7 @@ export async function POST(request) {
             c_role_id,
             c_user_img_url,
             password: hashPass,
+            n_status:n_status ? n_status : 1
           });
 
           if (resulData.length === 0 || resulData === null) {
@@ -285,6 +287,7 @@ export async function POST(request) {
               c_role_id: c_role_id,
               c_user_img_url,
               password: hashPass,
+              n_status:n_status ? n_status : 1
             });
   
             await userdata.save().then(async (result) => {

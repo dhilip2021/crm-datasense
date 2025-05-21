@@ -1,4 +1,6 @@
-"use client"
+'use client'
+
+import { useEffect } from 'react'
 
 // MUI Imports
 import Grid from '@mui/material/Grid'
@@ -14,11 +16,48 @@ import DepositWithdraw from '@views/dashboard/DepositWithdraw'
 import SalesByCountries from '@views/dashboard/SalesByCountries'
 import CardStatVertical from '@components/card-statistics/Vertical'
 import Table from '@views/dashboard/Table'
+import Cookies from 'js-cookie'
+
+import { getUserListApi } from '@/apiFunctions/ApiAction'
 
 const DashboardAnalytics = () => {
+  
+  const user_id = Cookies.get('user_id')
+  const getToken = Cookies.get('_token')
 
+  const getUserListFn = async userId => {
+    const header = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken}`
+    }
+    try {
+      const results = await getUserListApi(userId, header)
+      console.log(results?.payloadJson[0]?.n_status, '<<< N STATUS')
+      if (results?.payloadJson[0]?.n_status === 0) {
+        Cookies.remove('riho_token')
+        Cookies.remove('_token')
+        Cookies.remove('_token_expiry')
+        Cookies.remove('privileges')
+        Cookies.remove('role_id')
+        Cookies.remove('role_name')
+        Cookies.remove('user_name')
+        Cookies.remove('organization_id')
+        Cookies.remove('organization_name')
+        Cookies.remove('user_id')
+        Cookies.remove('c_version')
+        Cookies.remove('endedAt')
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
 
-
+  useEffect(() => {
+    console.log(user_id, 'ROLE IDDDD')
+    if (user_id !== undefined) {
+      getUserListFn(user_id)
+    }
+  }, [user_id])
 
   return (
     <Grid container spacing={6}>

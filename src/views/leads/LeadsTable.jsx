@@ -133,7 +133,6 @@ const LeadsTable = () => {
       getLeadList()
       toast.success(deleteRes?.message)
     }
-    console.log(deleteRes, '<<< deleteRes')
   }
 
   const getLeadList = async () => {
