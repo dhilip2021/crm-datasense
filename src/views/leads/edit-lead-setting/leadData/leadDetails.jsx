@@ -82,6 +82,32 @@ const LeadDetails = ({loader, inputs, handleChange, errors, handleBlur, handleCl
                               </TextField>
                             </Grid>
                           )}
+                          {item?.type === 'text-multiline' && (
+                            <Grid item xs={12}>
+                              <TextField
+                                multiline
+                                rows={3}
+                                autoComplete='off'
+                                fullWidth
+                                id='outlined-basic'
+                                label={`${item?.label} ${item?.mandatory === 'yes' ? '*' : ''}`}
+                                variant='outlined'
+                                type='text'
+                                name={item?.slug_label}
+                                size='small'
+                                value={item?.value}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                error={errors?.includes(item?.slug_label)}
+                                helperText={errors?.includes(item?.slug_label) && `Please enter ${item?.label}`}
+                                sx={{
+                                  '.MuiFormHelperText-root': {
+                                    ml: 0
+                                  }
+                                }}
+                              />
+                            </Grid>
+                          )}
                         </>
                       ))}
                   </Grid>

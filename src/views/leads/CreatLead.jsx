@@ -37,7 +37,8 @@ const keys = [
   'job_title',
   'lead_source',
   'status',
-  'live_status'
+  'live_status',
+  'others'
 ]
 
 const getMatchedKey = slugLabel => {
@@ -122,6 +123,17 @@ const CreatLead = () => {
         setErrors(prevErrors => prevErrors.filter(e => e !== 'email'))
       }
     }
+  }
+
+  const handleOtherChange = (e)=>{
+    const { name, value } = e.target
+
+    console.log(name,"<<< NAME")
+    console.log(value,"<<< vALUE")
+
+    setInputs(prevInputs =>
+      prevInputs.map(input => (input.slug_label === name ? { ...input, value: capitalizeWords(value) } : input))
+    )
   }
 
   const handleChange = e => {
@@ -273,11 +285,35 @@ const CreatLead = () => {
       return false
     } else {
       // If all validations pass, prepare payload
+
+      const rootFields = {};
+      const othersFields = {};
+    
+      inputs.forEach((input, index) => {
+        const key = input.slug_label.replace(/-/g, "_"); // snake_case
+        const value = capitalizeWords(input.value);
+    
+        if (index < 15) {
+          rootFields[key] = value;
+        } else {
+          othersFields[key] = value;
+        }
+      });
+    
+      const payload = {
+        ...rootFields,
+        others: [othersFields],
+      };
+
+    
+
       const body = {
         organization_id,
         live_status: 'lead',
         status: 'new',
-        ...inputObject
+        ...rootFields,
+        others: [othersFields],
+        // ...inputObject
       }
 
       // Submit the form (uncomment this in actual use)
@@ -293,9 +329,10 @@ const CreatLead = () => {
   useEffect(() => {
     getFieldList()
   }, [])
-  useEffect(() => {
-    console.log(inputs,"<<< INPUTSS")
-  }, [inputs])
+useEffect(() => {
+ console.log(inputs,"<<< INPUTSS")
+}, [inputs])
+
   
 
   return (
@@ -331,11 +368,6 @@ const CreatLead = () => {
       {Array.isArray(inputs) && inputs?.length > 0 && (
         <Card className='bs-full'>
          
-         
-          
-            
-        
-      
           <CardContent>
           
             <Box pt={2} pb={5}>
@@ -409,7 +441,7 @@ const CreatLead = () => {
               <Box pt={2}>
                 <Grid container spacing={6}>
                   {Array.isArray(inputs) &&
-                    inputs?.slice(7)?.map((item, index) => (
+                    inputs?.slice(7,15)?.map((item, index) => (
                       <>
                         {item?.type === 'text' && (
                           <Grid item xs={4}>
@@ -462,6 +494,124 @@ const CreatLead = () => {
                                 </MenuItem>
                               ))}
                             </TextField>
+                          </Grid>
+                        )}
+                        {item?.type === 'text-multiline' && (
+                          <Grid item xs={8}>
+                            <TextField
+                              multiline
+                              rows={5}
+                              autoComplete='off'
+                              fullWidth
+                              id='outlined-basic'
+                              label={`${item?.label} ${item?.mandatory === 'yes' ? '*' : ''}`}
+                              variant='outlined'
+                              type='text'
+                              name={item?.slug_label}
+                              size='small'
+                              value={item?.value}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              error={errors?.includes(item?.slug_label)}
+                              helperText={errors?.includes(item?.slug_label) && `Please enter ${item?.label}`}
+                              sx={{
+                                '.MuiFormHelperText-root': {
+                                  ml: 0
+                                }
+                              }}
+                            />
+                          </Grid>
+                        )}
+                      </>
+                    ))}
+                </Grid>
+              </Box>
+            </Box>
+
+            <Box pt={5} pb={5}>
+            <Typography variant='h5'>Others :</Typography>
+              <Box pt={2}>
+                <Grid container spacing={6}>
+                  {Array.isArray(inputs) &&
+                    inputs?.slice(15)?.map((item, index) => (
+                      <>
+                       {item?.type === 'text' && (
+                          <Grid item xs={4}>
+                            <TextField
+                              autoComplete='off'
+                              fullWidth
+                              id='outlined-basic'
+                              label={`${item?.label} ${item?.mandatory === 'yes' ? '*' : ''}`}
+                              variant='outlined'
+                              type='text'
+                              name={item?.slug_label}
+                              size='small'
+                              value={item?.value}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              error={errors?.includes(item?.slug_label)}
+                              helperText={errors?.includes(item?.slug_label) && `Please enter ${item?.label}`}
+                              sx={{
+                                '.MuiFormHelperText-root': {
+                                  ml: 0
+                                }
+                              }}
+                            />
+                          </Grid>
+                        )}
+                        {item?.type === 'select' && (
+                          <Grid item xs={4}>
+                            <TextField
+                              select
+                              fullWidth
+                              id='outlined-basic'
+                              label={`${item?.label} ${item?.mandatory === 'yes' ? `*` : ''}`}
+                              variant='outlined'
+                              type='text'
+                              name={item?.slug_label}
+                              size='small'
+                              value={item?.value}
+                              onChange={handleChange}
+                              error={errors?.includes(item?.slug_label)}
+                              helperText={errors?.includes(item?.slug_label) && `Please select ${item?.label}`}
+                              sx={{
+                                '.MuiFormHelperText-root': {
+                                  ml: 0
+                                }
+                              }}
+                            >
+                              {item?.items?.map((list, ids) => (
+                                <MenuItem value={list?.menu_value} key={ids}>
+                                  {list?.menu_value}
+                                </MenuItem>
+                              ))}
+                            </TextField>
+                          </Grid>
+                        )}
+                        {item?.type === 'text-multiline' && (
+                          <Grid item xs={8}>
+                            <TextField
+                              multiline
+                              rows={5}
+                              autoComplete='off'
+                              fullWidth
+                              id='outlined-basic'
+                              label={`${item?.label} ${item?.mandatory === 'yes' ? '*' : ''}`}
+                              variant='outlined'
+                              type='text'
+                              name={item?.slug_label}
+                              size='small'
+                              value={item?.value}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              error={errors?.includes(item?.slug_label)}
+                              helperText={errors?.includes(item?.slug_label) && `Please enter ${item?.label}`}
+                              sx={{
+                                '.MuiFormHelperText-root': {
+                                  ml: 0
+                                }
+                              }}
+                            />
                           </Grid>
                         )}
                       </>

@@ -46,6 +46,7 @@ export async function POST(request) {
     status,
     live_status,
     c_activities,
+    others,
     c_emails,
     c_comments,
     c_calls,
@@ -228,6 +229,7 @@ export async function POST(request) {
                   salutation,
                   status,
                   website,
+                  others
               },
               $push: {
                 c_activities: {
@@ -334,6 +336,7 @@ export async function POST(request) {
             lead_source,
             status,
             live_status,
+            others,
             c_createdBy: verified.data.user_id,
             c_activities : dataActivity
           };

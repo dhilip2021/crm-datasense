@@ -82,30 +82,24 @@ const LeadSingleDetails = ({ loader, inputs }) => {
                     <Divider />
                   </Grid>
 
-                        {
-                          Array.isArray(inputs) && inputs?.slice(0,7)?.map((item, index) =>
-                            <Grid item xs={6} key={index}>
-                          <Box display={'flex'} gap={2}>
-                            <Grid item xs={3}>
-                              <Typography variant='h6' color={'#a7a7a7'}>
-                                <Box display={'flex'} justifyContent={'space-between'}>
-                                  <span>{item?.label}</span>
-                                  <span>:</span>
-                                </Box>
-                              </Typography>
-                            </Grid>
-                            <Grid item xs={9}>
-                              <Typography variant='h6'>
-                               {item?.value}
-                              </Typography>
-                            </Grid>
-                          </Box>
-                        </Grid>
-                          )
-                        }
-
-                  
-                 
+                  {Array.isArray(inputs) &&
+                    inputs?.slice(0, 7)?.map((item, index) => (
+                      <Grid item xs={6} key={index}>
+                        <Box display={'flex'} gap={2}>
+                          <Grid item xs={3}>
+                            <Typography variant='h6' color={'#a7a7a7'}>
+                              <Box display={'flex'} justifyContent={'space-between'}>
+                                <span>{item?.label}</span>
+                                <span>:</span>
+                              </Box>
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={9}>
+                            <Typography variant='h6'>{item?.value}</Typography>
+                          </Grid>
+                        </Box>
+                      </Grid>
+                    ))}
 
                   {/* ****************************************** DETAILS ********************************************** */}
 
@@ -116,27 +110,51 @@ const LeadSingleDetails = ({ loader, inputs }) => {
                     <Divider />
                   </Grid>
 
-                  {
-                          Array.isArray(inputs) && inputs?.slice(7,15)?.map((item, index) =>
-                            <Grid item xs={6} key={index}>
-                          <Box display={'flex'} gap={2}>
-                            <Grid item xs={3}>
-                              <Typography variant='h6' color={'#a7a7a7'}>
-                                <Box display={'flex'} justifyContent={'space-between'}>
-                                  <span>{item?.label}</span>
-                                  <span>:</span>
-                                </Box>
-                              </Typography>
-                            </Grid>
-                            <Grid item xs={9}>
-                              <Typography variant='h6'>
-                               {item?.value}
-                              </Typography>
-                            </Grid>
-                          </Box>
-                        </Grid>
-                          )
-                        }
+                  {Array.isArray(inputs) &&
+                    inputs?.slice(7, 15)?.map((item, index) => (
+                      <Grid item xs={6} key={index}>
+                        <Box display={'flex'} gap={2}>
+                          <Grid item xs={3}>
+                            <Typography variant='h6' color={'#a7a7a7'}>
+                              <Box display={'flex'} justifyContent={'space-between'}>
+                                <span>{item?.label}</span>
+                                <span>:</span>
+                              </Box>
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={9}>
+                            <Typography variant='h6'>{item?.value}</Typography>
+                          </Grid>
+                        </Box>
+                      </Grid>
+                    ))}
+
+                  {/* ****************************************** Others ********************************************** */}
+                  <Grid item xs={12}>
+                    <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} mt={4} mb={2}>
+                      <Typography variant='h5'>Other Details :</Typography>
+                    </Box>
+                    <Divider />
+                  </Grid>
+
+                  {Array.isArray(inputs) &&
+                    inputs?.slice(15)?.map((item, index) => (
+                      <Grid item xs={6} key={index}>
+                        <Box display={'flex'} gap={2}>
+                          <Grid item xs={3}>
+                            <Typography variant='h6' color={'#a7a7a7'}>
+                              <Box display={'flex'} justifyContent={'space-between'}>
+                                <span>{item?.label}</span>
+                                <span>:</span>
+                              </Box>
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={9}>
+                            <Typography variant='h6'>{item?.value}</Typography>
+                          </Grid>
+                        </Box>
+                      </Grid>
+                    ))}
                 </Grid>
               </Box>
             </Box>

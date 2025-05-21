@@ -49,7 +49,8 @@ const keys = [
   'job_title',
   'lead_source',
   'status',
-  'live_status'
+  'live_status',
+  'others'
 ]
 
 const getMatchedKey = slugLabel => {
@@ -136,7 +137,8 @@ const LeadData = () => {
     'industry',
     'job-title',
     'lead-source',
-    'status'
+    'status',
+    'others'
   ]
   const isFetched = useRef(false)
   const router = useRouter()
@@ -324,10 +326,14 @@ const LeadData = () => {
     setLoader(true)
     const results = await getFieldListApi(orgId, header)
 
+    console.log(results,"<<< RESLTSSSSSS")
+
     setLoader(false)
 
     if (results?.appStatusCode === 0) {
       const resArr = results?.payloadJson[0]?.fields
+
+      console.log(resArr,"<<< RESLTSSSSSS")
 
       setFieldDataList(resArr)
       const dumArr = []
@@ -345,10 +351,10 @@ const LeadData = () => {
       })
       console.log(dumArr, '<<< DUMMM ARRR')
 
-      const sortedInputs = desiredOrder.map(slug => dumArr.find(input => input.slug_label === slug)).filter(Boolean)
-      console.log(sortedInputs, '<<< sortedInputs')
+      // const sortedInputs = desiredOrder.map(slug => dumArr.find(input => input.slug_label === slug)).filter(Boolean)
+      // console.log(sortedInputs, '<<< sortedInputs')
 
-      setInputs(sortedInputs)
+      setInputs(dumArr)
 
       getParticularLeadFn()
     } else {
@@ -434,26 +440,31 @@ const LeadData = () => {
 
   useEffect(() => {
     const fallbackKeyMap = {
-      no_of_employees: 'no-of-empoyees' // Fix typo
-    }
-
+      no_of_employees: 'no-of-employees' // Fixed typo
+    };
+  
     if (leadDatas?.length > 0 && inputs?.length > 0) {
-      const convertSlugToKey = slug => fallbackKeyMap[slug] || slug.replace(/-/g, '_')
-
+      const convertSlugToKey = slug => fallbackKeyMap[slug] || slug.replace(/-/g, '_');
+      const lead = leadDatas[0];
+      const others = lead.others?.[0] || {};
+  
       const updatedInputs = inputs.map(input => {
-        const key = convertSlugToKey(input.slug_label)
-        const value = leadDatas[0]?.[key] ?? ''
-
+        const key = convertSlugToKey(input.slug_label);
+  
+        // Check in lead first, fallback to others if not found
+        const value = lead[key] !== undefined ? lead[key] : (others[key] ?? '');
+  
         return {
           ...input,
           value: value,
-          _id: leadDatas[0]._id
-        }
-      })
-
-      setInputs(updatedInputs)
+          _id: lead._id
+        };
+      });
+  
+      setInputs(updatedInputs);
     }
-  }, [leadDatas])
+  }, [leadDatas]);
+  
 
   useEffect(() => {
     if (!isFetched.current && callFlag && organization_id1) {

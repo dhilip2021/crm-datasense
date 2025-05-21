@@ -34,7 +34,7 @@ const LeadSchema = new Schema(
     },
     first_name: {
       type: String,
-      required: [true, "Lead name is required"],
+      required: [true, "First name is required"],
       trim: true,
     },
     last_name: {
@@ -171,13 +171,12 @@ const LeadSchema = new Schema(
         },
       },
     ],
-
-
-
-
-
-
-
+    others: [
+      {
+        type: Map,
+        of: String, // allows dynamic fields like address, contact_us, etc.
+      },
+    ],
     c_createdBy: {
       type: String,
     },

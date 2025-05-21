@@ -27,7 +27,7 @@ import LoaderGif from '@assets/gif/loader.gif'
 
 
 
-const menuList = ['text', 'select', 'check']
+const menuList = ['text', 'text-multiline', 'select', 'check']
 
 function capitalizeWords(str) {
   return str
