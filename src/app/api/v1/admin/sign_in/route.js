@@ -154,7 +154,7 @@ export async function POST(request) {
           sendResponse["appStatusCode"] = 4;
           sendResponse["message"] = "";
           sendResponse["payloadJson"] = err;
-          sendResponse["error"] = "This user not found! Please contact your Admin";
+          sendResponse["error"] = "Please contact your administrator";
         });
     } else {
       sendResponse["appStatusCode"] = 4;
