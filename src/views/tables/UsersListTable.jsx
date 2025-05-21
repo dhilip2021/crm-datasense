@@ -269,7 +269,10 @@ const UsersListTable = () => {
                     <Box display={'flex'}>
                             {' '}
                             <Link href={`/edit-user/${row?.user_id}`}>
-                              <i className='ri-edit-box-line'></i>
+                              <i 
+                              className='ri-edit-box-line'
+                              style={{ color: '#4caf50', cursor: 'pointer' }}
+                              ></i>
                             </Link>{' '}
                             <Box>
                               <i

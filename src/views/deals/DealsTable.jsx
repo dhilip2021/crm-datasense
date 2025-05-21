@@ -250,7 +250,10 @@ const DealsTable = () => {
                         <TableCell>
                           {' '}
                           <Link href={`/deals/edit-deal/${row?.lead_slug_name}`}>
-                            <i className='ri-edit-box-line'></i>
+                            <i 
+                            className='ri-edit-box-line'
+                            style={{ color: '#4caf50', cursor: 'pointer' }}
+                            ></i>
                           </Link>{' '}
                         </TableCell>
                       </TableRow>

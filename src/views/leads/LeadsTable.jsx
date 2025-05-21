@@ -292,7 +292,10 @@ const LeadsTable = () => {
                           <Box display={'flex'}>
                             {' '}
                             <Link href={`/leads/edit-lead/${row?.lead_slug_name}`}>
-                              <i className='ri-edit-box-line'></i>
+                              <i 
+                              className='ri-edit-box-line'
+                              style={{ color: '#4caf50', cursor: 'pointer' }}
+                              ></i>
                             </Link>{' '}
                             <Box>
                               <i
