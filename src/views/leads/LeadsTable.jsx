@@ -18,7 +18,7 @@ import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TablePagination from '@mui/material/TablePagination'
-import { Box, Button, Card, CardContent, InputAdornment, TextField } from '@mui/material'
+import { Box, Button, Card, CardContent, InputAdornment, TextField, Tooltip } from '@mui/material'
 
 import { deleteLeadApi, postLeadListApi } from '@/apiFunctions/ApiAction'
 
@@ -291,18 +291,23 @@ const LeadsTable = () => {
                         <TableCell>
                           <Box display={'flex'}>
                             {' '}
+                            <Tooltip title="Edit Lead" arrow>
                             <Link href={`/leads/edit-lead/${row?.lead_slug_name}`}>
                               <i 
                               className='ri-edit-box-line'
                               style={{ color: '#4caf50', cursor: 'pointer' }}
                               ></i>
-                            </Link>{' '}
+                            </Link>
+                            </Tooltip>
+                            {' '}
                             <Box>
+                            <Tooltip title="Delete Lead" arrow>
                               <i
                                 className='ri-delete-bin-3-fill'
                                 style={{ color: '#ff5555', cursor: 'pointer' }}
                                 onClick={() => deleteFn(row?._id)}
                               ></i>
+                              </Tooltip>
                             </Box>
                           </Box>
                         </TableCell>

@@ -11,7 +11,7 @@ import Cookies from 'js-cookie'
 import Typography from '@mui/material/Typography'
 import Card from '@mui/material/Card'
 import Chip from '@mui/material/Chip'
-import { Box, Button, CardContent, InputAdornment, TablePagination, TextField } from '@mui/material'
+import { Box, Button, CardContent, InputAdornment, TablePagination, TextField, Tooltip } from '@mui/material'
 
 // Components Imports
 import CustomAvatar from '@core/components/mui/Avatar'
@@ -268,18 +268,23 @@ const UsersListTable = () => {
                     <td className='!pb-1'>
                     <Box display={'flex'}>
                             {' '}
+                            <Tooltip title="Edit User" arrow>
                             <Link href={`/edit-user/${row?.user_id}`}>
                               <i 
                               className='ri-edit-box-line'
                               style={{ color: '#4caf50', cursor: 'pointer' }}
                               ></i>
-                            </Link>{' '}
+                            </Link>
+                            </Tooltip>
+                            {' '}
                             <Box>
+                            <Tooltip title="Delete User" arrow>
                               <i
                                 className='ri-delete-bin-3-fill'
                                 style={{ color: '#ff5555', cursor: 'pointer' }}
                                 onClick={() => deleteFn(row?._id)}
                               ></i>
+                              </Tooltip>
                             </Box>
                           </Box>
                     </td>

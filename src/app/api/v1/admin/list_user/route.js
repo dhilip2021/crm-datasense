@@ -48,7 +48,10 @@ export async function POST(request) {
       if (searchTerm !== '') {
         _search = {
           organization_id,
-          user_name: { $regex: searchTerm, $options: 'i' },
+          $or: [
+            { user_name: { $regex: searchTerm, $options: 'i' } },
+            { email: { $regex: searchTerm, $options: 'i' } }  
+          ],
           n_published: 1,
           ...(hasRoles && { c_role_id: { $in: checkArray } })
         }
