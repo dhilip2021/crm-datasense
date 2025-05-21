@@ -19,7 +19,7 @@ import CustomAvatar from '@core/components/mui/Avatar'
 // Styles Imports
 import tableStyles from '@core/styles/table.module.css'
 import { allUserListApi, deleteUserApi } from '@/apiFunctions/ApiAction'
-import LoaderGif from '@assets/gif/loader.gif'
+import LoaderGif from '@assets/gif/loader1.gif'
 import DeleteConformPopup from '../leads/DeleteConformPopup'
 import { toast, ToastContainer } from 'react-toastify'
 
@@ -191,7 +191,7 @@ const UsersListTable = () => {
             <Card className='w-full shadow-md rounded-lg'>
               <CardContent className='text-center'>
                 <Box p={40}>
-                  <Image src={LoaderGif} alt='My GIF' width={200} height={100} />
+                  <Image src={LoaderGif} alt='My GIF' width={100} height={100} />
                 </Box>
               </CardContent>
             </Card>
