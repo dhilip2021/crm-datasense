@@ -278,12 +278,12 @@ const LeadData = () => {
     if (results?.appStatusCode !== 0) {
       toast?.error(results?.error)
       setLoader(false)
-
       router.push(`/leads`)
     } else {
       setLoader(false)
       toast?.success(results?.message)
-      router.push(`/deals/edit-deal/${results?.payloadJson?.lead_slug_name}`)
+      router.push(`/deals`)
+      // router.push(`/deals/edit-deal/${results?.payloadJson?.lead_slug_name}`)
     }
   }
 
