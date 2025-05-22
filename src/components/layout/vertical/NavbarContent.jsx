@@ -1,3 +1,6 @@
+"use client"
+
+import { useState } from 'react'
 
 
 // MUI Imports
@@ -13,13 +16,27 @@ import NavSearch from '@components/layout/shared/search'
 import ModeDropdown from '@components/layout/shared/ModeDropdown'
 import UserDropdown from '@components/layout/shared/UserDropdown'
 
+import { Box, Button } from '@mui/material'
+
 // Util Imports
 import { verticalLayoutClasses } from '@layouts/utils/layoutClasses'
 import { converDayJsDatewithOutTime } from '@/helper/frontendHelper'
+import PlanPopup from './PlanPopup'
 
 const NavbarContent = ({c_version, endedAt}) => {
  
-  
+  const [open, setOpen] = useState(false)
+  const [title, setTitle] = useState("")
+
+  const handlePopClose =()=>{
+    setOpen(false);
+    setTitle("")
+  }
+  const handlePopChange =(plan)=>{
+    console.log(plan,"<<< PLAN")
+    setOpen(true);
+    setTitle(plan)
+  }
 
   return (
     <div className={classnames(verticalLayoutClasses.navbarContent, 'flex items-center justify-between gap-4 is-full')}>
@@ -29,7 +46,8 @@ const NavbarContent = ({c_version, endedAt}) => {
       </div>
       {c_version === "Trial" && (
        <div className='hidden md:flex items-center'>
-          <p
+        <Box>
+        <p
             style={{
               color: 'red',
               fontWeight: 'bold',
@@ -46,6 +64,13 @@ const NavbarContent = ({c_version, endedAt}) => {
             Your trial version is valid for 14 days only and will expire on{' '}
             <span style={{ textDecoration: 'underline' }}>{converDayJsDatewithOutTime(endedAt)}</span>.
           </p>
+          <Box display={"flex"} justifyContent={"space-evenly"}>
+          <Button variant='contained' className="golden-btn" onClick={()=>handlePopChange("Gold")}>Gold Plan</Button>
+          <Button variant='contained' className="silver-btn" onClick={()=>handlePopChange("Silver")}>Silver Plan</Button>
+          </Box>
+          
+        </Box>
+         
         </div>
       )}
 
@@ -56,6 +81,11 @@ const NavbarContent = ({c_version, endedAt}) => {
         </IconButton>
         <UserDropdown />
       </div>
+      <PlanPopup 
+      open={open}
+      title= {title}
+      handlePopClose= {handlePopClose} 
+      />
     </div>
   )
 }

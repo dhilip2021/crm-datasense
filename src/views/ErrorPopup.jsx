@@ -16,7 +16,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 export default function ErrorPopup(props) {
   const { open, close, title, trailVal } = props
 
-    console.log(title,"<<< TILTEEEE")
+   
 
   const regexSplit =title !== "" && title.match(/[^.]+[.?!]?/g).map(s => s.trim())
 
