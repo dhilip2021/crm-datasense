@@ -16,7 +16,6 @@ const UserSchema = new Schema(
     },
     last_name: {
       type: String,
-      required: [true, "Lastname is required"],
       trim: true,
     },
     user_name: {
@@ -32,7 +31,11 @@ const UserSchema = new Schema(
     },
     email: {
       type: String,
-      required: [true, "Email number is is required"],
+      required: [true, "Email is is required"],
+      unique: true,
+    },
+    mobile: {
+      type: String,
       unique: true,
     },
     password: {

@@ -199,6 +199,14 @@ const UserTable = () => {
     }
   }, [userId])
 
+
+  useEffect(() => {
+    if(menuList?.length === 1 ){
+      setInputs({ ...inputs, "c_role_id":  menuList[0]?.c_role_id})
+    }
+  }, [menuList])
+  
+
   useEffect(() => {
     GetAllRoleList()
     const fullUrl = window.location.href

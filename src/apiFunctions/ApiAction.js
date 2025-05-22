@@ -272,3 +272,15 @@ export const changePasswordApi = async (body, token) => {
       return err;
     });
 };
+
+
+export const sendOtpApi = async (body,header) => {
+  return await axios
+    .post(`/api/v1/admin/otp/send`, body,{ headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};

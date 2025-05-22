@@ -31,7 +31,7 @@ function  emailSend(mailData) {
 }
 
 export async function POST(request) {
-  const { organization_id,first_name, last_name, email, role, c_role_id, c_user_img_url,c_about_user,Id,password,n_status
+  const { organization_id,first_name, last_name, email, mobile,role, c_role_id, c_user_img_url,c_about_user,Id,password,n_status
   } =
     await request.json();
 
@@ -77,6 +77,7 @@ export async function POST(request) {
           c_about_user:c_about_user,
           slug_name:slug_name,
           email:email,
+          mobile: mobile,
           role:role,
           c_role_id:c_role_id,
           c_user_img_url:c_user_img_url,
@@ -181,11 +182,11 @@ export async function POST(request) {
 
 
 
-      if (role !== "super-admin" || role === undefined) {
+      if (role !== "admin" || role === undefined) {
         if (role === undefined) {
           
           let data = {
-            role: "super-admin",
+            role: "admin",
           };
           const resulData = await User.find(data);
 
@@ -196,6 +197,7 @@ export async function POST(request) {
             last_name,
             user_name,
             email,
+            mobile,
             role,
             slug_name,
             c_about_user,
@@ -241,7 +243,7 @@ export async function POST(request) {
             });
           } else {
             
-            if (resulData[0].role === "super-admin") {
+            if (resulData[0].role === "admin") {
               sendResponse["appStatusCode"] = 4;
               sendResponse["message"] = "This access not allowed";
               sendResponse["payloadJson"] = [];
@@ -282,6 +284,7 @@ export async function POST(request) {
               user_name,
               slug_name,
               email,
+              mobile,
               c_about_user,
               role,
               c_role_id: c_role_id,
@@ -339,7 +342,7 @@ export async function POST(request) {
           
           
         }
-      } else if (role === "super-admin") {
+      } else if (role === "admin") {
         sendResponse["appStatusCode"] = 0;
         sendResponse["message"] = "please check your role";
         sendResponse["payloadJson"] = [];

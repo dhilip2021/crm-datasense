@@ -37,7 +37,6 @@ const VerticalMenu = ({ scrollMenu }) => {
   const ScrollWrapper = isBreakpointReached ? 'div' : PerfectScrollbar
 
   const logoutFn = () => {
-    
     Cookies.remove('riho_token')
     Cookies.remove('_token')
     Cookies.remove('_token_expiry')
@@ -48,10 +47,9 @@ const VerticalMenu = ({ scrollMenu }) => {
     Cookies.remove('organization_id')
     Cookies.remove('organization_name')
     Cookies.remove('user_id')
-    Cookies.remove("c_version");
-    Cookies.remove("endedAt");
+    Cookies.remove('c_version')
+    Cookies.remove('endedAt')
     router.push('/login')
-
   }
 
   return (
@@ -80,24 +78,6 @@ const VerticalMenu = ({ scrollMenu }) => {
         <MenuItem href='/' icon={<i className='ri-bar-chart-box-line' />}>
           Dashboard
         </MenuItem>
-        {(role_id === '16f01165898b' || role_id === "27f01165688z") && (
-          <SubMenu label='Users' icon={<i className='ri-user-line' />}>
-            <MenuItem href='/users-list'>List</MenuItem>
-            <MenuItem href='/add-user'>Add</MenuItem>
-          </SubMenu>
-        )}
-
-        {(role_id === '16f01165898b' || role_id === "27f01165688z") && (
-          <SubMenu label='Roles & Permissions' icon={<i className='ri-settings-3-line' />}>
-            <MenuItem href='/roles'>Roles</MenuItem>
-            <MenuItem href='/permissions'>Permissions</MenuItem>
-          </SubMenu>
-        )}
-
-        <SubMenu label='Fields' icon={<i className='ri-input-field' />}>
-          <MenuItem href='/fields/list-fields'>List</MenuItem>
-          <MenuItem href='/fields/add-field'>Add</MenuItem>
-        </SubMenu>
 
         <MenuSection label='Apps & Pages'>
           <MenuItem href='/leads' icon={<i className='ri-user-settings-line' />}>
@@ -109,7 +89,7 @@ const VerticalMenu = ({ scrollMenu }) => {
           <MenuItem href='/tasks' icon={<i className='ri-list-check-3'></i>}>
             Tasks
           </MenuItem>
-          <MenuItem href='/organization' icon={<i className="ri-community-line"></i>}>
+          <MenuItem href='/organization' icon={<i className='ri-community-line'></i>}>
             Organization
           </MenuItem>
           <MenuItem href='/calls' icon={<i className='ri-phone-line'></i>}>
@@ -121,12 +101,11 @@ const VerticalMenu = ({ scrollMenu }) => {
           <MenuItem href='/comments' icon={<i className='ri-chat-1-line'></i>}>
             Comments
           </MenuItem>
-         
+
           <MenuItem href='/deals' icon={<i className='ri-user-settings-line' />}>
             Deals
           </MenuItem>
 
-         
           {/* <MenuItem href='/card-basic' icon={<i className='ri-bar-chart-box-line' />}>
             {' '}
             Cards
@@ -140,13 +119,24 @@ const VerticalMenu = ({ scrollMenu }) => {
             {' '}
             Use Select
           </MenuItem> */}
-
-
         </MenuSection>
         <MenuSection label='Settings'>
           <SubMenu label='Settings' icon={<i className='ri-settings-3-line' />}>
             <MenuItem href='/profile-settings'>Profile Setting</MenuItem>
 
+            {(role_id === '16f01165898b' || role_id === '27f01165688z') && (
+             
+                <MenuItem href='/users-list' icon={<i className='ri-user-line' />}>Users List</MenuItem>
+              
+            )}
+
+            {(role_id === '16f01165898b' || role_id === '27f01165688z') && (
+              <SubMenu label='Roles & Permissions' icon={<i className='ri-settings-3-line' />}>
+                <MenuItem href='/roles'>Roles</MenuItem>
+                <MenuItem href='/permissions'>Permissions</MenuItem>
+              </SubMenu>
+            )}
+            <MenuItem href='/fields/list-fields' icon={<i className='ri-input-field' />}>Field List</MenuItem>
             <MenuItem href='/login' icon={<i className='ri-logout-box-line'></i>}>
               <div onClick={logoutFn}>Logout</div>{' '}
             </MenuItem>

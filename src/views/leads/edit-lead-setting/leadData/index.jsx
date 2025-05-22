@@ -86,9 +86,10 @@ function isValidMobileNumberStrict(value) {
   if (value?.length > 10) {
     return false
   } else {
+    if (!/^\d+$/.test(value)) return false;
+
     const digitsOnly = String(value).replace(/\D/g, '') // removes all non-digit characters
     const regex = /^[6-9][0-9]*$/
-
     return regex.test(digitsOnly)
   }
 }

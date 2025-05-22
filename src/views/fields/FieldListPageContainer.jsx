@@ -299,7 +299,7 @@ function FieldListPageContainer() {
               </Card>
             </Box>
           )}
-          {fieldDataList?.length === 0 && (
+          {!loader && fieldDataList?.length === 0 && (
             <Box textAlign={'center'} width={'100%'}>
               <Card className='w-full shadow-md rounded-lg'>
                 <CardContent className='text-center'>
