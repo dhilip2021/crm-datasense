@@ -194,24 +194,63 @@ code {
 }
 
 
-/* wave card */
-.wave-card {
-  width: 150px;
-  height: 150px;
-  background: white;
+
+
+.plan-card {
+  width: 280px;
+  background: #fff;
   border-radius: 20px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  position: relative;
-  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  padding: 2rem 1.5rem;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.wave {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 50%;
-  background: linear-gradient(to top, #d98c43, #e1a663); /* amber-like gradient */
-  border-top-left-radius: 60% 30%;
-  border-top-right-radius: 60% 30%;
-  transform: translateY(20%);
+.plan-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+}
+
+.plan-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 0.5rem;
+}
+
+.plan-price {
+  font-size: 2rem;
+  color: #e67300;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.plan-price span {
+  font-size: 0.9rem;
+  color: #888;
+  font-weight: 400;
+}
+
+.plan-features {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.plan-button {
+  background: linear-gradient(to right, #e69500, #ffb347);
+  border: none;
+  color: white;
+  font-size: 1rem;
+  padding: 0.8rem 1.5rem;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.plan-button:hover {
+  background: linear-gradient(to right, #cc7a00, #ffaa00);
 }
