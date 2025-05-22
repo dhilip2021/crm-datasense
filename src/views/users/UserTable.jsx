@@ -129,8 +129,8 @@ const UserTable = () => {
         body['Id'] = inputs?.id
       }
 
-      const results = await craeteUserApi(body)
       setLoader(true)
+      const results = await craeteUserApi(body)
       if (results?.appStatusCode !== 0) {
         setLoader(false)
         toast?.error(results?.error)
