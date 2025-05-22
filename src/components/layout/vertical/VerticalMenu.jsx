@@ -95,7 +95,7 @@ const VerticalMenu = ({ scrollMenu }) => {
         )}
 
         <SubMenu label='Fields' icon={<i className='ri-input-field' />}>
-          <MenuItem href='/fields/list-fields'>list</MenuItem>
+          <MenuItem href='/fields/list-fields'>List</MenuItem>
           <MenuItem href='/fields/add-field'>Add</MenuItem>
         </SubMenu>
 
