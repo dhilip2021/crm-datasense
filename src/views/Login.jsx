@@ -19,9 +19,17 @@ import Button from '@mui/material/Button'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import { ToastContainer, toast } from 'react-toastify'
 
+
+
+// ** Icons Imports
+import Google from 'mdi-material-ui/Google'
+import Github from 'mdi-material-ui/Github'
+import Twitter from 'mdi-material-ui/Twitter'
+import Facebook from 'mdi-material-ui/Facebook'
+
 import Cookies from 'js-cookie'
 
-import { Box } from '@mui/material'
+import { Box, Divider } from '@mui/material'
 
 // Component Imports
 import Logo from '@components/layout/shared/Logo'
@@ -686,6 +694,31 @@ const Login = ({ mode }) => {
                     Create your Organization
                   </Typography>
                 </div>
+                <Divider sx={{ my: 5 }}>or</Divider>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Link href='/' passHref>
+                <IconButton component='a' onClick={e => e.preventDefault()}>
+                  <Facebook sx={{ color: '#497ce2' }} />
+                </IconButton>
+              </Link>
+              <Link href='/' passHref>
+                <IconButton component='a' onClick={e => e.preventDefault()}>
+                  <Twitter sx={{ color: '#1da1f2' }} />
+                </IconButton>
+              </Link>
+              <Link href='/' passHref>
+                <IconButton component='a' onClick={e => e.preventDefault()}>
+                  <Github
+                    sx={{ color: theme => (theme.palette.mode === 'light' ? '#272727' : theme.palette.grey[300]) }}
+                  />
+                </IconButton>
+              </Link>
+              <Link href='/' passHref>
+                <IconButton component='a' onClick={e => e.preventDefault()}>
+                  <Google sx={{ color: '#db4437' }} />
+                </IconButton>
+              </Link>
+            </Box>
               </form>
             </div>
           </CardContent>
