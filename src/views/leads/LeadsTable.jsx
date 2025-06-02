@@ -264,7 +264,7 @@ const LeadsTable = () => {
                   <TableBody>
                     {leadDataList.map(row => (
                       <TableRow hover role='checkbox' tabIndex={-1} key={row._id}>
-                        <TableCell>{row?.organization}</TableCell>
+                        <TableCell> <Link href={`/leads/edit-lead/${row?.lead_slug_name}`} > <b>{row?.organization}</b></Link> </TableCell>
                         <TableCell>{row?.first_name}</TableCell>
                         <TableCell>{row?.last_name}</TableCell>
                         <TableCell>{row?.email}</TableCell>
