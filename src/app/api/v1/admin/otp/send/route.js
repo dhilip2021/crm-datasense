@@ -48,7 +48,7 @@ export async function POST(request) {
       }else{
         const otpValue = Math.floor(1000 + Math.random() * 9000);
           let mailData = {
-            from: '"No Reply" <polimertv2012@gmail.com>', // sender address
+            from: '"No Reply" <dhilipbeece001@gmail.com>', // sender address
               to: `${email}`, // list of receivers
               subject: "Email OTP verification from CRM DATA SENSE",
               text: "OTP MESSAGE",

@@ -60,7 +60,7 @@ export async function POST(request) {
         );
 
         let mailData = {
-          from: '"No Reply" <polimertv2012@gmail.com>', // sender address
+          from: '"No Reply" <dhilipbeece001@gmail.com>', // sender address
           to: `${email}`, // list of receivers
           subject: " CRM Datasense Password Reset",
           text: "Login Credential",

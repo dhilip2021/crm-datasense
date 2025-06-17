@@ -92,7 +92,7 @@ export async function POST(request) {
           .then(async() => {
             if(password !== "" && password !== undefined){      
               let mailData = {
-                from: '"No Reply" <polimertv2012@gmail.com>', // sender address
+                from: '"No Reply" <dhilipbeece001@gmail.com>', // sender address
                 to: `${email}`, // list of receivers
                 subject: "CRM Datasense password changes",
                 text: "Login Credential",
@@ -211,7 +211,7 @@ export async function POST(request) {
             await userdata.save().then((result) => {
 
               let mailData = {
-                from: '"No Reply" <polimertv2012@gmail.com>', // sender address
+                from: '"No Reply" <dhilipbeece001@gmail.com>', // sender address
                 to: `${email}`, // list of receivers
                 subject: "CRM Datasense Login Credential",
                 text: "Login Credential",
@@ -298,7 +298,7 @@ export async function POST(request) {
 
 
                 let mailData = {
-                  from: '"No Reply" <polimertv2012@gmail.com>', // sender address
+                  from: '"No Reply" <dhilipbeece001@gmail.com>', // sender address
                   to: `${email}`, // list of receivers
                   subject: "CRM Datasense Login Credential",
                   text: "Login Credential",
