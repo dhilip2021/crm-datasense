@@ -157,7 +157,7 @@ const CardNotes = () => {
   const getParticularLeadFn = async organization_id => {
     setLoader(true)
 
-    console.log('call 2')
+    
 
     const results = await getAllLeadListApi(organization_id)
 
@@ -172,7 +172,7 @@ const CardNotes = () => {
 
   const handleAction = (option, item) => {
     if (option === 'Edit') {
-      console.log('Edit clicked for:', item)
+      
 
       setTitles('Edit your notes')
       setInputs({
@@ -185,7 +185,7 @@ const CardNotes = () => {
 
       // navigateToEdit(item)
     } else if (option === 'Delete') {
-      console.log('Delete clicked for:', item)
+      
 
       const obj = {
         title: item.title,
@@ -203,7 +203,7 @@ const CardNotes = () => {
         c_activities: `Notes deleted ${item?.title}`
       }
 
-      console.log(body)
+      
       leadNotesCreation(body)
 
       // showConfirmDeleteModal(item)

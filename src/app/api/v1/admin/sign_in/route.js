@@ -44,16 +44,13 @@ export async function POST(request) {
         n_status: 1,
         n_published: 1
       }).then(async (data) => {
-        console.log(data.c_role_id.trim(),"<<< DATAAAA ROLE IDDD")
-
       
         const listRes = await UserRole.findOne({ c_role_id: data.c_role_id.trim() });
 
-        console.log(listRes,"<<< LISTTT RESPONSE")
+       
 
         const orgData = await Organization.findOne({ organization_id: data.organization_id });
 
-        console.log(orgData,"<<< ORG DATA")
 
          
 
@@ -61,7 +58,7 @@ export async function POST(request) {
 
               await bcrypt.compare(password, data.password).then(async (response) => {
 
-                console.log(response,"<<< RESPONNSE")
+           
 
                 if (response) {
 

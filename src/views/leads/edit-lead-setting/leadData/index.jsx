@@ -237,7 +237,7 @@ const LeadData = () => {
       )
       if (normalizeEmail(value)) removeError(name)
     } else {
-      console.log('check mobbbb')
+  
       setInputs(prevInputs =>
         prevInputs.map(input => (input.slug_label === name ? { ...input, value: capitalizeWords(value) } : input))
       )
@@ -351,9 +351,7 @@ const LeadData = () => {
       })
    
 
-      // const sortedInputs = desiredOrder.map(slug => dumArr.find(input => input.slug_label === slug)).filter(Boolean)
-      // console.log(sortedInputs, '<<< sortedInputs')
-
+     
       setInputs(dumArr)
 
       getParticularLeadFn()

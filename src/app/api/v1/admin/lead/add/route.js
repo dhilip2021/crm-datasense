@@ -207,8 +207,7 @@ export async function POST(request) {
 
             return NextResponse.json(sendResponse, { status: 200 });
           }else{
-            
-            console.log("call 2")
+          
 
             const update = {
               $set: {
@@ -281,8 +280,6 @@ export async function POST(request) {
           return NextResponse.json(sendResponse, { status: 200 });
         } else if (checkLeads === null) {
           const result = await Lead.find().sort({ _id: -1 }).limit(1);
-
-          console.log(result,"<<< results finddddd")
 
           
 

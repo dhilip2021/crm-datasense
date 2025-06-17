@@ -35,7 +35,6 @@ const DashboardAnalytics = () => {
     }
     try {
       const results = await getUserListApi(userId, header)
-      console.log(results?.payloadJson[0]?.n_status, '<<< N STATUS')
       if (results?.payloadJson[0]?.n_status === 0) {
         removeCredentials()
       }
@@ -45,7 +44,6 @@ const DashboardAnalytics = () => {
   }
 
   useEffect(() => {
-    console.log(user_id, 'ROLE IDDDD')
     if (user_id !== undefined) {
       getUserListFn(user_id)
     }

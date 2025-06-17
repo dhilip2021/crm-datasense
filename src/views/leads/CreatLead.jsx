@@ -129,8 +129,6 @@ const CreatLead = () => {
   const handleOtherChange = (e)=>{
     const { name, value } = e.target
 
-    console.log(name,"<<< NAME")
-    console.log(value,"<<< vALUE")
 
     setInputs(prevInputs =>
       prevInputs.map(input => (input.slug_label === name ? { ...input, value: capitalizeWords(value) } : input))
@@ -318,7 +316,6 @@ const CreatLead = () => {
       }
 
       // Submit the form (uncomment this in actual use)
-      console.log(body,"<<< CREATE LEAD")
       funcreateLead(body)
     }
   }
@@ -330,9 +327,7 @@ const CreatLead = () => {
   useEffect(() => {
     getFieldList()
   }, [])
-useEffect(() => {
- console.log(inputs,"<<< INPUTSS")
-}, [inputs])
+
 
   
 

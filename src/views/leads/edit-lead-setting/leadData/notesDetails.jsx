@@ -51,7 +51,7 @@ const NotesDetails = ({ loader, setLoader, leadDatas, organization_id, getToken,
   })
 
   const handleAction = (option, item) => {
-    console.log(option, '<< OPTTTT')
+    
     if (option === 'Edit') {
       setTitles('Edit your notes')
       setInputs({
@@ -64,7 +64,7 @@ const NotesDetails = ({ loader, setLoader, leadDatas, organization_id, getToken,
 
       // navigateToEdit(item)
     } else if (option === 'Delete') {
-      console.log('Delete clicked for:', item)
+      
 
       const obj = {
         title: item.title,

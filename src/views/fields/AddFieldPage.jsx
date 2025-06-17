@@ -159,7 +159,6 @@ const AddFieldPage = () => {
 
 
   const getFieldList = async() => {
-    console.log("call function")
     const header = {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${getToken}`
@@ -183,7 +182,6 @@ const AddFieldPage = () => {
 
 
     if(fieldArr[0]?.label === ""){
-      console.log("come 1")
       setErrors({ ...errors, label: true })
     }else if(fieldArr[0]?.type === ""){
       setErrors({ ...errors, type: true })

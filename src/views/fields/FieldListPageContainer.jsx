@@ -137,14 +137,11 @@ function FieldListPageContainer() {
   }
 
   const handleAction = (option, item, index) => {
-    console.log(option,"<<< OPTIONSSS")
     if (option === 'Edit') {
-      console.log('Edit clicked for:', item)
-
+     
       // navigateToEdit(item)
     } else if (option === 'Delete') {
-      console.log('Delete clicked for:', item)
-
+     
       let arr = [...fieldDataList]
       arr.splice(index, 1)
       setFieldDataList(arr)

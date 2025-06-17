@@ -184,7 +184,7 @@ const NotesDataPageContainer = () => {
 
   const handleAction = (option, item) => {
     if (option === 'Edit') {
-      console.log('Edit clicked for:', item)
+      
 
       setTitles('Edit your notes')
       setInputs({
@@ -198,7 +198,7 @@ const NotesDataPageContainer = () => {
 
       // navigateToEdit(item)
     } else if (option === 'Delete') {
-      console.log('Delete clicked for:', item)
+      
 
       const obj = {
         title: item.title,
@@ -234,7 +234,7 @@ const NotesDataPageContainer = () => {
 
   React.useEffect(() => {
     if (callFag) {
-      console.log('call 11')
+      
       getParticularLeadFn(organization_id)
       setCallFlag(false)
     }

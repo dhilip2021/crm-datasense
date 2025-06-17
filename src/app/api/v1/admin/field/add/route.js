@@ -89,7 +89,6 @@ export async function POST(request) {
 
           return NextResponse.json(sendResponse, { status: 200 });
         } else if (FieldData) {
-          console.log(FieldData,"<<< FIELDS DATA>>>>")
           const dummyAddArray = [];
 
            // Step 1: Get the last known position from existing fields
@@ -109,7 +108,6 @@ export async function POST(request) {
               position: maxPosition + index + 1, // Increment from last known
             });
           });
-          console.log("field update")
           await Field.findByIdAndUpdate(
             FieldData._id, // just the ID here
             {
@@ -152,7 +150,6 @@ export async function POST(request) {
             fields: dummyAddArray,
             c_createdBy: verified.data.user_id,
           });
-          console.log("field created")
           await FieldDataSave.save()
             .then(() => {
               sendResponse["appStatusCode"] = 0;

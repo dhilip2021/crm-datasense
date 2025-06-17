@@ -218,9 +218,7 @@ const Register = ({ mode }) => {
     } else if (name === 'otp') {
       
       const res = isValidOTPStrict(value)
-      console.log(res,"<<< RESPONSE")
-
-
+     
       if (value === '' || res) {
         setErrorInputs({ ...errorInputs, otp: false })
         setInputs({ ...inputs, [name]: value })

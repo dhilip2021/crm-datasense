@@ -33,7 +33,6 @@ const NavbarContent = ({c_version, endedAt}) => {
     setTitle("")
   }
   const handlePopChange =(plan)=>{
-    console.log(plan,"<<< PLAN")
     setOpen(true);
     setTitle(plan)
   }

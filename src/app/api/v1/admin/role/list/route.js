@@ -19,7 +19,6 @@ export async function GET(request) {
   const id = request.nextUrl.searchParams.get("id");
   const verified = verifyAccessToken();
 
-  console.log(verified,"<<< VERIFIED ")
 
   await connectMongoDB();
 
@@ -139,8 +138,7 @@ export async function GET(request) {
       }
     } else {
 
-      console.log(checkArray,"<<< checkArray")
-      
+    
 
       let _search = {};
 

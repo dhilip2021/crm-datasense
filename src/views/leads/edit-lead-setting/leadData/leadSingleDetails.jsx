@@ -52,7 +52,7 @@ function activeColor(value) {
 }
 
 const LeadSingleDetails = ({ loader, inputs }) => {
-  console.log(inputs, '<<< INPUTSSS')
+  
   return (
     <Box style={loader ? { opacity: 0.3, pointerEvents: 'none' } : { opacity: 1 }}>
       {!loader && Array.isArray(inputs) && inputs?.length > 0 && (

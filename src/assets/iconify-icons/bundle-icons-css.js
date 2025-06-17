@@ -124,7 +124,6 @@ const target = join(__dirname, 'generated-icons.css')
     .join('\n')
 
   await fs.writeFile(target, css, 'utf8')
-  console.log(`✅ Icon CSS saved to ${target}`)
 })().catch(console.error)
 
 // Helper

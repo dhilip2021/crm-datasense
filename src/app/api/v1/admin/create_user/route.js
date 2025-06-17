@@ -314,7 +314,6 @@ export async function POST(request) {
             `;
                 const emailRes = await emailSend(mailData)
                 
-                console.log(mailData,"<< MAIL DATA")
   
                 if(emailRes){
                   sendResponse["appStatusCode"] = 0;
