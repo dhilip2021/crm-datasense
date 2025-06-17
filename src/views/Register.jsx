@@ -53,6 +53,17 @@ function isValidMobileNumberStrict(value) {
   }
 }
 
+function isValidOTPStrict(value) {
+  if (value?.length > 10) {
+    return false
+  } else {
+    if (!/^\d+$/.test(value)) return false
+
+    const digitsOnly = String(value).replace(/\D/g, '') // removes all non-digit characters
+    const regex = /^[0-9][0-9]*$/
+    return regex.test(digitsOnly)
+  }
+}
 function normalizeEmail(email) {
   return email.toLowerCase()
 }
@@ -205,7 +216,11 @@ const Register = ({ mode }) => {
       //   setInputs({ ...inputs, [name]: normalizeEmail(value.toLowerCase()) })
       // }
     } else if (name === 'otp') {
-      const res = isValidMobileNumberStrict(value)
+      
+      const res = isValidOTPStrict(value)
+      console.log(res,"<<< RESPONSE")
+
+
       if (value === '' || res) {
         setErrorInputs({ ...errorInputs, otp: false })
         setInputs({ ...inputs, [name]: value })
