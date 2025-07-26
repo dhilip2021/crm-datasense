@@ -236,6 +236,9 @@ const CreatLead = () => {
     }
 
     setLoader(true)
+
+
+
     const results = await createLead(body, header)
 
     if (results?.appStatusCode !== 0) {
@@ -245,7 +248,6 @@ const CreatLead = () => {
       setLoader(false)
       toast?.success(results?.message)
       router.push('/leads')
-      // router.push(`/leads/edit-lead/${results?.payloadJson?.lead_slug_name}`)
     }
   }
 
@@ -315,6 +317,11 @@ const CreatLead = () => {
         // ...inputObject
       }
 
+      console.log(rootFields,"rootFields")
+      console.log(body,"CREATE LEAD BODYYYY")
+
+
+
       // Submit the form (uncomment this in actual use)
       funcreateLead(body)
     }
@@ -329,6 +336,9 @@ const CreatLead = () => {
   }, [])
 
 
+  useEffect(() => {
+   console.log(inputs,"<<< INPUTSSSSS")
+  }, [inputs])
   
 
   return (
@@ -345,7 +355,7 @@ const CreatLead = () => {
             <Box textAlign={'center'} width={'100%'} mt={'100px'} mb={'100px'}>
               <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Fields Found</p>
 
-              <Link href={'/fields/add-field'}>
+              {/* <Link href={'/fields/add-field'}>
                 <Button
                   startIcon={<i className='ri-add-line'></i>}
                   color='primary'
@@ -355,7 +365,7 @@ const CreatLead = () => {
                 >
                   Add Field
                 </Button>
-              </Link>
+              </Link> */}
             </Box>
           )}
         </Box>
@@ -474,7 +484,8 @@ const CreatLead = () => {
                               type='text'
                               name={item?.slug_label}
                               size='small'
-                              value={item?.value}
+                              // value={item?.value}
+                              value={item?.label ==="Status" ? (item?.value || item?.items?.[0]?.menu_value || '') : item?.value}
                               onChange={handleChange}
                               error={errors?.includes(item?.slug_label)}
                               helperText={errors?.includes(item?.slug_label) && `Please select ${item?.label}`}

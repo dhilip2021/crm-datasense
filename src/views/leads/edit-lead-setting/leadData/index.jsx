@@ -123,24 +123,7 @@ function removeDuplicatesByKey(data) {
 }
 
 const LeadData = () => {
-  const desiredOrder = [
-    'salutation',
-    'first-name',
-    'last-name',
-    'email',
-    'mobile',
-    'phone',
-    'gender',
-    'organization',
-    'website',
-    'no-of-employees',
-    'annual-revenue',
-    'industry',
-    'job-title',
-    'lead-source',
-    'status',
-    'others'
-  ]
+
   const isFetched = useRef(false)
   const router = useRouter()
   const dispatch = useDispatch()

@@ -688,12 +688,12 @@ const Login = ({ mode }) => {
                   Log In
                 </Button>
 
-                {/* <div className='flex justify-center items-center flex-wrap gap-2'>
+                <div className='flex justify-center items-center flex-wrap gap-2'>
                   <Typography>New on our platform?</Typography>
                   <Typography component={Link} href='/register' color='primary'>
                     Create your Organization
                   </Typography>
-                </div> */}
+                </div>
                 <Divider sx={{ my: 5 }}>or</Divider>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Link href='/' passHref>
