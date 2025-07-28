@@ -1002,13 +1002,13 @@ export async function POST(request) {
         sendResponse["message"] = "";
         sendResponse["payloadJson"] = [];
         sendResponse["error"] = "Something went wrong!";
-  
         return NextResponse.json(sendResponse, { status: 400 });
       }
     } else {
       let _search = {};
 
       if(verified.data.c_role_id === "16f01165898b"){
+        
         _search["$and"] = [
           {
             $and: [

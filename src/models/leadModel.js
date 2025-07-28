@@ -1,7 +1,5 @@
 const mongoose = require("mongoose");
-
 var Schema = mongoose.Schema;
-var validator = require("validator");
 
 const LeadSchema = new Schema(
   {

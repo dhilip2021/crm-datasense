@@ -20,14 +20,19 @@ const FooterContent = () => {
     <div
       className={classnames(verticalLayoutClasses.footerContent, 'flex items-center justify-between flex-wrap gap-4')}
     >
-      <p>
-        <span>{`© ${new Date().getFullYear()}, Made with `}</span>
+      <div style={{display:"flex", justifyContent:"center"}}>
+        <p> <span>{`© ${new Date().getFullYear()} `}</span></p>
+        <p>
+        <span>{` Made with `}</span>
         <span>{`❤️`}</span>
         <span>{` by `}</span>
         <Link href='https://datasense.in/' target='_blank' className='text-primary'>
-          Datasense Technologies
+          WAM Datasense Technologies
         </Link>
       </p>
+      </div>
+   
+      
     </div>
   )
 }

@@ -30,6 +30,8 @@ export const config = {
     '/fields/add-field',
     '/leads',
     '/leads/create-lead',
+    '/customer',
+    '/customer/create-customer',
     '/notes',
     '/tasks',
     '/organization',

@@ -284,3 +284,55 @@ export const sendOtpApi = async (body,header) => {
       return err;
     });
 };
+
+
+// Leads model api's
+  
+export const createCustomer = async (body, header) => {
+  
+  return await axios.post(`/api/v1/admin/customer/add`, body,{ headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const postCustomerListApi = async (body,header) => {
+  return await axios
+    .post(`/api/v1/admin/customer/list`, body, { headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const getCustomerListApi = async (body) => {
+  return await axios
+    .get(`/api/v1/admin/customer/list?name=${body}`,{ headers: AppHeader })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+
+
+
+export const deleteCustomerApi = async (body,header) => {
+  return await axios
+    .delete(`/api/v1/admin/customer/delete?id=${body}`, {
+      headers: header,
+    })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};

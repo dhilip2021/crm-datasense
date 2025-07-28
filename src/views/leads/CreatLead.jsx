@@ -317,10 +317,6 @@ const CreatLead = () => {
         // ...inputObject
       }
 
-      console.log(rootFields,"rootFields")
-      console.log(body,"CREATE LEAD BODYYYY")
-
-
 
       // Submit the form (uncomment this in actual use)
       funcreateLead(body)
@@ -335,11 +331,6 @@ const CreatLead = () => {
     getFieldList()
   }, [])
 
-
-  useEffect(() => {
-   console.log(inputs,"<<< INPUTSSSSS")
-  }, [inputs])
-  
 
   return (
     <Box style={loader ? { opacity: 0.3, pointerEvents: 'none' } : { opacity: 1 }}>
