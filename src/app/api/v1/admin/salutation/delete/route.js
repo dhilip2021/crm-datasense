@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { verifyAccessToken } from "@/helper/helper";
 import connectMongoDB from "@/libs/mongodb";
-import { Customer } from "@/models/customerModel";
+import { Salutation } from "@/models/salutationModel";
 
 let sendResponse = {
   appStatusCode: "",
@@ -26,7 +26,7 @@ export async function DELETE(request) {
     
 
     try {
-      await Customer.findByIdAndUpdate(id, body).then((result) => {
+      await Salutation.findByIdAndUpdate(id, body).then((result) => {
         if (result) {
           sendResponse["appStatusCode"] = 0;
           sendResponse["message"] = "Deleted Successfully";
