@@ -43,19 +43,27 @@ const CustomerSchema = new Schema(
       type: String,
       trim: true
     },
-    account_manager_id: {
+    account_manager: {
       type: String,
       trim: true
     },
-    billing_currency_id: {
+    billing_currency: {
       type: String,
       trim: true
     },
-    price_list_id: {
+    default_price_list: {
       type: String,
       trim: true
     },
-    bank_account_id: {
+    default_bank_account: {
+      type: String,
+      trim: true
+    },
+     customer_address: {
+      type: String,
+      trim: true
+    },
+     customer_contact: {
       type: String,
       trim: true
     },

@@ -116,6 +116,51 @@ const accountManagerOptions = [
   }
 ]
 
+const billingCurrencyOptions = [
+  { id: 'AED', display: 'AED' },
+  { id: 'AUD', display: 'AUD' },
+  { id: 'CHF', display: 'CHF' },
+  { id: 'CNY', display: 'CNY' },
+  { id: 'EUR', display: 'EUR' },
+  { id: 'GBP', display: 'GBP' },
+  { id: 'INR', display: 'INR' },
+  { id: 'JPY', display: 'JPY' },
+  { id: 'USD', display: 'USD' },
+  { id: '__create' },
+  { id: '__advanced' }
+]
+
+const priceListOptions = [
+  {
+    id: 'Standard Selling',
+    display: 'Standard Selling',
+    description: 'INR',
+    filters: 'Selling = Yes'
+  },
+  { id: '__create' },
+  { id: '__advanced' }
+]
+
+const companyBankAccountOptions = [
+  { id: '__filter', filters: 'Is Company Account = Yes' },
+  { id: '__create' },
+  { id: '__advanced' }
+];
+
+const customerPrimaryAddressOptions = [
+  { id: '__filter', filters: 'Is Customer new Address = Yes' },
+  { id: '__create' },
+  { id: '__advanced' }
+];
+
+const customerPrimaryContactOptions = [
+  { id: '__filter', filters: 'Is Customer new Contact = Yes' },
+  { id: '__create' },
+  { id: '__advanced' }
+];
+
+
+
 const CreatCustomer = () => {
   const getToken = Cookies.get('_token')
   const router = useRouter()
@@ -131,9 +176,11 @@ const CreatCustomer = () => {
     opportunity_id: '',
     prospect_id: '',
     account_manager: '',
-    billing_currency_id: '',
-    price_list_id: '',
-    bank_account_id: ''
+    billing_currency: '',
+    default_price_list: '',
+    default_bank_account: '',
+    customer_address: '',
+    customer_contact: ''
   })
   const [errors, setErrors] = useState({})
 
@@ -205,7 +252,7 @@ const CreatCustomer = () => {
 
       <Card className='bs-full'>
         <CardContent>
-          <Box pt={2} pb={5}>
+          <Box pt={2} pb={2}>
             <Typography variant='h5'>Customer Details :</Typography>
             <Box pt={2}>
               <Grid container spacing={6}>
@@ -648,11 +695,340 @@ const CreatCustomer = () => {
               </Grid>
             </Box>
           </Box>
+          <Box pt={2} pb={4}>
+            <Typography variant='h5'>Defaults :</Typography>
+            <Box pt={2}>
+              <Grid container spacing={6}>
+                <Grid item xs={6}>
+                  <Autocomplete
+                    fullWidth
+                    options={billingCurrencyOptions}
+                    getOptionLabel={option => {
+                      if (option.id === '__create') return 'Create a new Currency'
+                      if (option.id === '__advanced') return 'Advanced Search'
+                      return option.display || option.id
+                    }}
+                    onChange={(event, newValue) => {
+                      if (!newValue) return
 
-          <Box pt={5} pb={5}>
+                      if (newValue.id === '__create') {
+                        alert('Create Currency Modal')
+                      } else if (newValue.id === '__advanced') {
+                        alert('Open Advanced Search for Currency')
+                      } else {
+                        setInputs(prev => ({
+                          ...prev,
+                          billing_currency: newValue.id
+                        }))
+                      }
+                    }}
+                    renderOption={(props, option) => {
+                      if (option.id === '__create') {
+                        return (
+                          <li {...props}>
+                            <AddIcon fontSize='small' style={{ marginRight: 8 }} />
+                            Create a new Currency
+                          </li>
+                        )
+                      }
+
+                      if (option.id === '__advanced') {
+                        return (
+                          <>
+                            <Divider style={{ margin: '4px 0' }} />
+                            <li {...props}>
+                              <SearchIcon fontSize='small' style={{ marginRight: 8 }} />
+                              Advanced Search
+                            </li>
+                          </>
+                        )
+                      }
+
+                      return (
+                        <li {...props}>
+                          <strong>{option.display}</strong>
+                        </li>
+                      )
+                    }}
+                    renderInput={params => (
+                      <TextField {...params} label='Billing Currency' variant='outlined' size='small' />
+                    )}
+                    value={billingCurrencyOptions.find(opt => opt.id === inputs.billing_currency) || null}
+                  />
+                </Grid>
+
+                <Grid item xs={6}>
+                  <Autocomplete
+                    fullWidth
+                    options={priceListOptions}
+                    getOptionLabel={option => {
+                      if (option.id === '__create') return 'Create a new Price List'
+                      if (option.id === '__advanced') return 'Advanced Search'
+                      return option.display || option.id
+                    }}
+                    onChange={(event, newValue) => {
+                      if (!newValue) return
+
+                      if (newValue.id === '__create') {
+                        alert('Create Price List Modal')
+                      } else if (newValue.id === '__advanced') {
+                        alert('Advanced Search for Price List')
+                      } else {
+                        setInputs(prev => ({
+                          ...prev,
+                          default_price_list: newValue.id
+                        }))
+                      }
+                    }}
+                    renderOption={(props, option) => {
+                      if (option.id === '__create') {
+                        return (
+                          <li {...props}>
+                            <AddIcon fontSize='small' style={{ marginRight: 8 }} />
+                            Create a new Price List
+                          </li>
+                        )
+                      }
+
+                      if (option.id === '__advanced') {
+                        return (
+                          <>
+                            <Divider style={{ margin: '4px 0' }} />
+                            <li {...props}>
+                              <SearchIcon fontSize='small' style={{ marginRight: 8 }} />
+                              Advanced Search
+                            </li>
+                          </>
+                        )
+                      }
+
+                      return (
+                        <li {...props}>
+                          <div>
+                            <strong>{option.display}</strong>
+                            <div style={{ fontSize: '12px', color: '#666' }}>{option.description}</div>
+                            {option.filters && (
+                              <div style={{ fontSize: '11px', color: '#999', marginTop: '2px' }}>
+                                Filters applied for <strong>{option.filters}</strong>
+                              </div>
+                            )}
+                          </div>
+                        </li>
+                      )
+                    }}
+                    renderInput={params => (
+                      <TextField {...params} label='Default Price List' variant='outlined' size='small' />
+                    )}
+                    value={priceListOptions.find(opt => opt.id === inputs.default_price_list) || null}
+                  />
+                </Grid>
+
+                <Grid item xs={6}>
+                  <Autocomplete
+                    fullWidth
+                    options={companyBankAccountOptions}
+                    getOptionLabel={option => {
+                      if (option.id === '__create') return 'Create a new Bank Account'
+                      if (option.id === '__advanced') return 'Advanced Search'
+                      if (option.id === '__filter') return ''
+                      return option.display || option.id
+                    }}
+                    onChange={(event, newValue) => {
+                      if (!newValue) return
+
+                      if (newValue.id === '__create') {
+                        alert('Create Bank Account Modal')
+                      } else if (newValue.id === '__advanced') {
+                        alert('Advanced Search for Bank Accounts')
+                      } else {
+                        setInputs(prev => ({
+                          ...prev,
+                          default_bank_account: newValue.id
+                        }))
+                      }
+                    }}
+                    renderOption={(props, option) => {
+                      if (option.id === '__filter') {
+                        return (
+                          <li {...props} style={{ pointerEvents: 'none' }}>
+                            <div style={{ fontSize: '12px', color: '#666' }}>
+                              Filters applied for <strong>{option.filters}</strong>
+                            </div>
+                          </li>
+                        )
+                      }
+
+                      if (option.id === '__create') {
+                        return (
+                          <li {...props}>
+                            <AddIcon fontSize='small' style={{ marginRight: 8 }} />
+                            Create a new Bank Account
+                          </li>
+                        )
+                      }
+
+                      if (option.id === '__advanced') {
+                        return (
+                          <>
+                            <Divider style={{ margin: '4px 0' }} />
+                            <li {...props}>
+                              <SearchIcon fontSize='small' style={{ marginRight: 8 }} />
+                              Advanced Search
+                            </li>
+                          </>
+                        )
+                      }
+
+                      return <li {...props}>{option.display}</li>
+                    }}
+                    renderInput={params => (
+                      <TextField {...params} label='Default Company Bank Account' variant='outlined' size='small' />
+                    )}
+                    value={companyBankAccountOptions.find(opt => opt.id === inputs.default_bank_account) || null}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+          </Box>
+
+          <Box pt={5} pb={2}>
             <Typography variant='h5'>Address & Contacts :</Typography>
             <Box pt={2}>
-              <Grid container spacing={6}></Grid>
+              <Grid container spacing={6}>
+                <Grid item xs={6}>
+                    <Autocomplete
+                    fullWidth
+                    options={customerPrimaryAddressOptions}
+                    getOptionLabel={option => {
+                      if (option.id === '__create') return 'Create a new Address'
+                      if (option.id === '__advanced') return 'Advanced Search'
+                      if (option.id === '__filter') return ''
+                      return option.display || option.id
+                    }}
+                    onChange={(event, newValue) => {
+                      if (!newValue) return
+
+                      if (newValue.id === '__create') {
+                        alert('Create new Address Modal')
+                      } else if (newValue.id === '__advanced') {
+                        alert('Advanced Search for new Address')
+                      } else {
+                        setInputs(prev => ({
+                          ...prev,
+                          customer_address: newValue.id
+                        }))
+                      }
+                    }}
+                    renderOption={(props, option) => {
+                      if (option.id === '__filter') {
+                        return (
+                          <li {...props} style={{ pointerEvents: 'none' }}>
+                            <div style={{ fontSize: '12px', color: '#666' }}>
+                              Filters applied for <strong>{option.filters}</strong>
+                            </div>
+                          </li>
+                        )
+                      }
+
+                      if (option.id === '__create') {
+                        return (
+                          <li {...props}>
+                            <AddIcon fontSize='small' style={{ marginRight: 8 }} />
+                            Create a new Address
+                          </li>
+                        )
+                      }
+
+                      if (option.id === '__advanced') {
+                        return (
+                          <>
+                            <Divider style={{ margin: '4px 0' }} />
+                            <li {...props}>
+                              <SearchIcon fontSize='small' style={{ marginRight: 8 }} />
+                              Advanced Search
+                            </li>
+                          </>
+                        )
+                      }
+
+                      return <li {...props}>{option.display}</li>
+                    }}
+                    renderInput={params => (
+                      <TextField {...params} label='Customer Primary Address' variant='outlined' size='small' />
+                    )}
+                    value={customerPrimaryAddressOptions.find(opt => opt.id === inputs.customer_address) || null}
+                  />
+
+
+                </Grid>
+                    <Grid item xs={6}>
+                    <Autocomplete
+                    fullWidth
+                    options={customerPrimaryContactOptions}
+                    getOptionLabel={option => {
+                      if (option.id === '__create') return 'Create a new Contact'
+                      if (option.id === '__advanced') return 'Advanced Search'
+                      if (option.id === '__filter') return ''
+                      return option.display || option.id
+                    }}
+                    onChange={(event, newValue) => {
+                      if (!newValue) return
+
+                      if (newValue.id === '__create') {
+                        alert('Create new Contact Modal')
+                      } else if (newValue.id === '__advanced') {
+                        alert('Advanced Search for new Contact')
+                      } else {
+                        setInputs(prev => ({
+                          ...prev,
+                          customer_contact: newValue.id
+                        }))
+                      }
+                    }}
+                    renderOption={(props, option) => {
+                      if (option.id === '__filter') {
+                        return (
+                          <li {...props} style={{ pointerEvents: 'none' }}>
+                            <div style={{ fontSize: '12px', color: '#666' }}>
+                              Filters applied for <strong>{option.filters}</strong>
+                            </div>
+                          </li>
+                        )
+                      }
+
+                      if (option.id === '__create') {
+                        return (
+                          <li {...props}>
+                            <AddIcon fontSize='small' style={{ marginRight: 8 }} />
+                            Create a new  Contact
+                          </li>
+                        )
+                      }
+
+                      if (option.id === '__advanced') {
+                        return (
+                          <>
+                            <Divider style={{ margin: '4px 0' }} />
+                            <li {...props}>
+                              <SearchIcon fontSize='small' style={{ marginRight: 8 }} />
+                              Advanced Search
+                            </li>
+                          </>
+                        )
+                      }
+
+                      return <li {...props}>{option.display}</li>
+                    }}
+                    renderInput={params => (
+                      <TextField {...params} label='Customer Primary Contact' variant='outlined' size='small' />
+                    )}
+                    value={customerPrimaryContactOptions.find(opt => opt.id === inputs.customer_contact) || null}
+                  />
+
+
+                </Grid>
+
+              </Grid>
             </Box>
           </Box>
 
