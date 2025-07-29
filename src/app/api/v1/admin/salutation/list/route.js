@@ -23,7 +23,7 @@ export async function GET(request) {
 
         _search['$and'] = [
           {
-            $and: [{ n_status: 1 }, { n_published: 1 }, { salutation_id: id }]
+            $and: [ { n_published: 1 }, { salutation_id: id }]
           }
         ]
 
@@ -100,7 +100,7 @@ export async function GET(request) {
 
       _search['$and'] = [
         {
-          $and: [{ n_status: 1 }, { n_published: 1 }]
+          $and: [ { n_published: 1 }]
         }
       ]
 
@@ -188,7 +188,7 @@ export async function POST(request) {
 
     _search['$and'] = [
       {
-        $and: [{ n_status: 1 }, { n_published: 1 }],
+        $and: [ { n_published: 1 }],
         $or: [{ salutation_name: { $regex: searchTerm, $options: 'i' } }]
       }
     ]
@@ -264,7 +264,7 @@ export async function POST(request) {
 
     _search['$and'] = [
       {
-        $and: [{ n_status: 1 }, { n_published: 1 }]
+        $and: [ { n_published: 1 }]
       }
     ]
 

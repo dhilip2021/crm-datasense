@@ -12,7 +12,7 @@ let sendResponse = {
 }
 
 export async function POST(request) {
-  const { salutation_name, Id } = await request.json()
+  const { salutation_name, n_status, n_published, Id } = await request.json()
 
   try {
     await connectMongoDB()
@@ -20,23 +20,24 @@ export async function POST(request) {
 
     if (verified.success) {
       if (Id) {
-        const customerId = await Salutation.findOne({ _id: Id })
-        if (customerId === null) {
+        const salutationId = await Salutation.findOne({ _id: Id })
+
+        if (salutationId === null) {
           sendResponse['appStatusCode'] = 4
           sendResponse['message'] = []
           sendResponse['payloadJson'] = []
           sendResponse['error'] = 'Please enter valid id!'
 
           return NextResponse.json(sendResponse, { status: 200 })
-        } else {
+        } else if (salutation_name) {
           const body = {
             salutation_name: salutation_name
           }
 
           await Salutation.findByIdAndUpdate(Id, body)
-            .then(() => {
+            .then(result => {
               sendResponse['appStatusCode'] = 0
-              sendResponse['message'] = 'Updated Successfully!'
+              sendResponse['message'] = 'Name Updated Successfully!'
               sendResponse['payloadJson'] = []
               sendResponse['error'] = []
             })
@@ -48,10 +49,30 @@ export async function POST(request) {
             })
 
           return NextResponse.json(sendResponse, { status: 200 })
-        }
+        } 
+          const body = {
+            n_status: n_status
+          }
+          await Salutation.findByIdAndUpdate(Id, body)
+            .then(result => {
+              sendResponse['appStatusCode'] = 0
+              sendResponse['message'] = 'Status Updated Successfully!'
+              sendResponse['payloadJson'] = []
+              sendResponse['error'] = []
+            })
+            .catch(err => {
+              sendResponse['appStatusCode'] = 4
+              sendResponse['message'] = 'Invalid Id'
+              sendResponse['payloadJson'] = []
+              sendResponse['error'] = err
+            })
+          return NextResponse.json(sendResponse, { status: 200 })
+        
+
+
+        // return NextResponse.json(sendResponse, { status: 200 })
       } else {
         const checksalutation = await Salutation.findOne({ salutation_name: salutation_name })
-        console.log(checksalutation, '<<< SALUUUUU')
 
         if (salutation_name === '') {
           sendResponse['appStatusCode'] = 4

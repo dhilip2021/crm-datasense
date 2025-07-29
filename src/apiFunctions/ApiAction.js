@@ -286,7 +286,7 @@ export const sendOtpApi = async (body,header) => {
 };
 
 
-// Leads model api's
+// Customer model api's
   
 export const createCustomer = async (body, header) => {
   
@@ -321,12 +321,58 @@ export const getCustomerListApi = async (body) => {
     });
 };
 
-
-
-
 export const deleteCustomerApi = async (body,header) => {
   return await axios
     .delete(`/api/v1/admin/customer/delete?id=${body}`, {
+      headers: header,
+    })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+
+// SAlutation model api's
+  
+export const createSalutation = async (body, header) => {
+  
+  return await axios.post(`/api/v1/admin/salutation/add`, body,{ headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const postSalutationListApi = async (body,header) => {
+  return await axios
+    .post(`/api/v1/admin/salutation/list`, body, { headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const getSalutationListApi = async (body) => {
+  return await axios
+    .get(`/api/v1/admin/salutation/list?name=${body}`,{ headers: AppHeader })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const deleteSalutationApi = async (body,header) => {
+  return await axios
+    .delete(`/api/v1/admin/salutation/delete?id=${body}`, {
       headers: header,
     })
     .then((res) => {
