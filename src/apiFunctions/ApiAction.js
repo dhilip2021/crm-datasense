@@ -431,3 +431,51 @@ export const deleteGenderApi = async (body,header) => {
       return err;
     });
 };
+
+// Territory model api's
+  
+export const createTerritory = async (body, header) => {
+  
+  return await axios.post(`/api/v1/admin/territory/add`, body,{ headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const postTerritoryListApi = async (body,header) => {
+  return await axios
+    .post(`/api/v1/admin/territory/list`, body, { headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const getTerritoryListApi = async (body) => {
+  return await axios
+    .get(`/api/v1/admin/territory/list?is_group_param=${body}`,{ headers: AppHeader })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const deleteTerritoryApi = async (body,header) => {
+  return await axios
+    .delete(`/api/v1/admin/territory/delete?id=${body}`, {
+      headers: header,
+    })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
