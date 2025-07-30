@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 
 import { Lead } from "@/models/leadModel";
-import { verifyAccessToken } from "@/helper/helper";
+import { verifyAccessToken } from "@/helper/clientHelper";
 import connectMongoDB from "@/libs/mongodb";
 
 let sendResponse = {

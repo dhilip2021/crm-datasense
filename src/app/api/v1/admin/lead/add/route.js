@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import slugify from "slugify";
 
 import connectMongoDB from "@/libs/mongodb";
-import { create_UUID, verifyAccessToken } from "@/helper/helper";
+import { create_UUID, verifyAccessToken } from "@/helper/clientHelper";
 import { Lead } from "@/models/leadModel";
 
 

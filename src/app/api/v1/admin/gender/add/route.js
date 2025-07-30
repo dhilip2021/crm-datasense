@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 
 import connectMongoDB from '@/libs/mongodb'
 import { create_UUID, verifyAccessToken } from '@/helper/clientHelper'
-import { Salutation } from '@/models/salutationModel'
+import { Gender } from '@/models/genderModel'
 
 let sendResponse = {
   appStatusCode: '',
@@ -12,7 +12,7 @@ let sendResponse = {
 }
 
 export async function POST(request) {
-  const { salutation_name, n_status, n_published, Id } = await request.json()
+  const { gender_name, n_status, Id } = await request.json()
 
   try {
     await connectMongoDB()
@@ -20,21 +20,21 @@ export async function POST(request) {
 
     if (verified.success) {
       if (Id) {
-        const salutationId = await Salutation.findOne({ _id: Id })
+        const genderId = await Gender.findOne({ _id: Id })
 
-        if (salutationId === null) {
+        if (genderId === null) {
           sendResponse['appStatusCode'] = 4
           sendResponse['message'] = []
           sendResponse['payloadJson'] = []
           sendResponse['error'] = 'Please enter valid id!'
 
           return NextResponse.json(sendResponse, { status: 200 })
-        } else if (salutation_name) {
+        } else if (gender_name) {
           const body = {
-            salutation_name: salutation_name
+            gender_name: gender_name
           }
 
-          await Salutation.findByIdAndUpdate(Id, body)
+          await Gender.findByIdAndUpdate(Id, body)
             .then(result => {
               sendResponse['appStatusCode'] = 0
               sendResponse['message'] = 'Name Updated Successfully!'
@@ -53,7 +53,7 @@ export async function POST(request) {
           const body = {
             n_status: n_status
           }
-          await Salutation.findByIdAndUpdate(Id, body)
+          await Gender.findByIdAndUpdate(Id, body)
             .then(result => {
               sendResponse['appStatusCode'] = 0
               sendResponse['message'] = 'Status Updated Successfully!'
@@ -72,33 +72,33 @@ export async function POST(request) {
 
         // return NextResponse.json(sendResponse, { status: 200 })
       } else {
-        const checksalutation = await Salutation.findOne({ salutation_name: salutation_name })
+        const checkgender = await Gender.findOne({ gender_name: gender_name })
 
-        if (salutation_name === '') {
+        if (gender_name === '') {
           sendResponse['appStatusCode'] = 4
           sendResponse['message'] = ''
           sendResponse['payloadJson'] = []
-          sendResponse['error'] = 'Salutation name is required'
+          sendResponse['error'] = 'Gender name is required'
           return NextResponse.json(sendResponse, { status: 200 })
-        } else if (checksalutation !== null) {
+        } else if (checkgender !== null) {
           sendResponse['appStatusCode'] = 4
           sendResponse['message'] = []
           sendResponse['payloadJson'] = []
-          sendResponse['error'] = 'Salutation already exist'
+          sendResponse['error'] = 'Gender already exist'
           return NextResponse.json(sendResponse, { status: 200 })
         } else {
           const body = {
-            salutation_id: create_UUID(),
-            salutation_name: salutation_name,
+            gender_id: create_UUID(),
+            gender_name: gender_name,
             c_createdBy: verified.data.user_id
           }
 
-          const SalutationData = new Salutation(body)
+          const GenderData = new Gender(body)
 
-          await SalutationData.save()
+          await GenderData.save()
             .then(result => {
               sendResponse['appStatusCode'] = 0
-              sendResponse['message'] = 'Salutation created Successfully'
+              sendResponse['message'] = 'Gender created Successfully'
               sendResponse['payloadJson'] = result
               sendResponse['error'] = []
             })

@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
-
-import connectMongoDB from "@/libs/mongodb";
 import { verifyAccessToken } from "@/helper/clientHelper";
-import { User } from "@/models/userModel";
-
+import connectMongoDB from "@/libs/mongodb";
+import { Gender } from "@/models/genderModel";
 
 let sendResponse = {
   appStatusCode: "",
@@ -15,6 +13,8 @@ let sendResponse = {
 export async function DELETE(request) {
   const id = request.nextUrl.searchParams.get("id");
   const verified = verifyAccessToken();
+  
+  await connectMongoDB();
 
   if (verified.success) {
     const body = {
@@ -23,10 +23,10 @@ export async function DELETE(request) {
       c_deletedBy: verified.data.user_id,
     };
 
-    await connectMongoDB();
+    
 
     try {
-      await User.findByIdAndUpdate(id, body).then((result) => {
+      await Gender.findByIdAndUpdate(id, body).then((result) => {
         if (result) {
           sendResponse["appStatusCode"] = 0;
           sendResponse["message"] = "Deleted Successfully";
@@ -34,7 +34,7 @@ export async function DELETE(request) {
           sendResponse["error"] = "";
         } else {
           sendResponse["appStatusCode"] = 0;
-          sendResponse["message"] = "Cannot Delete ! please check again";
+          sendResponse["message"] = "Cannot Delete! please check again";
           sendResponse["payloadJson"] = [];
           sendResponse["error"] = "";
         }
@@ -54,7 +54,7 @@ export async function DELETE(request) {
     sendResponse["message"] = "";
     sendResponse["payloadJson"] = [];
     sendResponse["error"] = "token expired!";
-    
+
     return NextResponse.json(sendResponse, { status: 400 });
   }
 }

@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // ** React Imports
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -29,32 +29,21 @@ import {
 import AddIcon from '@mui/icons-material/Add'
 import SearchIcon from '@mui/icons-material/Search'
 
-import { createCustomer } from '@/apiFunctions/ApiAction'
+import {
+  createCustomer,
+  createGender,
+  createSalutation,
+  postGenderListApi,
+  postSalutationListApi
+} from '@/apiFunctions/ApiAction'
 
 import LoaderGif from '@assets/gif/loader.gif'
+import AddSalutationPopup from '../salutation/AddSalutationPopup'
+import { capitalizeWords } from '@/helper/frontendHelper'
+import AddGenderPopup from '../gender/AddGenderPopup'
 
-const salutationOptions = [
-  { label: 'Dr' },
-  { label: 'Madam' },
-  { label: 'Master' },
-  { label: 'Miss' },
-  { label: 'Mr' },
-  { label: 'Mrs' },
-  { label: 'Ms' },
-  { label: 'Mx' },
-  { label: 'Prof' }
-]
 const prospectOptions = [{ label: 'ABC Tech' }, { label: 'XRF Design' }]
 
-const genderOptions = [
-  { label: 'Female' },
-  { label: 'Genderqueer' },
-  { label: 'Male' },
-  { label: 'Non-Conforming' },
-  { label: 'Other' },
-  { label: 'Prefer not to say' },
-  { label: 'Transgender' }
-]
 const territories = [
   { label: 'All Territories', group: 'Global' },
   { label: 'India', group: 'All Territories' },
@@ -145,30 +134,33 @@ const companyBankAccountOptions = [
   { id: '__filter', filters: 'Is Company Account = Yes' },
   { id: '__create' },
   { id: '__advanced' }
-];
+]
 
 const customerPrimaryAddressOptions = [
   { id: '__filter', filters: 'Is Customer new Address = Yes' },
   { id: '__create' },
   { id: '__advanced' }
-];
+]
 
 const customerPrimaryContactOptions = [
   { id: '__filter', filters: 'Is Customer new Contact = Yes' },
   { id: '__create' },
   { id: '__advanced' }
-];
-
-
+]
 
 const CreatCustomer = () => {
+  const customerNameRef = useRef(null)
   const getToken = Cookies.get('_token')
   const router = useRouter()
-
+  const [salutationOptions, setSalutationOptions] = useState([])
+  const [genderOptions, setGenderOptions] = useState([])
+  const [search, setSearch] = useState('')
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
   const [loader, setLoader] = useState(false)
   const [inputs, setInputs] = useState({
     customer_name: '',
-    customer_type: 'Company',
+    customer_type: 'Individual',
     salutation: '',
     gender: '',
     territory_id: '',
@@ -184,13 +176,221 @@ const CreatCustomer = () => {
   })
   const [errors, setErrors] = useState({})
 
-  const handleBlur = e => {
+  // ********************************************** Salutation Function open **********************************************
+  const [openSalutation, setOpenSalutation] = useState(false)
+  const [titlesSalutation, setTitlesSalutation] = useState('Add your salutation')
+
+  const [salutationInputs, setSalutationInputs] = useState({
+    salutation_name: '',
+    n_status: 1,
+    _id: ''
+  })
+
+  const [salutationErrors, setSalutationErrors] = useState({
+    salutation_name: false,
+    n_status: false,
+    _id: ''
+  })
+
+  const handleSalutationChange = e => {
+    e.preventDefault()
     const { name, value } = e.target
 
+    setSalutationErrors(prev => ({ ...prev, [name]: false }))
+    setSalutationInputs(prev => ({ ...prev, [name]: capitalizeWords(value) }))
+  }
+
+  const addSalutationChanges = () => {
+    setSalutationInputs({
+      salutation_name: '',
+      n_status: '',
+      _id: ''
+    })
+    setOpenSalutation(true)
+  }
+
+  const handleSalutationClose = () => {
+    setOpenSalutation(false)
+    setSalutationErrors({ salutation_name: false, n_status: false })
+    setSalutationInputs({
+      salutation_name: '',
+      n_status: '',
+      _id: ''
+    })
+  }
+
+  const handleSalutationSubmit = () => {
+    setOpenSalutation(false)
+
+    if (salutationInputs?.salutation_name === '') {
+      setErrors(prev => ({ ...prev, ['salutation_name']: true }))
+    } else {
+      if (salutationInputs?._id === '') {
+        const body = {
+          salutation_name: salutationInputs?.salutation_name
+        }
+        salutationCreation(body)
+      } else {
+        const body = {
+          Id: salutationInputs?._id,
+          salutation_name: salutationInputs?.salutation_name
+        }
+        salutationCreation(body)
+      }
+    }
+  }
+
+  const salutationCreation = async body => {
+    const header = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken}`
+    }
+
+    const results = await createSalutation(body, header)
+
+    if (results?.appStatusCode !== 0) {
+      setOpenSalutation(false)
+      toast?.error(results?.error)
+      setInputs(prev => ({ ...prev, salutation: '' }))
+      getSalutationList()
+    } else {
+      setOpenSalutation(false)
+      toast?.success(results?.message)
+      setInputs(prev => ({ ...prev, salutation: results?.payloadJson?.salutation_name }))
+      getSalutationList()
+    }
+  }
+
+  const getSalutationList = async () => {
+    const header = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken}`
+    }
+    const body = {
+      n_page: page + 1,
+      n_limit: rowsPerPage,
+      c_search_term: search
+    }
+
+    const results = await postSalutationListApi(body, header)
+
+    setSalutationOptions(results?.payloadJson[0]?.data || [])
+  }
+
+  // ********************************************** Salutation Function close **********************************************
+
+  // ********************************************** Gender Function open **********************************************
+
+  const [openGender, setOpenGender] = useState(false)
+  const [titlesGender, setTitlesGender] = useState('Add your gender')
+
+  const [genderInputs, setGenderInputs] = useState({
+    gender_name: '',
+    n_status: 1,
+    _id: ''
+  })
+
+  const [genderErrors, setGenderErrors] = useState({
+    gender_name: false,
+    n_status: false,
+    _id: ''
+  })
+
+  const handleGenderChange = e => {
+    e.preventDefault()
+    const { name, value } = e.target
+
+    setGenderErrors(prev => ({ ...prev, [name]: false }))
+    setGenderInputs(prev => ({ ...prev, [name]: capitalizeWords(value) }))
+  }
+
+  const addGenderChanges = () => {
+    setGenderInputs({
+      gender_name: '',
+      n_status: '',
+      _id: ''
+    })
+    setOpenGender(true)
+  }
+
+  const handleGenderClose = () => {
+    setOpenGender(false)
+    setGenderErrors({ gender_name: false, n_status: false })
+    setGenderInputs({
+      gender_name: '',
+      n_status: '',
+      _id: ''
+    })
+  }
+
+  const handleGenderSubmit = () => {
+    setOpenGender(false)
+
+    if (genderInputs?.gender_name === '') {
+      setErrors(prev => ({ ...prev, ['gender_name']: true }))
+    } else {
+      if (genderInputs?._id === '') {
+        const body = {
+          gender_name: genderInputs?.gender_name
+        }
+        genderCreation(body)
+      } else {
+        const body = {
+          Id: genderInputs?._id,
+          gender_name: genderInputs?.gender_name
+        }
+        genderCreation(body)
+      }
+    }
+  }
+
+  const genderCreation = async body => {
+    const header = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken}`
+    }
+
+    const results = await createGender(body, header)
+
+    if (results?.appStatusCode !== 0) {
+      setOpenGender(false)
+      toast?.error(results?.error)
+      setInputs(prev => ({ ...prev, gender: '' }))
+      getGenderList()
+    } else {
+      setOpenGender(false)
+      toast?.success(results?.message)
+      setInputs(prev => ({ ...prev, gender: results?.payloadJson?.gender_name }))
+      getGenderList()
+    }
+  }
+
+  const getGenderList = async () => {
+    const header = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken}`
+    }
+    const body = {
+      n_page: page + 1,
+      n_limit: rowsPerPage,
+      c_search_term: search
+    }
+
+    const results = await postGenderListApi(body, header)
+
+    console.log(results, '<<< FFFFFF')
+
+    setGenderOptions(results?.payloadJson[0]?.data || [])
+  }
+
+  // ********************************************** Gender Function close **********************************************
+
+  const handleBlur = e => {
+    const { name, value } = e.target
     if (value.trim() === '') {
       setErrors(prev => ({
         ...prev,
-        [name]: 'This field is required'
+        [name]: `${name} is required`
       }))
     }
   }
@@ -198,13 +398,10 @@ const CreatCustomer = () => {
   const handleChange = e => {
     const { name, value } = e.target
 
-    setInputs(prev => ({ ...prev, [name]: value }))
+    setInputs(prev => ({ ...prev, [name]: capitalizeWords(value) }))
 
     // Clear error on change
-    setErrors(prev => ({
-      ...prev,
-      [name]: ''
-    }))
+    setErrors(prev => ({ ...prev, [name]: '' }))
   }
 
   const CustomerApiCall = async body => {
@@ -223,15 +420,41 @@ const CreatCustomer = () => {
     } else {
       setLoader(false)
       toast?.success(results?.message)
-      router.push('/leads')
+      router.push('/customer')
     }
   }
 
-  const handleSubmit = () => {}
+  const handleSubmit = () => {
+    const newErrors = {}
+
+    if (!inputs.customer_name || inputs.customer_name.trim() === '') {
+      newErrors.customer_name = 'Customer Name is required'
+    }
+
+    setErrors(newErrors)
+
+    if (Object.keys(newErrors).length === 0) {
+      console.log(inputs, '<<< INPUTSSSS')
+
+      CustomerApiCall(inputs)
+    } else {
+      // Scroll to the first error field
+      const firstErrorKey = Object.keys(newErrors)[0]
+
+      if (firstErrorKey === 'customer_name') {
+        customerNameRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }
+  }
 
   const handleClick = () => {
     router.push('/customer')
   }
+
+  useEffect(() => {
+    getSalutationList()
+    getGenderList()
+  }, [])
 
   return (
     <Box style={loader ? { opacity: 0.3, pointerEvents: 'none' } : { opacity: 1 }}>
@@ -251,7 +474,8 @@ const CreatCustomer = () => {
       </Card>
 
       <Card className='bs-full'>
-        <CardContent>
+        {!loader && (
+           <CardContent>
           <Box pt={2} pb={2}>
             <Typography variant='h5'>Customer Details :</Typography>
             <Box pt={2}>
@@ -260,23 +484,28 @@ const CreatCustomer = () => {
                   <Grid item xs={3}>
                     <Autocomplete
                       fullWidth
-                      options={[...salutationOptions, { label: '__create' }, { label: '__advanced' }]}
+                      options={[
+                        ...salutationOptions,
+                        { salutation_name: '__create' },
+                        { salutation_name: '__advanced' }
+                      ]}
                       getOptionLabel={option => {
-                        if (option.label === '__create') return 'Create a new Salutation'
-                        if (option.label === '__advanced') return 'Advanced Search'
-                        return option.label
+                        if (option.salutation_name === '__create') return 'Create a new Salutation'
+                        if (option.salutation_name === '__advanced') return 'Advanced Search'
+                        return option.salutation_name
                       }}
                       onChange={(event, newValue) => {
-                        if (newValue?.label === '__create') {
-                          alert('Open Create Salutation modal')
-                        } else if (newValue?.label === '__advanced') {
+                        if (newValue?.salutation_name === '__create') {
+                          // alert('Open Create Salutation modal')
+                          addSalutationChanges()
+                        } else if (newValue?.salutation_name === '__advanced') {
                           alert('Open Advanced Search')
                         } else {
-                          setInputs(prev => ({ ...prev, salutation: newValue?.label || '' }))
+                          setInputs(prev => ({ ...prev, salutation: newValue?.salutation_name || '' }))
                         }
                       }}
                       renderOption={(props, option) => {
-                        if (option.label === '__create') {
+                        if (option.salutation_name === '__create') {
                           return (
                             <li {...props}>
                               <AddIcon fontSize='small' style={{ marginRight: 8 }} />
@@ -284,7 +513,7 @@ const CreatCustomer = () => {
                             </li>
                           )
                         }
-                        if (option.label === '__advanced') {
+                        if (option.salutation_name === '__advanced') {
                           return (
                             <li {...props}>
                               <SearchIcon fontSize='small' style={{ marginRight: 8 }} />
@@ -294,20 +523,21 @@ const CreatCustomer = () => {
                         }
                         return (
                           <li {...props}>
-                            <strong>{option.label}</strong>
+                            <strong>{option.salutation_name}</strong>
                           </li>
                         )
                       }}
                       renderInput={params => (
                         <TextField {...params} label='Salutation' variant='outlined' size='small' />
                       )}
-                      value={salutationOptions.find(opt => opt.label === inputs.salutation) || null}
+                      value={salutationOptions.find(opt => opt.salutation_name === inputs.salutation) || null}
                     />
                   </Grid>
                 )}
 
                 <Grid item xs={3}>
                   <TextField
+                    inputRef={customerNameRef}
                     fullWidth
                     onBlur={handleBlur}
                     autoComplete='off'
@@ -321,22 +551,6 @@ const CreatCustomer = () => {
                     onChange={handleChange}
                     error={Boolean(errors.customer_name)}
                     helperText={errors.customer_name}
-                    //    sx={{
-                    //     '& .MuiOutlinedInput-root': {
-                    //       position: 'relative',
-                    //       '&::before': {
-                    //         content: '""',
-                    //         position: 'absolute',
-                    //         left: 0,
-                    //         top: 0,
-                    //         bottom: 0,
-                    //         width: '4px', // thickness of the strip
-                    //         backgroundColor: 'error.main',
-                    //         borderTopLeftRadius: '4px', // match the TextField’s rounded corners
-                    //         borderBottomLeftRadius: '4px'
-                    //       }
-                    //     }
-                    //   }}
                   />
                 </Grid>
 
@@ -366,28 +580,29 @@ const CreatCustomer = () => {
                   <Grid item xs={3}>
                     <Autocomplete
                       fullWidth
-                      options={[...genderOptions, { label: '__create' }, { label: '__advanced' }]}
+                      options={[...genderOptions, { gender_name: '__create' }, { gender_name: '__advanced' }]}
                       getOptionLabel={option => {
-                        if (option.label === '__create') return 'Create a new Gender'
-                        if (option.label === '__advanced') return 'Advanced Search'
-                        return option.label
+                        if (option.gender_name === '__create') return 'Create a new Gender'
+                        if (option.gender_name === '__advanced') return 'Advanced Search'
+                        return option.gender_name
                       }}
                       onChange={(event, newValue) => {
                         if (!newValue) return
 
-                        if (newValue.label === '__create') {
-                          alert('Open Create New Gender Dialog')
-                        } else if (newValue.label === '__advanced') {
+                        if (newValue.gender_name === '__create') {
+                          // alert('Open Create New Gender Dialog')
+                          addGenderChanges()
+                        } else if (newValue.gender_name === '__advanced') {
                           alert('Open Advanced Gender Search Dialog')
                         } else {
                           setInputs(prev => ({
                             ...prev,
-                            gender: newValue.label
+                            gender: newValue.gender_name
                           }))
                         }
                       }}
                       renderOption={(props, option) => {
-                        if (option.label === '__create') {
+                        if (option.gender_name === '__create') {
                           return (
                             <li {...props}>
                               <AddIcon fontSize='small' style={{ marginRight: 8 }} />
@@ -396,7 +611,7 @@ const CreatCustomer = () => {
                           )
                         }
 
-                        if (option.label === '__advanced') {
+                        if (option.gender_name === '__advanced') {
                           return (
                             <li {...props}>
                               <SearchIcon fontSize='small' style={{ marginRight: 8 }} />
@@ -407,11 +622,11 @@ const CreatCustomer = () => {
 
                         return (
                           <li {...props}>
-                            <strong>{option.label}</strong>
+                            <strong>{option.gender_name}</strong>
                           </li>
                         )
                       }}
-                      value={genderOptions.find(opt => opt.label === inputs.gender) || null}
+                      value={genderOptions.find(opt => opt.gender_name === inputs.gender) || null}
                       renderInput={params => <TextField {...params} label='Gender' variant='outlined' size='small' />}
                     />
                   </Grid>
@@ -896,7 +1111,7 @@ const CreatCustomer = () => {
             <Box pt={2}>
               <Grid container spacing={6}>
                 <Grid item xs={6}>
-                    <Autocomplete
+                  <Autocomplete
                     fullWidth
                     options={customerPrimaryAddressOptions}
                     getOptionLabel={option => {
@@ -958,11 +1173,9 @@ const CreatCustomer = () => {
                     )}
                     value={customerPrimaryAddressOptions.find(opt => opt.id === inputs.customer_address) || null}
                   />
-
-
                 </Grid>
-                    <Grid item xs={6}>
-                    <Autocomplete
+                <Grid item xs={6}>
+                  <Autocomplete
                     fullWidth
                     options={customerPrimaryContactOptions}
                     getOptionLabel={option => {
@@ -1000,7 +1213,7 @@ const CreatCustomer = () => {
                         return (
                           <li {...props}>
                             <AddIcon fontSize='small' style={{ marginRight: 8 }} />
-                            Create a new  Contact
+                            Create a new Contact
                           </li>
                         )
                       }
@@ -1024,10 +1237,7 @@ const CreatCustomer = () => {
                     )}
                     value={customerPrimaryContactOptions.find(opt => opt.id === inputs.customer_contact) || null}
                   />
-
-
                 </Grid>
-
               </Grid>
             </Box>
           </Box>
@@ -1055,9 +1265,34 @@ const CreatCustomer = () => {
             </Button>
           </Box>
         </CardContent>
+        )}
+       
       </Card>
 
       <ToastContainer />
+
+      <AddSalutationPopup
+        open={openSalutation}
+        close={handleSalutationClose}
+        titles={titlesSalutation}
+        inputs={salutationInputs}
+        handleChange={handleSalutationChange}
+        handleSubmit={handleSalutationSubmit}
+        errors={salutationErrors}
+        handleBlur={handleBlur}
+        loader={loader}
+      />
+      <AddGenderPopup
+        open={openGender}
+        close={handleGenderClose}
+        titles={titlesGender}
+        inputs={genderInputs}
+        handleChange={handleGenderChange}
+        handleSubmit={handleGenderSubmit}
+        errors={genderErrors}
+        handleBlur={handleBlur}
+        loader={loader}
+      />
     </Box>
   )
 }

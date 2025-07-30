@@ -5,7 +5,7 @@ import slugify from "slugify";
 import connectMongoDB from "@/libs/mongodb";
 
 import { User } from "@/models/userModel";
-import { create_UUID, transporter } from "@/helper/helper";
+import { create_UUID, transporter } from "@/helper/clientHelper";
 
 const bcrypt = require("bcryptjs");
 

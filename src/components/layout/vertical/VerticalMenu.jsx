@@ -78,16 +78,19 @@ const VerticalMenu = ({ scrollMenu }) => {
         <MenuItem href='/' icon={<i className='ri-bar-chart-box-line' />}>
           Dashboard
         </MenuItem>
-          <MenuSection label='Master'>
-             <MenuItem href='/salutation' icon={<i className='ri-user-settings-line' />}>
+        <MenuSection label='Master'>
+          <MenuItem href='/salutation' icon={<i className='ri-user-settings-line' />}>
             Salutation
           </MenuItem>
-          </MenuSection>
+          <MenuItem href='/gender' icon={<i className='ri-user-settings-line' />}>
+            Gender
+          </MenuItem>
+        </MenuSection>
         <MenuSection label='Apps & Pages'>
           <MenuItem href='/leads' icon={<i className='ri-user-settings-line' />}>
             Leads
           </MenuItem>
-           <MenuItem href='/customer' icon={<i className='ri-user-settings-line' />}>
+          <MenuItem href='/customer' icon={<i className='ri-user-settings-line' />}>
             Customer
           </MenuItem>
           <MenuItem href='/notes' icon={<i className='ri-sticky-note-add-line'></i>}>
@@ -132,9 +135,9 @@ const VerticalMenu = ({ scrollMenu }) => {
             <MenuItem href='/profile-settings'>Profile Setting</MenuItem>
 
             {(role_id === '16f01165898b' || role_id === '27f01165688z') && (
-             
-                <MenuItem href='/users-list' icon={<i className='ri-user-line' />}>Users List</MenuItem>
-              
+              <MenuItem href='/users-list' icon={<i className='ri-user-line' />}>
+                Users List
+              </MenuItem>
             )}
 
             {(role_id === '16f01165898b' || role_id === '27f01165688z') && (
@@ -143,7 +146,9 @@ const VerticalMenu = ({ scrollMenu }) => {
                 <MenuItem href='/permissions'>Permissions</MenuItem>
               </SubMenu>
             )}
-            <MenuItem href='/fields/list-fields' icon={<i className='ri-input-field' />}>Field List</MenuItem>
+            <MenuItem href='/fields/list-fields' icon={<i className='ri-input-field' />}>
+              Field List
+            </MenuItem>
             <MenuItem href='/login' icon={<i className='ri-logout-box-line'></i>}>
               <div onClick={logoutFn}>Logout</div>{' '}
             </MenuItem>

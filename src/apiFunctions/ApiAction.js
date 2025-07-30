@@ -335,7 +335,7 @@ export const deleteCustomerApi = async (body,header) => {
 };
 
 
-// SAlutation model api's
+// Salutation model api's
   
 export const createSalutation = async (body, header) => {
   
@@ -373,6 +373,55 @@ export const getSalutationListApi = async (body) => {
 export const deleteSalutationApi = async (body,header) => {
   return await axios
     .delete(`/api/v1/admin/salutation/delete?id=${body}`, {
+      headers: header,
+    })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+
+// Gender model api's
+  
+export const createGender = async (body, header) => {
+  
+  return await axios.post(`/api/v1/admin/gender/add`, body,{ headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const postGenderListApi = async (body,header) => {
+  return await axios
+    .post(`/api/v1/admin/gender/list`, body, { headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const getGenderListApi = async (body) => {
+  return await axios
+    .get(`/api/v1/admin/gender/list?name=${body}`,{ headers: AppHeader })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const deleteGenderApi = async (body,header) => {
+  return await axios
+    .delete(`/api/v1/admin/gender/delete?id=${body}`, {
       headers: header,
     })
     .then((res) => {

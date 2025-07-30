@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 import { UserRole } from '@/models/userRoleModel'
 import { User } from '@/models/userModel'
 
-import { verifyAccessToken } from '@/helper/helper'
+import { verifyAccessToken } from '@/helper/clientHelper'
 import connectMongoDB from '@/libs/mongodb'
 
 let sendResponse = {

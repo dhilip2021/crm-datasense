@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import {urlEncoder} from "encryptdecrypt-everytime/src"
 
-import { generateAccessTokenForget, transporter } from "@/helper/helper";
+import { generateAccessTokenForget, transporter } from "@/helper/clientHelper";
 
 import { User } from "@/models/userModel";
 import connectMongoDB from "@/libs/mongodb";

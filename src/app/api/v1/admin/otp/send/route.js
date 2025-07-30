@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 
 import connectMongoDB from "@/libs/mongodb";
-import { transporter } from "@/helper/helper";
+import { transporter } from "@/helper/clientHelper";
 import { User } from "@/models/userModel";
 import { OTP } from "@/models/otpModel";
 

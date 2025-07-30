@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 
 // eslint-disable-next-line import/named
-import { verifyAccessToken } from "@/helper/helper";
+import { verifyAccessToken } from "@/helper/clientHelper";
 import connectMongoDB from "@/libs/mongodb";
 import { UserRole } from "@/models/userRoleModel";
 

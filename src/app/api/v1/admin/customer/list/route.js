@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import connectMongoDB from '@/libs/mongodb'
-import { verifyAccessToken } from '@/helper/helper'
+import { verifyAccessToken } from '@/helper/clientHelper'
 import { Customer } from '@/models/customerModel'
 
 let sendResponse = {

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 
 import { Organization } from "@/models/organizationModel";
-import { create_UUID } from "@/helper/helper";
+import { create_UUID } from "@/helper/clientHelper";
 import connectMongoDB from "@/libs/mongodb";
 
 let sendResponse = {

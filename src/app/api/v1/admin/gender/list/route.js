@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import connectMongoDB from '@/libs/mongodb'
 import { verifyAccessToken } from '@/helper/clientHelper'
-import { Salutation } from '@/models/salutationModel'
+import { Gender } from '@/models/genderModel'
 
 let sendResponse = {
   appStatusCode: '',
@@ -16,27 +16,27 @@ export async function GET(request) {
 
   if (verified.success) {
     if (id) {
-      const checkId = await Salutation.findOne({ salutation_id: id })
+      const checkId = await Gender.findOne({ gender_id: id })
 
       if (checkId) {
         let _search = {}
 
         _search['$and'] = [
           {
-            $and: [ { n_published: 1 }, { salutation_id: id }]
+            $and: [ { n_published: 1 }, { gender_id: id }]
           }
         ]
 
         try {
           await connectMongoDB()
 
-          await Salutation.aggregate([
+          await Gender.aggregate([
             { $match: _search },
             {
               $group: {
                 _id: '$_id',
-                salutation_id: { $first: '$salutation_id' },
-                salutation_name: { $first: '$salutation_name' },
+                gender_id: { $first: '$gender_id' },
+                gender_name: { $first: '$gender_name' },
                 createdAt: { $first: '$createdAt' },
                 c_createdBy: { $first: '$c_createdBy' },
                 n_status: { $first: '$n_status' },
@@ -46,8 +46,8 @@ export async function GET(request) {
             {
               $project: {
                 _id: 1,
-                salutation_id: 1,
-                salutation_name: 1,
+                gender_id: 1,
+                gender_name: 1,
                 createdAt: 1,
                 c_createdBy: 1,
                 n_status: 1,
@@ -107,13 +107,13 @@ export async function GET(request) {
       try {
         await connectMongoDB()
 
-        await Salutation.aggregate([
+        await Gender.aggregate([
           { $match: _search },
           {
             $group: {
               _id: '$_id',
-              salutation_id: { $first: '$salutation_id' },
-              salutation_name: { $first: '$salutation_name' },
+              gender_id: { $first: '$gender_id' },
+              gender_name: { $first: '$gender_name' },
               createdAt: { $first: '$createdAt' },
               c_createdBy: { $first: '$c_createdBy' },
               n_status: { $first: '$n_status' },
@@ -124,8 +124,8 @@ export async function GET(request) {
           {
             $project: {
               _id: 1,
-              salutation_id: 1,
-              salutation_name: 1,
+              gender_id: 1,
+              gender_name: 1,
               createdAt: 1,
               c_createdBy: 1,
               n_status: 1,
@@ -189,27 +189,27 @@ export async function POST(request) {
     _search['$and'] = [
       {
         $and: [ { n_published: 1 }],
-        $or: [{ salutation_name: { $regex: searchTerm, $options: 'i' } }]
+        $or: [{ gender_name: { $regex: searchTerm, $options: 'i' } }]
       }
     ]
 
     try {
       await connectMongoDB()
 
-      await Salutation.aggregate([
+      await Gender.aggregate([
         { $match: _search },
         {
           $group: {
             _id: '$_id',
-            salutation_id: { $first: '$salutation_id' },
-            salutation_name: { $first: '$salutation_name' }
+            gender_id: { $first: '$gender_id' },
+            gender_name: { $first: '$gender_name' }
           }
         },
         {
           $project: {
             _id: 1,
-            salutation_id: 1,
-            salutation_name: 1,
+            gender_id: 1,
+            gender_name: 1,
             createdAt: 1,
             c_createdBy: 1,
             n_status: 1,
@@ -271,13 +271,13 @@ export async function POST(request) {
     try {
       await connectMongoDB()
 
-      await Salutation.aggregate([
+      await Gender.aggregate([
         { $match: _search },
         {
           $group: {
             _id: '$_id',
-            salutation_id: { $first: '$salutation_id' },
-            salutation_name: { $first: '$salutation_name' },
+            gender_id: { $first: '$gender_id' },
+            gender_name: { $first: '$gender_name' },
             createdAt: { $first: '$createdAt' },
             c_createdBy: { $first: '$c_createdBy' },
             n_status: { $first: '$n_status' },
@@ -287,8 +287,8 @@ export async function POST(request) {
         {
           $project: {
             _id: 1,
-            salutation_id: 1,
-            salutation_name: 1,
+            gender_id: 1,
+            gender_name: 1,
             createdAt: 1,
             c_createdBy: 1,
             n_status: 1,

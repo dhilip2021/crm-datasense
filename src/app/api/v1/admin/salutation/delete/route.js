@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { verifyAccessToken } from "@/helper/helper";
+import { verifyAccessToken } from "@/helper/clientHelper";
 import connectMongoDB from "@/libs/mongodb";
 import { Salutation } from "@/models/salutationModel";
 

@@ -20,15 +20,15 @@ import TableContainer from '@mui/material/TableContainer'
 import TablePagination from '@mui/material/TablePagination'
 import { Box, Button, Card, CardContent, InputAdornment, Switch, TextField, Tooltip } from '@mui/material'
 
-import { createSalutation, deleteSalutationApi, postSalutationListApi } from '@/apiFunctions/ApiAction'
+import { createGender, deleteGenderApi, postGenderListApi } from '@/apiFunctions/ApiAction'
 
 import LoaderGif from '@assets/gif/loader.gif'
 import { toast, ToastContainer } from 'react-toastify'
 import DeleteConformPopup from './DeleteConformPopup'
-import AddSalutationPopup from './AddSalutationPopup'
 import { capitalizeWords } from '@/helper/frontendHelper'
+import AddGenderPopup from './AddGenderPopup'
 
-const SalutationTable = () => {
+const GenderTable = () => {
   const getToken = Cookies.get('_token')
   const [callFlag, setCallFlag] = useState(false)
   const [search, setSearch] = useState('')
@@ -36,29 +36,29 @@ const SalutationTable = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [loader, setLoader] = useState(false)
   const [count, setCount] = useState(0)
-  const [salutationDataList, setSalutationDataList] = useState([])
+  const [genderDataList, setGenderDataList] = useState([])
   const [open, setOpen] = useState(false)
-  const [titles, setTitles] = useState('Add your salutation')
+  const [titles, setTitles] = useState('Add your gender')
   const [delOpen, setDelOpen] = useState(false)
   const [delId, setDelId] = useState('')
   const [delTitle, setDelTitle] = useState('')
 
   const [inputs, setInputs] = useState({
-    salutation_name: '',
+    gender_name: '',
     n_status: 1,
     _id: ''
   })
 
   const [errors, setErrors] = useState({
-    salutation_name: false,
+    gender_name: false,
     n_status: false,
     _id: ''
   })
 
   const handleSwitchChange = index => async event => {
-    const updatedRows = [...salutationDataList]
+    const updatedRows = [...genderDataList]
     updatedRows[index].n_status = event.target.checked ? 1 : 0
-    setSalutationDataList(updatedRows)
+    setGenderDataList(updatedRows)
 
     const body = {
       Id: updatedRows[index]._id,
@@ -70,13 +70,13 @@ const SalutationTable = () => {
       Authorization: `Bearer ${getToken}`
     }
 
-    const results = await createSalutation(body, header)
+    const results = await createGender(body, header)
 
     if (results?.appStatusCode === 0) {
       if (body.n_status === 0) {
-        toast.error(`${updatedRows[index].salutation_name} Status Inactive `)
+        toast.error(`${updatedRows[index].gender_name} Status Inactive `)
       } else {
-        toast.success(`${updatedRows[index].salutation_name} Status Active `)
+        toast.success(`${updatedRows[index].gender_name} Status Active `)
       }
     } else {
       toast.error(results?.error)
@@ -87,7 +87,7 @@ const SalutationTable = () => {
 
   const addChanges = () => {
     setInputs({
-      salutation_name: '',
+      gender_name: '',
       n_status: '',
       _id: ''
     })
@@ -96,7 +96,7 @@ const SalutationTable = () => {
 
   const editChanges = row => {
     setInputs({
-      salutation_name: row?.salutation_name,
+      gender_name: row?.gender_name,
       n_status: row?.n_status,
       _id: row?._id
     })
@@ -140,15 +140,15 @@ const SalutationTable = () => {
       Authorization: `Bearer ${getToken}`
     }
     setLoader(true)
-    const deleteRes = await deleteSalutationApi(delId, header)
+    const deleteRes = await deleteGenderApi(delId, header)
 
     if (deleteRes?.appStatusCode !== 0) {
       setLoader(false)
       toast.success(deleteRes?.error)
-      getSalutationList()
+      getGenderList()
     } else {
       setLoader(false)
-      getSalutationList()
+      getGenderList()
       toast.success(deleteRes?.message)
     }
   }
@@ -164,46 +164,46 @@ const SalutationTable = () => {
   const handleSubmit = () => {
     setOpen(false)
 
-    if (inputs?.salutation_name === '') {
-      setErrors(prev => ({ ...prev, ['salutation_name']: true }))
+    if (inputs?.gender_name === '') {
+      setErrors(prev => ({ ...prev, ['gender_name']: true }))
     } else {
 
         console.log()
 
       if (inputs?._id === '') {
         const body = {
-          salutation_name: inputs?.salutation_name
+          gender_name: inputs?.gender_name
         }
-        salutationCreation(body)
+        genderCreation(body)
       } else {
         const body = {
           Id: inputs?._id,
-          salutation_name: inputs?.salutation_name
+          gender_name: inputs?.gender_name
         }
-        salutationCreation(body)
+        genderCreation(body)
       }
     }
   }
 
-  const salutationCreation = async body => {
+  const genderCreation = async body => {
     const header = {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${getToken}`
     }
 
     setLoader(true)
-    const results = await createSalutation(body, header)
+    const results = await createGender(body, header)
 
     if (results?.appStatusCode !== 0) {
       toast?.error(results?.error)
       setLoader(false)
       setOpen(false)
-      getSalutationList()
+      getGenderList()
     } else {
       setLoader(false)
       toast?.success(results?.message)
       setOpen(false)
-      getSalutationList()
+      getGenderList()
     }
   }
 
@@ -211,11 +211,11 @@ const SalutationTable = () => {
 
   const handleClose = () => {
     setOpen(false)
-    setErrors({ salutation_name: false, n_status: false })
-    setInputs({ salutation_name: '', n_status: 1 })
+    setErrors({ gender_name: false, n_status: false })
+    setInputs({ gender_name: '', n_status: 1 })
   }
 
-  const getSalutationList = async () => {
+  const getGenderList = async () => {
     setLoader(true)
 
     const header = {
@@ -229,15 +229,15 @@ const SalutationTable = () => {
       c_search_term: search
     }
 
-    const results = await postSalutationListApi(body, header)
+    const results = await postGenderListApi(body, header)
 
     setLoader(false)
 
     if (results?.appStatusCode === 0) {
       setCount(results?.payloadJson?.at(0)?.total_count?.at(0)?.count)
-      setSalutationDataList(results?.payloadJson[0]?.data)
+      setGenderDataList(results?.payloadJson[0]?.data)
     } else {
-      setSalutationDataList([])
+      setGenderDataList([])
     }
   }
 
@@ -245,10 +245,10 @@ const SalutationTable = () => {
     const delayDebounce = setTimeout(() => {
       if (search?.length > 0) {
         setLoader(true)
-        getSalutationList()
+        getGenderList()
       } else if (search?.length == 0) {
         setLoader(true)
-        getSalutationList()
+        getGenderList()
         setCallFlag(true)
       }
     }, 500) // waits 500ms after typing stops
@@ -259,7 +259,7 @@ const SalutationTable = () => {
   useEffect(() => {
     if (callFlag) {
       setLoader(true)
-      getSalutationList()
+      getGenderList()
     }
   }, [page, rowsPerPage])
 
@@ -293,7 +293,7 @@ const SalutationTable = () => {
           variant='contained'
           className='mis-4'
         >
-          Add Salutation
+          Add Gender
         </Button>
       </Box>
 
@@ -310,12 +310,12 @@ const SalutationTable = () => {
           </Box>
         )}
 
-        {callFlag && !loader && salutationDataList?.length === 0 && (
+        {callFlag && !loader && genderDataList?.length === 0 && (
           <Box textAlign={'center'} width={'100%'}>
             <Card className='w-full shadow-md rounded-lg'>
               <CardContent className='text-center'>
                 <Box p={40}>
-                  <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Salutation Found</p>
+                  <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Gender Found</p>
                 </Box>
               </CardContent>
             </Card>
@@ -323,7 +323,7 @@ const SalutationTable = () => {
         )}
       </Box>
 
-      {!loader && salutationDataList?.length > 0 && (
+      {!loader && genderDataList?.length > 0 && (
         <Card className='bs-full'>
           <CardContent>
             <Paper sx={{ width: '100%', overflow: 'hidden' }}>
@@ -332,22 +332,22 @@ const SalutationTable = () => {
                   <TableHead>
                     <TableRow>
                       <TableCell sx={{ width: '60px', fontWeight: 800 }}> S.no</TableCell>
-                      <TableCell sx={{ fontWeight: 800 }}>Salutation Name</TableCell>
-                      <TableCell sx={{ fontWeight: 800 }}>Salutation id </TableCell>
+                      <TableCell sx={{ fontWeight: 800 }}>Gender Name</TableCell>
+                      <TableCell sx={{ fontWeight: 800 }}>Gender id </TableCell>
                       <TableCell sx={{ fontWeight: 800 }}>Status</TableCell>
                       <TableCell sx={{ fontWeight: 800 }}>Action</TableCell>
                     </TableRow>
                   </TableHead>
 
                   <TableBody>
-                    {salutationDataList.map((row, index) => (
+                    {genderDataList.map((row, index) => (
                       <TableRow hover role='checkbox' tabIndex={-1} key={row._id}>
                         <TableCell sx={{ width: '60px' }}>{index + 1}</TableCell>
                         <TableCell>
                             <b onClick={() => editChanges(row)}
-                                style={{ color: '#000', cursor: 'pointer' }}>{row?.salutation_name}</b>
+                                style={{ color: '#000', cursor: 'pointer' }}>{row?.gender_name}</b>
                         </TableCell>
-                        <TableCell>{row?.salutation_id}</TableCell>
+                        <TableCell>{row?.gender_id}</TableCell>
                         <TableCell>
                           <Switch checked={row.n_status === 1} onChange={handleSwitchChange(index)} />
                         </TableCell>
@@ -393,7 +393,7 @@ const SalutationTable = () => {
       )}
       <ToastContainer />
       <DeleteConformPopup open={delOpen} title={delTitle} close={delClose} deleteConfirm={deleteConfirm} />
-      <AddSalutationPopup
+      <AddGenderPopup
         open={open}
         close={handleClose}
         titles={titles}
@@ -408,4 +408,4 @@ const SalutationTable = () => {
   )
 }
 
-export default SalutationTable
+export default GenderTable

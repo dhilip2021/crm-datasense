@@ -21,7 +21,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export default function AddSalutationPopup(props) {
+export default function AddGenderPopup(props) {
   const {
     open,
     close,
@@ -80,19 +80,19 @@ export default function AddSalutationPopup(props) {
                 <Grid item xs={12} mt={2} mb={2}>
                   <TextField
                     autoComplete="off"
-                    name="salutation_name" 
-                    placeholder="please enter salutation"
+                    name="gender_name" 
+                    placeholder="please enter gender"
                     fullWidth
                     id="outlined-basic"
-                    label="Salutation name"
+                    label="Gender name"
                     variant="outlined"
                     type="text"
                     size="small"
-                    value={inputs?.salutation_name}
+                    value={inputs?.gender_name}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    error={errors?.salutation_name}
-                    helperText={errors?.salutation_name && `Please enter salutation name`}
+                    error={errors?.gender_name}
+                    helperText={errors?.gender_name && `Please enter gender name`}
                     sx={{
                       ".MuiFormHelperText-root": {
                         ml: 0,

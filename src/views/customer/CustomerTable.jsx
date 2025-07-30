@@ -70,8 +70,6 @@ const CustomerTable = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [loader, setLoader] = useState(false)
   const [count, setCount] = useState(0)
-  const [open, setOpen] = useState(false)
-  const [title, setTitle] = useState('')
   const [customerDataList, setCustomerDataList] = useState([])
 
   const [inputs, setInputs] = useState([])
@@ -155,7 +153,6 @@ const CustomerTable = () => {
 
     if (results?.appStatusCode === 0) {
       setCount(results?.payloadJson?.at(0)?.total_count?.at(0)?.count)
-      console.log(results?.payloadJson[0]?.data,"<<< FFFFFF")
       setCustomerDataList(results?.payloadJson[0]?.data)
     } else {
       setCustomerDataList([])
@@ -248,22 +245,24 @@ const CustomerTable = () => {
                 <Table stickyHeader aria-label='sticky table'>
                   <TableHead>
                     <TableRow>
-                      <TableCell>Customer Name</TableCell>
-                      <TableCell>Customer Type </TableCell>
-                      <TableCell>territory</TableCell>
-                      <TableCell>From Lead</TableCell>
-                      <TableCell>From Opportunity</TableCell>
-                      <TableCell>From Prospect</TableCell>
-                      <TableCell>Account Manager</TableCell>
-                      <TableCell>Created By</TableCell>
-                      <TableCell>Action</TableCell>
+                      <TableCell sx={{ fontWeight: 800 }}>Customer Name</TableCell>
+                      <TableCell sx={{ fontWeight: 800 }}>Gender</TableCell>
+                      <TableCell sx={{ fontWeight: 800 }}>Customer Type </TableCell>
+                      <TableCell sx={{ fontWeight: 800 }}>Territory</TableCell>
+                      <TableCell sx={{ fontWeight: 800 }}>From Lead</TableCell>
+                      <TableCell sx={{ fontWeight: 800 }}>From Opportunity</TableCell>
+                      <TableCell sx={{ fontWeight: 800 }}>From Prospect</TableCell>
+                      <TableCell sx={{ fontWeight: 800 }}>Account Manager</TableCell>
+                      <TableCell sx={{ fontWeight: 800 }}>Created By</TableCell>
+                      <TableCell sx={{ fontWeight: 800 }}>Action</TableCell>
                     </TableRow>
                   </TableHead>
 
                   <TableBody>
                     {customerDataList.map(row => (
                       <TableRow hover role='checkbox' tabIndex={-1} key={row._id}>
-                        <TableCell> <Link href={`/leads/edit-lead/${row?.customer_name}`} > <b>{row?.customer_name}</b></Link> </TableCell>
+                        <TableCell> <Link href={`/leads/edit-lead/${row?.customer_name}`} > <b>  {row?.salutation === ""? "": `${row?.salutation}.`}{row?.customer_name}</b></Link> </TableCell>
+                        <TableCell>{row?.gender}</TableCell>
                         <TableCell>{row?.customer_type}</TableCell>
                         <TableCell>{row?.territory_id}</TableCell>
                         <TableCell>{row?.lead_id}</TableCell>
