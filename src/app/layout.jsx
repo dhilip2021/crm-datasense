@@ -8,6 +8,7 @@ import '@/app/globals.css'
 // import '@assets/iconify-icons/generated-icons.css'
 
 import '@assets/iconify-icons/icon.css'
+import 'remixicon/fonts/remixicon.css'
 
 //react-toastify
 import 'react-toastify/dist/ReactToastify.css';
@@ -25,6 +26,10 @@ const RootLayout = ({ children }) => {
 
   return (
     <html id='__next' dir={direction}>
+      <link
+          href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
+          rel="stylesheet"
+        />
       <body className='flex is-full min-bs-full flex-auto flex-col'>
         <ReduxProvider>{children}</ReduxProvider>
       </body>

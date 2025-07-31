@@ -1,12 +1,17 @@
-import { accessTokenKey, forgetToken } from "./access";
 
-import {headers} from "next/headers";
+
+
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 
-const  CryptoJS  = require("crypto-js");
+import { accessTokenKey, forgetToken } from "./access";
 
-const { urlEncoder, urlDecoder } = require("encryptdecrypt-everytime/src");
+const  CryptoJS  = require("crypto-js");
+import {headers} from "next/headers";
+
+import { urlEncoder, urlDecoder } from "encryptdecrypt-everytime/src"
+
+
 
 
 
@@ -36,17 +41,7 @@ export function generateAccessTokenForget(user){
   return jwt.sign(user, forgetToken, { expiresIn: "1h" });
 }
 
-const formatBytes = (bytes, decimals = 2) => {
-  if (!+bytes) return "0 Bytes";
 
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
-};
 
 export const transporter = nodemailer.createTransport({
   port: 465, // true for 465, false for other ports
@@ -281,15 +276,14 @@ export function checkFileType(fileType) {
   }
 }
 
+
 export function getBase64(file) {
-  let reader = new FileReader();
-
-  if (file !== undefined) {
-    reader.onloadend = () => {
-     return reader.result
-    };
-
-    return reader.readAsDataURL(file);
-  }
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = (error) => reject(error)
+  })
 }
+
 

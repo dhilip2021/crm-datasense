@@ -151,12 +151,23 @@ const VerticalMenu = ({ scrollMenu }) => {
               </SubMenu>
             )}
             <MenuItem href='/fields/list-fields' icon={<i className='ri-input-field' />}>
-              Field List
+              Lead Field 
+            </MenuItem>
+             <MenuItem href='/customer/fields' icon={<i className='ri-input-field' />}>
+              Customer Field
+            </MenuItem>
+           
+
+
+
+            
+          </SubMenu>
+           <MenuItem href='/builder' icon={<i className='ri-tools-line text-xl' />}>
+              Setup
             </MenuItem>
             <MenuItem href='/login' icon={<i className='ri-logout-box-line'></i>}>
               <div onClick={logoutFn}>Logout</div>{' '}
             </MenuItem>
-          </SubMenu>
         </MenuSection>
       </Menu>
     </ScrollWrapper>
