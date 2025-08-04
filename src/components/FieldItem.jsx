@@ -2,9 +2,12 @@
 
 import { useDrag } from 'react-dnd'
 import { useRef } from 'react'
+import FieldCard from './FieldCard'
 
-export default function FieldItem({ type, field, index, onUpdate, onDelete, isPreview }) {
+export default function FieldItem({ type, field, index, onUpdate, onDelete, isPreview, removeField, handleMakeRequired, handleSetPermission }) {
   const ref = useRef(null)
+
+
   const [, drag] = useDrag(
     () => ({
       type: 'FIELD',
@@ -69,70 +72,30 @@ export default function FieldItem({ type, field, index, onUpdate, onDelete, isPr
         <span className='text-xs text-gray-500 italic w-1/3 text-right'>{type}</span>
       </div>
 
-      {type !== 'Checkbox' && (
-        <input
-          className='border p-1 w-full text-sm text-gray-500'
-          value={field.placeholder}
-          onChange={e => onUpdate(index, { ...field, placeholder: e.target.value })}
-          placeholder='Placeholder'
-        />
-      )}
-      {type === 'Phone' && (
-        <div className='space-y-1'>
-          <label className='text-sm font-medium'>Max Characters:</label>
-          <input
-            type='number'
-            className='border p-1 w-full text-sm'
-            value={field.maxLength || ''}
-            onChange={e => onUpdate(index, { ...field, maxLength: e.target.value })}
-            placeholder='e.g. 10'
-          />
-        </div>
-      )}
-      {type === 'Pick List' && (
-        <div className='space-y-1'>
-          <p className='text-sm font-medium'>Options:</p>
-          {(field.options || []).map((opt, i) => (
-            <div key={i} className='flex gap-2'>
-              <input
-                className='border p-1 w-full text-sm'
-                value={opt}
-                onChange={e => handlePicklistChange(i, e.target.value)}
-              />
-              <button onClick={() => handleDeleteOption(i)} className='text-red-500 text-xs'>
-                ✕
-              </button>
-            </div>
-          ))}
-          <button onClick={handleAddOption} className='text-blue-500 text-xs mt-1'>
-            + Add Option
-          </button>
-        </div>
-      )}
+      <FieldCard
+        field={field}
+        index={index}
+        onUpdate={onUpdate}
+        onDelete={onDelete}
+        removeField={removeField}
+        handleMakeRequired={handleMakeRequired}
+        handleSetPermission={handleSetPermission}
+      />
 
-      {type === 'Checkbox' && (
-        <label className='flex items-center gap-2 text-sm'>
-          <input
-            type='checkbox'
-            checked={field.defaultChecked || false}
-            onChange={e => onUpdate(index, { ...field, defaultChecked: e.target.checked })}
-          />
-          Enable by Default
-        </label>
-      )}
+     
 
       <div className='flex justify-between items-center'>
-        <label className='flex items-center gap-2 text-sm'>
+        {/* <label className='flex items-center gap-2 text-sm'>
           <input
             type='checkbox'
             checked={field.required}
             onChange={e => onUpdate(index, { ...field, required: e.target.checked })}
           />
           Required
-        </label>
-        <button onClick={() => onDelete(index)} className='text-red-500 text-xs'>
+        </label> */}
+        {/* <button onClick={() => onDelete(index)} className='text-red-500 text-xs'>
           Delete
-        </button>
+        </button> */}
       </div>
     </div>
   )
