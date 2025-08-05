@@ -56,7 +56,22 @@ export default function PreviewModal({ open, onClose, sections }) {
   )
 }
 
+
 function renderPreviewField(field) {
+  const renderLabel = (
+    <>
+      {field.label}
+      {field.required && (
+        <Typography
+          component="span"
+          sx={{ color: 'red', ml: 0.5, fontWeight: 'bold' }}
+        >
+          *
+        </Typography>
+      )}
+    </>
+  );
+
   switch (field.type) {
     case 'Single Line':
     case 'Email':
@@ -67,7 +82,7 @@ function renderPreviewField(field) {
           fullWidth
           size="small"
           type={field.type === 'Email' ? 'email' : 'text'}
-          label={field.label}
+          label={renderLabel}
           placeholder={field.placeholder || ''}
           InputProps={{
             endAdornment:
@@ -80,24 +95,40 @@ function renderPreviewField(field) {
               ) : null
           }}
         />
-      )
+      );
+
+    case 'Multi-Line':
+      return (
+        <TextField
+          fullWidth
+          size="small"
+          multiline
+          minRows={field.rows || 3} // optional rows count
+          label={renderLabel}
+          placeholder={field.placeholder || ''}
+        />
+      );
 
     case 'Checkbox':
       return (
         <Box display="flex" alignItems="center">
           <Checkbox checked={field.defaultChecked || false} disabled />
-          <Typography>{field.label}</Typography>
+          <Typography>
+            {renderLabel}
+          </Typography>
         </Box>
-      )
+      );
 
     default:
       return (
         <TextField
           fullWidth
           size="small"
-          label={field.label || 'Field'}
+          label={renderLabel}
           placeholder={field.placeholder || ''}
         />
-      )
+      );
   }
 }
+
+

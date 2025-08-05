@@ -26,6 +26,7 @@
     "@mui/lab": "5.0.0-alpha.170",
     "@mui/material": "^5.18.0",
     "@mui/material-nextjs": "^5.15.11",
+    "@mui/x-date-pickers": "^8.9.2",
     "@radix-ui/react-dropdown-menu": "^2.1.15",
     "@reduxjs/toolkit": "^2.8.1",
     "apexcharts": "^4.7.0",
@@ -38,6 +39,8 @@
     "encryptdecrypt-everytime": "^1.1.4",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
+    "jspdf": "^3.0.1",
+    "jspdf-autotable": "^5.0.2",
     "mdi-material-ui": "^7.9.4",
     "mongoose": "^8.14.1",
     "next": "^14.2.3",
@@ -55,7 +58,8 @@
     "server-only": "^0.0.1",
     "sharp": "^0.34.1",
     "slugify": "^1.6.6",
-    "validator": "^13.15.0"
+    "validator": "^13.15.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@iconify/json": "^2.2.218",

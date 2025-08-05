@@ -20,8 +20,10 @@ import {
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
+import CloseIcon from '@mui/icons-material/Close'
 
 const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRequired, handleSetPermission }) => {
+  
   const [editingFieldIndex, setEditingFieldIndex] = useState(null)
 
   const [anchorEl, setAnchorEl] = useState(null)
@@ -45,15 +47,36 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
       case 'Single Line':
         return (
           <>
-            <Typography variant='body2' fontWeight='medium'>
-              Single Line Properties:
-            </Typography>
+            {/*  */}
+            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+              <Typography variant='body2' fontWeight='medium'>
+                Single Line Properties:
+              </Typography>
+              <IconButton aria-label='close' onClick={() => editPropertyClick()}>
+                <CloseIcon sx={{ color: 'red' }} />
+              </IconButton>
+            </Box>
+            <TextField
+              fullWidth
+              size='small'
+              label='Placeholder'
+              value={field.placeholder || ''}
+              onChange={e => onUpdate(index, { ...field, placeholder: e.target.value })}
+            />
 
             <TextField
               fullWidth
               type='number'
               size='small'
-              label='Number of characters allowed'
+              label='Min Number of characters'
+              value={field.minChars || 3}
+              onChange={e => onUpdate(index, { ...field, maxChars: e.target.value })}
+            />
+            <TextField
+              fullWidth
+              type='number'
+              size='small'
+              label='Max Number of characters'
               value={field.maxChars || 255}
               onChange={e => onUpdate(index, { ...field, maxChars: e.target.value })}
             />
@@ -72,6 +95,17 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
               <FormControlLabel
                 control={
                   <Checkbox
+                    checked={field.allowSplCharacter || false}
+                    onChange={e => onUpdate(index, { ...field, allowSplCharacter: e.target.checked })}
+                  />
+                }
+                label='Allow Special Charcter'
+              />
+            </Box>
+            <Box>
+              <FormControlLabel
+                control={
+                  <Checkbox
                     checked={field.isPublic || false}
                     onChange={e => onUpdate(index, { ...field, isPublic: e.target.checked })}
                   />
@@ -79,6 +113,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 label='Mark as Public'
               />
             </Box>
+
             <Box>
               <FormControlLabel
                 control={
@@ -152,9 +187,15 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
       case 'Multi-Line':
         return (
           <>
-            <Typography variant='body2' fontWeight='medium'>
-              Multi-Line Properties:
-            </Typography>
+            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+              <Typography variant='body2' fontWeight='medium'>
+                {' '}
+                Multi-Line Properties:
+              </Typography>
+              <IconButton aria-label='close' onClick={() => editPropertyClick()}>
+                <CloseIcon sx={{ color: 'red' }} />
+              </IconButton>
+            </Box>
 
             <div>
               <Typography variant='body2'>Type:</Typography>
@@ -253,9 +294,14 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
       case 'Email':
         return (
           <>
-            <Typography variant='body2' fontWeight='medium'>
-              Email Properties:
-            </Typography>
+            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+              <Typography variant='body2' fontWeight='medium'>
+                Email Properties:
+              </Typography>
+              <IconButton aria-label='close' onClick={() => editPropertyClick()}>
+                <CloseIcon sx={{ color: 'red' }} />
+              </IconButton>
+            </Box>
             <Box>
               <FormControlLabel
                 control={
@@ -339,6 +385,16 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
       case 'Phone':
         return (
           <div className='space-y-3'>
+            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+              <Typography variant='body2' fontWeight='medium'>
+                {' '}
+                Phone Properties:
+              </Typography>
+              <IconButton aria-label='close' onClick={() => editPropertyClick()}>
+                <CloseIcon sx={{ color: 'red' }} />
+              </IconButton>
+            </Box>
+
             <TextField
               type='number'
               label='Max Characters'
@@ -351,7 +407,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                   maxLength: parseInt(e.target.value || 0)
                 })
               }
-              placeholder='e.g. 30'
+              placeholder='e.g. 10'
             />
 
             {[
@@ -435,10 +491,19 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
           </div>
         )
 
-      case 'Pick List':
+      case 'Dropdown':
         return (
           <Box className='space-y-3'>
-            <FormLabel>Pick List Options</FormLabel>
+            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+              <Typography variant='body2' fontWeight='medium'>
+                {' '}
+                Dropdown Options:
+              </Typography>
+              <IconButton aria-label='close' onClick={() => editPropertyClick()}>
+                <CloseIcon sx={{ color: 'red' }} />
+              </IconButton>
+            </Box>
+
             {(field.options || []).map((opt, i) => (
               <TextField
                 key={i}
@@ -581,7 +646,15 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
         return (
           <Box className='space-y-3'>
             {/* Options */}
-            <FormLabel>Multi Pick List Options</FormLabel>
+            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+              <Typography variant='body2' fontWeight='medium'>
+                {' '}
+                Multi Select Options:
+              </Typography>
+              <IconButton aria-label='close' onClick={() => editPropertyClick()}>
+                <CloseIcon sx={{ color: 'red' }} />
+              </IconButton>
+            </Box>
             {(field.options || []).map((opt, i) => (
               <TextField
                 key={i}
@@ -737,9 +810,17 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
       case 'Date':
         return (
           <>
-            <Typography variant='body2' fontWeight='medium'>
-              Date Properties:
-            </Typography>
+            {/* Options */}
+            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+              <Typography variant='body2' fontWeight='medium'>
+                {' '}
+                Date Properties::
+              </Typography>
+              <IconButton aria-label='close' onClick={() => editPropertyClick()}>
+                <CloseIcon sx={{ color: 'red' }} />
+              </IconButton>
+            </Box>
+
             <Box>
               <FormControlLabel
                 control={
@@ -812,9 +893,15 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
       case 'Date Time':
         return (
           <>
-            <Typography variant='body2' fontWeight='medium'>
-              Date and Time Properties:
-            </Typography>
+            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+              <Typography variant='body2' fontWeight='medium'>
+                {' '}
+                Date and Time Properties:
+              </Typography>
+              <IconButton aria-label='close' onClick={() => editPropertyClick()}>
+                <CloseIcon sx={{ color: 'red' }} />
+              </IconButton>
+            </Box>
             <Box>
               <FormControlLabel
                 control={
@@ -887,6 +974,15 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
       case 'Number':
         return (
           <Box className='space-y-3'>
+            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+              <Typography variant='body2' fontWeight='medium'>
+                {' '}
+                Number Properties:
+              </Typography>
+              <IconButton aria-label='close' onClick={() => editPropertyClick()}>
+                <CloseIcon sx={{ color: 'red' }} />
+              </IconButton>
+            </Box>
             {/* Field Label */}
             <TextField
               fullWidth
@@ -1036,6 +1132,15 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
       case 'Auto-Number':
         return (
           <Box className='space-y-3'>
+            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+              <Typography variant='body2' fontWeight='medium'>
+                {' '}
+                Auto Number Properties:
+              </Typography>
+              <IconButton aria-label='close' onClick={() => editPropertyClick()}>
+                <CloseIcon sx={{ color: 'red' }} />
+              </IconButton>
+            </Box>
             {/* Field Label */}
             <TextField
               fullWidth
@@ -1161,6 +1266,15 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
       case 'Currency':
         return (
           <Box className='space-y-3'>
+            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+              <Typography variant='body2' fontWeight='medium'>
+                {' '}
+                Currency Properties:
+              </Typography>
+              <IconButton aria-label='close' onClick={() => editPropertyClick()}>
+                <CloseIcon sx={{ color: 'red' }} />
+              </IconButton>
+            </Box>
             {/* Field Label */}
             <TextField
               fullWidth
@@ -1309,6 +1423,15 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
       case 'Decimal':
         return (
           <Box className='space-y-3'>
+            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+              <Typography variant='body2' fontWeight='medium'>
+                {' '}
+                Decimal Properties:
+              </Typography>
+              <IconButton aria-label='close' onClick={() => editPropertyClick()}>
+                <CloseIcon sx={{ color: 'red' }} />
+              </IconButton>
+            </Box>
             {/* Field Label */}
             <TextField
               fullWidth
@@ -1454,6 +1577,15 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
       case 'User': {
         return (
           <Box className='space-y-3'>
+            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+              <Typography variant='body2' fontWeight='medium'>
+                {' '}
+                User Properties:
+              </Typography>
+              <IconButton aria-label='close' onClick={() => editPropertyClick()}>
+                <CloseIcon sx={{ color: 'red' }} />
+              </IconButton>
+            </Box>
             {/* Field Label */}
             <TextField
               fullWidth
@@ -1585,9 +1717,15 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
       case 'Checkbox':
         return (
           <>
-            <Typography variant='body2' fontWeight='medium'>
-              Checkbox Properties:
-            </Typography>
+            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+              <Typography variant='body2' fontWeight='medium'>
+                {' '}
+                Checkbox Properties:
+              </Typography>
+              <IconButton aria-label='close' onClick={() => editPropertyClick()}>
+                <CloseIcon sx={{ color: 'red' }} />
+              </IconButton>
+            </Box>
 
             <Box>
               <FormControlLabel
@@ -1651,6 +1789,15 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
       case 'URL': {
         return (
           <Box className='space-y-3'>
+            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+              <Typography variant='body2' fontWeight='medium'>
+                {' '}
+                URL Properties:
+              </Typography>
+              <IconButton aria-label='close' onClick={() => editPropertyClick()}>
+                <CloseIcon sx={{ color: 'red' }} />
+              </IconButton>
+            </Box>
             {/* Field Label */}
             <TextField
               fullWidth
@@ -1774,7 +1921,14 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
     <div className='border rounded p-3 bg-white mb-4 shadow-sm'>
       <div className='flex justify-between items-start'>
         <div>
-          <Typography fontWeight='medium'>{field.label}</Typography>
+          <Typography fontWeight='medium'>
+            {field.label}
+            {field.required && (
+              <Typography component='span' sx={{ color: 'red', ml: 0.5 }}>
+                *
+              </Typography>
+            )}
+          </Typography>
           <Typography variant='caption' color='text.secondary'>
             {field.type}
           </Typography>

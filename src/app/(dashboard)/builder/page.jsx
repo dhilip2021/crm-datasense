@@ -1,254 +1,152 @@
 'use client'
 
-import { useState } from 'react'
-import { DndProvider } from 'react-dnd'
-import { HTML5Backend } from 'react-dnd-html5-backend'
-import SectionBlock from '@/components/SectionBlock'
-import FieldItem from '@/components/FieldItem'
-import { Button } from '@mui/material'
-import PreviewModal from '@/components/PreviewRenderer'
+import React, { useState } from 'react'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+  TablePagination,
+  TableSortLabel,
+  TextField,
+  Box
+} from '@mui/material'
+import EditIcon from '@mui/icons-material/Edit'
+import DeleteIcon from '@mui/icons-material/Delete'
+import Link from 'next/link'
 
-const fieldOptions = [
-  'Single Line',
-  'Multi-Line',
-  'Email',
-  'Phone',
-  'Pick List',
-  'Multi-Select',
-  'Date',
-  'Date Time',
-  'Number',
-  'Auto-Number',
-  'Currency',
-  'Decimal',
-  'User',
-  'Checkbox',
-  'URL',
-  // 'Formula',
-  'File Upload',
-  'Image Upload',
-  'Section Divider'
+const sampleData = [
+  { id: 1, name: 'Leads', module_name: 'Leads', href: '/builder/lead-form' },
+  { id: 2, name: 'Customer (Accounts/Contacts)', module_name: 'Customer', href: '/builder/customer-form' },
+  { id: 3, name: 'Opportunities / Deals', module_name: 'Opportunities', href: '/builder/opportunities-form' },
+  { id: 4, name: 'Contacts', module_name: 'Contacts', href: '/builder/contact-form' },
+  { id: 5, name: 'Orders', module_name: 'Orders', href: '/builder' },
+  { id: 6, name: 'Support Tickets', module_name: 'Support_Tickets', href: '/builder' }
 ]
 
 export default function BuilderPage() {
-  const [sections, setSections] = useState([])
-  const [showLayoutPicker, setShowLayoutPicker] = useState(false)
-  const [open, setOpen] = useState(false)
-  const removeField = () => {
-    console.log('removeField')
-  }
-  const handleMakeRequired = () => {
-    console.log('handleMakeRequired')
-  }
-  const handleSetPermission = () => {
-    console.log('handleSetPermission')
-  }
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(5)
+  const [orderBy, setOrderBy] = useState('name')
+  const [order, setOrder] = useState('asc')
+  const [searchText, setSearchText] = useState('')
 
-  const handleDropField = (sectionIndex, column, type) => {
-    const updated = [...sections]
-
-    const newField = {
-      id: crypto.randomUUID(),
-      type,
-      label: type,
-      placeholder: '',
-      required: false
-    }
-
-    if (type === 'Single Line') {
-      newField.maxChars = 255
-      newField.allowDuplicate = true
-      newField.isPublic = false
-      newField.isEncrypted = false
-      newField.isExternal = false
-      newField.showTooltip = false
-      newField.createFor = [] // [ 'Account', 'Contact', 'Deal' ]
-    }
-    if (type === 'Multi-Line') {
-      newField.subType = 'plain-small'
-      newField.isPublic = false
-      newField.isEncrypted = false
-      newField.showTooltip = false
-      newField.createFor = []
-    }
-    if (type === 'Email') {
-      newField.isPublic = false
-      newField.isEncrypted = false
-      newField.required = false
-      newField.noDuplicates = false
-      newField.showTooltip = false
-      newField.createFor = []
-    }
-    if (type === 'Phone') {
-      newField.maxLength = 30
-      newField.isPublic = false
-      newField.required = false
-      newField.noDuplicates = false
-      newField.isEncrypted = false
-      newField.showTooltip = false
-      newField.tooltipMessage = ''
-      newField.tooltipType = 'icon' // or 'static'
-      newField.createFor = []
-    }
-
-    if (type === 'Pick List') {
-      newField.options = ['Option 1', 'Option 2']
-      newField.defaultValue = ''
-      newField.sortOrder = 'entered' // or 'alphabetical'
-      newField.trackHistory = false
-      newField.enableColor = false
-      newField.isPublic = false
-      newField.required = false
-      newField.showTooltip = false
-      newField.tooltipMessage = ''
-      newField.tooltipType = 'icon'
-      newField.createFor = []
-    }
-
-    if (type === 'Multi-Select') {
-      newField.options = ['Option 1', 'Option 2']
-      newField.defaultValue = [] // multiple values
-      newField.sortOrder = 'entered' // or 'alphabetical'
-      newField.isPublic = false
-      newField.required = false
-      newField.showTooltip = false
-      newField.tooltipMessage = ''
-      newField.tooltipType = 'icon'
-      newField.createFor = []
-    }
-    if (type === 'Date') {
-      newField.isPublic = false
-      newField.isEncrypted = false
-      newField.required = false
-      newField.noDuplicates = false
-      newField.showTooltip = false
-      newField.createFor = []
-    }
-    if (type === 'Date Time') {
-      newField.isPublic = false
-      newField.isEncrypted = false
-      newField.required = false
-      newField.noDuplicates = false
-      newField.showTooltip = false
-      newField.createFor = []
-    }
-
-    if (type === 'Number') {
-      newField.maxDigits = ''
-      newField.useSeparator = false
-    }
-    if (type === 'Checkbox') {
-      newField.defaultChecked = false
-      newField.placeholder = 'Checkbox Label'
-    }
-    if (type === 'Currency') {
-      newField.maxDigits = ''
-      newField.decimalPlaces = '2'
-      newField.rounding = 'normal'
-    }
-
-    // ✅ Safely create the column array if it's missing
-    if (!updated[sectionIndex].fields[column]) {
-      updated[sectionIndex].fields[column] = []
-    }
-
-    updated[sectionIndex].fields[column].push(newField)
-
-    setSections(updated)
+  const handleSort = property => {
+    const isAsc = orderBy === property && order === 'asc'
+    setOrder(isAsc ? 'desc' : 'asc')
+    setOrderBy(property)
   }
 
-  const handleUpdateSection = (sectionIndex, updatedSection) => {
-    const updated = [...sections]
-    updated[sectionIndex] = updatedSection
-    setSections(updated)
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage)
   }
 
-  const handleSave = () => {
-    // console.log('Saved JSON:', JSON.stringify(sections, null, 2))
-    console.log('Saved JSON:', sections)
+  const handleChangeRowsPerPage = event => {
+    setRowsPerPage(parseInt(event.target.value, 10))
+    setPage(0)
   }
+
+  const filteredData = sampleData.filter(
+    row =>
+      row.name.toLowerCase().includes(searchText.toLowerCase()) ||
+      row.module_name.toLowerCase().includes(searchText.toLowerCase())
+  )
+
+  const sortedData = [...filteredData].sort((a, b) => {
+    if (order === 'asc') {
+      return a[orderBy].localeCompare(b[orderBy])
+    } else {
+      return b[orderBy].localeCompare(a[orderBy])
+    }
+  })
+
+  const paginatedData = sortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
 
   return (
-    <DndProvider backend={HTML5Backend}>
-      <div className='flex gap-6 p-6'>
-        <div className='w-[220px] bg-slate-900 text-white rounded p-4 space-y-2'>
-          <h2 className='text-lg font-semibold mb-2'>New Fields</h2>
-          <button
-            onClick={() => setShowLayoutPicker(true)}
-            className='w-full mt-4 py-2 bg-white text-black rounded text-sm font-medium'
-          >
-            ➕ New Section
-          </button>
-          {showLayoutPicker && (
-            <div className='mt-2 space-y-2'>
-              <button
-                className='w-full px-3 py-2 bg-gray-200 rounded text-sm'
-                onClick={() => {
-                  setSections(prev => [
-                    ...prev,
-                    {
-                      id: crypto.randomUUID(),
-                      title: 'New Section',
-                      layout: 'single',
-                      fields: { left: [] }
-                    }
-                  ])
-                  setShowLayoutPicker(false)
-                }}
-              >
-                🟦 Single Column Section
-              </button>
-              <button
-                className='w-full px-3 py-2 bg-gray-200 rounded text-sm'
-                onClick={() => {
-                  setSections(prev => [
-                    ...prev,
-                    {
-                      id: crypto.randomUUID(),
-                      title: 'New Section',
-                      layout: 'double',
-                      fields: { left: [], right: [] }
-                    }
-                  ])
-                  setShowLayoutPicker(false)
-                }}
-              >
-                🟨 Two Column Section
-              </button>
-            </div>
-          )}
+    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+      {/* 🔍 Search Box */}
+      <Box p={2}>
+        <TextField
+          fullWidth
+          size='small'
+          label='Search by Name or Module'
+          value={searchText}
+          onChange={e => setSearchText(e.target.value)}
+        />
+      </Box>
 
-          {fieldOptions.map((type, i) => (
-            <FieldItem
-              key={i}
-              type={type}
-              isPreview
-              removeField={removeField}
-              handleMakeRequired={handleMakeRequired}
-              handleSetPermission={handleSetPermission}
-            />
-          ))}
-        </div>
+      {/* 🧾 Table */}
+      <TableContainer>
+        <Table stickyHeader>
+          <TableHead>
+            <TableRow>
+              <TableCell>#</TableCell>
+              <TableCell sortDirection={orderBy === 'name' ? order : false}>
+                <TableSortLabel
+                  active={orderBy === 'name'}
+                  direction={orderBy === 'name' ? order : 'asc'}
+                  onClick={() => handleSort('name')}
+                >
+                  Displayed in tabs as
+                </TableSortLabel>
+              </TableCell>
+              <TableCell sortDirection={orderBy === 'module_name' ? order : false}>
+                <TableSortLabel
+                  active={orderBy === 'module_name'}
+                  direction={orderBy === 'module_name' ? order : 'asc'}
+                  onClick={() => handleSort('module_name')}
+                >
+                  Module Name
+                </TableSortLabel>
+              </TableCell>
+              <TableCell align='right'>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {paginatedData.map((row, index) => (
+              <TableRow key={row.id}>
+                <TableCell>{page * rowsPerPage + index + 1}</TableCell>
+                <TableCell>
+                  <Link href={row.href} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <strong>{row.name}</strong>
+                  </Link>
+                </TableCell>
+                <TableCell>{row.module_name}</TableCell>
+                <TableCell align='right'>
+                  <IconButton color='primary' size='small' onClick={() => alert(`Edit ${row.name}`)}>
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton color='error' size='small' onClick={() => alert(`Delete ${row.name}`)}>
+                    <DeleteIcon />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+            {paginatedData.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={4} align='center'>
+                  No records found
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-        <div className='flex-1'>
-          {sections.map((section, index) => (
-            <SectionBlock
-              key={section.id}
-              section={section}
-              index={index}
-              onDropField={handleDropField}
-              onUpdateSection={handleUpdateSection}
-            />
-          ))}
-          <Button onClick={handleSave} variant='contained'>
-            Save
-          </Button>
-          <Button variant='contained' color="success" onClick={() => setOpen(true)}>
-            Preview 
-          </Button>
-          <PreviewModal open={open} onClose={() => setOpen(false)} sections={sections} />
-        </div>
-      </div>
-    </DndProvider>
+      {/* 📄 Pagination Controls */}
+      <TablePagination
+        component='div'
+        count={filteredData.length}
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        rowsPerPageOptions={[5, 10, 25]}
+      />
+    </Paper>
   )
 }
