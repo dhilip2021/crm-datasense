@@ -9,9 +9,4 @@
 // === lib/fieldTypes.js ===
 export const fieldTypes = [
   { type: 'single_line', label: 'Single Line' },
-  { type: 'email', label: 'Email' },
-  { type: 'phone', label: 'Phone' },
-  { type: 'date', label: 'Date' },
-  { type: 'number', label: 'Number' },
-  { type: 'picklist', label: 'Pick List' }
 ]

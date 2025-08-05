@@ -23,7 +23,6 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import CloseIcon from '@mui/icons-material/Close'
 
 const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRequired, handleSetPermission }) => {
-  
   const [editingFieldIndex, setEditingFieldIndex] = useState(null)
 
   const [anchorEl, setAnchorEl] = useState(null)
@@ -70,7 +69,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
               size='small'
               label='Min Number of characters'
               value={field.minChars || 3}
-              onChange={e => onUpdate(index, { ...field, maxChars: e.target.value })}
+              onChange={e => onUpdate(index, { ...field, minChars: e.target.value })}
             />
             <TextField
               fullWidth
@@ -89,6 +88,17 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                   />
                 }
                 label='Required'
+              />
+            </Box>
+             <Box>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={field.autoComplte || false}
+                    onChange={e => onUpdate(index, { ...field, autoComplte: e.target.checked })}
+                  />
+                }
+                label='Auto Complete'
               />
             </Box>
             <Box>
@@ -196,6 +206,13 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 <CloseIcon sx={{ color: 'red' }} />
               </IconButton>
             </Box>
+            <TextField
+              fullWidth
+              size='small'
+              label='Placeholder'
+              value={field.placeholder || ''}
+              onChange={e => onUpdate(index, { ...field, placeholder: e.target.value })}
+            />
 
             <div>
               <Typography variant='body2'>Type:</Typography>
@@ -230,6 +247,17 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                   />
                 }
                 label='Required'
+              />
+            </Box>
+             <Box>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={field.autoComplte || false}
+                    onChange={e => onUpdate(index, { ...field, autoComplte: e.target.checked })}
+                  />
+                }
+                label='Auto Complete'
               />
             </Box>
             <Box>
@@ -302,6 +330,13 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 <CloseIcon sx={{ color: 'red' }} />
               </IconButton>
             </Box>
+            <TextField
+              fullWidth
+              size='small'
+              label='Placeholder'
+              value={field.placeholder || ''}
+              onChange={e => onUpdate(index, { ...field, placeholder: e.target.value })}
+            />
             <Box>
               <FormControlLabel
                 control={
@@ -311,6 +346,17 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                   />
                 }
                 label='Required'
+              />
+            </Box>
+             <Box>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={field.autoComplte || false}
+                    onChange={e => onUpdate(index, { ...field, autoComplte: e.target.checked })}
+                  />
+                }
+                label='Auto Complete'
               />
             </Box>
             <Box>
@@ -394,6 +440,13 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 <CloseIcon sx={{ color: 'red' }} />
               </IconButton>
             </Box>
+             <TextField
+              fullWidth
+              size='small'
+              label='Placeholder'
+              value={field.placeholder || ''}
+              onChange={e => onUpdate(index, { ...field, placeholder: e.target.value })}
+            />
 
             <TextField
               type='number'
@@ -411,6 +464,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
             />
 
             {[
+              { key: 'autoComplte', label: 'Auto Complete' },
               { key: 'required', label: 'Required' },
               { key: 'isPublic', label: 'Mark as Public' },
               { key: 'noDuplicates', label: 'Do not allow duplicate values' },
@@ -505,18 +559,36 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
             </Box>
 
             {(field.options || []).map((opt, i) => (
-              <TextField
-                key={i}
-                size='small'
-                fullWidth
-                value={opt}
-                onChange={e => {
-                  const updated = [...field.options]
-                  updated[i] = e.target.value
-                  onUpdate(index, { ...field, options: updated })
-                }}
-                placeholder={`Option ${i + 1}`}
-              />
+              <Box key={i} display='flex' alignItems='center' gap={1}>
+                <TextField
+                  size='small'
+                  fullWidth
+                  value={opt}
+                  onChange={e => {
+                    const updated = [...field.options]
+                    updated[i] = e.target.value
+                    onUpdate(index, { ...field, options: updated })
+                  }}
+                  placeholder={`Option ${i + 1}`}
+                />
+                <IconButton
+                  size='small'
+                  onClick={() => {
+                    const updated = field.options.filter((_, idx) => idx !== i)
+                    // Remove defaultValue if it was the deleted one
+                    const updatedField = {
+                      ...field,
+                      options: updated
+                    }
+                    if (field.defaultValue === opt) {
+                      updatedField.defaultValue = ''
+                    }
+                    onUpdate(index, updatedField)
+                  }}
+                >
+                  <CloseIcon fontSize='small' sx={{ color: 'gray' }} />
+                </IconButton>
+              </Box>
             ))}
             <Button
               onClick={() => onUpdate(index, { ...field, options: [...(field.options || []), ''] })}
@@ -642,6 +714,178 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
           </Box>
         )
 
+      case 'RadioButton':
+        return (
+          <Box className='space-y-3'>
+            <Box display='flex' alignItems='center' justifyContent='space-between'>
+              <Typography variant='body2' fontWeight='medium'>
+                Radio Button Options:
+              </Typography>
+              <IconButton aria-label='close' onClick={() => editPropertyClick()}>
+                <CloseIcon sx={{ color: 'red' }} />
+              </IconButton>
+            </Box>
+
+            {(field.options || []).map((opt, i) => (
+              <Box key={i} display='flex' alignItems='center' gap={1}>
+                <TextField
+                  size='small'
+                  fullWidth
+                  value={opt}
+                  onChange={e => {
+                    const updated = [...field.options]
+                    updated[i] = e.target.value
+                    onUpdate(index, { ...field, options: updated })
+                  }}
+                  placeholder={`Option ${i + 1}`}
+                />
+                <IconButton
+                  size='small'
+                  onClick={() => {
+                    const updated = field.options.filter((_, idx) => idx !== i)
+                    const updatedField = {
+                      ...field,
+                      options: updated
+                    }
+                    if (field.defaultValue === opt) {
+                      updatedField.defaultValue = ''
+                    }
+                    onUpdate(index, updatedField)
+                  }}
+                >
+                  <CloseIcon fontSize='small' sx={{ color: 'gray' }} />
+                </IconButton>
+              </Box>
+            ))}
+
+            <Button
+              onClick={() => onUpdate(index, { ...field, options: [...(field.options || []), ''] })}
+              size='small'
+              variant='text'
+              sx={{ textTransform: 'none', pl: 0 }}
+            >
+              + Add Option
+            </Button>
+
+             <Box>
+               <FormLabel>Default Selected Option</FormLabel>
+            <RadioGroup
+              value={field.defaultValue || ''}
+              onChange={e => onUpdate(index, { ...field, defaultValue: e.target.value })}
+            >
+              {(field.options || []).map((opt, i) => (
+                <FormControlLabel key={i} value={opt} control={<Radio />} label={opt || `Option ${i + 1}`} />
+              ))}
+            </RadioGroup>
+
+              
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={field.trackHistory || false}
+                  onChange={e => onUpdate(index, { ...field, trackHistory: e.target.checked })}
+                />
+              }
+              label='Enable history tracking for radio selection'
+            />
+
+
+            
+             </Box>
+             <Box>
+              <FormLabel>Sort order preference</FormLabel>
+            <RadioGroup
+              row
+              name={`sortOrder-${field.id}`}
+              value={field.sortOrder || 'entered'}
+              onChange={e => onUpdate(index, { ...field, sortOrder: e.target.value })}
+            >
+              <FormControlLabel value='entered' control={<Radio />} label='Entered order' />
+              <FormControlLabel value='alphabetical' control={<Radio />} label='Alphabetical order' />
+            </RadioGroup>
+             </Box>
+
+           
+
+
+            {[
+              { key: 'required', label: 'Required' },
+              { key: 'isPublic', label: 'Mark as Public' }
+            ].map(opt => (
+              <Box key={opt.key}>
+                <Box>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={field[opt.key] || false}
+                      onChange={e =>
+                        onUpdate(index, {
+                          ...field,
+                          [opt.key]: e.target.checked
+                        })
+                      }
+                    />
+                  }
+                  label={opt.label}
+                />
+                </Box>
+              </Box>
+            ))}
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={field.showTooltip || false}
+                  onChange={e =>
+                    onUpdate(index, {
+                      ...field,
+                      showTooltip: e.target.checked
+                    })
+                  }
+                />
+              }
+              label='Show Tooltip'
+            />
+
+            {field.showTooltip && (
+              <>
+                <TextField
+                  label='Tooltip Message'
+                  multiline
+                  fullWidth
+                  rows={2}
+                  size='small'
+                  value={field.tooltipMessage || ''}
+                  onChange={e =>
+                    onUpdate(index, {
+                      ...field,
+                      tooltipMessage: e.target.value
+                    })
+                  }
+                  inputProps={{ maxLength: 255 }}
+                  placeholder='Type tooltip message'
+                />
+
+                <FormLabel sx={{ mt: 1 }}>Tooltip Display Type</FormLabel>
+                <RadioGroup
+                  row
+                  name={`tooltipType-${field.id}`}
+                  value={field.tooltipType || 'icon'}
+                  onChange={e =>
+                    onUpdate(index, {
+                      ...field,
+                      tooltipType: e.target.value
+                    })
+                  }
+                >
+                  <FormControlLabel value='icon' control={<Radio />} label='Info Icon' />
+                  <FormControlLabel value='static' control={<Radio />} label='Static Text' />
+                </RadioGroup>
+              </>
+            )}
+          </Box>
+        )
+
       case 'Multi-Select':
         return (
           <Box className='space-y-3'>
@@ -681,6 +925,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
             >
               + Add Option
             </Button>
+
 
             {/* Default values multi-select */}
             <Box>

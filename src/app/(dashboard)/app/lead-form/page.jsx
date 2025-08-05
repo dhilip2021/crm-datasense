@@ -1,6 +1,18 @@
 'use client'
 
-import { Box, Button, Card, CardContent, Grid, MenuItem, TextField, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  FormControlLabel,
+  Grid,
+  MenuItem,
+  Radio,
+  RadioGroup,
+  TextField,
+  Typography
+} from '@mui/material'
 import Cookies from 'js-cookie'
 import React, { useEffect, useState } from 'react'
 import { toast, ToastContainer } from 'react-toastify'
@@ -13,75 +25,120 @@ import { useRouter } from 'next/navigation'
 function LeadFormPage() {
   const organization_id = Cookies.get('organization_id')
   const lead_form = 'lead-form'
- const router = useRouter()
+  const router = useRouter()
   const [callFlag, setCallFlag] = useState(false)
-  const [search, setSearch] = useState('')
-  //   const [page, setPage] = useState(0)
   const [sections, setSections] = useState([])
   const [formId, setFormId] = useState(null)
   const [values, setValues] = useState({})
   const [loader, setLoader] = useState(false)
-  const handleChange = (fieldId, value) => {
-    setValues(prev => ({
+  const [errors, setErrors] = useState({})
+
+
+  const validateField = (field, value) => {
+  if (field.required && !value) {
+    return `${field.label} is required`
+  }
+
+  if (value) {
+    if (field.type === 'Phone' && !/^\d{10}$/.test(value)) {
+      return 'Phone number must be 10 digits'
+    }
+
+    if (field.type === 'Email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      return 'Invalid email address'
+    }
+
+    if (field.type === 'URL' && !/^(http|https):\/\/[^ "]+$/.test(value)) {
+      return 'Invalid URL (must start with http:// or https://)'
+    }
+  }
+
+  return ''
+}
+
+const handleChange = (fieldId, value) => {
+  setValues(prev => ({
+    ...prev,
+    [fieldId]: value
+  }))
+
+  setErrors(prev => ({
+    ...prev,
+    [fieldId]: '' // clear error on change
+  }))
+}
+
+  const handleBlur = (field) => {
+  const errorMsg = validateField(field, values[field.id])
+  if (errorMsg) {
+    setErrors(prev => ({
       ...prev,
-      [fieldId]: value
+      [field.id]: errorMsg
     }))
   }
-
-  const handleOnChange = e => {
-    const { name, value } = e.target
-
-    setSearch(value)
-  }
-  //   const handleChangePage = (event, newPage) => {
-  //     setPage(newPage)
-  //   }
-
-  //   const handleChangeRowsPerPage = event => {
-  //     setRowsPerPage(+event.target.value)
-  //     setPage(0)
-  //   }
+}
 
   const handleClick = () => {
     router.push('/app/leads')
   }
 
-
   const handleSubmit = async () => {
     const missingFields = []
     const labelBasedValues = {}
+    const newErrors = {}
 
     sections.forEach(section => {
       const allFields = [...(section.fields.left || []), ...(section.fields.right || [])]
 
       allFields.forEach(field => {
         const value = values[field.id]
+
+        // Validation
         if (field.required && !value) {
+          newErrors[field.id] = `${field.label} is required`
           missingFields.push(field.label)
         }
 
-        // Convert ID to Label
+        if (value) {
+          if (field.type === 'Phone' && !/^\d{10}$/.test(value)) {
+            newErrors[field.id] = 'Phone number must be 10 digits'
+            missingFields.push(`${field.label} (must be 10 digits)`)
+          }
+
+          if (field.type === 'Email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+            newErrors[field.id] = 'Invalid email address'
+            missingFields.push(`${field.label} (invalid email)`)
+          }
+
+          if (field.type === 'URL' && !/^(http|https):\/\/[^ "]+$/.test(value)) {
+            newErrors[field.id] = 'Invalid URL (must start with http:// or https://)'
+            missingFields.push(`${field.label} (invalid URL)`)
+          }
+        }
+
         if (value !== undefined && value !== '') {
           labelBasedValues[field.label] = value
         }
       })
     })
 
-    if (missingFields.length > 0) {
-      toast.error(`Please fill: ${missingFields.join(', ')}`)
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+    //   toast.error(`Please fill: ${missingFields.join(', ')}`)
       return
     }
 
+    setErrors({}) // clear previous errors if any
+
     const payload = {
       organization_id,
-      lead_form, // use the correct dynamic form name
+      form_name : lead_form,
       values: labelBasedValues,
       submittedAt: new Date().toISOString()
     }
 
     setLoader(true)
 
-    // Uncomment below for actual submit
     const res = await fetch('/api/v1/admin/lead-form/form-submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -93,6 +150,7 @@ function LeadFormPage() {
       setLoader(false)
       toast.success('Form submitted successfully')
       setValues({})
+      router.push('/app/leads')
     } else {
       setLoader(false)
       toast.error('Failed to submit form')
@@ -106,9 +164,21 @@ function LeadFormPage() {
     )
     const json = await res.json()
     if (json?.success && json?.data?.sections?.length > 0) {
+      const defaultValues = {}
+
+      json.data.sections.forEach(section => {
+        const allFields = [...(section.fields.left || []), ...(section.fields.right || [])]
+        allFields.forEach(field => {
+          if (field.defaultValue !== undefined && field.defaultValue !== '') {
+            defaultValues[field.id] = field.defaultValue
+          }
+        })
+      })
+
       setLoader(false)
-      setSections(json?.data?.sections)
+      setSections(json.data.sections)
       setFormId(json.data._id)
+      setValues(defaultValues)
     } else {
       setLoader(false)
       toast.error('Form not found')
@@ -138,6 +208,8 @@ function LeadFormPage() {
             label={label}
             value={values[field.id] || ''}
             onChange={e => handleChange(field.id, e.target.value)}
+            error={!!errors[field.id]}
+            helperText={errors[field.id]}
           >
             {field.options?.map((option, i) => (
               <MenuItem key={i} value={option}>
@@ -147,17 +219,86 @@ function LeadFormPage() {
           </TextField>
         )
 
+      case 'RadioButton':
+        return (
+          <Box>
+            <Typography variant='body2' gutterBottom>
+              {field.label}
+              {field.required && <span style={{ color: 'red' }}> *</span>}
+            </Typography>
+            <RadioGroup row value={values[field.id] || ''} onChange={e => handleChange(field.id, e.target.value)}>
+              {field.options?.map((opt, i) => (
+                <FormControlLabel key={i} value={opt} control={<Radio />} label={opt} />
+              ))}
+            </RadioGroup>
+          </Box>
+        )
+
       case 'Multi-Line':
         return (
           <TextField
             fullWidth
             size='small'
+            label={label}
             multiline
             minRows={field.rows || 3}
+            placeholder={field.placeholder || ''}
+            value={values[field.id] || ''}
+            onChange={e => handleChange(field.id, e.target.value)}
+            error={!!errors[field.id]}
+            helperText={errors[field.id]}
+            onBlur={() => handleBlur(field)}
+          />
+        )
+      case 'Phone':
+        return (
+          <TextField
+            fullWidth
+            size='small'
+            label={label}
+            placeholder={field.placeholder || ''}
+            type='tel'
+            inputProps={{ maxLength: 10 }}
+            value={values[field.id] || ''}
+            onChange={e => {
+              const val = e.target.value
+              if (/^\d*$/.test(val)) {
+                handleChange(field.id, val)
+              }
+            }}
+            error={!!errors[field.id]}
+            helperText={errors[field.id]}
+            onBlur={() => handleBlur(field)}
+          />
+        )
+
+      case 'Email':
+        return (
+          <TextField
+            fullWidth
+            size='small'
             label={label}
             placeholder={field.placeholder || ''}
             value={values[field.id] || ''}
             onChange={e => handleChange(field.id, e.target.value)}
+            error={!!errors[field.id]}
+            helperText={errors[field.id]}
+            onBlur={() => handleBlur(field)}
+          />
+        )
+
+      case 'URL':
+        return (
+          <TextField
+            fullWidth
+            size='small'
+            label={label}
+            placeholder={field.placeholder || ''}
+            value={values[field.id] || ''}
+            onChange={e => handleChange(field.id, e.target.value)}
+            error={!!errors[field.id]}
+            helperText={errors[field.id]}
+            onBlur={() => handleBlur(field)}
           />
         )
 
@@ -170,6 +311,9 @@ function LeadFormPage() {
             placeholder={field.placeholder || ''}
             value={values[field.id] || ''}
             onChange={e => handleChange(field.id, e.target.value)}
+            error={!!errors[field.id]}
+            helperText={errors[field.id]}
+            onBlur={() => handleBlur(field)}
           />
         )
     }
@@ -216,18 +360,18 @@ function LeadFormPage() {
 
                   <Grid container spacing={2}>
                     {/* Left Column */}
-                    <Grid item xs={12} sm={6} >
+                    <Grid item xs={12} sm={6}>
                       {(section.fields.left || []).map(field => (
-                        <Box mb={4} key={field.id} >
+                        <Box mb={4} key={field.id}>
                           {renderField(field)}
                         </Box>
                       ))}
                     </Grid>
 
                     {/* Right Column */}
-                    <Grid item xs={12} sm={6} >
+                    <Grid item xs={12} sm={6}>
                       {(section.fields.right || []).map(field => (
-                        <Box mb={4} key={field.id} >
+                        <Box mb={4} key={field.id}>
                           {renderField(field)}
                         </Box>
                       ))}
@@ -239,7 +383,7 @@ function LeadFormPage() {
           ))}
 
         <Box display='flex' justifyContent='space-between' mt={2}>
-             <Button variant='contained' color='warning'  onClick={handleClick}>
+          <Button variant='contained' color='error' onClick={handleClick}>
             cancel
           </Button>
           <Button variant='contained' color='primary' onClick={handleSubmit}>

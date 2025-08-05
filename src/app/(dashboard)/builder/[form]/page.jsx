@@ -10,6 +10,7 @@ import PreviewModal from '@/components/PreviewRenderer'
 import { toast, ToastContainer } from 'react-toastify'
 import Cookies from 'js-cookie'
 import { useParams } from 'next/navigation'
+import { LoadingButton } from '@mui/lab'
 
 const fieldOptions = [
   'Single Line',
@@ -17,6 +18,7 @@ const fieldOptions = [
   'Email',
   'Phone',
   'Dropdown',
+  'RadioButton',
   'Multi-Select',
   'Date',
   'Date Time',
@@ -41,6 +43,7 @@ export default function LeadFormPage() {
   const [formId, setFormId] = useState(null)
   const [showLayoutPicker, setShowLayoutPicker] = useState(false)
   const [open, setOpen] = useState(false)
+  const [loader, setLoader] = useState(false)
   const removeField = () => {
     console.log('removeField')
   }
@@ -66,6 +69,7 @@ export default function LeadFormPage() {
       newField.maxChars = 255
       newField.minChars = 3
       newField.allowDuplicate = true
+      newField.autoComplte = true
       newField.isPublic = false
       newField.allowSplCharacter = false
       newField.isEncrypted = false
@@ -78,23 +82,27 @@ export default function LeadFormPage() {
     if (type === 'Multi-Line') {
       newField.subType = 'plain-small'
       newField.rowSize = 3
+      newField.autoComplte = true
       newField.isPublic = false
       newField.isEncrypted = false
       newField.showTooltip = false
-      newField.placeholder = 'Enter a value'
       newField.createFor = []
+      newField.placeholder = 'Enter a value'
     }
     if (type === 'Email') {
       newField.isPublic = false
       newField.isEncrypted = false
+      newField.autoComplte = true
       newField.required = false
       newField.noDuplicates = false
       newField.showTooltip = false
       newField.createFor = []
+      newField.placeholder = 'Enter a value'
     }
     if (type === 'Phone') {
       newField.maxLength = 10
       newField.isPublic = false
+      newField.autoComplte = true
       newField.required = false
       newField.noDuplicates = false
       newField.isEncrypted = false
@@ -102,6 +110,7 @@ export default function LeadFormPage() {
       newField.tooltipMessage = ''
       newField.tooltipType = 'icon' // or 'static'
       newField.createFor = []
+      newField.placeholder = 'Enter a phone number'
     }
 
     if (type === 'Dropdown') {
@@ -112,6 +121,19 @@ export default function LeadFormPage() {
       newField.enableColor = false
       newField.isPublic = false
       newField.required = false
+      newField.showTooltip = false
+      newField.tooltipMessage = ''
+      newField.tooltipType = 'icon'
+      newField.createFor = []
+      newField.placeholder = 'Enter a value'
+    }
+    if (type === 'RadioButton') {
+      newField.options = ['Option 1', 'Option 2']
+      newField.defaultValue = ''
+      newField.sortOrder = 'entered' // or 'alphabetical'
+      newField.trackHistory = false
+      newField.required = false
+      newField.isPublic = false
       newField.showTooltip = false
       newField.tooltipMessage = ''
       newField.tooltipType = 'icon'
@@ -136,6 +158,7 @@ export default function LeadFormPage() {
       newField.noDuplicates = false
       newField.showTooltip = false
       newField.createFor = []
+      newField.placeholder = 'Enter a value'
     }
     if (type === 'Date Time') {
       newField.isPublic = false
@@ -144,11 +167,13 @@ export default function LeadFormPage() {
       newField.noDuplicates = false
       newField.showTooltip = false
       newField.createFor = []
+      newField.placeholder = 'Enter a value'
     }
 
     if (type === 'Number') {
       newField.maxDigits = ''
       newField.useSeparator = false
+      newField.placeholder = 'Enter a value'
     }
     if (type === 'CheckBox') {
       newField.defaultChecked = false
@@ -158,6 +183,7 @@ export default function LeadFormPage() {
       newField.maxDigits = ''
       newField.decimalPlaces = '2'
       newField.rounding = 'normal'
+      newField.placeholder = 'CheckBox Label'
     }
 
     // ✅ Safely create the column array if it's missing
@@ -183,7 +209,7 @@ export default function LeadFormPage() {
     }
 
     let res
-
+    setLoader(true)
     if (formId) {
       // update existing
       res = await fetch('/api/v1/admin/form-template/update', {
@@ -203,9 +229,11 @@ export default function LeadFormPage() {
     const data = await res.json()
 
     if (data?.success) {
+      setLoader(false)
       toast.success(formId ? 'Form updated successfully!' : 'Form saved successfully!')
       if (!formId) setFormId(data.data._id) // in case it's newly created
     } else {
+      setLoader(false)
       toast.error('Form save/update failed!')
     }
   }
@@ -234,7 +262,7 @@ export default function LeadFormPage() {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className='flex gap-6 p-6'>
-        <div className='w-[220px] bg-slate-900 text-white rounded p-4 space-y-2'>
+        <div className='w-[220px] bg-slate-900 text-white rounded p-4 space-y-2 max-h-[85vh] overflow-y-auto'>
           <h2 className='text-lg font-semibold mb-2'>Lead Fields</h2>
           <button
             onClick={() => setShowLayoutPicker(true)}
@@ -294,25 +322,34 @@ export default function LeadFormPage() {
         </div>
 
         <div className='flex-1'>
-          {sections.map((section, index) => (
-            <SectionBlock
-              key={section.id}
-              section={section}
-              index={index}
-              onDropField={handleDropField}
-              onUpdateSection={handleUpdateSection}
-            />
-          ))}
-           <Box display='flex' justifyContent={"space-between"} mt={2}>
-            
-           <Button variant='contained' color='success' onClick={() => setOpen(true)}>
-            Preview
-          </Button>
-          <Button onClick={handleSaveLayout} variant='contained'>
-            {formId ? 'Update' : 'Save'}
-          </Button>
-           </Box>
-         
+          <div className='max-h-[85vh] overflow-y-auto'>
+            {sections.map((section, index) => (
+              <SectionBlock
+                key={section.id}
+                section={section}
+                index={index}
+                onDropField={handleDropField}
+                onUpdateSection={handleUpdateSection}
+              />
+            ))}
+          </div>
+
+          <Box display='flex' justifyContent={'space-between'} mt={2}>
+            <Button variant='contained' color='success' onClick={() => setOpen(true)}>
+              Preview
+            </Button>
+            {/* <Button onClick={handleSaveLayout} variant='contained' loadingPosition="start">
+              {formId ? 'Update' : 'Save'}
+            </Button> */}
+            <LoadingButton
+              onClick={handleSaveLayout}
+              variant='contained'
+              loading={loader} // ← this should be a state (true/false)
+              loadingPosition='start'
+            >
+              {formId ? 'Update' : 'Save'}
+            </LoadingButton>
+          </Box>
 
           <PreviewModal open={open} onClose={() => setOpen(false)} sections={sections} />
         </div>

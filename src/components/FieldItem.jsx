@@ -84,19 +84,20 @@ export default function FieldItem({ type, field, index, onUpdate, onDelete, isPr
 
      
 
-      <div className='flex justify-between items-center'>
-        {/* <label className='flex items-center gap-2 text-sm'>
+      {/* <div className='flex justify-between items-center'>
+        <label className='flex items-center gap-2 text-sm'>
           <input
             type='checkbox'
             checked={field.required}
             onChange={e => onUpdate(index, { ...field, required: e.target.checked })}
           />
           Required
-        </label> */}
-        {/* <button onClick={() => onDelete(index)} className='text-red-500 text-xs'>
+        </label>
+        <button onClick={() => onDelete(index)} className='text-red-500 text-xs'>
           Delete
-        </button> */}
-      </div>
+        </button>
+      </div> */}
+
     </div>
   )
 }

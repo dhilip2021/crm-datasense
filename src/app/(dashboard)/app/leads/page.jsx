@@ -1,178 +1,208 @@
 'use client'
 
-import Link from 'next/link';
-
 import {
-  Box, TextField,Breadcrumbs, Button,InputAdornment, Grid, Typography, Table, TableHead,
-  TableRow, TableCell, TableBody, TablePagination
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Divider,
+  Grid,
+  MenuItem,
+  Paper,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TextField,
+  Typography
 } from '@mui/material'
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { useEffect, useState } from 'react'
-import dayjs from 'dayjs'
+import * as XLSX from 'xlsx'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import * as XLSX from 'xlsx'
-import Cookies from 'js-cookie';
-
-
-// Components Imports
+import Cookies from 'js-cookie'
 
 const Leads = () => {
   const organization_id = Cookies.get('organization_id')
   const form_name = 'lead-form'
 
-  const [search, setSearch] = useState('')
-  const [page, setPage] = useState(0)
   const [data, setData] = useState([])
+  const [filteredData, setFilteredData] = useState([])
+  const [filters, setFilters] = useState({ status: '', source: '', region: '', rep: '', value: '' })
+  const [page, setPage] = useState(0)
   const [limit, setLimit] = useState(10)
-  const [total, setTotal] = useState(0)
-  const [fromDate, setFromDate] = useState(null)
-  const [toDate, setToDate] = useState(null)
-
-
-  
-  const fetchData = async () => {
-    const params = new URLSearchParams({
-      organization_id,
-      form_name,
-      page: page + 1,
-      limit,
-      search,
-      ...(fromDate && { from: dayjs(fromDate).format('YYYY-MM-DD') }),
-      ...(toDate && { to: dayjs(toDate).format('YYYY-MM-DD') })
-    })
-
-    const res = await fetch(`/api/v1/admin/lead-form/list?${params}`)
-    const json = await res.json()
-
-    if (json.success) {
-      setData(json.data)
-      setTotal(json.total)
-    }
-  }
 
   useEffect(() => {
     fetchData()
-  }, [page, limit])
+  }, [])
 
-  const handleExportExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(data.map(row => ({
-      'Lead Name': row.lead_name,
-      ...row.values
-    })))
-    const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, worksheet, 'Leads')
-    XLSX.writeFile(wb, `${form_name}_leads.xlsx`)
+  const fetchData = async () => {
+    const res = await fetch(`/api/v1/admin/lead-form/list?organization_id=${organization_id}&form_name=${form_name}`)
+    const json = await res.json()
+    if (json.success) {
+      setData(json.data)
+      setFilteredData(json.data)
+    }
   }
 
-  const handleExportPDF = () => {
-    const doc = new jsPDF()
-    const columns = ['Lead Name', ...Object.keys(data[0]?.values || {})]
-    const rows = data.map(row => [
-      row.lead_name,
-      ...Object.values(row.values || {})
-    ])
-    autoTable(doc, { head: [columns], body: rows })
-    doc.save(`${form_name}_leads.pdf`)
+  const handleFilterChange = (key, value) => {
+    const updated = { ...filters, [key]: value }
+    setFilters(updated)
+
+    const filtered = data.filter(
+      row =>
+        (!updated.status || row.values.Status === updated.status) &&
+        (!updated.source || row.values['Lead Source'] === updated.source) &&
+        (!updated.region || row.values.Region === updated.region) &&
+        (!updated.rep || row.values['Assigned To'] === updated.rep) &&
+        (!updated.value || row.values.Value === updated.value)
+    )
+    setFilteredData(filtered)
+    setPage(0)
   }
+
+  const handleExport = type => {
+    const tableData = filteredData.map(row => ({
+      'Lead ID': row.lead_id,
+      Name: row.values['Full Name'] || '',
+      Company: row.values['Company Name'] || '',
+      Location: row.values['City / Location'] || '',
+      Status: row.values['Status'] || '',
+      'Assigned To': row.values['Assigned To'] || '',
+      Source: row.values['Lead Source'] || '',
+      Score: row.values.Score || '',
+      'Last Activity': row.values['Last Activity'] || '',
+      'Next Follow-up': row.values['Next Follow-up'] || ''
+    }))
+
+    if (type === 'excel' || type === 'csv') {
+      const ws = XLSX.utils.json_to_sheet(tableData)
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, ws, 'Leads')
+      XLSX.writeFile(wb, `leads.${type === 'excel' ? 'xlsx' : 'csv'}`)
+    }
+
+    if (type === 'pdf') {
+      const doc = new jsPDF()
+      const columns = Object.keys(tableData[0] || {})
+      const rows = tableData.map(obj => columns.map(col => obj[col]))
+      autoTable(doc, { head: [columns], body: rows })
+      doc.save('leads.pdf')
+    }
+  }
+
+  const columns = [
+    'Lead ID',
+    'Name',
+    'Company',
+    'Location',
+    'Status',
+    'Assigned To',
+    'Source',
+    'Score',
+    'Last Activity',
+    'Next Follow-up'
+  ]
 
   return (
-    <Grid container spacing={6}>
-      <Grid item xs={12}>
-        <Box display={'flex'} justifyContent={'flex-end'} mb={4}>
-          <Link href={'/app/lead-form'}>
-            <Button startIcon={<i className='ri-add-line'></i>} variant='contained' className='mis-4'>
-              New Lead
-            </Button>
-          </Link>
-        </Box>
+    <Box px={4} py={4}>
+      <Grid container justifyContent='flex-end' alignItems='center' mb={2}>
+        {/* <Typography variant="h5" fontWeight="bold">📂 3. Lead Table View</Typography> */}
+        <Button variant='contained' href='/app/lead-form'>
+          + New Lead
+        </Button>
       </Grid>
 
-       <Box>
-      
-      <Grid container spacing={2} mb={2}>
-        <Grid item xs={12} sm={3}>
-          <TextField
-            label="Search by Lead Name"
-            size="small"
-            fullWidth
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && fetchData()}
-          />
-        </Grid>
-        <Grid item xs={12} sm={3}>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              label="From Date"
-              value={fromDate}
-              onChange={setFromDate}
-              slotProps={{ textField: { size: 'small', fullWidth: true } }}
-            />
-          </LocalizationProvider>
-        </Grid>
-        <Grid item xs={12} sm={3}>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              label="To Date"
-              value={toDate}
-              onChange={setToDate}
-              slotProps={{ textField: { size: 'small', fullWidth: true } }}
-            />
-          </LocalizationProvider>
-        </Grid>
-        <Grid item xs={12} sm={3}>
-          <Button variant="contained" onClick={fetchData} fullWidth>
-            Apply Filters
-          </Button>
-        </Grid>
-      </Grid>
-
-      <Box mb={2} display="flex" gap={1}>
-        <Button onClick={handleExportExcel} variant="outlined">Export Excel</Button>
-        <Button onClick={handleExportPDF} variant="outlined">Export PDF</Button>
-      </Box>
-
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Lead Name</TableCell>
-            {Object.keys(data[0]?.values || {}).map((key, i) => (
-              <TableCell key={i}>{key}</TableCell>
+      <Card elevation={1}>
+        <CardContent>
+          <Grid container spacing={2} mb={2}>
+            {['status', 'source', 'region', 'rep', 'value'].map((key, i) => (
+              <Grid item xs={6} sm={2.4} key={i}>
+                <Select
+                  fullWidth
+                  displayEmpty
+                  size='small'
+                  value={filters[key]}
+                  onChange={e => handleFilterChange(key, e.target.value)}
+                >
+                  <MenuItem value=''>Filter by {key.charAt(0).toUpperCase() + key.slice(1)}</MenuItem>
+                  {[...new Set(data.map(d => d.values[key.replace(/^\w/, c => c.toUpperCase())] || ''))]
+                    .filter(Boolean)
+                    .map((option, i) => (
+                      <MenuItem key={i} value={option}>
+                        {option}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </Grid>
             ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {data.map(row => (
-            <TableRow key={row.lead_id}>
-              <TableCell>{row.lead_name}</TableCell>
-              {Object.values(row.values || {}).map((val, i) => (
-                <TableCell key={i}>{val}</TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </Grid>
 
-      <TablePagination
-        component="div"
-        count={total}
-        page={page}
-        onPageChange={(e, newPage) => setPage(newPage)}
-        rowsPerPage={limit}
-        onRowsPerPageChange={e => {
-          setLimit(parseInt(e.target.value, 10))
-          setPage(0)
-        }}
-        rowsPerPageOptions={[5, 10, 20, 50]}
-      />
+          <Box display='flex' gap={1} mb={2}>
+            <Button onClick={() => handleExport('excel')} variant='outlined'>
+              Export Excel
+            </Button>
+            <Button onClick={() => handleExport('csv')} variant='outlined'>
+              Export CSV
+            </Button>
+            <Button onClick={() => handleExport('pdf')} variant='outlined'>
+              Export PDF
+            </Button>
+          </Box>
+
+          <Divider sx={{ mb: 2 }} />
+
+          <Paper sx={{ width: '100%', overflow: 'auto' }}>
+            <TableContainer sx={{ maxHeight: 500 }}>
+              <Table stickyHeader>
+                <TableHead>
+                  <TableRow>
+                    {columns.map((col, i) => (
+                      <TableCell key={i} sx={{ fontWeight: 600 }}>
+                        {col}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {filteredData.slice(page * limit, page * limit + limit).map((row, i) => (
+                    <TableRow key={i}>
+                      <TableCell>{row.lead_id}</TableCell>
+                      <TableCell>{row.values['Full Name']}</TableCell>
+                      <TableCell>{row.values['Company Name']}</TableCell>
+                      <TableCell>{row.values['City / Location']}</TableCell>
+                      <TableCell>{row.values['Status']}</TableCell>
+                      <TableCell>{row.values['Assigned To']}</TableCell>
+                      <TableCell>{row.values['Lead Source']}</TableCell>
+                      <TableCell>{row.values['Score']}</TableCell>
+                      <TableCell>{row.values['Last Activity']}</TableCell>
+                      <TableCell>{row.values['Next Follow-up']}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            <TablePagination
+              component='div'
+              count={filteredData.length}
+              page={page}
+              rowsPerPage={limit}
+              rowsPerPageOptions={[5, 10, 25, 50]}
+              onPageChange={(e, newPage) => setPage(newPage)}
+              onRowsPerPageChange={e => {
+                setLimit(parseInt(e.target.value, 10))
+                setPage(0)
+              }}
+            />
+          </Paper>
+        </CardContent>
+      </Card>
     </Box>
-
-
-
-
-    </Grid>
   )
 }
 
