@@ -1,5 +1,6 @@
 'use client'
 
+import React, { useEffect, useState } from 'react'
 import {
   Box,
   Button,
@@ -8,202 +9,210 @@ import {
   Divider,
   Grid,
   MenuItem,
-  Paper,
-  Select,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TablePagination,
   TableRow,
   TextField,
   Typography
 } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import dayjs from 'dayjs'
 import * as XLSX from 'xlsx'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import Cookies from 'js-cookie'
 
-const Leads = () => {
-  const organization_id = Cookies.get('organization_id')
-  const form_name = 'lead-form'
-
+const LeadTable = () => {
   const [data, setData] = useState([])
-  const [filteredData, setFilteredData] = useState([])
-  const [filters, setFilters] = useState({ status: '', source: '', region: '', rep: '', value: '' })
   const [page, setPage] = useState(0)
   const [limit, setLimit] = useState(10)
-
-  useEffect(() => {
-    fetchData()
-  }, [])
+  const [total, setTotal] = useState(0)
+  const [filters, setFilters] = useState({
+    status: '',
+    source: '',
+    region: '',
+    rep: '',
+    value: '',
+    fromDate: null,
+    toDate: null,
+    search: ''
+  })
 
   const fetchData = async () => {
-    const res = await fetch(`/api/v1/admin/lead-form/list?organization_id=${organization_id}&form_name=${form_name}`)
+    const organization_id = Cookies.get('organization_id')
+    const form_name = 'lead-form'
+
+    const query = new URLSearchParams({
+      organization_id,
+      form_name,
+      page: page + 1,
+      limit,
+      ...filters.search && { search: filters.search },
+      ...filters.status && { status: filters.status },
+      ...filters.source && { source: filters.source },
+      ...filters.region && { region: filters.region },
+      ...filters.rep && { rep: filters.rep },
+      ...filters.value && { value: filters.value },
+      ...filters.fromDate && { from: dayjs(filters.fromDate).format('YYYY-MM-DD') },
+      ...filters.toDate && { to: dayjs(filters.toDate).format('YYYY-MM-DD') }
+    })
+
+    const res = await fetch(`/api/v1/admin/lead-form/list?${query}`)
     const json = await res.json()
     if (json.success) {
       setData(json.data)
-      setFilteredData(json.data)
+      setTotal(json.total)
     }
   }
 
-  const handleFilterChange = (key, value) => {
-    const updated = { ...filters, [key]: value }
-    setFilters(updated)
+  useEffect(() => {
+    fetchData()
+  }, [page, limit])
 
-    const filtered = data.filter(
-      row =>
-        (!updated.status || row.values.Status === updated.status) &&
-        (!updated.source || row.values['Lead Source'] === updated.source) &&
-        (!updated.region || row.values.Region === updated.region) &&
-        (!updated.rep || row.values['Assigned To'] === updated.rep) &&
-        (!updated.value || row.values.Value === updated.value)
-    )
-    setFilteredData(filtered)
-    setPage(0)
-  }
-
-  const handleExport = type => {
-    const tableData = filteredData.map(row => ({
-      'Lead ID': row.lead_id,
-      Name: row.values['Full Name'] || '',
-      Company: row.values['Company Name'] || '',
-      Location: row.values['City / Location'] || '',
-      Status: row.values['Status'] || '',
-      'Assigned To': row.values['Assigned To'] || '',
-      Source: row.values['Lead Source'] || '',
-      Score: row.values.Score || '',
-      'Last Activity': row.values['Last Activity'] || '',
-      'Next Follow-up': row.values['Next Follow-up'] || ''
+  const exportToExcel = () => {
+    const rows = data.map(d => ({
+      'Lead ID': d.lead_id,
+      'Name': d.values['Full Name'],
+      'Company': d.values['Company Name'],
+      'Location': d.values['City / Location'],
+      'Status': d.values['Status'],
+      'Assigned To': d.values['Lead Owner'],
+      'Source': d.values['Lead Source'],
+      'Score': d.values['Lead Score'],
+      'Last Activity': d.values['Last Activity Date'],
+      'Next Follow-up': d.values['Next Follow-up Date']
     }))
-
-    if (type === 'excel' || type === 'csv') {
-      const ws = XLSX.utils.json_to_sheet(tableData)
-      const wb = XLSX.utils.book_new()
-      XLSX.utils.book_append_sheet(wb, ws, 'Leads')
-      XLSX.writeFile(wb, `leads.${type === 'excel' ? 'xlsx' : 'csv'}`)
-    }
-
-    if (type === 'pdf') {
-      const doc = new jsPDF()
-      const columns = Object.keys(tableData[0] || {})
-      const rows = tableData.map(obj => columns.map(col => obj[col]))
-      autoTable(doc, { head: [columns], body: rows })
-      doc.save('leads.pdf')
-    }
+    const sheet = XLSX.utils.json_to_sheet(rows)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, sheet, 'Leads')
+    XLSX.writeFile(wb, 'leads_export.xlsx')
   }
 
-  const columns = [
-    'Lead ID',
-    'Name',
-    'Company',
-    'Location',
-    'Status',
-    'Assigned To',
-    'Source',
-    'Score',
-    'Last Activity',
-    'Next Follow-up'
-  ]
+  const exportToPDF = () => {
+    const doc = new jsPDF()
+    const columns = ['Lead ID', 'Name', 'Company', 'Location', 'Status', 'Assigned To', 'Source', 'Score', 'Last Activity', 'Next Follow-up']
+    const rows = data.map(d => [
+      d.lead_id,
+      d.values['Full Name'],
+      d.values['Company Name'],
+      d.values['City / Location'],
+      d.values['Status'],
+      d.values['Lead Owner'],
+      d.values['Lead Source'],
+      d.values['Lead Score'],
+      d.values['Last Activity Date'],
+      d.values['Next Follow-up Date']
+    ])
+    autoTable(doc, { head: [columns], body: rows })
+    doc.save('leads_export.pdf')
+  }
 
   return (
     <Box px={4} py={4}>
-      <Grid container justifyContent='flex-end' alignItems='center' mb={2}>
-        {/* <Typography variant="h5" fontWeight="bold">📂 3. Lead Table View</Typography> */}
-        <Button variant='contained' href='/app/lead-form'>
-          + New Lead
-        </Button>
+      <Grid container justifyContent='space-between' mb={2} alignItems='center'>
+        <Typography variant='h5' fontWeight='bold'>Leads</Typography>
+        <Button variant='contained' href='/app/lead-form'>+ New Lead</Button>
       </Grid>
 
-      <Card elevation={1}>
+      <Card>
         <CardContent>
-          <Grid container spacing={2} mb={2}>
-            {['status', 'source', 'region', 'rep', 'value'].map((key, i) => (
-              <Grid item xs={6} sm={2.4} key={i}>
-                <Select
-                  fullWidth
-                  displayEmpty
-                  size='small'
-                  value={filters[key]}
-                  onChange={e => handleFilterChange(key, e.target.value)}
-                >
-                  <MenuItem value=''>Filter by {key.charAt(0).toUpperCase() + key.slice(1)}</MenuItem>
-                  {[...new Set(data.map(d => d.values[key.replace(/^\w/, c => c.toUpperCase())] || ''))]
-                    .filter(Boolean)
-                    .map((option, i) => (
-                      <MenuItem key={i} value={option}>
-                        {option}
-                      </MenuItem>
-                    ))}
-                </Select>
-              </Grid>
-            ))}
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={2}>
+              <TextField size='small' fullWidth label='Search' value={filters.search} onChange={e => setFilters({ ...filters, search: e.target.value })} onKeyDown={e => e.key === 'Enter' && fetchData()} />
+            </Grid>
+            <Grid item xs={12} sm={2}>
+              <TextField select size='small' fullWidth label='Status' value={filters.status} onChange={e => setFilters({ ...filters, status: e.target.value })}>
+                <MenuItem value=''>All</MenuItem>
+                <MenuItem value='New'>New</MenuItem>
+                <MenuItem value='Contacted'>Contacted</MenuItem>
+                <MenuItem value='Qualified'>Qualified</MenuItem>
+              </TextField>
+            </Grid>
+            <Grid item xs={12} sm={2}>
+              <TextField select size='small' fullWidth label='Source' value={filters.source} onChange={e => setFilters({ ...filters, source: e.target.value })}>
+                <MenuItem value=''>All</MenuItem>
+                <MenuItem value='Website'>Website</MenuItem>
+                <MenuItem value='Referral'>Referral</MenuItem>
+                <MenuItem value='LinkedIn'>LinkedIn</MenuItem>
+              </TextField>
+            </Grid>
+            <Grid item xs={12} sm={2}>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker label='From Date' value={filters.fromDate} onChange={val => setFilters({ ...filters, fromDate: val })} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
+              </LocalizationProvider>
+            </Grid>
+            <Grid item xs={12} sm={2}>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker label='To Date' value={filters.toDate} onChange={val => setFilters({ ...filters, toDate: val })} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
+              </LocalizationProvider>
+            </Grid>
+            <Grid item xs={12} sm={2}>
+              <Button variant='contained' fullWidth onClick={fetchData}>Apply</Button>
+            </Grid>
           </Grid>
 
-          <Box display='flex' gap={1} mb={2}>
-            <Button onClick={() => handleExport('excel')} variant='outlined'>
-              Export Excel
-            </Button>
-            <Button onClick={() => handleExport('csv')} variant='outlined'>
-              Export CSV
-            </Button>
-            <Button onClick={() => handleExport('pdf')} variant='outlined'>
-              Export PDF
-            </Button>
+          <Box mt={2} display='flex' gap={1}>
+            <Button variant='outlined' onClick={exportToExcel}>Export Excel</Button>
+            <Button variant='outlined' onClick={exportToPDF}>Export PDF</Button>
           </Box>
 
-          <Divider sx={{ mb: 2 }} />
+          <Divider sx={{ my: 2 }} />
 
-          <Paper sx={{ width: '100%', overflow: 'auto' }}>
-            <TableContainer sx={{ maxHeight: 500 }}>
-              <Table stickyHeader>
-                <TableHead>
-                  <TableRow>
-                    {columns.map((col, i) => (
-                      <TableCell key={i} sx={{ fontWeight: 600 }}>
-                        {col}
-                      </TableCell>
-                    ))}
+          <Box sx={{ overflowX: 'auto' }}>
+            <Table stickyHeader>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Lead ID</TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Company</TableCell>
+                  <TableCell>Location</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Assigned To</TableCell>
+                  <TableCell>Source</TableCell>
+                  <TableCell>Score</TableCell>
+                  <TableCell>Last Activity</TableCell>
+                  <TableCell>Next Follow-up</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {data.map((row, i) => (
+                  <TableRow key={i}>
+                    <TableCell>{row.lead_id}</TableCell>
+                    <TableCell>{row.values['Full Name']}</TableCell>
+                    <TableCell>{row.values['Company Name']}</TableCell>
+                    <TableCell>{row.values['City / Location']}</TableCell>
+                    <TableCell>{row.values['Status']}</TableCell>
+                    <TableCell>{row.values['Lead Owner']}</TableCell>
+                    <TableCell>{row.values['Lead Source']}</TableCell>
+                    <TableCell>{row.values['Lead Score']}</TableCell>
+                    <TableCell>{row.values['Last Activity Date']}</TableCell>
+                    <TableCell>{row.values['Next Follow-up Date']}</TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredData.slice(page * limit, page * limit + limit).map((row, i) => (
-                    <TableRow key={i}>
-                      <TableCell>{row.lead_id}</TableCell>
-                      <TableCell>{row.values['Full Name']}</TableCell>
-                      <TableCell>{row.values['Company Name']}</TableCell>
-                      <TableCell>{row.values['City / Location']}</TableCell>
-                      <TableCell>{row.values['Status']}</TableCell>
-                      <TableCell>{row.values['Assigned To']}</TableCell>
-                      <TableCell>{row.values['Lead Source']}</TableCell>
-                      <TableCell>{row.values['Score']}</TableCell>
-                      <TableCell>{row.values['Last Activity']}</TableCell>
-                      <TableCell>{row.values['Next Follow-up']}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
 
-            <TablePagination
-              component='div'
-              count={filteredData.length}
-              page={page}
-              rowsPerPage={limit}
-              rowsPerPageOptions={[5, 10, 25, 50]}
-              onPageChange={(e, newPage) => setPage(newPage)}
-              onRowsPerPageChange={e => {
-                setLimit(parseInt(e.target.value, 10))
-                setPage(0)
-              }}
-            />
-          </Paper>
+          <TablePagination
+            component='div'
+            count={total}
+            page={page}
+            onPageChange={(e, newPage) => setPage(newPage)}
+            rowsPerPage={limit}
+            onRowsPerPageChange={e => {
+              setLimit(parseInt(e.target.value, 10))
+              setPage(0)
+            }}
+            rowsPerPageOptions={[5, 10, 20, 50]}
+          />
         </CardContent>
       </Card>
     </Box>
   )
 }
 
-export default Leads
+export default LeadTable
