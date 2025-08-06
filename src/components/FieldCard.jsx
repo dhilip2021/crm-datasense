@@ -1077,6 +1077,17 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 label='Required'
               />
             </Box>
+             <Box>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={field.allowPastDate || false}
+                    onChange={e => onUpdate(index, { ...field, allowPastDate: e.target.checked })}
+                  />
+                }
+                label='Allow Past Date'
+              />
+            </Box>
             <Box>
               <FormControlLabel
                 control={

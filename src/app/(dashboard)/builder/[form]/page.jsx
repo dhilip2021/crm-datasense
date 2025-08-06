@@ -66,8 +66,8 @@ export default function LeadFormPage() {
     }
 
     if (type === 'Single Line') {
-      newField.maxChars = 255
       newField.minChars = 3
+      newField.maxChars = 255
       newField.allowDuplicate = true
       newField.autoComplte = true
       newField.isPublic = false
@@ -76,7 +76,6 @@ export default function LeadFormPage() {
       newField.isExternal = false
       newField.showTooltip = false
       newField.placeholder = 'Enter a value'
-
       newField.createFor = [] // [ 'Account', 'Contact', 'Deal' ]
     }
     if (type === 'Multi-Line') {
@@ -93,7 +92,6 @@ export default function LeadFormPage() {
       newField.isPublic = false
       newField.isEncrypted = false
       newField.autoComplte = true
-      newField.required = false
       newField.noDuplicates = false
       newField.showTooltip = false
       newField.createFor = []
@@ -103,7 +101,6 @@ export default function LeadFormPage() {
       newField.maxLength = 10
       newField.isPublic = false
       newField.autoComplte = true
-      newField.required = false
       newField.noDuplicates = false
       newField.isEncrypted = false
       newField.showTooltip = false
@@ -120,7 +117,6 @@ export default function LeadFormPage() {
       newField.trackHistory = false
       newField.enableColor = false
       newField.isPublic = false
-      newField.required = false
       newField.showTooltip = false
       newField.tooltipMessage = ''
       newField.tooltipType = 'icon'
@@ -132,7 +128,6 @@ export default function LeadFormPage() {
       newField.defaultValue = ''
       newField.sortOrder = 'entered' // or 'alphabetical'
       newField.trackHistory = false
-      newField.required = false
       newField.isPublic = false
       newField.showTooltip = false
       newField.tooltipMessage = ''
@@ -145,7 +140,6 @@ export default function LeadFormPage() {
       newField.defaultValue = [] // multiple values
       newField.sortOrder = 'entered' // or 'alphabetical'
       newField.isPublic = false
-      newField.required = false
       newField.showTooltip = false
       newField.tooltipMessage = ''
       newField.tooltipType = 'icon'
@@ -153,8 +147,8 @@ export default function LeadFormPage() {
     }
     if (type === 'Date') {
       newField.isPublic = false
+      newField.allowPastDate = false
       newField.isEncrypted = false
-      newField.required = false
       newField.noDuplicates = false
       newField.showTooltip = false
       newField.createFor = []
@@ -162,8 +156,8 @@ export default function LeadFormPage() {
     }
     if (type === 'Date Time') {
       newField.isPublic = false
+      newField.allowPastDate = false
       newField.isEncrypted = false
-      newField.required = false
       newField.noDuplicates = false
       newField.showTooltip = false
       newField.createFor = []
@@ -171,6 +165,7 @@ export default function LeadFormPage() {
     }
 
     if (type === 'Number') {
+      newField.minDigits = ''
       newField.maxDigits = ''
       newField.useSeparator = false
       newField.placeholder = 'Enter a value'
@@ -180,6 +175,7 @@ export default function LeadFormPage() {
       newField.placeholder = 'CheckBox Label'
     }
     if (type === 'Currency') {
+      newField.minDigits = ''
       newField.maxDigits = ''
       newField.decimalPlaces = '2'
       newField.rounding = 'normal'
@@ -208,8 +204,12 @@ export default function LeadFormPage() {
       sections: sections
     }
 
+
+
     let res
     setLoader(true)
+
+
     if (formId) {
       // update existing
       res = await fetch('/api/v1/admin/form-template/update', {

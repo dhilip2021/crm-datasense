@@ -25,6 +25,11 @@ import * as XLSX from 'xlsx'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import Cookies from 'js-cookie'
+import { formatDateShort } from '@/helper/frontendHelper'
+import Link from 'next/link'
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
+import GridOnIcon from '@mui/icons-material/GridOn'
+
 
 const LeadTable = () => {
   const [data, setData] = useState([])
@@ -155,9 +160,9 @@ const LeadTable = () => {
             </Grid>
           </Grid>
 
-          <Box mt={2} display='flex' gap={1}>
-            <Button variant='outlined' onClick={exportToExcel}>Export Excel</Button>
-            <Button variant='outlined' onClick={exportToPDF}>Export PDF</Button>
+          <Box mt={2} display='flex' justifyContent={"flex-end"} gap={1}>
+            <Button variant='outlined' onClick={exportToExcel} startIcon={<GridOnIcon />}>Export Excel</Button>
+            <Button variant='outlined' onClick={exportToPDF} startIcon={<PictureAsPdfIcon />}>Export PDF</Button>
           </Box>
 
           <Divider sx={{ my: 2 }} />
@@ -167,6 +172,7 @@ const LeadTable = () => {
               <TableHead>
                 <TableRow>
                   <TableCell>Lead ID</TableCell>
+                  <TableCell>Lead Name</TableCell>
                   <TableCell>Name</TableCell>
                   <TableCell>Company</TableCell>
                   <TableCell>Location</TableCell>
@@ -181,7 +187,8 @@ const LeadTable = () => {
               <TableBody>
                 {data.map((row, i) => (
                   <TableRow key={i}>
-                    <TableCell>{row.lead_id}</TableCell>
+                    <TableCell><Link underline='hover' color='inherit' href= {`/app/lead-form/${row.lead_id}`} ><strong>{row.lead_id}</strong></Link> </TableCell>
+                    <TableCell>{row.lead_name}</TableCell>
                     <TableCell>{row.values['Full Name']}</TableCell>
                     <TableCell>{row.values['Company Name']}</TableCell>
                     <TableCell>{row.values['City / Location']}</TableCell>
@@ -190,7 +197,7 @@ const LeadTable = () => {
                     <TableCell>{row.values['Lead Source']}</TableCell>
                     <TableCell>{row.values['Lead Score']}</TableCell>
                     <TableCell>{row.values['Last Activity Date']}</TableCell>
-                    <TableCell>{row.values['Next Follow-up Date']}</TableCell>
+                    <TableCell>{formatDateShort(row.values['Next Follow-up Date'])}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

@@ -14,15 +14,18 @@ import {
   Typography
 } from '@mui/material'
 import Cookies from 'js-cookie'
-import React, { useEffect, useState } from 'react'
+import React, { use, useEffect, useState } from 'react'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
 import LoaderGif from '@assets/gif/loader.gif'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 
 function LeadFormPage() {
+  const params = useParams()
+  const leadId = params.id // 👉 "566fa1a00b9e"
+
   const organization_id = Cookies.get('organization_id')
   const lead_form = 'lead-form'
   const router = useRouter()
@@ -30,7 +33,7 @@ function LeadFormPage() {
   const [sections, setSections] = useState([])
   const [formId, setFormId] = useState(null)
   const [values, setValues] = useState({})
-  const [loader, setLoader] = useState(null)
+  const [loader, setLoader] = useState(false)
   const [errors, setErrors] = useState({})
 
   const validateField = (field, value) => {
@@ -104,6 +107,80 @@ function LeadFormPage() {
     router.push('/app/leads')
   }
 
+  //   const handleSubmit = async () => {
+  //     const missingFields = []
+  //     const labelBasedValues = {}
+  //     const newErrors = {}
+
+  //     sections.forEach(section => {
+  //       const allFields = [...(section.fields.left || []), ...(section.fields.right || [])]
+
+  //       allFields.forEach(field => {
+  //         const value = values[field.id]
+
+  //         // Validation
+  //         if (field.required && !value) {
+  //           newErrors[field.id] = `${field.label} is required`
+  //           missingFields.push(field.label)
+  //         }
+
+  //         if (value) {
+  //           if (field.type === 'Phone' && !/^\d{10}$/.test(value)) {
+  //             newErrors[field.id] = 'Phone number must be 10 digits'
+  //             missingFields.push(`${field.label} (must be 10 digits)`)
+  //           }
+
+  //           if (field.type === 'Email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+  //             newErrors[field.id] = 'Invalid email address'
+  //             missingFields.push(`${field.label} (invalid email)`)
+  //           }
+
+  //           if (field.type === 'URL' && !/^(http|https):\/\/[^ "]+$/.test(value)) {
+  //             newErrors[field.id] = 'Invalid URL (must start with http:// or https://)'
+  //             missingFields.push(`${field.label} (invalid URL)`)
+  //           }
+  //         }
+
+  //         if (value !== undefined && value !== '') {
+  //           labelBasedValues[field.label] = value
+  //         }
+  //       })
+  //     })
+
+  //     if (Object.keys(newErrors).length > 0) {
+  //       setErrors(newErrors)
+  //       //   toast.error(`Please fill: ${missingFields.join(', ')}`)
+  //       return
+  //     }
+
+  //     setErrors({}) // clear previous errors if any
+
+  //     const payload = {
+  //       organization_id,
+  //       form_name: lead_form,
+  //       values: labelBasedValues,
+  //       submittedAt: new Date().toISOString()
+  //     }
+
+  //     setLoader(true)
+
+  //     const res = await fetch('/api/v1/admin/lead-form/form-submit', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify(payload)
+  //     })
+
+  //     const data = await res.json()
+  //     if (data.success) {
+  //       setLoader(false)
+  //       toast.success('Form submitted successfully')
+  //       setValues({})
+  //       router.push('/app/leads')
+  //     } else {
+  //       setLoader(false)
+  //       toast.error('Failed to submit form')
+  //     }
+  //   }
   const handleSubmit = async () => {
     const missingFields = []
     const labelBasedValues = {}
@@ -115,27 +192,9 @@ function LeadFormPage() {
       allFields.forEach(field => {
         const value = values[field.id]
 
-        // Validation
         if (field.required && !value) {
           newErrors[field.id] = `${field.label} is required`
           missingFields.push(field.label)
-        }
-
-        if (value) {
-          if (field.type === 'Phone' && !/^\d{10}$/.test(value)) {
-            newErrors[field.id] = 'Phone number must be 10 digits'
-            missingFields.push(`${field.label} (must be 10 digits)`)
-          }
-
-          if (field.type === 'Email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-            newErrors[field.id] = 'Invalid email address'
-            missingFields.push(`${field.label} (invalid email)`)
-          }
-
-          if (field.type === 'URL' && !/^(http|https):\/\/[^ "]+$/.test(value)) {
-            newErrors[field.id] = 'Invalid URL (must start with http:// or https://)'
-            missingFields.push(`${field.label} (invalid URL)`)
-          }
         }
 
         if (value !== undefined && value !== '') {
@@ -146,11 +205,8 @@ function LeadFormPage() {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
-      //   toast.error(`Please fill: ${missingFields.join(', ')}`)
       return
     }
-
-    setErrors({}) // clear previous errors if any
 
     const payload = {
       organization_id,
@@ -160,16 +216,18 @@ function LeadFormPage() {
     }
 
     setLoader(true)
-    const res = await fetch('/api/v1/admin/lead-form/form-submit', {
-      method: 'POST',
+
+    const res = await fetch(leadId ? `/api/v1/admin/lead-form/${leadId}` : '/api/v1/admin/lead-form/form-submit', {
+      method: leadId ? 'PUT' : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     })
 
     const data = await res.json()
+
     if (data.success) {
       setLoader(false)
-      toast.success('Form submitted successfully')
+      toast.success(leadId ? 'Lead updated successfully' : 'Form submitted successfully')
       setValues({})
       router.push('/app/leads')
     } else {
@@ -206,10 +264,50 @@ function LeadFormPage() {
     }
   }
 
+  const fetchLeadfromId = async () => {
+    try {
+      setLoader(true)
+      const res = await fetch(`/api/v1/admin/lead-form/${leadId}`)
+      const data = await res.json()
+
+      if (data.success && data.data?.values) {
+        const fetchedValues = data.data.values
+        const mappedValues = {}
+
+        // Flatten values based on label
+        sections.forEach(section => {
+          const allFields = [...(section.fields.left || []), ...(section.fields.right || [])]
+          allFields.forEach(field => {
+            if (fetchedValues[field.label] !== undefined) {
+              mappedValues[field.id] =
+                field.type === 'Date'
+                  ? new Date(fetchedValues[field.label]).toISOString().split('T')[0] // Format date
+                  : fetchedValues[field.label]
+            }
+          })
+        })
+
+        setValues(mappedValues)
+        setLoader(false)
+      } else {
+        setLoader(false)
+        toast.error(data.message || 'Lead not found')
+      }
+    } catch (err) {
+      toast.error('Something went wrong while fetching lead')
+    }
+  }
+
   useEffect(() => {
     setCallFlag(true)
     fetchFormByOrgAndName()
   }, [])
+
+  useEffect(() => {
+    if (sections.length > 0 && leadId) {
+      fetchLeadfromId()
+    }
+  }, [sections, leadId])
 
   const renderField = field => {
     const label = (
@@ -436,13 +534,14 @@ function LeadFormPage() {
               </CardContent>
             </Card>
           ))}
+
         {!loader && (
           <Box display='flex' justifyContent='space-between' mt={2}>
             <Button variant='contained' color='error' onClick={handleClick}>
               cancel
             </Button>
             <Button variant='contained' color='primary' onClick={handleSubmit}>
-              Submit
+              {leadId ? 'Update' : 'Submit'}
             </Button>
           </Box>
         )}

@@ -20,6 +20,15 @@ export const converDayJsDatewithOutTime = value => {
   return dayjs(value).format('DD-MMM-YYYY')
 }
 
+export function formatDateShort(dateStr) {
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: '2-digit'
+  })
+}
+
 export const converDayDate = value => {
   return dayjs(value).format('YYYY/MM')
 }
