@@ -21,7 +21,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import LoaderGif from '@assets/gif/loader.gif'
 
-function LeadFormPage() {
+function LeadFormAppPage() {
   const organization_id = Cookies.get('organization_id')
   const lead_form = 'lead-form'
   const router = useRouter()
@@ -189,8 +189,9 @@ function LeadFormPage() {
         <Box textAlign='center' py={6}>
           <Image src={LoaderGif} alt='loading' width={100} height={100} />
         </Box>
-      ) : sections.length === 0 ? (
-        <Typography textAlign='center' color='error'>No Form Configured</Typography>
+      ) : !loader && sections.length === 0 ? (
+        // <Typography textAlign='center' color='error'>No Form Configured</Typography>
+        <></>
       ) : (
         <>
           {sections.map((section, sIndex) => (
@@ -224,4 +225,4 @@ function LeadFormPage() {
   )
 }
 
-export default LeadFormPage
+export default LeadFormAppPage

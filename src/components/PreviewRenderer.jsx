@@ -35,15 +35,22 @@ export default function PreviewModal({ open, onClose, sections }) {
 
               <Grid container spacing={3}>
                 {/* Left Column */}
-                {section.fields.left.map((field) => (
-                  <Grid item xs={12} sm={6} key={field.id}>
+                {section.fields?.left?.map((field) => (
+                  <Grid item xs={12} sm={section.layout === 'single' ? 12 : section.layout === 'triple' ? 4 : 6} key={field.id}>
+                    {renderPreviewField(field)}
+                  </Grid>
+                ))}
+
+                {/* Center Column */}
+                {section.fields?.center?.map((field) => (
+                  <Grid item xs={12} sm={4} key={field.id}>
                     {renderPreviewField(field)}
                   </Grid>
                 ))}
 
                 {/* Right Column */}
-                {section.fields.right.map((field) => (
-                  <Grid item xs={12} sm={6} key={field.id}>
+                {section.fields?.right?.map((field) => (
+                  <Grid item xs={12} sm={section.layout === 'triple' ? 4 : 6} key={field.id}>
                     {renderPreviewField(field)}
                   </Grid>
                 ))}
@@ -56,21 +63,17 @@ export default function PreviewModal({ open, onClose, sections }) {
   )
 }
 
-
 function renderPreviewField(field) {
   const renderLabel = (
     <>
       {field.label}
       {field.required && (
-        <Typography
-          component="span"
-          sx={{ color: 'red', ml: 0.5, fontWeight: 'bold' }}
-        >
+        <Typography component="span" sx={{ color: 'red', ml: 0.5, fontWeight: 'bold' }}>
           *
         </Typography>
       )}
     </>
-  );
+  )
 
   switch (field.type) {
     case 'Single Line':
@@ -95,7 +98,7 @@ function renderPreviewField(field) {
               ) : null
           }}
         />
-      );
+      )
 
     case 'Multi-Line':
       return (
@@ -103,21 +106,19 @@ function renderPreviewField(field) {
           fullWidth
           size="small"
           multiline
-          minRows={field.rows || 3} // optional rows count
+          minRows={field.rows || 3}
           label={renderLabel}
           placeholder={field.placeholder || ''}
         />
-      );
+      )
 
     case 'Checkbox':
       return (
         <Box display="flex" alignItems="center">
           <Checkbox checked={field.defaultChecked || false} disabled />
-          <Typography>
-            {renderLabel}
-          </Typography>
+          <Typography>{renderLabel}</Typography>
         </Box>
-      );
+      )
 
     default:
       return (
@@ -127,8 +128,6 @@ function renderPreviewField(field) {
           label={renderLabel}
           placeholder={field.placeholder || ''}
         />
-      );
+      )
   }
 }
-
-

@@ -25,11 +25,10 @@ import * as XLSX from 'xlsx'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import Cookies from 'js-cookie'
-import { formatDateShort } from '@/helper/frontendHelper'
+import { converDayJsDate, formatDateShort } from '@/helper/frontendHelper'
 import Link from 'next/link'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import GridOnIcon from '@mui/icons-material/GridOn'
-
 
 const LeadTable = () => {
   const [data, setData] = useState([])
@@ -56,14 +55,14 @@ const LeadTable = () => {
       form_name,
       page: page + 1,
       limit,
-      ...filters.search && { search: filters.search },
-      ...filters.status && { status: filters.status },
-      ...filters.source && { source: filters.source },
-      ...filters.region && { region: filters.region },
-      ...filters.rep && { rep: filters.rep },
-      ...filters.value && { value: filters.value },
-      ...filters.fromDate && { from: dayjs(filters.fromDate).format('YYYY-MM-DD') },
-      ...filters.toDate && { to: dayjs(filters.toDate).format('YYYY-MM-DD') }
+      ...(filters.search && { search: filters.search }),
+      ...(filters.status && { status: filters.status }),
+      ...(filters.source && { source: filters.source }),
+      ...(filters.region && { region: filters.region }),
+      ...(filters.rep && { rep: filters.rep }),
+      ...(filters.value && { value: filters.value }),
+      ...(filters.fromDate && { from: dayjs(filters.fromDate).format('YYYY-MM-DD') }),
+      ...(filters.toDate && { to: dayjs(filters.toDate).format('YYYY-MM-DD') })
     })
 
     const res = await fetch(`/api/v1/admin/lead-form/list?${query}`)
@@ -81,13 +80,13 @@ const LeadTable = () => {
   const exportToExcel = () => {
     const rows = data.map(d => ({
       'Lead ID': d.lead_id,
-      'Name': d.values['Full Name'],
-      'Company': d.values['Company Name'],
-      'Location': d.values['City / Location'],
-      'Status': d.values['Status'],
+      Name: d.values['Full Name'],
+      Company: d.values['Company Name'],
+      Location: d.values['City / Location'],
+      Status: d.values['Status'],
       'Assigned To': d.values['Lead Owner'],
-      'Source': d.values['Lead Source'],
-      'Score': d.values['Lead Score'],
+      Source: d.values['Lead Source'],
+      Score: d.values['Lead Score'],
       'Last Activity': d.values['Last Activity Date'],
       'Next Follow-up': d.values['Next Follow-up Date']
     }))
@@ -99,7 +98,18 @@ const LeadTable = () => {
 
   const exportToPDF = () => {
     const doc = new jsPDF()
-    const columns = ['Lead ID', 'Name', 'Company', 'Location', 'Status', 'Assigned To', 'Source', 'Score', 'Last Activity', 'Next Follow-up']
+    const columns = [
+      'Lead ID',
+      'Name',
+      'Company',
+      'Location',
+      'Status',
+      'Assigned To',
+      'Source',
+      'Score',
+      'Last Activity',
+      'Next Follow-up'
+    ]
     const rows = data.map(d => [
       d.lead_id,
       d.values['Full Name'],
@@ -119,18 +129,36 @@ const LeadTable = () => {
   return (
     <Box px={4} py={4}>
       <Grid container justifyContent='space-between' mb={2} alignItems='center'>
-        <Typography variant='h5' fontWeight='bold'>Leads</Typography>
-        <Button variant='contained' href='/app/lead-form'>+ New Lead</Button>
+        <Typography variant='h5' fontWeight='bold'>
+          Leads
+        </Typography>
+        <Button variant='contained' href='/app/lead-form'>
+          + New Lead
+        </Button>
       </Grid>
 
       <Card>
         <CardContent>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={2}>
-              <TextField size='small' fullWidth label='Search' value={filters.search} onChange={e => setFilters({ ...filters, search: e.target.value })} onKeyDown={e => e.key === 'Enter' && fetchData()} />
+              <TextField
+                size='small'
+                fullWidth
+                label='Search'
+                value={filters.search}
+                onChange={e => setFilters({ ...filters, search: e.target.value })}
+                onKeyDown={e => e.key === 'Enter' && fetchData()}
+              />
             </Grid>
             <Grid item xs={12} sm={2}>
-              <TextField select size='small' fullWidth label='Status' value={filters.status} onChange={e => setFilters({ ...filters, status: e.target.value })}>
+              <TextField
+                select
+                size='small'
+                fullWidth
+                label='Status'
+                value={filters.status}
+                onChange={e => setFilters({ ...filters, status: e.target.value })}
+              >
                 <MenuItem value=''>All</MenuItem>
                 <MenuItem value='New'>New</MenuItem>
                 <MenuItem value='Contacted'>Contacted</MenuItem>
@@ -138,7 +166,14 @@ const LeadTable = () => {
               </TextField>
             </Grid>
             <Grid item xs={12} sm={2}>
-              <TextField select size='small' fullWidth label='Source' value={filters.source} onChange={e => setFilters({ ...filters, source: e.target.value })}>
+              <TextField
+                select
+                size='small'
+                fullWidth
+                label='Source'
+                value={filters.source}
+                onChange={e => setFilters({ ...filters, source: e.target.value })}
+              >
                 <MenuItem value=''>All</MenuItem>
                 <MenuItem value='Website'>Website</MenuItem>
                 <MenuItem value='Referral'>Referral</MenuItem>
@@ -147,22 +182,43 @@ const LeadTable = () => {
             </Grid>
             <Grid item xs={12} sm={2}>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker label='From Date' value={filters.fromDate} onChange={val => setFilters({ ...filters, fromDate: val })} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
+                <DatePicker
+                  label='From Date'
+                  value={filters.fromDate}
+                  onChange={val => setFilters({ ...filters, fromDate: val })}
+                  slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                />
               </LocalizationProvider>
             </Grid>
             <Grid item xs={12} sm={2}>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker label='To Date' value={filters.toDate} onChange={val => setFilters({ ...filters, toDate: val })} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
+                <DatePicker
+                  label='To Date'
+                  value={filters.toDate}
+                  onChange={val => setFilters({ ...filters, toDate: val })}
+                  slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                />
               </LocalizationProvider>
             </Grid>
             <Grid item xs={12} sm={2}>
-              <Button variant='contained' fullWidth onClick={fetchData}>Apply</Button>
+              <Button
+                variant='contained'
+                color='success'
+                fullWidth
+                onClick={fetchData}
+              >
+                Apply
+              </Button>
             </Grid>
           </Grid>
 
-          <Box mt={2} display='flex' justifyContent={"flex-end"} gap={1}>
-            <Button variant='outlined' onClick={exportToExcel} startIcon={<GridOnIcon />}>Export Excel</Button>
-            <Button variant='outlined' onClick={exportToPDF} startIcon={<PictureAsPdfIcon />}>Export PDF</Button>
+          <Box mt={2} display='flex' justifyContent={'flex-end'} gap={1}>
+            <Button variant='outlined' onClick={exportToExcel} startIcon={<GridOnIcon />}>
+              Export Excel
+            </Button>
+            <Button variant='outlined' onClick={exportToPDF} startIcon={<PictureAsPdfIcon />}>
+              Export PDF
+            </Button>
           </Box>
 
           <Divider sx={{ my: 2 }} />
@@ -180,6 +236,7 @@ const LeadTable = () => {
                   <TableCell>Assigned To</TableCell>
                   <TableCell>Source</TableCell>
                   <TableCell>Score</TableCell>
+                  <TableCell>Label</TableCell>
                   <TableCell>Last Activity</TableCell>
                   <TableCell>Next Follow-up</TableCell>
                 </TableRow>
@@ -187,7 +244,11 @@ const LeadTable = () => {
               <TableBody>
                 {data.map((row, i) => (
                   <TableRow key={i}>
-                    <TableCell><Link underline='hover' color='inherit' href= {`/app/lead-form/${row.lead_id}`} ><strong>{row.lead_id}</strong></Link> </TableCell>
+                    <TableCell>
+                      <Link underline='hover' color='inherit' href={`/app/lead-form/${row.lead_id}`}>
+                        <strong>{row.lead_id}</strong>
+                      </Link>
+                    </TableCell>
                     <TableCell>{row.lead_name}</TableCell>
                     <TableCell>{row.values['Full Name']}</TableCell>
                     <TableCell>{row.values['Company Name']}</TableCell>
@@ -195,8 +256,27 @@ const LeadTable = () => {
                     <TableCell>{row.values['Status']}</TableCell>
                     <TableCell>{row.values['Lead Owner']}</TableCell>
                     <TableCell>{row.values['Lead Source']}</TableCell>
-                    <TableCell>{row.values['Lead Score']}</TableCell>
-                    <TableCell>{row.values['Last Activity Date']}</TableCell>
+                    <TableCell>
+                      {(() => {
+                        const score = row.values['Score'] || 0
+                        if (score >= 75) return <span style={{ color: 'red', fontWeight: 'bold' }}>{score}</span>
+                        if (score >= 50) return <span style={{ color: 'orange', fontWeight: 'bold' }}>{score}</span>
+                        return <span style={{ color: 'blue', fontWeight: 'bold' }}>{score}</span>
+                      })()}
+                    </TableCell>
+
+                    {/* 🔥🟡❄️ Label based on Score */}
+                    <TableCell>
+                      {(() => {
+                        const score = row.values['Score'] || 0
+                        if (score >= 75) return <span style={{ color: 'red', fontWeight: 'bold' }}>🔥 Hot Lead</span>
+                        if (score >= 50)
+                          return <span style={{ color: 'orange', fontWeight: 'bold' }}>🟡 Warm Lead</span>
+                        return <span style={{ color: 'blue', fontWeight: 'bold' }}>❄️ Cold Lead</span>
+                      })()}
+                    </TableCell>
+
+                    <TableCell>{converDayJsDate(row.updatedAt)}</TableCell>
                     <TableCell>{formatDateShort(row.values['Next Follow-up Date'])}</TableCell>
                   </TableRow>
                 ))}

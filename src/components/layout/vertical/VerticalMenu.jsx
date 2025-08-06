@@ -79,10 +79,10 @@ const VerticalMenu = ({ scrollMenu }) => {
           Dashboard
         </MenuItem>
         {/* <MenuSection label='Master'>
-          <MenuItem href='/salutation' icon={<i class="ri-id-card-line" />}>
+          <MenuItem href='/salutation' icon={<i classNames="ri-id-card-line" />}>
             Salutation
           </MenuItem>
-          <MenuItem href='/gender' icon={<i class="ri-women-line" />}>
+          <MenuItem href='/gender' icon={<i classNames="ri-women-line" />}>
             Gender
           </MenuItem>
 
@@ -91,7 +91,7 @@ const VerticalMenu = ({ scrollMenu }) => {
           </MenuItem>
         </MenuSection> */}
         <MenuSection label='Apps & Pages'>
-          <MenuItem href='/app/leads' icon={<i class="ri-user-star-line" />}>
+          <MenuItem href='/app/leads' icon={<i className="ri-user-star-line" />}>
             Leads
           </MenuItem>
           <MenuItem href='/customer' icon={<i className='ri-user-settings-line' />}>

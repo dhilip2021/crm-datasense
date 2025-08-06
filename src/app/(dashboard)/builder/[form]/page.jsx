@@ -190,6 +190,11 @@ export default function LeadFormPage() {
     setSections(updated)
   }
 
+  const handleDeleteSection = (sectionIndex) => {
+  const updated = [...sections]
+  updated.splice(sectionIndex, 1)
+  setSections(updated)
+}
   const handleUpdateSection = (sectionIndex, updatedSection) => {
     const updated = [...sections]
     updated[sectionIndex] = updatedSection
@@ -204,11 +209,8 @@ export default function LeadFormPage() {
       sections: sections
     }
 
-
-
     let res
     setLoader(true)
-
 
     if (formId) {
       // update existing
@@ -306,6 +308,23 @@ export default function LeadFormPage() {
               >
                 🟨 Two Column Section
               </button>
+              <button
+                className='w-full px-3 py-2 bg-gray-200 rounded text-sm'
+                onClick={() => {
+                  setSections(prev => [
+                    ...prev,
+                    {
+                      id: crypto.randomUUID(),
+                      title: 'New Section',
+                      layout: 'triple',
+                      fields: { left: [], center: [], right: [] }
+                    }
+                  ])
+                  setShowLayoutPicker(false)
+                }}
+              >
+                🟥 Three Column Section
+              </button>
             </div>
           )}
 
@@ -330,6 +349,7 @@ export default function LeadFormPage() {
                 index={index}
                 onDropField={handleDropField}
                 onUpdateSection={handleUpdateSection}
+                onDeleteSection={handleDeleteSection}
               />
             ))}
           </div>

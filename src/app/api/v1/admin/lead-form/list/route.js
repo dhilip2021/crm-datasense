@@ -47,7 +47,7 @@ export async function GET(req) {
         .sort({ submittedAt: -1 })
         .skip(skip)
         .limit(limit)
-        .select('-__v -updatedAt')
+        .select('-__v')
         .lean(),
       Leadform.countDocuments(query)
     ])

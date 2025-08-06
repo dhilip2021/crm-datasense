@@ -20,7 +20,7 @@ import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { useRouter, useParams } from 'next/navigation'
 
-function LeadFormPage() {
+function LeadFormAppIdPage() {
   const params = useParams()
   const leadId = params.id
   const organization_id = Cookies.get('organization_id')
@@ -280,4 +280,4 @@ function LeadFormPage() {
   )
 }
 
-export default LeadFormPage
+export default LeadFormAppIdPage
