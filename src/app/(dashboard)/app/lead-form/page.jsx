@@ -17,146 +17,69 @@ import Cookies from 'js-cookie'
 import React, { useEffect, useState } from 'react'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-
-import LoaderGif from '@assets/gif/loader.gif'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import LoaderGif from '@assets/gif/loader.gif'
 
 function LeadFormPage() {
   const organization_id = Cookies.get('organization_id')
   const lead_form = 'lead-form'
   const router = useRouter()
-  const [callFlag, setCallFlag] = useState(false)
+
   const [sections, setSections] = useState([])
-  const [formId, setFormId] = useState(null)
   const [values, setValues] = useState({})
-  const [loader, setLoader] = useState(null)
   const [errors, setErrors] = useState({})
+  const [loader, setLoader] = useState(false)
 
   const validateField = (field, value) => {
-    if (field.required && !value) {
-      return `${field.label} is required`
-    }
-
+    if (field.required && !value) return `${field.label} is required`
     if (value) {
-      if (field.type === 'Single Line' && value.length < field.minChars) {
-        return `Minimum ${field.minChars} character is required`
+      if (field.type === 'Single Line') {
+        if (value.length < field.minChars) return `Minimum ${field.minChars} characters required`
+        if (value.length > field.maxChars) return `Maximum ${field.maxChars} characters allowed`
       }
-      if (field.type === 'Single Line' && value.length > field.maxChars) {
-        return `Maximum ${field.maxChars} character is required`
+      if (field.type === 'Phone') {
+        if (!/^[6-9]\d{9}$/.test(value)) return 'Invalid phone number'
       }
-      if (field.type === 'Phone' && !/^\d{10}$/.test(value)) {
-        return 'Phone number must be 10 digits'
-      }
-      if (field.type === 'Phone' && !/^[6-9]\d{9}$/.test(value)) {
-        return 'Invalid Phone number'
-      }
-      if (field.type === 'Phone' && !/^\d{10}$/.test(value)) {
-        return 'Phone number must be 10 digits'
-      }
-      if (field.type === 'Email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-        return 'Invalid email address'
-      }
-      if (field.type === 'URL' && !/^(http|https):\/\/[^ "]+$/.test(value)) {
-        return 'Invalid URL (must start with http:// or https://)'
-      }
-      if (field.type === 'Date') {
-        // const isValidDate = /^\d{4}-\d{2}-\d{2}$/.test(value)
-        // if (!isValidDate) {
-        //   return 'Invalid date format'
-        // }
-
-        const selectedDate = new Date(value)
-        const today = new Date()
-        today.setHours(0, 0, 0, 0) // remove time part
-        if (selectedDate < today) {
-          return 'Date cannot be in the past'
-        }
-      }
+      if (field.type === 'Email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Invalid email address'
+      if (field.type === 'URL' && !/^(http|https):\/\/.+/.test(value)) return 'Invalid URL'
+      if (field.type === 'Date' && new Date(value) < new Date().setHours(0, 0, 0, 0)) return 'Date cannot be in the past'
     }
-
     return ''
   }
 
-  const handleChange = (fieldId, value) => {
-    setValues(prev => ({
-      ...prev,
-      [fieldId]: value
-    }))
-
-    setErrors(prev => ({
-      ...prev,
-      [fieldId]: '' // clear error on change
-    }))
+  const handleChange = (id, value) => {
+    setValues(prev => ({ ...prev, [id]: value }))
+    setErrors(prev => ({ ...prev, [id]: '' }))
   }
 
   const handleBlur = field => {
-    const errorMsg = validateField(field, values[field.id])
-    if (errorMsg) {
-      setErrors(prev => ({
-        ...prev,
-        [field.id]: errorMsg
-      }))
-    }
-  }
-
-  const handleClick = () => {
-    router.push('/app/leads')
+    const error = validateField(field, values[field.id])
+    if (error) setErrors(prev => ({ ...prev, [field.id]: error }))
   }
 
   const handleSubmit = async () => {
-    const missingFields = []
-    const labelBasedValues = {}
+    const payload = {
+      organization_id,
+      form_name: lead_form,
+      values: {},
+      submittedAt: new Date().toISOString()
+    }
+
     const newErrors = {}
-
     sections.forEach(section => {
-      const allFields = [...(section.fields.left || []), ...(section.fields.right || [])]
-
-      allFields.forEach(field => {
+      const fields = [...(section.fields.left || []), ...(section.fields.right || [])]
+      fields.forEach(field => {
         const value = values[field.id]
-
-        // Validation
-        if (field.required && !value) {
-          newErrors[field.id] = `${field.label} is required`
-          missingFields.push(field.label)
-        }
-
-        if (value) {
-          if (field.type === 'Phone' && !/^\d{10}$/.test(value)) {
-            newErrors[field.id] = 'Phone number must be 10 digits'
-            missingFields.push(`${field.label} (must be 10 digits)`)
-          }
-
-          if (field.type === 'Email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-            newErrors[field.id] = 'Invalid email address'
-            missingFields.push(`${field.label} (invalid email)`)
-          }
-
-          if (field.type === 'URL' && !/^(http|https):\/\/[^ "]+$/.test(value)) {
-            newErrors[field.id] = 'Invalid URL (must start with http:// or https://)'
-            missingFields.push(`${field.label} (invalid URL)`)
-          }
-        }
-
-        if (value !== undefined && value !== '') {
-          labelBasedValues[field.label] = value
-        }
+        const error = validateField(field, value)
+        if (error) newErrors[field.id] = error
+        if (value !== undefined && value !== '') payload.values[field.label] = value
       })
     })
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
-      //   toast.error(`Please fill: ${missingFields.join(', ')}`)
       return
-    }
-
-    setErrors({}) // clear previous errors if any
-
-    const payload = {
-      organization_id,
-      form_name: lead_form,
-      values: labelBasedValues,
-      submittedAt: new Date().toISOString()
     }
 
     setLoader(true)
@@ -167,288 +90,136 @@ function LeadFormPage() {
     })
 
     const data = await res.json()
+    setLoader(false)
     if (data.success) {
-      setLoader(false)
       toast.success('Form submitted successfully')
-      setValues({})
       router.push('/app/leads')
     } else {
-      setLoader(false)
-      toast.error('Failed to submit form')
+      toast.error('Submission failed')
     }
   }
 
-  const fetchFormByOrgAndName = async () => {
+  const fetchForm = async () => {
     setLoader(true)
-    const res = await fetch(
-      `/api/v1/admin/form-template/single?organization_id=${organization_id}&form_name=${lead_form}`
-    )
-    const json = await res.json()
-    if (json?.success && json?.data?.sections?.length > 0) {
+    const res = await fetch(`/api/v1/admin/form-template/single?organization_id=${organization_id}&form_name=${lead_form}`)
+    const data = await res.json()
+    setLoader(false)
+    if (data?.success && data.data?.sections?.length > 0) {
+      setSections(data.data.sections)
       const defaultValues = {}
-
-      json.data.sections.forEach(section => {
-        const allFields = [...(section.fields.left || []), ...(section.fields.right || [])]
-        allFields.forEach(field => {
-          if (field.defaultValue !== undefined && field.defaultValue !== '') {
-            defaultValues[field.id] = field.defaultValue
-          }
+      data.data.sections.forEach(section => {
+        const fields = [...(section.fields.left || []), ...(section.fields.right || [])]
+        fields.forEach(field => {
+          if (field.defaultValue) defaultValues[field.id] = field.defaultValue
         })
       })
-
-      setLoader(false)
-      setSections(json.data.sections)
-      setFormId(json.data._id)
       setValues(defaultValues)
     } else {
-      setLoader(false)
       toast.error('Form not found')
     }
   }
 
   useEffect(() => {
-    setCallFlag(true)
-    fetchFormByOrgAndName()
+    fetchForm()
   }, [])
 
   const renderField = field => {
-    const label = (
-      <>
-        {field.label}
-        {field.required && <span style={{ color: 'red' }}> *</span>}
-      </>
-    )
+    const commonProps = {
+      fullWidth: true,
+      size: 'small',
+      label: (
+        <>
+          {field.label} {field.required && <span style={{ color: 'red' }}>*</span>}
+        </>
+      ),
+      value: values[field.id] || '',
+      onChange: e => handleChange(field.id, e.target.value),
+      onBlur: () => handleBlur(field),
+      error: !!errors[field.id],
+      helperText: errors[field.id],
+      placeholder: field.placeholder || ''
+    }
 
     switch (field.type) {
       case 'Dropdown':
         return (
-          <TextField
-            select
-            fullWidth
-            size='small'
-            label={label}
-            value={values[field.id] || ''}
-            onChange={e => handleChange(field.id, e.target.value)}
-            error={!!errors[field.id]}
-            helperText={errors[field.id]}
-          >
-            {field.options?.map((option, i) => (
-              <MenuItem key={i} value={option}>
-                {option}
-              </MenuItem>
+          <TextField select {...commonProps}>
+            {field.options?.map((opt, i) => (
+              <MenuItem key={i} value={opt}>{opt}</MenuItem>
             ))}
           </TextField>
         )
-
       case 'RadioButton':
         return (
           <Box>
-            <Typography variant='body2' gutterBottom>
-              {field.label}
-              {field.required && <span style={{ color: 'red' }}> *</span>}
-            </Typography>
-            <RadioGroup row value={values[field.id] || ''} onChange={e => handleChange(field.id, e.target.value)}>
+            <Typography variant='body2' fontWeight='bold'>{field.label}</Typography>
+            <RadioGroup
+              row
+              value={values[field.id] || ''}
+              onChange={e => handleChange(field.id, e.target.value)}
+            >
               {field.options?.map((opt, i) => (
                 <FormControlLabel key={i} value={opt} control={<Radio />} label={opt} />
               ))}
             </RadioGroup>
           </Box>
         )
-
       case 'Multi-Line':
-        return (
-          <TextField
-            fullWidth
-            size='small'
-            label={label}
-            multiline
-            minRows={field.rows || 3}
-            placeholder={field.placeholder || ''}
-            value={values[field.id] || ''}
-            onChange={e => handleChange(field.id, e.target.value)}
-            error={!!errors[field.id]}
-            helperText={errors[field.id]}
-            onBlur={() => handleBlur(field)}
-          />
-        )
+        return <TextField {...commonProps} multiline minRows={field.rows || 3} />
       case 'Phone':
-        return (
-          <TextField
-            fullWidth
-            size='small'
-            autoComplete={field.autoComplte ? 'new-password' : 'off'}
-            label={label}
-            placeholder={field.placeholder || ''}
-            type='tel'
-            inputProps={{ maxLength: 10 }}
-            value={values[field.id] || ''}
-            onChange={e => {
-              const val = e.target.value
-              if (/^\d*$/.test(val)) {
-                handleChange(field.id, val)
-              }
-            }}
-            error={!!errors[field.id]}
-            helperText={errors[field.id]}
-            onBlur={() => handleBlur(field)}
-          />
-        )
-
+        return <TextField {...commonProps} type='tel' inputProps={{ maxLength: 10 }} />
       case 'Email':
-        return (
-          <TextField
-            fullWidth
-            size='small'
-            label={label}
-            autoComplete={field.autoComplte ? 'new-password' : 'off'}
-            placeholder={field.placeholder || ''}
-            value={values[field.id] || ''}
-            onChange={e => handleChange(field.id, e.target.value)}
-            error={!!errors[field.id]}
-            helperText={errors[field.id]}
-            onBlur={() => handleBlur(field)}
-          />
-        )
-
+        return <TextField {...commonProps} type='email' />
       case 'URL':
-        return (
-          <TextField
-            fullWidth
-            size='small'
-            autoComplete={field.autoComplte ? 'new-password' : 'off'}
-            label={label}
-            placeholder={field.placeholder || ''}
-            value={values[field.id] || ''}
-            onChange={e => handleChange(field.id, e.target.value)}
-            error={!!errors[field.id]}
-            helperText={errors[field.id]}
-            onBlur={() => handleBlur(field)}
-          />
-        )
-      case 'Single Line':
-        return (
-          <TextField
-            fullWidth
-            size='small'
-            autoComplete={field.autoComplte ? 'new-password' : 'off'}
-            label={label}
-            placeholder={field.placeholder || ''}
-            value={values[field.id] || ''}
-            onChange={e => handleChange(field.id, e.target.value)}
-            error={!!errors[field.id]}
-            helperText={errors[field.id]}
-            onBlur={() => handleBlur(field)}
-          />
-        )
+        return <TextField {...commonProps} type='url' />
       case 'Date':
-        return (
-          <TextField
-            fullWidth
-            size='small'
-            type='date'
-            label={label}
-            InputLabelProps={{ shrink: true }}
-            value={values[field.id] || ''}
-            onChange={e => handleChange(field.id, e.target.value)}
-            error={!!errors[field.id]}
-            helperText={errors[field.id]}
-            onBlur={() => handleBlur(field)}
-          />
-        )
-
+        return <TextField {...commonProps} type='date' InputLabelProps={{ shrink: true }} />
       default:
-        return (
-          <TextField
-            fullWidth
-            size='small'
-            label={label}
-            placeholder={field.placeholder || ''}
-            value={values[field.id] || ''}
-            onChange={e => handleChange(field.id, e.target.value)}
-            error={!!errors[field.id]}
-            helperText={errors[field.id]}
-            onBlur={() => handleBlur(field)}
-          />
-        )
+        return <TextField {...commonProps} />
     }
   }
 
   return (
-    <Box>
-      <Box px={3} py={4}>
-        <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
-          {loader && (
-            <Box textAlign={'center'} width={'100%'}>
-              {/* <Card className='w-full shadow-md rounded-lg'>
-                <CardContent className='text-center'>
-                  
-                </CardContent>
-              </Card> */}
-              <Box p={40}>
-                <Image src={LoaderGif} alt='My GIF' width={200} height={100} />
-              </Box>
-            </Box>
-          )}
+    <Box px={4} py={4} sx={{ background: '#f9f9f9', minHeight: '100vh' }}>
+      <Typography variant='h4' fontWeight='bold' color='primary' mb={4}>
+        Lead Submission Form
+      </Typography>
 
-          {!loader && sections?.length === 0 && (
-            <Box textAlign={'center'} width={'100%'}>
-              <Card className='w-full shadow-md rounded-lg'>
-                <CardContent className='text-center'>
-                  <Box p={40}>
-                    <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Leads Found</p>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Box>
-          )}
+      {loader ? (
+        <Box textAlign='center' py={6}>
+          <Image src={LoaderGif} alt='loading' width={100} height={100} />
         </Box>
-
-        {!loader &&
-          sections?.length > 0 &&
-          sections.map((section, sIndex) => (
-            <Card className='w-full shadow-md rounded-lg'>
+      ) : sections.length === 0 ? (
+        <Typography textAlign='center' color='error'>No Form Configured</Typography>
+      ) : (
+        <>
+          {sections.map((section, sIndex) => (
+            <Card key={sIndex} sx={{ mb: 4, borderLeft: '8px solid #8c57ff' }}>
               <CardContent>
-                <Box key={section.id} gap={2} pb={2}>
-                  <Typography fontWeight='bold' mb={2}>
-                    {section.title || `Section ${sIndex + 1}`}
-                  </Typography>
-
-                  <Grid container spacing={2}>
-                    {/* Left Column */}
-                    <Grid item xs={12} sm={6}>
-                      {(section.fields.left || []).map(field => (
-                        <Box mb={4} key={field.id}>
-                          {renderField(field)}
-                        </Box>
-                      ))}
-                    </Grid>
-
-                    {/* Right Column */}
-                    <Grid item xs={12} sm={6}>
-                      {(section.fields.right || []).map(field => (
-                        <Box mb={4} key={field.id}>
-                          {renderField(field)}
-                        </Box>
-                      ))}
-                    </Grid>
+                <Typography variant='h6' fontWeight='bold' mb={2}>{section.title || `Section ${sIndex + 1}`}</Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    {section.fields.left?.map(field => (
+                      <Box key={field.id} mb={2}>{renderField(field)}</Box>
+                    ))}
                   </Grid>
-                </Box>
+                  <Grid item xs={12} sm={6}>
+                    {section.fields.right?.map(field => (
+                      <Box key={field.id} mb={2}>{renderField(field)}</Box>
+                    ))}
+                  </Grid>
+                </Grid>
               </CardContent>
             </Card>
           ))}
-        {!loader && (
-          <Box display='flex' justifyContent='space-between' mt={2}>
-            <Button variant='contained' color='error' onClick={handleClick}>
-              cancel
-            </Button>
-            <Button variant='contained' color='primary' onClick={handleSubmit}>
-              Submit
-            </Button>
+          <Box display='flex' justifyContent='flex-end' gap={2}>
+            <Button variant='outlined' color='secondary' onClick={() => router.push('/app/leads')}>Cancel</Button>
+            <Button variant='contained' color='primary' onClick={handleSubmit}>Submit</Button>
           </Box>
-        )}
+        </>
+      )}
 
-        <ToastContainer />
-      </Box>
+      <ToastContainer />
     </Box>
   )
 }
