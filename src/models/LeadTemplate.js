@@ -43,9 +43,10 @@ const SectionSchema = new mongoose.Schema(
   {
     id: { type: String, required: true },
     title: { type: String },
-    layout: { type: String, enum: ['single', 'double'], default: 'double' },
+    layout: { type: String, enum: ['single', 'double', 'triple'], default: 'single' },
     fields: {
       left: [FieldSchema],
+      center: [FieldSchema],
       right: [FieldSchema]
     }
   },
