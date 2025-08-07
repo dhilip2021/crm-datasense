@@ -3,7 +3,7 @@
 import { useDrop } from 'react-dnd'
 import FieldItem from './FieldItem'
 
-export default function SectionBlock({ section, index, onDropField, onUpdateSection, onDeleteSection }) {
+export default function SectionBlock({ section, index, onDropField, onUpdateSection }) {
   const [, dropLeft] = useDrop(
     () => ({
       accept: 'FIELD',
@@ -57,131 +57,149 @@ export default function SectionBlock({ section, index, onDropField, onUpdateSect
       />
 
       {section.layout === 'double' ? (
-        <div className='grid grid-cols-2 gap-4'>
-          <div ref={dropLeft} className='min-h-[200px] bg-white border p-2 rounded'>
-            <button
-            onClick={() => onDeleteSection(index)}
-            className='absolute right-6 cursor-pointer text-red-500 text-sm'
-          >
-            ❌
-          </button>
-            {section.fields.left.map((field, i) => (
-              <FieldItem
-                key={field.id}
-                type={field.type}
-                field={field}
-                index={i}
-                onUpdate={(i, updated) => updateField('left', i, updated)}
-                onDelete={i => deleteField('left', i)}
-              />
-            ))}
-            <p className='text-xs text-gray-400 text-center mt-2'>Drop fields here</p>
+        <>
+          <div className='grid grid-cols-2 gap-4'>
+            <div ref={dropLeft} className='min-h-[200px] bg-white border p-2 rounded'>
+              {section.fields.left.map((field, i) => (
+                <>
+                 <button
+                  onClick={()=>deleteField('left', i)}
+                  className='float-right right-6 cursor-pointer text-red-500 text-sm'
+                >
+                  ❌
+                </button>
+                 <FieldItem
+                  key={field.id}
+                  type={field.type}
+                  field={field}
+                  index={i}
+                  onUpdate={(i, updated) => updateField('left', i, updated)}
+                  onDelete={i => deleteField('left', i)}
+                />
+                </>
+               
+              ))}
+              <p className='text-xs text-gray-400 text-center mt-2'>Drop fields here</p>
+            </div>
+            <div ref={dropRight} className='min-h-[200px] bg-white border p-2 rounded'>
+              {section.fields.right.map((field, i) => (
+                <>
+                 <button
+                  onClick={()=>deleteField('right', i)}
+                  className='float-right right-6 cursor-pointer text-red-500 text-sm'
+                >
+                  ❌
+                </button>
+                <FieldItem
+                  key={field.id}
+                  type={field.type}
+                  field={field}
+                  index={i}
+                  onUpdate={(i, updated) => updateField('right', i, updated)}
+                  onDelete={i => deleteField('right', i)}
+                  />
+                  </>
+              ))}
+              <p className='text-xs text-gray-400 text-center mt-2'>Drop fields here</p>
+            </div>
           </div>
-          <div ref={dropRight} className='min-h-[200px] bg-white border p-2 rounded'>
-            <button
-            onClick={() => onDeleteSection(index)}
-            className='absolute right-6 cursor-pointer text-red-500 text-sm'
-          >
-            ❌
-          </button>
-            {section.fields.right.map((field, i) => (
-              <FieldItem
-                key={field.id}
-                type={field.type}
-                field={field}
-                index={i}
-                onUpdate={(i, updated) => updateField('right', i, updated)}
-                onDelete={i => deleteField('right', i)}
-              />
-            ))}
-            <p className='text-xs text-gray-400 text-center mt-2'>Drop fields here</p>
-           
-          </div>
-        </div>
+        </>
       ) : section.layout === 'triple' ? (
-        <div className='grid grid-cols-3 gap-4'>
-          <div ref={dropLeft} className='min-h-[200px] bg-white border p-2 rounded'>
-            <button
-            onClick={() => onDeleteSection(index)}
-            className='absolute right-6 cursor-pointer text-red-500 text-sm'
-          >
-            ❌
-          </button>
-            {section.fields.left.map((field, i) => (
-              <FieldItem
-                key={field.id}
-                type={field.type}
-                field={field}
-                index={i}
-                onUpdate={(i, updated) => updateField('left', i, updated)}
-                onDelete={i => deleteField('left', i)}
-              />
-            ))}
-            <p className='text-xs text-gray-400 text-center mt-2'>Drop fields here</p>
+        <>
+         
+          <div className='grid grid-cols-3 gap-4'>
+            <div ref={dropLeft} className='min-h-[200px] bg-white border p-2 rounded'>
+              {section.fields.left.map((field, i) => (
+                <>
+                 <button
+                  onClick={()=>deleteField('left', i)}
+                  className='float-right right-6 cursor-pointer text-red-500 text-sm'
+                >
+                  ❌
+                </button>
+                 <FieldItem
+                  key={field.id}
+                  type={field.type}
+                  field={field}
+                  index={i}
+                  onUpdate={(i, updated) => updateField('left', i, updated)}
+                  onDelete={i => deleteField('left', i)}
+                />
+                </>
+               
+              ))}
+              <p className='text-xs text-gray-400 text-center mt-2'>Drop fields here</p>
+            </div>
+            <div ref={dropCenter} className='min-h-[200px] bg-white border p-2 rounded'>
+              {section.fields.center.map((field, i) => (
+                <>
+                 <button
+                  onClick={()=>deleteField('center', i)}
+                  className='float-right right-6 cursor-pointer text-red-500 text-sm'
+                >
+                  ❌
+                </button>
+                <FieldItem
+                  key={field.id}
+                  type={field.type}
+                  field={field}
+                  index={i}
+                  onUpdate={(i, updated) => updateField('center', i, updated)}
+                  onDelete={i => deleteField('center', i)}
+                />
+                </>
+                
+              ))}
+              <p className='text-xs text-gray-400 text-center mt-2'>Drop fields here</p>
+            </div>
+            <div ref={dropRight} className='min-h-[200px] bg-white border p-2 rounded'>
+              {section.fields.right.map((field, i) => (
+                <>
+                  <button
+                  onClick={()=>deleteField('right', i)}
+                  className='float-right right-6 cursor-pointer text-red-500 text-sm'
+                >
+                  ❌
+                </button>
+                <FieldItem
+                  key={field.id}
+                  type={field.type}
+                  field={field}
+                  index={i}
+                  onUpdate={(i, updated) => updateField('right', i, updated)}
+                  onDelete={i => deleteField('right', i)}
+                />
+                </>
+                
+              ))}
+              <p className='text-xs text-gray-400 text-center mt-2'>Drop fields here</p>
+            </div>
           </div>
-          <div ref={dropCenter} className='min-h-[200px] bg-white border p-2 rounded'>
-            <button
-            onClick={() => onDeleteSection(index)}
-            className='absolute right-6 cursor-pointer text-red-500 text-sm'
-          >
-            ❌
-          </button>
-            {section.fields.center.map((field, i) => (
-              <FieldItem
-                key={field.id}
-                type={field.type}
-                field={field}
-                index={i}
-                onUpdate={(i, updated) => updateField('center', i, updated)}
-                onDelete={i => deleteField('center', i)}
-              />
-            ))}
-            <p className='text-xs text-gray-400 text-center mt-2'>Drop fields here</p>
-           
-          </div>
-          <div ref={dropRight} className='min-h-[200px] bg-white border p-2 rounded'>
-            <button
-            onClick={() => onDeleteSection(index)}
-            className='absolute right-6 cursor-pointer text-red-500 text-sm'
-          >
-            ❌
-          </button>
-            {section.fields.right.map((field, i) => (
-              <FieldItem
-                key={field.id}
-                type={field.type}
-                field={field}
-                index={i}
-                onUpdate={(i, updated) => updateField('right', i, updated)}
-                onDelete={i => deleteField('right', i)}
-              />
-            ))}
-            <p className='text-xs text-gray-400 text-center mt-2'>Drop fields here</p>
-            
-          </div>
-        </div>
+        </>
       ) : (
-        <div ref={dropLeft} className='min-h-[200px] bg-white border p-2 rounded'>
-          <button
-            onClick={() => onDeleteSection(index)}
-            className='absolute right-6 cursor-pointer text-red-500 text-sm'
-          >
-            ❌
-          </button>
-          {section.fields.left.map((field, i) => (
-            <>
-              <FieldItem
-                key={field.id}
-                type={field.type}
-                field={field}
-                index={i}
-                onUpdate={(i, updated) => updateField('left', i, updated)}
-                onDelete={i => deleteField('left', i)}
-              />
-            </>
-          ))}
-          <p className='text-xs text-gray-400 text-center mt-2'>Drop fields here</p>
-        </div>
+        <>
+          <div ref={dropLeft} className='min-h-[200px] bg-white border p-2 rounded'>
+            {section.fields.left.map((field, i) => (
+              <>
+                <button
+                  onClick={()=>deleteField('left', i)}
+                  className='float-right right-6 cursor-pointer text-red-500 text-sm'
+                >
+                  ❌
+                </button>
+                <FieldItem
+                  key={field.id}
+                  type={field.type}
+                  field={field}
+                  index={i}
+                  onUpdate={(i, updated) => updateField('left', i, updated)}
+                  onDelete={i => deleteField('left', i)}
+                />
+              </>
+            ))}
+            <p className='text-xs text-gray-400 text-center mt-2'>Drop fields here</p>
+          </div>
+        </>
       )}
     </div>
   )

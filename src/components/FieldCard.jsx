@@ -2175,8 +2175,10 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
 
   return (
     <div className='border rounded p-3 bg-white mb-4 shadow-sm'>
+     
       <div className='flex justify-between items-start'>
         <div>
+           
           <Typography fontWeight='medium'>
             {field.label}
             {field.required && (

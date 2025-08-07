@@ -190,11 +190,11 @@ export default function LeadFormPage() {
     setSections(updated)
   }
 
-  const handleDeleteSection = (sectionIndex) => {
-  const updated = [...sections]
-  updated.splice(sectionIndex, 1)
-  setSections(updated)
-}
+  const handleDeleteSection = sectionIndex => {
+    const updated = [...sections]
+    updated.splice(sectionIndex, 1)
+    setSections(updated)
+  }
   const handleUpdateSection = (sectionIndex, updatedSection) => {
     const updated = [...sections]
     updated[sectionIndex] = updatedSection
@@ -343,14 +343,23 @@ export default function LeadFormPage() {
         <div className='flex-1'>
           <div className='max-h-[85vh] overflow-y-auto'>
             {sections.map((section, index) => (
-              <SectionBlock
-                key={section.id}
-                section={section}
-                index={index}
-                onDropField={handleDropField}
-                onUpdateSection={handleUpdateSection}
-                onDeleteSection={handleDeleteSection}
-              />
+              <>
+               <button
+                  onClick={() => handleDeleteSection(index)}
+                  className='float-right right-6 cursor-pointer text-red-500 text-sm'
+                >
+                  ❌
+                </button>
+                <SectionBlock
+                  key={section.id}
+                  section={section}
+                  index={index}
+                  onDropField={handleDropField}
+                  onUpdateSection={handleUpdateSection}
+                  onDeleteSection={handleDeleteSection}
+                />
+               
+              </>
             ))}
           </div>
 
