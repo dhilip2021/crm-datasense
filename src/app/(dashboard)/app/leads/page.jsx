@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
   Box,
   Button,
@@ -33,6 +33,7 @@ import GridOnIcon from '@mui/icons-material/GridOn'
 
 const LeadTable = () => {
   const [data, setData] = useState([])
+  const [dataFilter, setDataFilter] = useState([])
   const [page, setPage] = useState(0)
   const [limit, setLimit] = useState(10)
   const [total, setTotal] = useState(0)
@@ -50,6 +51,42 @@ const LeadTable = () => {
   })
 
   const fetchData = async () => {
+    setLoading(true)
+    const organization_id = Cookies.get('organization_id')
+    const form_name = 'lead-form'
+
+    const query = new URLSearchParams({
+      organization_id,
+      form_name,
+      page: page + 1,
+      limit,
+      ...(filters.search && { search: filters.search }),
+      ...(filters.status && { status: filters.status }),
+      ...(filters.source && { source: filters.source }),
+      ...(filters.region && { region: filters.region }),
+      ...(filters.rep && { rep: filters.rep }),
+      ...(filters.value && { value: filters.value }),
+      ...(filters.fromDate && { from: dayjs(filters.fromDate).format('YYYY-MM-DD') }),
+      ...(filters.toDate && { to: dayjs(filters.toDate).format('YYYY-MM-DD') })
+    })
+
+    try {
+      const res = await fetch(`/api/v1/admin/lead-form/list?${query}`)
+      const json = await res.json()
+      if (json.success) {
+        console.log(json.data, '<<<< DTAT')
+        setData(json.data)
+        setDataFilter(json.data)
+        setTotal(json.total)
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchFilterData = async () => {
     setLoading(true)
     const organization_id = Cookies.get('organization_id')
     const form_name = 'lead-form'
@@ -136,6 +173,14 @@ const LeadTable = () => {
     doc.save('leads_export.pdf')
   }
 
+  const uniqueSources = useMemo(() => {
+    return [...new Set(dataFilter.map(item => item.values['Lead Source']))].filter(Boolean)
+  }, [dataFilter])
+
+  const uniqueStatus = useMemo(() => {
+    return [...new Set(dataFilter.map(item => item.values['Status']))].filter(Boolean)
+  }, [dataFilter])
+
   return (
     <Box px={4} py={4}>
       <Grid container justifyContent='space-between' mb={2} alignItems='center'>
@@ -157,7 +202,7 @@ const LeadTable = () => {
                 label='Search'
                 value={filters.search}
                 onChange={e => setFilters({ ...filters, search: e.target.value })}
-                onKeyDown={e => e.key === 'Enter' && fetchData()}
+                onKeyDown={e => e.key === 'Enter' && fetchFilterData()}
               />
             </Grid>
             <Grid item xs={12} sm={2}>
@@ -170,9 +215,11 @@ const LeadTable = () => {
                 onChange={e => setFilters({ ...filters, status: e.target.value })}
               >
                 <MenuItem value=''>All</MenuItem>
-                <MenuItem value='New'>New</MenuItem>
-                <MenuItem value='Contacted'>Contacted</MenuItem>
-                <MenuItem value='Qualified'>Qualified</MenuItem>
+                {uniqueStatus.map(status => (
+                  <MenuItem key={status} value={status}>
+                    {status}
+                  </MenuItem>
+                ))}
               </TextField>
             </Grid>
             <Grid item xs={12} sm={2}>
@@ -185,9 +232,11 @@ const LeadTable = () => {
                 onChange={e => setFilters({ ...filters, source: e.target.value })}
               >
                 <MenuItem value=''>All</MenuItem>
-                <MenuItem value='Website'>Website</MenuItem>
-                <MenuItem value='Referral'>Referral</MenuItem>
-                <MenuItem value='LinkedIn'>LinkedIn</MenuItem>
+                {uniqueSources.map(source => (
+                  <MenuItem key={source} value={source}>
+                    {source}
+                  </MenuItem>
+                ))}
               </TextField>
             </Grid>
             <Grid item xs={12} sm={2}>
@@ -211,7 +260,7 @@ const LeadTable = () => {
               </LocalizationProvider>
             </Grid>
             <Grid item xs={12} sm={2}>
-              <Button variant='contained' color='success' fullWidth onClick={fetchData}>
+              <Button variant='contained' color='success' fullWidth onClick={fetchFilterData}>
                 Apply
               </Button>
             </Grid>
@@ -346,6 +395,11 @@ const LeadTable = () => {
                         </TableCell>
                       </TableRow>
                     ))}
+                    {
+                     !loading && data?.length === 0 &&    <TableCell sx={{ minWidth: 150, height: 20, textAlign: "center",  maxWidth: 1200, whiteSpace: 'nowrap' }}>
+                      <h4>No record found !</h4>
+                      </TableCell>
+                    }
               </TableBody>
             </Table>
           </Box>

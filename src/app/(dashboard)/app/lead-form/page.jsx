@@ -248,7 +248,7 @@ function LeadFormAppPage() {
   return (
     <Box px={4} py={4} sx={{ background: '#f9f9f9', minHeight: '100vh' }}>
       <Typography variant='h4' fontWeight='bold' color='primary' mb={4}>
-        Lead Submission Form
+        Lead Submission
       </Typography>
 
       {loader ? (
