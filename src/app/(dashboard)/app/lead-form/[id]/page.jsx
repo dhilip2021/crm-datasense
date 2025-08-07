@@ -243,26 +243,59 @@ function LeadFormAppIdPage() {
       )}
 
       {!loader && sections.map((section, sIndex) => (
-        <Card key={section.id} sx={{ mb: 3, borderLeft: '8px solid #8c57ff' }}>
-          <CardContent>
-            <Typography variant='h6' fontWeight='bold' mb={2}>
-              {section.title || `Section ${sIndex + 1}`}
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                {(section.fields.left || []).map(field => (
-                  <Box mb={3} key={field.id}>{renderField(field)}</Box>
-                ))}
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                {(section.fields.right || []).map(field => (
-                  <Box mb={3} key={field.id}>{renderField(field)}</Box>
-                ))}
-              </Grid>
+  <Card key={section.id} sx={{ mb: 3, borderLeft: '8px solid #8c57ff' }}>
+    <CardContent>
+      <Typography variant='h6' fontWeight='bold' mb={2}>
+        {section.title || `Section ${sIndex + 1}`}
+      </Typography>
+
+      <Grid container spacing={2}>
+        {/* Left */}
+        {(section.fields.left || []).length > 0 && (
+          <Grid
+            item
+            xs={12}
+            sm={section.layout === 'single' ? 12 : section.layout === 'double' ? 6 : 4}
+          >
+            {section.fields.left.map(field => (
+              <Box mb={3} key={field.id}>
+                {renderField(field)}
+              </Box>
+            ))}
+          </Grid>
+        )}
+
+        {/* Center */}
+        {section.layout === 'triple' && (section.fields.center || []).length > 0 && (
+          <Grid item xs={12} sm={4}>
+            {section.fields.center.map(field => (
+              <Box mb={3} key={field.id}>
+                {renderField(field)}
+              </Box>
+            ))}
+          </Grid>
+        )}
+
+        {/* Right */}
+        {(section.layout === 'double' || section.layout === 'triple') &&
+          (section.fields.right || []).length > 0 && (
+            <Grid
+              item
+              xs={12}
+              sm={section.layout === 'double' ? 6 : 4}
+            >
+              {section.fields.right.map(field => (
+                <Box mb={3} key={field.id}>
+                  {renderField(field)}
+                </Box>
+              ))}
             </Grid>
-          </CardContent>
-        </Card>
-      ))}
+          )}
+      </Grid>
+    </CardContent>
+  </Card>
+))}
+
 
       {!loader && (
         <Box display='flex' justifyContent='space-between' mt={3}>

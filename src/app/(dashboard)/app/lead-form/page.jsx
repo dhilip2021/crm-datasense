@@ -68,7 +68,11 @@ function LeadFormAppPage() {
 
     const newErrors = {}
     sections.forEach(section => {
-      const fields = [...(section.fields.left || []), ...(section.fields.right || [])]
+      const fields = [
+        ...(section.fields.left || []),
+        ...(section.fields.center || []),
+        ...(section.fields.right || [])
+      ]
       fields.forEach(field => {
         const value = values[field.id]
         const error = validateField(field, value)
@@ -108,7 +112,11 @@ function LeadFormAppPage() {
       setSections(data.data.sections)
       const defaultValues = {}
       data.data.sections.forEach(section => {
-        const fields = [...(section.fields.left || []), ...(section.fields.right || [])]
+        const fields = [
+          ...(section.fields.left || []),
+          ...(section.fields.center || []),
+          ...(section.fields.right || [])
+        ]
         fields.forEach(field => {
           if (field.defaultValue) defaultValues[field.id] = field.defaultValue
         })
@@ -179,6 +187,44 @@ function LeadFormAppPage() {
     }
   }
 
+  // 🆕 Dynamic layout rendering
+  const renderLayoutGrid = section => {
+    const layout = section.layout || 'double'
+    const cols = layout === 'single' ? 12 : layout === 'double' ? 6 : 4
+
+    return (
+      <Grid container spacing={2}>
+        {section.fields.left?.length > 0 && (
+          <Grid item xs={12} sm={cols}>
+            {section.fields.left.map(field => (
+              <Box key={field.id} mb={2}>
+                {renderField(field)}
+              </Box>
+            ))}
+          </Grid>
+        )}
+        {layout === 'triple' && section.fields.center?.length > 0 && (
+          <Grid item xs={12} sm={4}>
+            {section.fields.center.map(field => (
+              <Box key={field.id} mb={2}>
+                {renderField(field)}
+              </Box>
+            ))}
+          </Grid>
+        )}
+        {(layout === 'double' || layout === 'triple') && section.fields.right?.length > 0 && (
+          <Grid item xs={12} sm={layout === 'double' ? 6 : 4}>
+            {section.fields.right.map(field => (
+              <Box key={field.id} mb={2}>
+                {renderField(field)}
+              </Box>
+            ))}
+          </Grid>
+        )}
+      </Grid>
+    )
+  }
+
   return (
     <Box px={4} py={4} sx={{ background: '#f9f9f9', minHeight: '100vh' }}>
       <Typography variant='h4' fontWeight='bold' color='primary' mb={4}>
@@ -190,7 +236,6 @@ function LeadFormAppPage() {
           <Image src={LoaderGif} alt='loading' width={100} height={100} />
         </Box>
       ) : !loader && sections.length === 0 ? (
-        // <Typography textAlign='center' color='error'>No Form Configured</Typography>
         <></>
       ) : (
         <>
@@ -198,18 +243,7 @@ function LeadFormAppPage() {
             <Card key={sIndex} sx={{ mb: 4, borderLeft: '8px solid #8c57ff' }}>
               <CardContent>
                 <Typography variant='h6' fontWeight='bold' mb={2}>{section.title || `Section ${sIndex + 1}`}</Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
-                    {section.fields.left?.map(field => (
-                      <Box key={field.id} mb={2}>{renderField(field)}</Box>
-                    ))}
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    {section.fields.right?.map(field => (
-                      <Box key={field.id} mb={2}>{renderField(field)}</Box>
-                    ))}
-                  </Grid>
-                </Grid>
+                {renderLayoutGrid(section)}
               </CardContent>
             </Card>
           ))}
