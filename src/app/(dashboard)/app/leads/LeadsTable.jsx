@@ -1,6 +1,3 @@
-
-
-
 'use client'
 
 import {
@@ -11,8 +8,8 @@ import {
   Divider,
   Grid,
   MenuItem,
-  Paper,
   Select,
+  Skeleton,
   Table,
   TableBody,
   TableCell,
@@ -20,8 +17,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  TextField,
-  Typography
+  Paper
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
@@ -38,14 +34,17 @@ const Leads = () => {
   const [filters, setFilters] = useState({ status: '', source: '', region: '', rep: '', value: '' })
   const [page, setPage] = useState(0)
   const [limit, setLimit] = useState(10)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchData()
   }, [])
 
   const fetchData = async () => {
+    setLoading(true)
     const res = await fetch(`/api/v1/admin/lead-form/list?organization_id=${organization_id}&form_name=${form_name}`)
     const json = await res.json()
+    setLoading(false)
     if (json.success) {
       setData(json.data)
       setFilteredData(json.data)
@@ -114,7 +113,6 @@ const Leads = () => {
   return (
     <Box px={4} py={4}>
       <Grid container justifyContent='flex-end' alignItems='center' mb={2}>
-        {/* <Typography variant="h5" fontWeight="bold">📂 3. Lead Table View</Typography> */}
         <Button variant='contained' href='/app/lead-form'>
           + New Lead
         </Button>
@@ -122,6 +120,7 @@ const Leads = () => {
 
       <Card elevation={1}>
         <CardContent>
+          {/* Filters */}
           <Grid container spacing={2} mb={2}>
             {['status', 'source', 'region', 'rep', 'value'].map((key, i) => (
               <Grid item xs={6} sm={2.4} key={i}>
@@ -145,63 +144,70 @@ const Leads = () => {
             ))}
           </Grid>
 
+          {/* Export Buttons */}
           <Box display='flex' gap={1} mb={2}>
-            <Button onClick={() => handleExport('excel')} variant='outlined'>
-              Export Excel
-            </Button>
-            <Button onClick={() => handleExport('csv')} variant='outlined'>
-              Export CSV
-            </Button>
-            <Button onClick={() => handleExport('pdf')} variant='outlined'>
-              Export PDF
-            </Button>
+            <Button onClick={() => handleExport('excel')} variant='outlined'>Export Excel</Button>
+            <Button onClick={() => handleExport('csv')} variant='outlined'>Export CSV</Button>
+            <Button onClick={() => handleExport('pdf')} variant='outlined'>Export PDF</Button>
           </Box>
 
           <Divider sx={{ mb: 2 }} />
 
+          {/* Table with Scroll */}
           <Paper sx={{ width: '100%', overflow: 'auto' }}>
             <TableContainer sx={{ maxHeight: 500 }}>
               <Table stickyHeader>
                 <TableHead>
                   <TableRow>
                     {columns.map((col, i) => (
-                      <TableCell key={i} sx={{ fontWeight: 600 }}>
-                        {col}
-                      </TableCell>
+                      <TableCell key={i} sx={{ fontWeight: 600 }}>{col}</TableCell>
                     ))}
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredData.slice(page * limit, page * limit + limit).map((row, i) => (
-                    <TableRow key={i}>
-                      <TableCell>{row.lead_id}</TableCell>
-                      <TableCell>{row.values['Full Name']}</TableCell>
-                      <TableCell>{row.values['Company Name']}</TableCell>
-                      <TableCell>{row.values['City / Location']}</TableCell>
-                      <TableCell>{row.values['Status']}</TableCell>
-                      <TableCell>{row.values['Assigned To']}</TableCell>
-                      <TableCell>{row.values['Lead Source']}</TableCell>
-                      <TableCell>{row.values['Score']}</TableCell>
-                      <TableCell>{row.values['Last Activity']}</TableCell>
-                      <TableCell>{row.values['Next Follow-up']}</TableCell>
-                    </TableRow>
-                  ))}
+                  {loading
+                    ? [...Array(limit)].map((_, i) => (
+                        <TableRow key={i}>
+                          {columns.map((_, j) => (
+                            <TableCell key={j}>
+                              <Skeleton height={20} />
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))
+                    : filteredData.slice(page * limit, page * limit + limit).map((row, i) => (
+                        <TableRow key={i}>
+                          <TableCell>{row.lead_id}</TableCell>
+                          <TableCell>{row.values['Full Name']}</TableCell>
+                          <TableCell>{row.values['Company Name']}</TableCell>
+                          <TableCell>{row.values['City / Location']}</TableCell>
+                          <TableCell>{row.values['Status']}</TableCell>
+                          <TableCell>{row.values['Assigned To']}</TableCell>
+                          <TableCell>{row.values['Lead Source']}</TableCell>
+                          <TableCell>{row.values['Score']}</TableCell>
+                          <TableCell>{row.values['Last Activity']}</TableCell>
+                          <TableCell>{row.values['Next Follow-up']}</TableCell>
+                        </TableRow>
+                      ))}
                 </TableBody>
               </Table>
             </TableContainer>
 
-            <TablePagination
-              component='div'
-              count={filteredData.length}
-              page={page}
-              rowsPerPage={limit}
-              rowsPerPageOptions={[5, 10, 25, 50]}
-              onPageChange={(e, newPage) => setPage(newPage)}
-              onRowsPerPageChange={e => {
-                setLimit(parseInt(e.target.value, 10))
-                setPage(0)
-              }}
-            />
+            {/* Pagination */}
+            {!loading && (
+              <TablePagination
+                component='div'
+                count={filteredData.length}
+                page={page}
+                rowsPerPage={limit}
+                rowsPerPageOptions={[5, 10, 25, 50]}
+                onPageChange={(e, newPage) => setPage(newPage)}
+                onRowsPerPageChange={e => {
+                  setLimit(parseInt(e.target.value, 10))
+                  setPage(0)
+                }}
+              />
+            )}
           </Paper>
         </CardContent>
       </Card>
@@ -210,4 +216,3 @@ const Leads = () => {
 }
 
 export default Leads
-

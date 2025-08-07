@@ -9,6 +9,7 @@ import {
   Divider,
   Grid,
   MenuItem,
+  Skeleton,
   Table,
   TableBody,
   TableCell,
@@ -35,6 +36,8 @@ const LeadTable = () => {
   const [page, setPage] = useState(0)
   const [limit, setLimit] = useState(10)
   const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(false)
+
   const [filters, setFilters] = useState({
     status: '',
     source: '',
@@ -47,6 +50,7 @@ const LeadTable = () => {
   })
 
   const fetchData = async () => {
+    setLoading(true)
     const organization_id = Cookies.get('organization_id')
     const form_name = 'lead-form'
 
@@ -65,11 +69,17 @@ const LeadTable = () => {
       ...(filters.toDate && { to: dayjs(filters.toDate).format('YYYY-MM-DD') })
     })
 
-    const res = await fetch(`/api/v1/admin/lead-form/list?${query}`)
-    const json = await res.json()
-    if (json.success) {
-      setData(json.data)
-      setTotal(json.total)
+    try {
+      const res = await fetch(`/api/v1/admin/lead-form/list?${query}`)
+      const json = await res.json()
+      if (json.success) {
+        setData(json.data)
+        setTotal(json.total)
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -201,12 +211,7 @@ const LeadTable = () => {
               </LocalizationProvider>
             </Grid>
             <Grid item xs={12} sm={2}>
-              <Button
-                variant='contained'
-                color='success'
-                fullWidth
-                onClick={fetchData}
-              >
+              <Button variant='contained' color='success' fullWidth onClick={fetchData}>
                 Apply
               </Button>
             </Grid>
@@ -223,63 +228,124 @@ const LeadTable = () => {
 
           <Divider sx={{ my: 2 }} />
 
-          <Box sx={{ overflowX: 'auto' }}>
-            <Table stickyHeader>
+          {/* 🔥 Scrollable and Skeleton Table */}
+
+          <Box sx={{ width: '100%', overflowX: 'auto', maxHeight: 500 }}>
+            <Table stickyHeader size='small' sx={{ minWidth: 1200 }}>
               <TableHead>
                 <TableRow>
-                  <TableCell>Lead ID</TableCell>
-                  <TableCell>Lead Name</TableCell>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Company</TableCell>
+                  <TableCell
+                    sx={{
+                      position: 'sticky',
+                      left: 0,
+                      zIndex: 9,
+                      minWidth: 120
+                    }}
+                  >
+                    Lead ID
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      position: 'sticky',
+                      left: 120, // Same as Lead ID width
+                      zIndex: 9,
+                      minWidth: 180,
+                      maxWidth: 200,
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    Lead Name
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Name</TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Company</TableCell>
                   <TableCell>Location</TableCell>
                   <TableCell>Status</TableCell>
-                  <TableCell>Assigned To</TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Assigned To</TableCell>
                   <TableCell>Source</TableCell>
                   <TableCell>Score</TableCell>
-                  <TableCell>Label</TableCell>
-                  <TableCell>Last Activity</TableCell>
-                  <TableCell>Next Follow-up</TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Label</TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Last Activity</TableCell>
+                  <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Next Follow-up</TableCell>
                 </TableRow>
               </TableHead>
+
               <TableBody>
-                {data.map((row, i) => (
-                  <TableRow key={i}>
-                    <TableCell>
-                      <Link underline='hover' color='inherit' href={`/app/lead-form/${row.lead_id}`}>
-                        <strong>{row.lead_id}</strong>
-                      </Link>
-                    </TableCell>
-                    <TableCell>{row.lead_name}</TableCell>
-                    <TableCell>{row.values['Full Name']}</TableCell>
-                    <TableCell>{row.values['Company Name']}</TableCell>
-                    <TableCell>{row.values['City / Location']}</TableCell>
-                    <TableCell>{row.values['Status']}</TableCell>
-                    <TableCell>{row.values['Lead Owner']}</TableCell>
-                    <TableCell>{row.values['Lead Source']}</TableCell>
-                    <TableCell>
-                      {(() => {
-                        const score = row.values['Score'] || 0
-                        if (score >= 75) return <span style={{ color: 'red', fontWeight: 'bold' }}>{score}</span>
-                        if (score >= 50) return <span style={{ color: 'orange', fontWeight: 'bold' }}>{score}</span>
-                        return <span style={{ color: 'blue', fontWeight: 'bold' }}>{score}</span>
-                      })()}
-                    </TableCell>
-
-                    {/* 🔥🟡❄️ Label based on Score */}
-                    <TableCell>
-                      {(() => {
-                        const score = row.values['Score'] || 0
-                        if (score >= 75) return <span style={{ color: 'red', fontWeight: 'bold' }}>🔥 Hot Lead</span>
-                        if (score >= 50)
-                          return <span style={{ color: 'orange', fontWeight: 'bold' }}>🟡 Warm Lead</span>
-                        return <span style={{ color: 'blue', fontWeight: 'bold' }}>❄️ Cold Lead</span>
-                      })()}
-                    </TableCell>
-
-                    <TableCell>{converDayJsDate(row.updatedAt)}</TableCell>
-                    <TableCell>{formatDateShort(row.values['Next Follow-up Date'])}</TableCell>
-                  </TableRow>
-                ))}
+                {loading
+                  ? [...Array(limit)].map((_, i) => (
+                      <TableRow key={i}>
+                        {Array.from({ length: 12 }).map((_, j) => (
+                          <TableCell key={j}>
+                            <Skeleton variant='text' width='100%' />
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                  : data.map((row, i) => (
+                      <TableRow key={i}>
+                        <TableCell
+                          sx={{
+                            position: 'sticky',
+                            left: 0,
+                            zIndex: 2,
+                            backgroundColor: '#fff',
+                            minWidth: 120
+                          }}
+                        >
+                          <Link href={`/app/lead-form/${row.lead_id}`} style={{ textDecoration: 'none' }}>
+                            <strong>{row.lead_id}</strong>
+                          </Link>
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            position: 'sticky',
+                            left: 120, // Same as Lead ID width
+                            zIndex: 2,
+                            backgroundColor: '#fff',
+                            minWidth: 180,
+                            maxWidth: 200,
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {row.lead_name}
+                        </TableCell>
+                        <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                          {row.values['Full Name']}
+                        </TableCell>
+                        <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                          {row.values['Company Name']}
+                        </TableCell>
+                        <TableCell>{row.values['City / Location']}</TableCell>
+                        <TableCell>{row.values['Status']}</TableCell>
+                        <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                          {row.values['Lead Owner']}
+                        </TableCell>
+                        <TableCell>{row.values['Lead Source']}</TableCell>
+                        <TableCell>
+                          {(() => {
+                            const score = row.values['Score'] || 0
+                            if (score >= 75) return <span style={{ color: 'red', fontWeight: 'bold' }}>{score}</span>
+                            if (score >= 50) return <span style={{ color: 'orange', fontWeight: 'bold' }}>{score}</span>
+                            return <span style={{ color: 'blue', fontWeight: 'bold' }}>{score}</span>
+                          })()}
+                        </TableCell>
+                        <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                          {(() => {
+                            const score = row.values['Score'] || 0
+                            if (score >= 75)
+                              return <span style={{ color: 'red', fontWeight: 'bold' }}>🔥 Hot Lead</span>
+                            if (score >= 50)
+                              return <span style={{ color: 'orange', fontWeight: 'bold' }}>🟡 Warm Lead</span>
+                            return <span style={{ color: 'blue', fontWeight: 'bold' }}>❄️ Cold Lead</span>
+                          })()}
+                        </TableCell>
+                        <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                          {converDayJsDate(row.updatedAt)}
+                        </TableCell>
+                        <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                          {formatDateShort(row.values['Next Follow-up Date'])}
+                        </TableCell>
+                      </TableRow>
+                    ))}
               </TableBody>
             </Table>
           </Box>

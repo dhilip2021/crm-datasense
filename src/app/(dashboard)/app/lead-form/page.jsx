@@ -21,8 +21,22 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import LoaderGif from '@assets/gif/loader.gif'
 
+const shortName=(fullName)=>{
+const shortForm = fullName
+  .split(' ')
+  .map(word => word[0])
+  .join('')
+  .toUpperCase();
+
+  return shortForm;
+}
+
+
+
+
 function LeadFormAppPage() {
   const organization_id = Cookies.get('organization_id')
+  const organization_name = Cookies.get('organization_name')
   const lead_form = 'lead-form'
   const router = useRouter()
 
@@ -61,6 +75,7 @@ function LeadFormAppPage() {
   const handleSubmit = async () => {
     const payload = {
       organization_id,
+      organization_name : shortName(organization_name),
       form_name: lead_form,
       values: {},
       submittedAt: new Date().toISOString()
@@ -87,6 +102,8 @@ function LeadFormAppPage() {
     }
 
     setLoader(true)
+
+
     const res = await fetch('/api/v1/admin/lead-form/form-submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -101,6 +118,9 @@ function LeadFormAppPage() {
     } else {
       toast.error('Submission failed')
     }
+
+
+
   }
 
   const fetchForm = async () => {

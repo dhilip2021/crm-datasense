@@ -1,6 +1,7 @@
 import { create_UUID } from '@/helper/clientHelper'
 import connectMongoDB from '@/libs/mongodb'
 import Leadform from '@/models/Leadform'
+import Cookies from 'js-cookie'
 import { NextResponse } from 'next/server'
 import slugify from 'slugify'
 
@@ -37,11 +38,16 @@ const calculateLeadScore = (values) => {
 }
 
 export async function POST(req) {
+
   await connectMongoDB()
   const body = await req.json()
 
+
+
   try {
-    const { organization_id, form_name, values } = body
+    const { organization_id,organization_name, form_name, values } = body
+
+     
 
     if (!organization_id || !form_name || !values) {
       return NextResponse.json(
@@ -52,6 +58,7 @@ export async function POST(req) {
 
     // Safe prefix fallback
     const prefix = process.env.NEXT_PUBLIC_LEAD_PREFIX || 'CRM LEAD 2025'
+    const prefixId = `${organization_name} CRM`
 
     // Auto-increment ID logic
     const lastEntry = await Leadform.findOne().sort({ _id: -1 }).lean()
@@ -68,13 +75,25 @@ export async function POST(req) {
       trim: true
     })
 
+        // Generate id & slug id
+    const lead_id = `${prefixId} ${nextAutoId}`
+    const slugBaseId = lead_id.replace(/[^\w\s]/gi, '')
+    const lead_slug_id = slugify(slugBaseId, {
+      replacement: '-',
+      lower: false,
+      trim: true
+    })
+
+
+
     // ✅ Lead Scoring
     const { lead_score, lead_label } = calculateLeadScore(values)
 
     const leadformData = new Leadform({
       organization_id,
       auto_inc_id: nextAutoId,
-      lead_id: create_UUID(),
+      // lead_id: create_UUID(),
+      lead_id: lead_slug_id,
       lead_name,
       lead_slug_name,
       form_name,
