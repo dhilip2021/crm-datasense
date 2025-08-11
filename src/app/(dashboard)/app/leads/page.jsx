@@ -6,6 +6,7 @@ import {
   Button,
   Card,
   CardContent,
+  Chip,
   Divider,
   Grid,
   MenuItem,
@@ -293,7 +294,7 @@ const LeadTable = () => {
                   >
                     Lead ID
                   </TableCell>
-                  <TableCell
+                  {/* <TableCell
                     sx={{
                       position: 'sticky',
                       left: 120, // Same as Lead ID width
@@ -304,7 +305,7 @@ const LeadTable = () => {
                     }}
                   >
                     Lead Name
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Name</TableCell>
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Company</TableCell>
                   <TableCell>Location</TableCell>
@@ -344,19 +345,18 @@ const LeadTable = () => {
                             <strong>{row.lead_id}</strong>
                           </Link>
                         </TableCell>
-                        <TableCell
+
+                        {/* <TableCell
                           sx={{
                             position: 'sticky',
-                            left: 120, // Same as Lead ID width
+                            left: 120,
                             zIndex: 2,
                             backgroundColor: '#fff',
-                            minWidth: 180,
-                            maxWidth: 200,
-                            whiteSpace: 'nowrap'
+                            fontWeight: 500
                           }}
                         >
                           {row.lead_name}
-                        </TableCell>
+                        </TableCell> */}
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           {row.values['Full Name']}
                         </TableCell>
@@ -364,28 +364,72 @@ const LeadTable = () => {
                           {row.values['Company Name']}
                         </TableCell>
                         <TableCell>{row.values['City / Location']}</TableCell>
-                        <TableCell>{row.values['Status']}</TableCell>
+                        <TableCell>
+                          <Chip
+                            label={row.values['Status'] || 'Unknown'}
+                            color={
+                              row.values['Status'] === 'New'
+                                ? 'primary'
+                                : row.values['Status'] === 'Contacted'
+                                  ? 'info'
+                                  : row.values['Status'] === 'Qualified'
+                                    ? 'success'
+                                    : row.values['Status'] === 'Lost'
+                                      ? 'error'
+                                      : row.values['Status'] === 'Converted'
+                                        ? 'warning'
+                                        : 'default'
+                            }
+                            size='small'
+                          />
+                        </TableCell>
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           {row.values['Lead Owner']}
                         </TableCell>
                         <TableCell>{row.values['Lead Source']}</TableCell>
                         <TableCell>
-                          {(() => {
-                            const score = row.values['Score'] || 0
-                            if (score >= 75) return <span style={{ color: 'red', fontWeight: 'bold' }}>{score}</span>
-                            if (score >= 50) return <span style={{ color: 'orange', fontWeight: 'bold' }}>{score}</span>
-                            return <span style={{ color: 'blue', fontWeight: 'bold' }}>{score}</span>
-                          })()}
+                          <Box
+                            sx={{
+                              backgroundColor:
+                                (row.values['Score'] || 0) >= 75
+                                  ? '#d32f2f'
+                                  : (row.values['Score'] || 0) >= 50
+                                    ? '#ff9800'
+                                    : '#1976d2',
+                              color: '#fff',
+                              px: 1.5,
+                              py: 0.5,
+                              borderRadius: '50%',
+                              fontSize: '0.8rem',
+                              fontWeight: 'bold',
+                              display: 'inline-block',
+                              textAlign: 'center'
+                            }}
+                          >
+                            {row.values['Score'] || 0}
+                          </Box>
                         </TableCell>
+
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
-                          {(() => {
-                            const score = row.values['Score'] || 0
-                            if (score >= 75)
-                              return <span style={{ color: 'red', fontWeight: 'bold' }}>🔥 Hot Lead</span>
-                            if (score >= 50)
-                              return <span style={{ color: 'orange', fontWeight: 'bold' }}>🟡 Warm Lead</span>
-                            return <span style={{ color: 'blue', fontWeight: 'bold' }}>❄️ Cold Lead</span>
-                          })()}
+                          <Chip
+                            label={
+                              (row.values['Score'] || 0) >= 75
+                                ? '🔥 Hot Lead'
+                                : (row.values['Score'] || 0) >= 50
+                                  ? '🟡 Warm Lead'
+                                  : '❄️ Cold Lead'
+                            }
+                            sx={{
+                              backgroundColor:
+                                (row.values['Score'] || 0) >= 75
+                                  ? '#ffcdd2'
+                                  : (row.values['Score'] || 0) >= 50
+                                    ? '#fff3cd'
+                                    : '#bbdefb',
+                              fontWeight: 'bold'
+                            }}
+                            size='small'
+                          />
                         </TableCell>
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           {converDayJsDate(row.updatedAt)}
@@ -395,11 +439,37 @@ const LeadTable = () => {
                         </TableCell>
                       </TableRow>
                     ))}
-                    {
-                     !loading && data?.length === 0 &&    <TableCell sx={{ minWidth: 150, height: 20, textAlign: "center",  maxWidth: 1200, whiteSpace: 'nowrap' }}>
-                      <h4>No record found !</h4>
-                      </TableCell>
-                    }
+                {!loading && data?.length === 0 && (
+                  <TableCell
+                    colSpan={8}
+                    align='center'
+                    sx={{
+                      py: 4,
+                      border: 'none',
+                      backgroundColor: '#f9fafb'
+                    }}
+                  >
+                    <Typography
+                      variant='h6'
+                      sx={{
+                        fontWeight: 'bold',
+                        color: '#9e9e9e',
+                        letterSpacing: 0.5
+                      }}
+                    >
+                      🚫 No record found!
+                    </Typography>
+                    {/* <Typography
+                      variant='body2'
+                      sx={{
+                        color: '#b0bec5',
+                        mt: 0.5
+                      }}
+                    >
+                      Try adjusting filters or date range.
+                    </Typography> */}
+                  </TableCell>
+                )}
               </TableBody>
             </Table>
           </Box>

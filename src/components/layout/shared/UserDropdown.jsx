@@ -113,7 +113,7 @@ const UserDropdown = () => {
             <Paper className='shadow-lg'>
               <ClickAwayListener onClickAway={e => handleDropdownClose(e)}>
                 <MenuList>
-                  <div className='flex items-center plb-2 pli-4 gap-2' tabIndex={-1}>
+                  <div className='flex items-center plb-2 pli-4 gap-2' tabIndex={-1} style={{zIndex:"9"}}>
                     <Avatar alt='John Doe' src='/images/avatars/1.png' />
                     <div className='flex items-start flex-col'>
                       <Typography className='font-medium' color='text.primary'>

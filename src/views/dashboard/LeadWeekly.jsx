@@ -93,7 +93,7 @@ const LeadWeekly = () => {
       <CardContent sx={{ '& .apexcharts-xcrosshairs.apexcharts-active': { opacity: 0 } }}>
         <AppReactApexCharts
           type='bar'
-          height={270}
+          height={250}
           width='100%'
           series={[{ name: 'Leads', data: [37, 57, 45, 50, 10, 20, 30,40] }]}
           options={options}

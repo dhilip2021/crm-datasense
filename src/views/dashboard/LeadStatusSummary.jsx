@@ -1,15 +1,7 @@
-// LeadStatusTable.jsx
+'use client'
 
-// MUI Imports
-import Typography from '@mui/material/Typography'
-import Card from '@mui/material/Card'
-import Chip from '@mui/material/Chip'
-
-// Components Imports
-import CustomAvatar from '@core/components/mui/Avatar'
-
-// Styles Imports
-import tableStyles from '@core/styles/table.module.css'
+import { Card, CardHeader, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Chip, Avatar, Box } from '@mui/material'
+import OptionsMenu from '@core/components/option-menu'
 
 // Vars
 const stages = [
@@ -20,61 +12,68 @@ const stages = [
   { title: 'Converted', count: 12, color: 'warning', icon: 'ri-exchange-dollar-line' }
 ]
 
-const LeadStatusTable = () => {
+export default function LeadStatusSummary() {
   const totalLeads = stages.reduce((sum, stage) => sum + stage.count, 0)
 
   return (
-    <Card>
-      <div className='overflow-x-auto'>
-        <table className={tableStyles.table}>
-          <thead>
-            <tr>
-              <th>Stage</th>
-              <th>Lead Count</th>
-              <th>Percentage</th>
-            </tr>
-          </thead>
-          <tbody>
+    <Card sx={{ width: '100%' }}>
+      <CardHeader
+        title="Conversion Funnel"
+        action={<OptionsMenu iconClassName="text-textPrimary" options={['Refresh']} />}
+        sx={{ pb: 0 }}
+      />
+
+      <TableContainer sx={{ p: 2 }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 'bold' }}>Stage</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Lead Count</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Percentage</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {stages.map((stage, index) => (
-              <tr key={index}>
+              <TableRow key={index}>
                 {/* Stage Name with Icon */}
-                <td className='!plb-1'>
-                  <div className='flex items-center gap-3'>
-                    <CustomAvatar
-                      variant='rounded'
-                      color={stage.color}
-                      className='shadow-md'
-                      sx={{ width: 40, height: 40, fontSize: 20 }}
+                <TableCell>
+                  <Box display="flex" alignItems="center" gap={2}>
+                    <Avatar
+                      sx={{
+                        bgcolor: `${stage.color}.main`,
+                        width: 40,
+                        height: 40,
+                        fontSize: 20,
+                        boxShadow: 2
+                      }}
+                      variant="rounded"
                     >
                       <i className={stage.icon}></i>
-                    </CustomAvatar>
-                    <Typography color='text.primary' className='font-medium'>
-                      {stage.title}
-                    </Typography>
-                  </div>
-                </td>
+                    </Avatar>
+                    <Typography fontWeight="medium">{stage.title}</Typography>
+                  </Box>
+                </TableCell>
 
                 {/* Lead Count */}
-                <td className='!plb-1'>
+                <TableCell>
                   <Typography>{stage.count}</Typography>
-                </td>
+                </TableCell>
 
                 {/* Percentage */}
-                <td className='!plb-1'>
+                <TableCell>
                   <Chip
                     label={`${((stage.count / totalLeads) * 100).toFixed(1)}%`}
                     color={stage.color}
-                    size='small'
-                    variant='tonal'
+                    size="small"
+                    variant="outlined"
+                    sx={{ fontWeight: 'bold' }}
                   />
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Card>
   )
 }
-
-export default LeadStatusTable

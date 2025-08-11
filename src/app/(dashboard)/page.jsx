@@ -28,9 +28,12 @@ import LeadByLocation from '@/views/dashboard/LeadByLocation'
 import LeadBySource from '@/views/dashboard/LeadBySource'
 import HighValueLeads from '@/views/dashboard/HighValueLeads'
 import LeadStatusSummary from '@/views/dashboard/LeadStatusSummary'
+import AssignedStatusCard from '@/views/dashboard/AssignedStatusCard'
+import DashboardWidgets from '@/views/dashboard/DashboardWidgets'
+import ConversionFunnel from '@/views/dashboard/ConversionFunnel'
+import SalesRepSummary from '@/views/dashboard/SalesRepSummary'
 
 const DashboardAnalytics = () => {
-
   const user_id = Cookies.get('user_id')
   const getToken = Cookies.get('_token')
 
@@ -57,26 +60,43 @@ const DashboardAnalytics = () => {
 
   return (
     <Grid container spacing={6}>
-      {/* <Grid item xs={12} md={4}>
-        <Award />
-      </Grid>
-      <Grid item xs={12} md={8} lg={8}>
-        <Transactions />
-      </Grid> */}
-
-
-       <Grid item xs={12} md={12} lg={12}>
+      <Grid item xs={12} md={12} lg={12}>
         <LeadStatus />
       </Grid>
-       <Grid item xs={12} md={12} lg={6}>
+
+      <Grid item xs={12} md={12} lg={12}>
+        <DashboardWidgets />
+      </Grid>
+
+      <Grid item xs={12} md={12} lg={6}>
+        <ConversionFunnel />
+      </Grid>
+      <Grid item xs={12} md={6} lg={6}>
+        <LeadWeekly />
+      </Grid>
+
+      <Grid item xs={12} md={6} lg={6}>
+        <LeadByLocation />
+      </Grid>
+      <Grid item xs={12} md={6} lg={6}>
+        <HighValueLeads />
+      </Grid>
+      <Grid item xs={12}>
+        <LeadStatusSummary />
+      </Grid>
+      <Grid item xs={12} md={12} lg={12}>
+        <LeadBySource />
+      </Grid>
+
+      <Grid item xs={12} md={12} lg={12}>
         <Grid container spacing={6}>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={6} lg={3}>
             <LineChart />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={6} lg={3}>
             <CardStatVertical
               title='Total Profit'
-              stats='$25.6k'
+              stats='₹ 25.6k'
               avatarIcon='ri-pie-chart-2-line'
               avatarColor='secondary'
               subtitle='Weekly Profit'
@@ -84,7 +104,7 @@ const DashboardAnalytics = () => {
               trend='positive'
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={6} lg={3}>
             <CardStatVertical
               stats='862'
               trend='negative'
@@ -95,29 +115,14 @@ const DashboardAnalytics = () => {
               avatarIcon='ri-file-word-2-line'
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={6} lg={3}>
             <DistributedColumnChart />
           </Grid>
         </Grid>
       </Grid>
-      <Grid item xs={12} md={6} lg={6}>
-        <LeadWeekly />
-      </Grid>
 
-      <Grid item xs={12} md={6} lg={6}>
-        <LeadByLocation />
-      </Grid>
-       <Grid item xs={12} md={6} lg={6}>
-        <HighValueLeads />
-      </Grid>
-
-        <Grid item xs={12} md={12} lg={12}>
-        <LeadBySource />
-      </Grid>
-      
-      <Grid item xs={12}>
-        {/* <Table /> */}
-        <LeadStatusSummary />
+      <Grid item xs={12} sm={12} lg={12}>
+        <SalesRepSummary />
       </Grid>
     </Grid>
   )

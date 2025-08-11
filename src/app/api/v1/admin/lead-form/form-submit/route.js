@@ -58,7 +58,7 @@ export async function POST(req) {
 
     // Safe prefix fallback
     const prefix = process.env.NEXT_PUBLIC_LEAD_PREFIX || 'CRM LEAD 2025'
-    const prefixId = `${organization_name} CRM`
+    const prefixId = `${organization_name} `
 
     // Auto-increment ID logic
     const lastEntry = await Leadform.findOne().sort({ _id: -1 }).lean()

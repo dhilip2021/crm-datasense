@@ -29,15 +29,24 @@ export async function GET(req) {
 
     // 🔍 Search by lead_name (case-insensitive partial match)
     if (search) {
-      query.lead_id = { $regex: search, $options: 'i' }
+      query.$or = [
+        { lead_id: { $regex: search, $options: 'i' } },
+        { 'values.Full Name': { $regex: search, $options: 'i' } },
+        { 'values.Mobile Number': { $regex: search, $options: 'i' } },
+        { 'values.Email Address': { $regex: search, $options: 'i' } },
+        { 'values.Company Name': { $regex: search, $options: 'i' } },
+        { 'values.Industry': { $regex: search, $options: 'i' } },
+        { 'values.City / Location': { $regex: search, $options: 'i' } },
+        { 'values.Label': { $regex: search, $options: 'i' } },
+      ]
     }
 
     if (status) {
       query['values.Status'] = { $regex: status, $options: 'i' }
     }
-     if (source) {
-        query['values.Lead Source'] = { $regex: source, $options: 'i' }
-      }
+    if (source) {
+      query['values.Lead Source'] = { $regex: source, $options: 'i' }
+    }
 
     // 📅 Filter by date range
     if (from || to) {
