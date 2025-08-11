@@ -22,6 +22,12 @@ import Table from '@views/dashboard/Table'
 import { getUserListApi } from '@/apiFunctions/ApiAction'
 
 import { removeCredentials } from '@/helper/frontendHelper'
+import LeadStatus from '@/views/dashboard/LeadStatus'
+import LeadWeekly from '@/views/dashboard/LeadWeekly'
+import LeadByLocation from '@/views/dashboard/LeadByLocation'
+import LeadBySource from '@/views/dashboard/LeadBySource'
+import HighValueLeads from '@/views/dashboard/HighValueLeads'
+import LeadStatusSummary from '@/views/dashboard/LeadStatusSummary'
 
 const DashboardAnalytics = () => {
 
@@ -51,19 +57,18 @@ const DashboardAnalytics = () => {
 
   return (
     <Grid container spacing={6}>
-      <Grid item xs={12} md={4}>
+      {/* <Grid item xs={12} md={4}>
         <Award />
       </Grid>
       <Grid item xs={12} md={8} lg={8}>
         <Transactions />
+      </Grid> */}
+
+
+       <Grid item xs={12} md={12} lg={12}>
+        <LeadStatus />
       </Grid>
-      <Grid item xs={12} md={6} lg={4}>
-        <WeeklyOverview />
-      </Grid>
-      <Grid item xs={12} md={6} lg={4}>
-        <TotalEarning />
-      </Grid>
-      <Grid item xs={12} md={6} lg={4}>
+       <Grid item xs={12} md={12} lg={6}>
         <Grid container spacing={6}>
           <Grid item xs={12} sm={6}>
             <LineChart />
@@ -95,14 +100,24 @@ const DashboardAnalytics = () => {
           </Grid>
         </Grid>
       </Grid>
-      <Grid item xs={12} md={6} lg={4}>
-        <SalesByCountries />
+      <Grid item xs={12} md={6} lg={6}>
+        <LeadWeekly />
       </Grid>
-      <Grid item xs={12} lg={8}>
-        <DepositWithdraw />
+
+      <Grid item xs={12} md={6} lg={6}>
+        <LeadByLocation />
       </Grid>
+       <Grid item xs={12} md={6} lg={6}>
+        <HighValueLeads />
+      </Grid>
+
+        <Grid item xs={12} md={12} lg={12}>
+        <LeadBySource />
+      </Grid>
+      
       <Grid item xs={12}>
-        <Table />
+        {/* <Table /> */}
+        <LeadStatusSummary />
       </Grid>
     </Grid>
   )

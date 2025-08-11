@@ -11,71 +11,71 @@ import Link from '@components/Link'
 // Vars
 const depositData = [
   {
-    leads: '+$4,650',
-    subtitle: '',
+    leads: '128',
     title: 'WatsApp',
-    logo: '/images/cards/gumroad.png'
+    subtitle: 'Watsapp leads',
+    logo: '/images/social/whatsapp.png'
   },
   {
-    leads: '+$92,705',
-    title: 'Mastercard',
-    subtitle: 'Wallet deposit',
-    logo: '/images/logos/mastercard.png'
+    leads: '186',
+    title: 'Linked In',
+    subtitle: 'LinedIn Leads',
+    logo: '/images/social/linkedin.png'
   },
   {
-    leads: '+$957',
-    title: 'Stripe Account',
-    subtitle: 'iOS Application',
-    logo: '/images/logos/stripe.png'
+    leads: '350',
+    title: 'Employee Referal',
+    subtitle: 'Employee Referal Leads',
+    logo: '/images/social/employee_referel.png'
   },
   {
-    leads: '+$6,837',
-    title: 'American Bank',
-    subtitle: 'Bank Transfer',
-    logo: '/images/logos/american-bank.png'
+    leads: '837',
+    title: 'Cold Call',
+    subtitle: 'Cold Call Leads',
+    logo: '/images/social/cold_call.png'
   },
   {
-    leads: '+$446',
-    title: 'Bank Account',
-    subtitle: 'Wallet deposit',
-    logo: '/images/logos/citi-bank.png'
+    leads: '446',
+    title: 'Advertisement',
+    subtitle: 'Advertisement Leads',
+    logo: '/images/social/advertisement.png'
   }
 ]
 
 const withdrawData = [
   {
-    leads: '-$145',
-    title: 'Google Adsense',
-    subtitle: 'Paypal deposit',
-    logo: '/images/logos/google.png'
+    leads: '43',
+    title: 'WatsApp',
+    subtitle: 'Watsapp Opportunity',
+    logo: '/images/social/whatsapp.png'
   },
   {
-    leads: '-$1870',
-    title: 'Github Enterprise',
-    logo: '/images/logos/github.png',
-    subtitle: 'Security & compliance'
+    leads: '27',
+    title: 'Linked In',
+    subtitle: 'LinedIn Opportunity',
+    logo: '/images/social/linkedin.png'
   },
   {
-    leads: '-$450',
-    title: 'Upgrade Slack Plan',
-    subtitle: 'Debit card deposit',
-    logo: '/images/logos/slack.png'
+    leads: '53',
+    title: 'Employee Referal',
+    subtitle: 'Employee Referal Opportunity',
+    logo: '/images/social/employee_referel.png'
   },
   {
-    leads: '-$540',
-    title: 'Digital Ocean',
-    subtitle: 'Cloud Hosting',
-    logo: '/images/logos/digital-ocean.png'
+    leads: '18',
+    title: 'Cold Call',
+    subtitle: 'Cold Call Opportunity',
+    logo: '/images/social/cold_call.png'
   },
   {
-    leads: '-$21',
-    title: 'AWS Account',
-    logo: '/images/logos/aws.png',
-    subtitle: 'Choosing a Cloud Platform'
+    leads: '45',
+    title: 'Advertisement',
+    subtitle: 'Advertisement Opportunity',
+    logo: '/images/social/advertisement.png'
   }
 ]
 
-const DepositWithdraw = () => {
+const LeadBySource = () => {
   return (
     <Card>
       <Grid container>
@@ -140,4 +140,4 @@ const DepositWithdraw = () => {
   )
 }
 
-export default DepositWithdraw
+export default LeadBySource

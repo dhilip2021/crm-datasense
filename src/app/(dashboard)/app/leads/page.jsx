@@ -74,7 +74,7 @@ const LeadTable = () => {
       const res = await fetch(`/api/v1/admin/lead-form/list?${query}`)
       const json = await res.json()
       if (json.success) {
-        console.log(json.data, '<<<< DTAT')
+        console.log(json.data, '<<<< DTATTTTT')
         setData(json.data)
         setDataFilter(json.data)
         setTotal(json.total)
