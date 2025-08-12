@@ -64,8 +64,8 @@ const LeadByLocation = () => {
   return (
     <Card>
       <CardHeader
-        title='Lead By Location'
-        action={<OptionMenu iconClassName='text-textPrimary' options={['Last 28 Days', 'Last Month', 'Last Year']} />}
+        title='Lead By Location (Today)'
+        action={<OptionMenu iconClassName='text-textPrimary' options={['Today', 'Last 7 Days', 'Last 30 Days', 'Last 60 Days']} />}
       />
       <CardContent className='flex flex-col gap-[0.875rem]'>
         {data.map((item, index) => (

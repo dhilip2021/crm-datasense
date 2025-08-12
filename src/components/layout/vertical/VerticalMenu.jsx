@@ -75,9 +75,15 @@ const VerticalMenu = ({ scrollMenu }) => {
         renderExpandedMenuItemIcon={{ icon: <i className='ri-circle-line' /> }}
         menuSectionStyles={menuSectionStyles(theme)}
       >
-        <MenuItem href='/' icon={<i className='ri-bar-chart-box-line' />}>
-          Dashboard
-        </MenuItem>
+        <SubMenu label='Dashboard' icon={<i className='ri-bar-chart-box-line' />}>
+          <MenuItem href='/' icon={<i className='ri-id-card-line' />}>
+            Leads
+          </MenuItem>
+          <MenuItem href='/opportunity' icon={<i className='ri-bar-chart-box-line' />}>
+            Opportunity
+          </MenuItem>
+        </SubMenu>
+
         {/* <MenuSection label='Master'>
           <MenuItem href='/salutation' icon={<i classNames="ri-id-card-line" />}>
             Salutation
@@ -91,7 +97,7 @@ const VerticalMenu = ({ scrollMenu }) => {
           </MenuItem>
         </MenuSection> */}
         <MenuSection label='Apps & Pages'>
-          <MenuItem href='/app/leads' icon={<i className="ri-user-star-line" />}>
+          <MenuItem href='/app/leads' icon={<i className='ri-user-star-line' />}>
             Leads
           </MenuItem>
           <MenuItem href='/customer' icon={<i className='ri-user-settings-line' />}>
@@ -151,23 +157,18 @@ const VerticalMenu = ({ scrollMenu }) => {
               </SubMenu>
             )}
             <MenuItem href='/fields/list-fields' icon={<i className='ri-input-field' />}>
-              Lead Field 
+              Lead Field
             </MenuItem>
-             <MenuItem href='/customer/fields' icon={<i className='ri-input-field' />}>
+            <MenuItem href='/customer/fields' icon={<i className='ri-input-field' />}>
               Customer Field
             </MenuItem>
-           
-
-
-
-            
           </SubMenu>
-           <MenuItem href='/builder' icon={<i className='ri-tools-line text-xl' />}>
-              Setup
-            </MenuItem>
-            <MenuItem href='/login' icon={<i className='ri-logout-box-line'></i>}>
-              <div onClick={logoutFn}>Logout</div>{' '}
-            </MenuItem>
+          <MenuItem href='/builder' icon={<i className='ri-tools-line text-xl' />}>
+            Setup
+          </MenuItem>
+          <MenuItem href='/login' icon={<i className='ri-logout-box-line'></i>}>
+            <div onClick={logoutFn}>Logout</div>{' '}
+          </MenuItem>
         </MenuSection>
       </Menu>
     </ScrollWrapper>
