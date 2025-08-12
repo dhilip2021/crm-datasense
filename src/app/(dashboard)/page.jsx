@@ -64,20 +64,24 @@ const DashboardAnalytics = () => {
         <LeadStatus />
       </Grid>
 
+      
+
+      {/* <Grid item xs={12} md={12} lg={6}>
+        <ConversionFunnel />
+      </Grid> */}
+      <Grid item xs={12} md={6} lg={6}>
+        <LeadWeekly />
+      </Grid>
+       <Grid item xs={12} md={6} lg={6}>
+        <LeadByLocation />
+      </Grid>
+
+
       <Grid item xs={12} md={12} lg={12}>
         <DashboardWidgets />
       </Grid>
 
-      <Grid item xs={12} md={12} lg={6}>
-        <ConversionFunnel />
-      </Grid>
-      <Grid item xs={12} md={6} lg={6}>
-        <LeadWeekly />
-      </Grid>
-
-      <Grid item xs={12} md={6} lg={6}>
-        <LeadByLocation />
-      </Grid>
+     
       <Grid item xs={12} md={6} lg={6}>
         <HighValueLeads />
       </Grid>

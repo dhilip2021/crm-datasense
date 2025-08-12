@@ -44,7 +44,7 @@ const LeadWeekly = () => {
     legend: { show: false },
     grid: {
       xaxis: { lines: { show: false } },
-      strokeDashArray: 6,
+      strokeDashArray: 7,
       padding: { left: -9, top: -20, bottom: 13 },
       borderColor: divider
     },
@@ -67,14 +67,14 @@ const LeadWeekly = () => {
     },
     xaxis: {
       categories: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-      tickPlacement: 'on',
+      tickPlacement: 'off',
       labels: { show: false },
       axisTicks: { show: false },
       axisBorder: { show: false }
     },
     yaxis: {
       show: true,
-      tickAmount: 5,
+      tickAmount: 4,
       labels: {
         offsetY: 2,
         offsetX: -17,
@@ -95,7 +95,7 @@ const LeadWeekly = () => {
           type='bar'
           height={250}
           width='100%'
-          series={[{ name: 'Leads', data: [37, 57, 45, 50, 10, 20, 30,40] }]}
+          series={[{ name: 'Leads', data: [37, 57, 45, 50, 10, 20, 30] }]}
           options={options}
         />
         <Button fullWidth variant='contained'>

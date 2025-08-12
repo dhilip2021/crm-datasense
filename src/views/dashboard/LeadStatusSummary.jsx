@@ -18,7 +18,7 @@ export default function LeadStatusSummary() {
   return (
     <Card sx={{ width: '100%' }}>
       <CardHeader
-        title="Conversion Funnel"
+        title="Leads By Summary"
         action={<OptionsMenu iconClassName="text-textPrimary" options={['Refresh']} />}
         sx={{ pb: 0 }}
       />

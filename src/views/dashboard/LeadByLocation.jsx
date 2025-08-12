@@ -53,7 +53,7 @@ const data = [
     avatarLabel: 'KO',
     avatarColor: 'error',
     title: '₹ 45k',
-    subtitle: 'Korea',
+    subtitle: 'Madhya Pradesh',
     sales: '42',
     trend: 'up',
     trendPercentage: '16.2%'
