@@ -58,7 +58,7 @@ export async function GET(req) {
     const skip = (page - 1) * limit
 
     const [data, total] = await Promise.all([
-      Leadform.find(query).sort({ submittedAt: -1 }).skip(skip).limit(limit).select('-__v').lean(),
+      Leadform.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).select('-__v').lean(),
       Leadform.countDocuments(query)
     ])
 

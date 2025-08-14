@@ -10,6 +10,7 @@ export async function POST(req) {
     // Get FormData directly from request
     const formData = await req.formData()
     const file = formData.get('file')
+    const organization_id = formData.get('organization_id')
 
     if (!file) {
       return NextResponse.json({ success: false, message: 'No file uploaded' }, { status: 400 })
@@ -40,11 +41,14 @@ export async function POST(req) {
         continue // Skip if duplicate
       }
 
+
+
       const leadData = {
-        organization_id: '47b79a7f2d6f',
+        organization_id: organization_id,
         auto_inc_id: String(i + 1).padStart(5, '0'),
         lead_name: `CRM LEAD 2025 ${String(i + 1).padStart(5, '0')}`,
-        lead_id: row['Lead ID'] || `DT-${String(i + 1).padStart(5, '0')}`,
+        // lead_id: row['Lead ID'] || `DT-${String(i + 1).padStart(5, '0')}`,
+        lead_id: `DT-${String(i + 1).padStart(5, '0')}`,
         lead_slug_name: `crm-lead-2025-${String(i + 1).padStart(5, '0')}`,
         form_name: 'lead-form',
         values: {
@@ -66,6 +70,9 @@ export async function POST(req) {
         submittedAt: new Date(row['Created Date']),
         updatedAt: new Date(row['Last Contact Date'])
       }
+
+
+      console.log(leadData,"<<< LEAD DATA")
 
       const saved = await Leadform.create(leadData)
       savedRecords.push(saved)

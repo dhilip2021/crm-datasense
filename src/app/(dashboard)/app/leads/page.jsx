@@ -34,8 +34,10 @@ import Link from 'next/link'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import GridOnIcon from '@mui/icons-material/GridOn'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
+import { toast, ToastContainer } from 'react-toastify'
 
 const LeadTable = () => {
+  const organization_id = Cookies.get('organization_id')
   const [data, setData] = useState([])
   const [dataFilter, setDataFilter] = useState([])
   const [page, setPage] = useState(0)
@@ -45,6 +47,7 @@ const LeadTable = () => {
   const [loader, setLoader] = useState(false)
   const [response, setResponse] = useState(null)
   const [fileName, setFileName] = useState('')
+  const [selectedFile, setSelectedFile] = React.useState(null)
 
   const [filters, setFilters] = useState({
     status: '',
@@ -59,7 +62,7 @@ const LeadTable = () => {
 
   const fetchData = async () => {
     setLoading(true)
-    const organization_id = Cookies.get('organization_id')
+    
     const form_name = 'lead-form'
 
     const query = new URLSearchParams({
@@ -187,34 +190,22 @@ const LeadTable = () => {
     return [...new Set(dataFilter.map(item => item.values['Status']))].filter(Boolean)
   }, [dataFilter])
 
-  function handleFileChange(e) {
-    const file = e.target.files[0]
-    if (file) {
-      setFileName(file.name)
-    } else {
-      setFileName('')
-    }
-  }
 
   async function handleUpload(e) {
     e.preventDefault()
 
-    const fileInput = e.target.elements.file // safer way to get the file input
-    const file = fileInput?.files?.[0]
-
-    console.log('coming', file)
-
-    if (!file) {
-      setFileName('Please select a file')
-      setResponse({ success: false, message: 'Please select a file' })
+    if (!selectedFile) {
+      // alert('Please select a file')
+      toast.error('Please select a file')
       return
     }
 
     const formData = new FormData()
-    formData.append('file', file)
+    formData.append('file', selectedFile)
+    formData.append('organization_id', organization_id)
+    
 
     setLoader(true)
-    setResponse(null)
 
     try {
       const res = await fetch('/api/v1/admin/lead-form/import', {
@@ -222,20 +213,21 @@ const LeadTable = () => {
         body: formData
       })
 
-      if (!res.ok) {
-        const errorData = await res.json()
-        throw new Error(errorData.message || 'Upload failed')
-      }
       const data = await res.json()
-      console.log('FormData Response:', data)
-      setResponse(data)
+      console.log(data,"<<< DATAAAA")
+      toast.success(data.message)
       fetchData()
+      setFileName('')
+      setSelectedFile(null)
+      document.querySelector('input[name="file"]').value = ''
     } catch (err) {
-      console.error('Upload Error:', err)
-      setResponse({ success: false, message: err.message || 'Upload failed' })
+      // toast.error(err)
+      console.error(err)
+      setFileName('')
+      setSelectedFile(null)
+      document.querySelector('input[name="file"]').value = ''
     } finally {
       setLoader(false)
-      fileInput.value = '' // reset file input after upload
     }
   }
 
@@ -251,7 +243,8 @@ const LeadTable = () => {
               </Typography>
 
               <form onSubmit={handleUpload}>
-                <Box display={'flex'} flexDirection={'row'} gap={2}>
+                <Box display='flex' flexDirection='row' gap={2}>
+                  {/* File Upload */}
                   <Box>
                     <Button
                       component='label'
@@ -268,34 +261,46 @@ const LeadTable = () => {
                       }}
                     >
                       Select Excel File
-                      <input type='file' name='file' accept='.xlsx' hidden onChange={handleFileChange} />
+                      <input
+                        type='file'
+                        name='file'
+                        accept='.xlsx'
+                        hidden
+                        onChange={e => {
+                          const file = e.target.files[0]
+                          if (file) {
+                            setSelectedFile(file)
+                            setFileName(file.name)
+                          }
+                        }}
+                      />
                     </Button>
 
                     {loader && <LinearProgress sx={{ mb: 2 }} color='info' />}
 
-                    <Box display='flex' alignItems='center' gap={1}>
-                      {fileName && (
-                        <>
-                          <Typography variant='body2' sx={{ mt: 1, color: '#4CAF50', fontWeight: 500 }}>
-                            {fileName}{' '}
-                          </Typography>
-                          <Button
-                            variant='text'
-                            color='error'
-                            size='small'
-                            onClick={() => {
-                              setFileName('')
-                              e.target.file.value = ''
-                            }}
-                          >
-                            X 
-                          </Button>
-                        </>
-                      ) 
-                     }
-                    </Box>
+                    {/* Show File Name + Remove */}
+                    {fileName && (
+                      <Box display='flex' alignItems='center' gap={1}>
+                        <Typography variant='body2' sx={{ mt: 1, color: '#4CAF50', fontWeight: 500 }}>
+                          {fileName}
+                        </Typography>
+                        <Button
+                          variant='text'
+                          color='error'
+                          size='small'
+                          onClick={() => {
+                            setFileName('')
+                            setSelectedFile(null)
+                            document.querySelector('input[name="file"]').value = ''
+                          }}
+                        >
+                          X
+                        </Button>
+                      </Box>
+                    )}
                   </Box>
 
+                  {/* Upload Button */}
                   <Box>
                     <Button
                       type='submit'
@@ -309,6 +314,7 @@ const LeadTable = () => {
                     </Button>
                   </Box>
 
+                  {/* New Lead Button */}
                   <Box>
                     <Button
                       href='/app/lead-form'
@@ -627,6 +633,7 @@ const LeadTable = () => {
           />
         </CardContent>
       </Card>
+       <ToastContainer position='top-right' />
     </Box>
   )
 }
