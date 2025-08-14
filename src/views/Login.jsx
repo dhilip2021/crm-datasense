@@ -19,8 +19,6 @@ import Button from '@mui/material/Button'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import { ToastContainer, toast } from 'react-toastify'
 
-
-
 // ** Icons Imports
 import Google from 'mdi-material-ui/Google'
 import Github from 'mdi-material-ui/Github'
@@ -48,6 +46,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import { useDispatch } from 'react-redux'
 import { loginData } from '@/app/store/loginSlice'
 import ErrorPopup from './ErrorPopup'
+import { decrypCryptoRequest, encryptCryptoResponse } from '@/helper/frontendHelper'
 
 const isEmail = email => {
   var emailFormat = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/
@@ -59,328 +58,326 @@ const isEmail = email => {
   return false
 }
 
- const staticFields= [
-        {
-            "position": 1,
-            "label": "Salutation",
-            "slug_label": "salutation",
-            "type": "select",
-            "items": [
-                {
-                    "menu_value": "Mr"
-                },
-                {
-                    "menu_value": "Mrs"
-                },
-                {
-                    "menu_value": "Miss"
-                },
-                {
-                    "menu_value": "Madam"
-                },
-                {
-                    "menu_value": "Dr"
-                },
-                {
-                    "menu_value": "Proff"
-                }
-            ],
-            "mandatory": "no"
-        },
-        {
-            "position": 2,
-            "label": "First Name",
-            "slug_label": "first-name",
-            "type": "text",
-            "items": [
-                {
-                    "menu_value": ""
-                }
-            ],
-            "mandatory": "yes"
-        },
-        {
-            "position": 3,
-            "label": "Last Name",
-            "slug_label": "last-name",
-            "type": "text",
-            "items": [
-                {
-                    "menu_value": ""
-                }
-            ],
-            "mandatory": "no"
-        },
-        {
-            "position": 4,
-            "label": "Email",
-            "slug_label": "email",
-            "type": "text",
-            "items": [
-                {
-                    "menu_value": ""
-                }
-            ],
-            "mandatory": "no"
-        },
-        {
-            "position": 5,
-            "label": "Mobile",
-            "slug_label": "mobile",
-            "type": "text",
-            "items": [
-                {
-                    "menu_value": ""
-                }
-            ],
-            "mandatory": "no"
-        },
-         {
-            "position": 6,
-            "label": "Phone",
-            "slug_label": "phone",
-            "type": "text",
-            "items": [
-                {
-                    "menu_value": ""
-                }
-            ],
-            "mandatory": "no"
-        },
-        {
-            "position": 7,
-            "label": "Gender",
-            "slug_label": "gender",
-            "type": "select",
-            "items": [
-                {
-                    "menu_value": "Female"
-                },
-                {
-                    "menu_value": "Genderqueer"
-                },
-                {
-                    "menu_value": "Male"
-                },
-                {
-                    "menu_value": "Non-Conforming"
-                },
-                {
-                    "menu_value": "Other"
-                },
-                {
-                    "menu_value": "Prefer Not To Say"
-                },
-                {
-                    "menu_value": "Transgender"
-                }
-            ],
-            "mandatory": "no"
-        },
-        {
-            "position": 8,
-            "label": "Organization",
-            "slug_label": "organization",
-            "type": "text",
-            "items": [
-                {
-                    "menu_value": ""
-                }
-            ],
-            "mandatory": "no"
-        },
-        {
-            "position": 9,
-            "label": "Website",
-            "slug_label": "website",
-            "type": "text",
-            "items": [
-                {
-                    "menu_value": ""
-                }
-            ],
-            "mandatory": "no"
-        },
-        {
-            "position": 10,
-            "label": "No Of Employees",
-            "slug_label": "no-of-employees",
-            "type": "select",
-            "items": [
-                {
-                    "menu_value": "1-10"
-                },
-                {
-                    "menu_value": "11-50"
-                },
-                {
-                    "menu_value": "51-200"
-                },
-                {
-                    "menu_value": "201-500"
-                },
-                {
-                    "menu_value": "501-1000"
-                },
-                {
-                    "menu_value": "1000+"
-                }
-            ],
-            "mandatory": "no"
-        },
-        {
-            "position": 11,
-            "label": "Annual Revenue",
-            "slug_label": "annual-revenue",
-            "type": "text",
-            "items": [
-                {
-                    "menu_value": ""
-                }
-            ],
-            "mandatory": "no"
-        },
-        {
-            "position": 12,
-            "label": "Industry",
-            "slug_label": "industry",
-            "type": "select",
-            "items": [
-                {
-                    "menu_value": "Securities & Commodity Exchanges"
-                },
-                {
-                    "menu_value": "Service"
-                },
-                {
-                    "menu_value": "Soap & Detergent"
-                },
-                {
-                    "menu_value": "Software"
-                },
-                {
-                    "menu_value": "Sports"
-                },
-                {
-                    "menu_value": "Technology"
-                },
-                {
-                    "menu_value": "Telecommunications"
-                },
-                {
-                    "menu_value": "Television"
-                },
-                {
-                    "menu_value": "Transportation"
-                },
-                {
-                    "menu_value": "Venture Capital"
-                }
-            ],
-            "mandatory": "no"
-        },
-        {
-            "position": 13,
-            "label": "Job Title",
-            "slug_label": "job-title",
-            "type": "text",
-            "items": [
-                {
-                    "menu_value": ""
-                }
-            ],
-            "mandatory": "no"
-        },
-        {
-            "position": 14,
-            "label": "Lead Source",
-            "slug_label": "lead-source",
-            "type": "select",
-            "items": [
-                {
-                    "menu_value": "Advertisement"
-                },
-                {
-                    "menu_value": "Campaign"
-                },
-                {
-                    "menu_value": "Cold Calling"
-                },
-                {
-                    "menu_value": "Customer's Vendor"
-                },
-                {
-                    "menu_value": "Exhibition"
-                },
-                {
-                    "menu_value": "Existing Customer"
-                },
-                {
-                    "menu_value": "Mass Mailing"
-                },
-                {
-                    "menu_value": "Reference"
-                },
-                {
-                    "menu_value": "Supplier Reference"
-                },
-                {
-                    "menu_value": "Walk In"
-                }
-            ],
-            "mandatory": "no"
-        },
-        {
-            "position": 15,
-            "label": "Status",
-            "slug_label": "status",
-            "type": "select",
-            "items": [
-                {
-                    "menu_value": "New"
-                },
-                {
-                    "menu_value": "Contacted"
-                },
-                {
-                    "menu_value": "Nurture"
-                },
-                {
-                    "menu_value": "Qualified"
-                },
-                {
-                    "menu_value": "Unqualified"
-                },
-                {
-                    "menu_value": "Junk"
-                },
-                {
-                    "menu_value": "Qualification"
-                },
-                {
-                    "menu_value": "Demo/Making"
-                },
-                {
-                    "menu_value": "Proposal/Quotation"
-                },
-                {
-                    "menu_value": "Negotiation"
-                },
-                {
-                    "menu_value": "Ready To Close"
-                },
-                {
-                    "menu_value": "Won"
-                },
-                {
-                    "menu_value": "Lost"
-                }
-            ],
-            "mandatory": "no"
-        }
-    ]
-
-
+const staticFields = [
+  {
+    position: 1,
+    label: 'Salutation',
+    slug_label: 'salutation',
+    type: 'select',
+    items: [
+      {
+        menu_value: 'Mr'
+      },
+      {
+        menu_value: 'Mrs'
+      },
+      {
+        menu_value: 'Miss'
+      },
+      {
+        menu_value: 'Madam'
+      },
+      {
+        menu_value: 'Dr'
+      },
+      {
+        menu_value: 'Proff'
+      }
+    ],
+    mandatory: 'no'
+  },
+  {
+    position: 2,
+    label: 'First Name',
+    slug_label: 'first-name',
+    type: 'text',
+    items: [
+      {
+        menu_value: ''
+      }
+    ],
+    mandatory: 'yes'
+  },
+  {
+    position: 3,
+    label: 'Last Name',
+    slug_label: 'last-name',
+    type: 'text',
+    items: [
+      {
+        menu_value: ''
+      }
+    ],
+    mandatory: 'no'
+  },
+  {
+    position: 4,
+    label: 'Email',
+    slug_label: 'email',
+    type: 'text',
+    items: [
+      {
+        menu_value: ''
+      }
+    ],
+    mandatory: 'no'
+  },
+  {
+    position: 5,
+    label: 'Mobile',
+    slug_label: 'mobile',
+    type: 'text',
+    items: [
+      {
+        menu_value: ''
+      }
+    ],
+    mandatory: 'no'
+  },
+  {
+    position: 6,
+    label: 'Phone',
+    slug_label: 'phone',
+    type: 'text',
+    items: [
+      {
+        menu_value: ''
+      }
+    ],
+    mandatory: 'no'
+  },
+  {
+    position: 7,
+    label: 'Gender',
+    slug_label: 'gender',
+    type: 'select',
+    items: [
+      {
+        menu_value: 'Female'
+      },
+      {
+        menu_value: 'Genderqueer'
+      },
+      {
+        menu_value: 'Male'
+      },
+      {
+        menu_value: 'Non-Conforming'
+      },
+      {
+        menu_value: 'Other'
+      },
+      {
+        menu_value: 'Prefer Not To Say'
+      },
+      {
+        menu_value: 'Transgender'
+      }
+    ],
+    mandatory: 'no'
+  },
+  {
+    position: 8,
+    label: 'Organization',
+    slug_label: 'organization',
+    type: 'text',
+    items: [
+      {
+        menu_value: ''
+      }
+    ],
+    mandatory: 'no'
+  },
+  {
+    position: 9,
+    label: 'Website',
+    slug_label: 'website',
+    type: 'text',
+    items: [
+      {
+        menu_value: ''
+      }
+    ],
+    mandatory: 'no'
+  },
+  {
+    position: 10,
+    label: 'No Of Employees',
+    slug_label: 'no-of-employees',
+    type: 'select',
+    items: [
+      {
+        menu_value: '1-10'
+      },
+      {
+        menu_value: '11-50'
+      },
+      {
+        menu_value: '51-200'
+      },
+      {
+        menu_value: '201-500'
+      },
+      {
+        menu_value: '501-1000'
+      },
+      {
+        menu_value: '1000+'
+      }
+    ],
+    mandatory: 'no'
+  },
+  {
+    position: 11,
+    label: 'Annual Revenue',
+    slug_label: 'annual-revenue',
+    type: 'text',
+    items: [
+      {
+        menu_value: ''
+      }
+    ],
+    mandatory: 'no'
+  },
+  {
+    position: 12,
+    label: 'Industry',
+    slug_label: 'industry',
+    type: 'select',
+    items: [
+      {
+        menu_value: 'Securities & Commodity Exchanges'
+      },
+      {
+        menu_value: 'Service'
+      },
+      {
+        menu_value: 'Soap & Detergent'
+      },
+      {
+        menu_value: 'Software'
+      },
+      {
+        menu_value: 'Sports'
+      },
+      {
+        menu_value: 'Technology'
+      },
+      {
+        menu_value: 'Telecommunications'
+      },
+      {
+        menu_value: 'Television'
+      },
+      {
+        menu_value: 'Transportation'
+      },
+      {
+        menu_value: 'Venture Capital'
+      }
+    ],
+    mandatory: 'no'
+  },
+  {
+    position: 13,
+    label: 'Job Title',
+    slug_label: 'job-title',
+    type: 'text',
+    items: [
+      {
+        menu_value: ''
+      }
+    ],
+    mandatory: 'no'
+  },
+  {
+    position: 14,
+    label: 'Lead Source',
+    slug_label: 'lead-source',
+    type: 'select',
+    items: [
+      {
+        menu_value: 'Advertisement'
+      },
+      {
+        menu_value: 'Campaign'
+      },
+      {
+        menu_value: 'Cold Calling'
+      },
+      {
+        menu_value: "Customer's Vendor"
+      },
+      {
+        menu_value: 'Exhibition'
+      },
+      {
+        menu_value: 'Existing Customer'
+      },
+      {
+        menu_value: 'Mass Mailing'
+      },
+      {
+        menu_value: 'Reference'
+      },
+      {
+        menu_value: 'Supplier Reference'
+      },
+      {
+        menu_value: 'Walk In'
+      }
+    ],
+    mandatory: 'no'
+  },
+  {
+    position: 15,
+    label: 'Status',
+    slug_label: 'status',
+    type: 'select',
+    items: [
+      {
+        menu_value: 'New'
+      },
+      {
+        menu_value: 'Contacted'
+      },
+      {
+        menu_value: 'Nurture'
+      },
+      {
+        menu_value: 'Qualified'
+      },
+      {
+        menu_value: 'Unqualified'
+      },
+      {
+        menu_value: 'Junk'
+      },
+      {
+        menu_value: 'Qualification'
+      },
+      {
+        menu_value: 'Demo/Making'
+      },
+      {
+        menu_value: 'Proposal/Quotation'
+      },
+      {
+        menu_value: 'Negotiation'
+      },
+      {
+        menu_value: 'Ready To Close'
+      },
+      {
+        menu_value: 'Won'
+      },
+      {
+        menu_value: 'Lost'
+      }
+    ],
+    mandatory: 'no'
+  }
+]
 
 const Login = ({ mode }) => {
   // Vars
@@ -403,9 +400,8 @@ const Login = ({ mode }) => {
   const [isChecked, setIsChecked] = useState(false)
 
   const [open, setOpen] = useState(false)
-  const [title, setTitle] = useState("")
-  const [trailVal, setTrailVal] = useState("")
-  
+  const [title, setTitle] = useState('')
+  const [trailVal, setTrailVal] = useState('')
 
   const [values, setValues] = useState({
     showPassword: false
@@ -416,11 +412,10 @@ const Login = ({ mode }) => {
     password: false
   })
 
-  const handlePopupClose=(val)=>{
+  const handlePopupClose = val => {
     setOpen(false)
     setLoader(false)
-    setTitle("")
-    
+    setTitle('')
   }
 
   const handleChange = e => {
@@ -451,9 +446,22 @@ const Login = ({ mode }) => {
 
     setLoader(true)
 
-    let results = await LoginApi(body)
+    const enycryptDAta = encryptCryptoResponse(body)
+    const dataValue = {
+      data: enycryptDAta
+    }
 
-    dispatch(loginData(results))
+    let results = await LoginApi(dataValue)
+    const resultsPayloadJson = decrypCryptoRequest(results.payloadJson)
+
+    const dispatchLogin = {
+      appStatusCode: results?.appStatusCode,
+      message: results?.message,
+      payloadJson: resultsPayloadJson,
+      error: results?.error
+    }
+
+    dispatch(loginData(dispatchLogin))
 
     if (results?.appStatusCode === 4) {
       setLoader(false)
@@ -466,44 +474,32 @@ const Login = ({ mode }) => {
         setIsChecked(false)
       }
     } else if (results?.appStatusCode === 0) {
+      const header = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${resultsPayloadJson?.tokenAccess}`
+      }
 
-        
-         const header = {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${results?.payloadJson?.tokenAccess}`
-            }
-        
-         
-        
-            const fieldResponse = await getFieldListApi(results?.payloadJson?.organization_id, header)
+      const fieldResponse = await getFieldListApi(resultsPayloadJson?.organization_id, header)
 
-            
-
-            if(fieldResponse?.payloadJson?.length === 0){
-              const body2= {
-                organization_id: results?.payloadJson?.organization_id,
-                fields: staticFields,
-            }
-
-             const header = {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${results?.payloadJson?.tokenAccess}`
+      if (fieldResponse?.payloadJson?.length === 0) {
+        const body2 = {
+          organization_id: resultsPayloadJson?.organization_id,
+          fields: staticFields
         }
 
-        const resultFields = await addFieldApi(body2,header)
+        const header = {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${resultsPayloadJson?.tokenAccess}`
+        }
 
+        const resultFields = await addFieldApi(body2, header)
+      }
 
-            }
-
-
-      if (results?.payloadJson?.c_version === 'Trial') {
-
-
-
+      if (resultsPayloadJson?.c_version === 'Trial') {
         const localDateStr = new Date()
         const isoUtc = new Date(localDateStr).toISOString()
         const today = new Date(isoUtc)
-        const endDate = new Date(results?.payloadJson?.endedAt)
+        const endDate = new Date(resultsPayloadJson?.endedAt)
 
         if (today < endDate) {
           if (isChecked) {
@@ -515,40 +511,39 @@ const Login = ({ mode }) => {
             localStorage.setItem('user_email', '')
             localStorage.setItem('user_password', '')
           }
-  
+
           let dummyArray = []
-  
-          results?.payloadJson?.privileges.map(data => dummyArray.push(data?.role_privileage))
-  
-          Cookies.set('_token', results?.payloadJson?.tokenAccess)
-          Cookies.set('_token_expiry', results?.payloadJson?.tokenExpiry)
-          Cookies.set('role_id', results?.payloadJson?.c_role_id)
-          Cookies.set('user_id', results?.payloadJson?.user_id)
-          Cookies.set('organization_id', results?.payloadJson?.organization_id)
-          Cookies.set('organization_name', results?.payloadJson?.organization_name)
-          Cookies.set('c_version', results?.payloadJson?.c_version)
-          Cookies.set('endedAt', results?.payloadJson?.endedAt)
-          Cookies.set('role_name', results?.payloadJson?.role)
-          Cookies.set('user_name', results?.payloadJson?.user_name)
+
+          resultsPayloadJson?.privileges.map(data => dummyArray.push(data?.role_privileage))
+
+          Cookies.set('_token', resultsPayloadJson?.tokenAccess)
+          Cookies.set('_token_expiry', resultsPayloadJson?.tokenExpiry)
+          Cookies.set('role_id', resultsPayloadJson?.c_role_id)
+          Cookies.set('user_id', resultsPayloadJson?.user_id)
+          Cookies.set('organization_id', resultsPayloadJson?.organization_id)
+          Cookies.set('organization_name', resultsPayloadJson?.organization_name)
+          Cookies.set('c_version', resultsPayloadJson?.c_version)
+          Cookies.set('endedAt', resultsPayloadJson?.endedAt)
+          Cookies.set('role_name', resultsPayloadJson?.role)
+          Cookies.set('user_name', resultsPayloadJson?.user_name)
           Cookies.set('privileges', JSON.stringify(dummyArray))
-  
+
           router.push('/')
           router.refresh()
           handleSuccess()
-  
+
           toast.success('login successful', {
             autoClose: 1000
           })
           setLoader(false)
         } else if (today > endDate) {
-          
-          setTitle("Sorry ! Your trial period has ended. Please get in touch with your administrator.")
+          setTitle('Sorry ! Your trial period has ended. Please get in touch with your administrator.')
           setOpen(true)
-          setTrailVal("1")
+          setTrailVal('1')
         } else {
-          setTitle("Today is the last day of your trial period. Contacting your administrator is necessary.")
+          setTitle('Today is the last day of your trial period. Contacting your administrator is necessary.')
           setOpen(true)
-          setTrailVal("2")
+          setTrailVal('2')
         }
       } else {
         if (isChecked) {
@@ -563,18 +558,18 @@ const Login = ({ mode }) => {
 
         let dummyArray = []
 
-        results?.payloadJson?.privileges.map(data => dummyArray.push(data?.role_privileage))
+        resultsPayloadJson?.privileges.map(data => dummyArray.push(data?.role_privileage))
 
-        Cookies.set('_token', results?.payloadJson?.tokenAccess)
-        Cookies.set('_token_expiry', results?.payloadJson?.tokenExpiry)
-        Cookies.set('role_id', results?.payloadJson?.c_role_id)
-        Cookies.set('user_id', results?.payloadJson?.user_id)
-        Cookies.set('organization_id', results?.payloadJson?.organization_id)
-        Cookies.set('organization_name', results?.payloadJson?.organization_name)
-        Cookies.set('c_version', results?.payloadJson?.c_version)
-        Cookies.set('endedAt', results?.payloadJson?.endedAt)
-        Cookies.set('role_name', results?.payloadJson?.role)
-        Cookies.set('user_name', results?.payloadJson?.user_name)
+        Cookies.set('_token', resultsPayloadJson?.tokenAccess)
+        Cookies.set('_token_expiry', resultsPayloadJson?.tokenExpiry)
+        Cookies.set('role_id', resultsPayloadJson?.c_role_id)
+        Cookies.set('user_id', resultsPayloadJson?.user_id)
+        Cookies.set('organization_id', resultsPayloadJson?.organization_id)
+        Cookies.set('organization_name', resultsPayloadJson?.organization_name)
+        Cookies.set('c_version', resultsPayloadJson?.c_version)
+        Cookies.set('endedAt', resultsPayloadJson?.endedAt)
+        Cookies.set('role_name', resultsPayloadJson?.role)
+        Cookies.set('user_name', resultsPayloadJson?.user_name)
         Cookies.set('privileges', JSON.stringify(dummyArray))
 
         router.push('/')
@@ -607,7 +602,6 @@ const Login = ({ mode }) => {
   }
 
   useEffect(() => {
-  
     const userEmail = localStorage.getItem('user_email')
     const userPassword = localStorage.getItem('user_password')
     const userChecked = localStorage.getItem('user_checked')
@@ -622,8 +616,6 @@ const Login = ({ mode }) => {
       setIsChecked(false)
     }
   }, [])
-
- 
 
   return (
     <Box style={loader ? { opacity: 0.3, pointerEvents: 'none' } : { opacity: 1 }}>
@@ -695,30 +687,30 @@ const Login = ({ mode }) => {
                   </Typography>
                 </div>
                 <Divider sx={{ my: 5 }}>or</Divider>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Link href='/' passHref>
-                <IconButton component='a' onClick={e => e.preventDefault()}>
-                  <Facebook sx={{ color: '#497ce2' }} />
-                </IconButton>
-              </Link>
-              <Link href='/' passHref>
-                <IconButton component='a' onClick={e => e.preventDefault()}>
-                  <Twitter sx={{ color: '#1da1f2' }} />
-                </IconButton>
-              </Link>
-              <Link href='/' passHref>
-                <IconButton component='a' onClick={e => e.preventDefault()}>
-                  <Github
-                    sx={{ color: theme => (theme.palette.mode === 'light' ? '#272727' : theme.palette.grey[300]) }}
-                  />
-                </IconButton>
-              </Link>
-              <Link href='/' passHref>
-                <IconButton component='a' onClick={e => e.preventDefault()}>
-                  <Google sx={{ color: '#db4437' }} />
-                </IconButton>
-              </Link>
-            </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Link href='/' passHref>
+                    <IconButton component='a' onClick={e => e.preventDefault()}>
+                      <Facebook sx={{ color: '#497ce2' }} />
+                    </IconButton>
+                  </Link>
+                  <Link href='/' passHref>
+                    <IconButton component='a' onClick={e => e.preventDefault()}>
+                      <Twitter sx={{ color: '#1da1f2' }} />
+                    </IconButton>
+                  </Link>
+                  <Link href='/' passHref>
+                    <IconButton component='a' onClick={e => e.preventDefault()}>
+                      <Github
+                        sx={{ color: theme => (theme.palette.mode === 'light' ? '#272727' : theme.palette.grey[300]) }}
+                      />
+                    </IconButton>
+                  </Link>
+                  <Link href='/' passHref>
+                    <IconButton component='a' onClick={e => e.preventDefault()}>
+                      <Google sx={{ color: '#db4437' }} />
+                    </IconButton>
+                  </Link>
+                </Box>
               </form>
             </div>
           </CardContent>
@@ -726,12 +718,7 @@ const Login = ({ mode }) => {
         <Illustrations maskImg={{ src: authBackground }} />
       </div>
       <ToastContainer />
-      <ErrorPopup 
-      open={open}
-      close={handlePopupClose}
-      title={title}
-      trailVal={trailVal}
-      />
+      <ErrorPopup open={open} close={handlePopupClose} title={title} trailVal={trailVal} />
     </Box>
   )
 }

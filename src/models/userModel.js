@@ -50,6 +50,9 @@ const UserSchema = new Schema(
     },
     role: {
       type: String,
+      required: true,
+      enum: ["admin", "user"],
+      default: "user",
     },
     c_user_img_url: {
       type: String,

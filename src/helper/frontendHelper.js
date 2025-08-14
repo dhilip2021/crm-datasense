@@ -1,5 +1,7 @@
 import dayjs from 'dayjs'
 import Cookies from 'js-cookie'
+import CryptoJS from "crypto-js"
+
 
 export function capitalizeWords(str) {
   return str
@@ -46,4 +48,36 @@ export const removeCredentials = () => {
   Cookies.remove('user_id')
   Cookies.remove('c_version')
   Cookies.remove('endedAt')
+}
+export function encryptCryptoResponse(data) {
+  const secretPassphrase = `${process.env.NEXT_PUBLIC_ENCY_DECY_SECRET}`;
+  const encryptedResponse = CryptoJS.AES.encrypt(
+    JSON.stringify(data), 
+    secretPassphrase
+  ).toString();
+
+  return encryptedResponse;
+}
+
+
+export function decrypCryptoRequest(data) {
+  const secretPassphrase = `${process.env.NEXT_PUBLIC_ENCY_DECY_SECRET}`;
+  const decrypted = CryptoJS.AES.decrypt(
+    data, 
+    secretPassphrase
+  ).toString(CryptoJS.enc.Utf8);
+
+  const decryptedResponse = JSON.parse(decrypted);
+
+  return decryptedResponse;
+}
+
+// Function to mask email
+export function maskEmail(email) {
+  const [name, domain] = email.split("@");
+  if (!domain) return email; // If not a valid email
+  const maskedName = name.length > 3
+    ? name.slice(0, 3) + "*".repeat(name.length - 3)
+    : name[0] + "*".repeat(name.length - 1);
+  return `${maskedName}@${domain}`;
 }

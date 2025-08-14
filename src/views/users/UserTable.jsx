@@ -20,9 +20,10 @@ import { ToastContainer, toast } from 'react-toastify'
 
 // Component Imports
 import Form from '@components/Form'
-import { capitalizeWords, normalizeEmail } from '@/helper/frontendHelper'
+import { capitalizeWords, decrypCryptoRequest, encryptCryptoResponse, normalizeEmail } from '@/helper/frontendHelper'
 import { craeteUserApi, getUserListApi, userPrivilegeApi } from '@/apiFunctions/ApiAction'
 import Link from 'next/link'
+
 
 const isEmail = email => {
   var emailFormat = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/
@@ -122,6 +123,14 @@ const UserTable = () => {
         c_role_id: inputs?.c_role_id,
         n_status: inputs?.n_status
       }
+
+       const enycryptDAta = encryptCryptoResponse(body) 
+      //  const deCrypttDAta = decrypCryptoRequest(enycryptDAta) 
+
+      const dataValue= {
+        data : enycryptDAta
+      }
+
       if(!edit){
         body['password'] = inputs?.password
       }
@@ -130,7 +139,8 @@ const UserTable = () => {
       }
 
       setLoader(true)
-      const results = await craeteUserApi(body)
+
+      const results = await craeteUserApi(dataValue)
       if (results?.appStatusCode !== 0) {
         setLoader(false)
         toast?.error(results?.error)

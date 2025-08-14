@@ -5,6 +5,7 @@ import { User } from '@/models/userModel'
 
 import { verifyAccessToken } from '@/helper/clientHelper'
 import connectMongoDB from '@/libs/mongodb'
+import { decrypCryptoRequest, maskEmail } from '@/helper/frontendHelper'
 
 let sendResponse = {
   appStatusCode: '',
@@ -22,11 +23,9 @@ export async function POST(request) {
 
   const userRoleData = await UserRole.findOne({ c_role_id: verified.data.c_role_id })
 
-
   const RoleData = await UserRole.find({
     c_role_priority: { $gt: userRoleData.c_role_priority }
   })
-
 
   const checkArray = []
 
@@ -36,8 +35,6 @@ export async function POST(request) {
 
   try {
     if (verified.success) {
-      
-
       let _search = {}
       let n_limitTerm = n_limit
       let n_pageTerm = n_page === 1 ? 0 : (n_page - 1) * n_limit
@@ -48,10 +45,7 @@ export async function POST(request) {
       if (searchTerm !== '') {
         _search = {
           organization_id,
-          $or: [
-            { user_name: { $regex: searchTerm, $options: 'i' } },
-            { email: { $regex: searchTerm, $options: 'i' } }  
-          ],
+          $or: [{ user_name: { $regex: searchTerm, $options: 'i' } }, { email: { $regex: searchTerm, $options: 'i' } }],
           n_published: 1,
           ...(hasRoles && { c_role_id: { $in: checkArray } })
         }
@@ -151,10 +145,32 @@ export async function POST(request) {
           }
         ])
           .then(data => {
+
+            console.log(data,"<< DATA")
             if (data[0].data.length > 0) {
+
+                 // Modify each record before sending
+        const updatedData = data.map(payload => {
+            return {
+                ...payload,
+                data: payload.data.map(user => {
+                   
+                    // Decrypt email if exists
+                    if (user.email) {
+                        try {
+                            user.email = maskEmail(decrypCryptoRequest(user.email));
+                        } catch (err) {
+                            console.error("Email decryption failed:", err);
+                        }
+                    }
+                    return user;
+                })
+            };
+        });
+
               sendResponse['appStatusCode'] = 0
               sendResponse['message'] = ''
-              sendResponse['payloadJson'] = data
+              sendResponse['payloadJson'] = updatedData
               sendResponse['error'] = []
             } else {
               sendResponse['appStatusCode'] = 0
