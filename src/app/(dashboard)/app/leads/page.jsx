@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react'
 import {
+  Alert,
   Box,
   Button,
   Card,
@@ -9,6 +10,7 @@ import {
   Chip,
   Divider,
   Grid,
+  LinearProgress,
   MenuItem,
   Skeleton,
   Table,
@@ -31,6 +33,7 @@ import { converDayJsDate, formatDateShort } from '@/helper/frontendHelper'
 import Link from 'next/link'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import GridOnIcon from '@mui/icons-material/GridOn'
+import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 
 const LeadTable = () => {
   const [data, setData] = useState([])
@@ -39,6 +42,9 @@ const LeadTable = () => {
   const [limit, setLimit] = useState(10)
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [loader, setLoader] = useState(false)
+  const [response, setResponse] = useState(null)
+  const [fileName, setFileName] = useState('')
 
   const [filters, setFilters] = useState({
     status: '',
@@ -75,7 +81,6 @@ const LeadTable = () => {
       const res = await fetch(`/api/v1/admin/lead-form/list?${query}`)
       const json = await res.json()
       if (json.success) {
-        console.log(json.data, '<<<< DTATTTTT')
         setData(json.data)
         setDataFilter(json.data)
         setTotal(json.total)
@@ -182,16 +187,153 @@ const LeadTable = () => {
     return [...new Set(dataFilter.map(item => item.values['Status']))].filter(Boolean)
   }, [dataFilter])
 
+  function handleFileChange(e) {
+    const file = e.target.files[0]
+    if (file) {
+      setFileName(file.name)
+    } else {
+      setFileName('Please select file')
+    }
+  }
+
+  async function handleUpload(e) {
+    e.preventDefault()
+
+
+    const fileInput = e.target.elements.file // safer way to get the file input
+    const file = fileInput?.files?.[0]
+
+    console.log("coming", file)
+
+
+    if (!file) {
+      
+      setFileName("Please select a file")
+      setResponse({ success: false, message: 'Please select a file' })
+      return
+    }
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    setLoader(true)
+    setResponse(null)
+
+    try {
+      const res = await fetch('/api/v1/admin/lead-form/import', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.message || 'Upload failed')
+      }
+      const data = await res.json()
+      console.log('FormData Response:', data)
+      setResponse(data)
+      fetchData()
+    } catch (err) {
+      console.error('Upload Error:', err)
+      setResponse({ success: false, message: err.message || 'Upload failed' })
+    } finally {
+      setLoader(false)
+      fileInput.value = '' // reset file input after upload
+    }
+  }
+
   return (
     <Box px={4} py={4}>
-      <Grid container justifyContent='space-between' mb={2} alignItems='center'>
-        <Typography variant='h5' fontWeight='bold'>
-          Leads
-        </Typography>
-        <Button variant='contained' href='/app/lead-form'>
-          + New Lead
-        </Button>
-      </Grid>
+      <Box sx={{ p: 4, backgroundColor: '#f9fafb' }}>
+        <Grid container direction='column' spacing={4}>
+          {/* Header Section */}
+          <Grid item>
+            <Grid container justifyContent='space-between' alignItems='center'>
+              <Typography variant='h5' fontWeight='bold'>
+                Leads
+              </Typography>
+
+              {/* <form > */}
+              <Box display={'flex'} flexDirection={'row'} gap={2}>
+                <Box>
+                  <Button
+                    component='label'
+                    variant='outlined'
+                    color='info'
+                    fullWidth
+                    startIcon={<CloudUploadIcon />}
+                    sx={{
+                      mb: 2,
+                      py: 1.5,
+                      borderColor: 'grey.300',
+                      fontWeight: '500',
+                      '&:hover': { borderColor: 'primary.main' }
+                    }}
+                  >
+                    Select Excel File
+                    <input type='file' name='file' accept='.xlsx' hidden onChange={handleFileChange} />
+                  </Button>
+
+                  {loader && <LinearProgress sx={{ mb: 2 }} color='info' />}
+
+                  <Box display='flex' alignItems='center' gap={1}>
+                    {fileName && (
+                      <>
+                        <Typography variant='body2' sx={{ mt: 1, color: '#4CAF50', fontWeight: 500 }}>
+                          {fileName}{' '}
+                        </Typography>
+                        <Button
+                          variant='text'
+                          color='error'
+                          size='small'
+                          onClick={() => {
+                            setFileName('')
+                            e.target.file.value = '' 
+                          }}
+                        >
+                          X
+                        </Button>
+                      </>
+                    )}
+                 
+                    
+                  </Box>
+                </Box>
+
+                <Box>
+                  <Button
+                    type='submit'
+                    variant='contained'
+                    color='info'
+                    fullWidth
+                    disabled={loader}
+                    sx={{ py: 1.5, fontWeight: 'bold' }}
+                    onSubmit={(e)=>handleUpload(e)}
+                  >
+                    {loader ? 'Uploading...' : 'Upload & Import'}
+                  </Button>
+                </Box>
+
+                <Box>
+                  <Button
+                    href='/app/lead-form'
+                    variant='contained'
+                    color='primary'
+                    fullWidth
+                    disabled={loader}
+                    sx={{ py: 1.5, fontWeight: 'bold' }}
+                  >
+                    + New Lead
+                  </Button>
+                </Box>
+              </Box>
+              {/* </form> */}
+            </Grid>
+          </Grid>
+
+          {/* Upload Section */}
+        </Grid>
+      </Box>
 
       <Card>
         <CardContent>
@@ -306,7 +448,7 @@ const LeadTable = () => {
                   >
                     Lead Name
                   </TableCell> */}
-                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Name</TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Full Name</TableCell>
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Company</TableCell>
                   <TableCell>Location</TableCell>
                   <TableCell>Status</TableCell>
@@ -374,10 +516,12 @@ const LeadTable = () => {
                                   ? 'info'
                                   : row.values['Status'] === 'Qualified'
                                     ? 'success'
-                                    : row.values['Status'] === 'Lost'
-                                      ? 'error'
-                                      : row.values['Status'] === 'Converted'
+                                    : row.values['Status'] === 'Proposal Sent'
+                                      ? 'secondary'
+                                      : row.values['Status'] === 'Closed Lost'
                                         ? 'warning'
+                                         : row.values['Status'] === 'Closed Won'
+                                        ? 'success'
                                         : 'default'
                             }
                             size='small'
