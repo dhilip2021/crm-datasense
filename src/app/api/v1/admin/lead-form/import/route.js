@@ -7,7 +7,6 @@ export async function POST(req) {
   await connectMongoDB()
 
   try {
-    // Get FormData directly from request
     const formData = await req.formData()
     const file = formData.get('file')
     const organization_id = formData.get('organization_id')
@@ -16,38 +15,36 @@ export async function POST(req) {
       return NextResponse.json({ success: false, message: 'No file uploaded' }, { status: 400 })
     }
 
-    // Convert to Buffer
     const buffer = Buffer.from(await file.arrayBuffer())
-
-    // Read Excel file
     const workbook = XLSX.read(buffer, { type: 'buffer' })
     const sheetName = workbook.SheetNames[0]
     const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName])
 
-    let savedRecords = []
-    let skippedRecords = []
+    let batch = []
+    let savedCount = 0
+    let skippedCount = 0
 
     for (let i = 0; i < sheetData.length; i++) {
       const row = sheetData[i]
 
-      // Duplicate check by lead_id OR Email Address
+      // Check duplicate
       const existingLead = await Leadform.findOne({
-        $or: [{ lead_id: row['Lead ID'] }, { 'values.Email Address': row['Email'] }]
-      })
+        $or: [
+          { lead_id: row['Lead ID'] },
+          { 'values.Email Address': row['Email'] }
+        ]
+      }).lean()
 
       if (existingLead) {
-        console.log(`Skipping duplicate: ${row['Lead ID']} / ${row['Email']}`)
-        skippedRecords.push(row)
-        continue // Skip if duplicate
+        skippedCount++
+        continue
       }
 
-
-
+      // Prepare new lead
       const leadData = {
-        organization_id: organization_id,
+        organization_id,
         auto_inc_id: String(i + 1).padStart(5, '0'),
         lead_name: `CRM LEAD 2025 ${String(i + 1).padStart(5, '0')}`,
-        // lead_id: row['Lead ID'] || `DT-${String(i + 1).padStart(5, '0')}`,
         lead_id: `DT-${String(i + 1).padStart(5, '0')}`,
         lead_slug_name: `crm-lead-2025-${String(i + 1).padStart(5, '0')}`,
         form_name: 'lead-form',
@@ -71,18 +68,27 @@ export async function POST(req) {
         updatedAt: new Date(row['Last Contact Date'])
       }
 
+      batch.push(leadData)
 
-      console.log(leadData,"<<< LEAD DATA")
+      // 🚀 Insert in chunks of 1000
+      if (batch.length === 1000) {
+        const inserted = await Leadform.insertMany(batch)
+        savedCount += inserted.length
+        batch = []
+      }
+    }
 
-      const saved = await Leadform.create(leadData)
-      savedRecords.push(saved)
+    // Insert remaining records if any
+    if (batch.length > 0) {
+      const inserted = await Leadform.insertMany(batch)
+      savedCount += inserted.length
     }
 
     return NextResponse.json({
       success: true,
-      imported: savedRecords.length,
-      skipped: skippedRecords.length,
-      message: `${savedRecords.length} leads imported, ${skippedRecords.length} duplicates skipped`
+      imported: savedCount,
+      skipped: skippedCount,
+      message: `${savedCount} leads imported, ${skippedCount} duplicates skipped`
     })
   } catch (error) {
     console.error('Import Error:', error)
