@@ -192,23 +192,20 @@ const LeadTable = () => {
     if (file) {
       setFileName(file.name)
     } else {
-      setFileName('Please select file')
+      setFileName('')
     }
   }
 
   async function handleUpload(e) {
     e.preventDefault()
 
-
     const fileInput = e.target.elements.file // safer way to get the file input
     const file = fileInput?.files?.[0]
 
-    console.log("coming", file)
-
+    console.log('coming', file)
 
     if (!file) {
-      
-      setFileName("Please select a file")
+      setFileName('Please select a file')
       setResponse({ success: false, message: 'Please select a file' })
       return
     }
@@ -253,81 +250,79 @@ const LeadTable = () => {
                 Leads
               </Typography>
 
-              {/* <form > */}
-              <Box display={'flex'} flexDirection={'row'} gap={2}>
-                <Box>
-                  <Button
-                    component='label'
-                    variant='outlined'
-                    color='info'
-                    fullWidth
-                    startIcon={<CloudUploadIcon />}
-                    sx={{
-                      mb: 2,
-                      py: 1.5,
-                      borderColor: 'grey.300',
-                      fontWeight: '500',
-                      '&:hover': { borderColor: 'primary.main' }
-                    }}
-                  >
-                    Select Excel File
-                    <input type='file' name='file' accept='.xlsx' hidden onChange={handleFileChange} />
-                  </Button>
+              <form onSubmit={handleUpload}>
+                <Box display={'flex'} flexDirection={'row'} gap={2}>
+                  <Box>
+                    <Button
+                      component='label'
+                      variant='outlined'
+                      color='info'
+                      fullWidth
+                      startIcon={<CloudUploadIcon />}
+                      sx={{
+                        mb: 2,
+                        py: 1.5,
+                        borderColor: 'grey.300',
+                        fontWeight: '500',
+                        '&:hover': { borderColor: 'primary.main' }
+                      }}
+                    >
+                      Select Excel File
+                      <input type='file' name='file' accept='.xlsx' hidden onChange={handleFileChange} />
+                    </Button>
 
-                  {loader && <LinearProgress sx={{ mb: 2 }} color='info' />}
+                    {loader && <LinearProgress sx={{ mb: 2 }} color='info' />}
 
-                  <Box display='flex' alignItems='center' gap={1}>
-                    {fileName && (
-                      <>
-                        <Typography variant='body2' sx={{ mt: 1, color: '#4CAF50', fontWeight: 500 }}>
-                          {fileName}{' '}
-                        </Typography>
-                        <Button
-                          variant='text'
-                          color='error'
-                          size='small'
-                          onClick={() => {
-                            setFileName('')
-                            e.target.file.value = '' 
-                          }}
-                        >
-                          X
-                        </Button>
-                      </>
-                    )}
-                 
-                    
+                    <Box display='flex' alignItems='center' gap={1}>
+                      {fileName && (
+                        <>
+                          <Typography variant='body2' sx={{ mt: 1, color: '#4CAF50', fontWeight: 500 }}>
+                            {fileName}{' '}
+                          </Typography>
+                          <Button
+                            variant='text'
+                            color='error'
+                            size='small'
+                            onClick={() => {
+                              setFileName('')
+                              e.target.file.value = ''
+                            }}
+                          >
+                            X 
+                          </Button>
+                        </>
+                      ) 
+                     }
+                    </Box>
+                  </Box>
+
+                  <Box>
+                    <Button
+                      type='submit'
+                      variant='contained'
+                      color='info'
+                      fullWidth
+                      disabled={loader}
+                      sx={{ py: 1.5, fontWeight: 'bold' }}
+                    >
+                      {loader ? 'Uploading...' : 'Upload & Import'}
+                    </Button>
+                  </Box>
+
+                  <Box>
+                    <Button
+                      href='/app/lead-form'
+                      variant='contained'
+                      color='primary'
+                      fullWidth
+                      disabled={loader}
+                      sx={{ py: 1.5, fontWeight: 'bold' }}
+                    >
+                      + New Lead
+                    </Button>
                   </Box>
                 </Box>
-
-                <Box>
-                  <Button
-                    type='submit'
-                    variant='contained'
-                    color='info'
-                    fullWidth
-                    disabled={loader}
-                    sx={{ py: 1.5, fontWeight: 'bold' }}
-                    onSubmit={(e)=>handleUpload(e)}
-                  >
-                    {loader ? 'Uploading...' : 'Upload & Import'}
-                  </Button>
-                </Box>
-
-                <Box>
-                  <Button
-                    href='/app/lead-form'
-                    variant='contained'
-                    color='primary'
-                    fullWidth
-                    disabled={loader}
-                    sx={{ py: 1.5, fontWeight: 'bold' }}
-                  >
-                    + New Lead
-                  </Button>
-                </Box>
-              </Box>
-              {/* </form> */}
+              </form>
             </Grid>
           </Grid>
 
@@ -520,9 +515,9 @@ const LeadTable = () => {
                                       ? 'secondary'
                                       : row.values['Status'] === 'Closed Lost'
                                         ? 'warning'
-                                         : row.values['Status'] === 'Closed Won'
-                                        ? 'success'
-                                        : 'default'
+                                        : row.values['Status'] === 'Closed Won'
+                                          ? 'success'
+                                          : 'default'
                             }
                             size='small'
                           />
