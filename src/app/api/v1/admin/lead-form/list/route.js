@@ -31,18 +31,18 @@ export async function GET(req) {
     if (search) {
       query.$or = [
         { lead_id: { $regex: search, $options: 'i' } },
-        { 'values.Full Name': { $regex: search, $options: 'i' } },
-        { 'values.Mobile Number': { $regex: search, $options: 'i' } },
-        { 'values.Email Address': { $regex: search, $options: 'i' } },
-        { 'values.Company Name': { $regex: search, $options: 'i' } },
+        { 'values.First Name': { $regex: search, $options: 'i' } },
+        { 'values.Phone': { $regex: search, $options: 'i' } },
+        { 'values.Email': { $regex: search, $options: 'i' } },
+        { 'values.Company': { $regex: search, $options: 'i' } },
         { 'values.Industry': { $regex: search, $options: 'i' } },
-        { 'values.City / Location': { $regex: search, $options: 'i' } },
-        { 'values.Label': { $regex: search, $options: 'i' } },
+        { 'values.City': { $regex: search, $options: 'i' } },
+        { 'values.Job Title': { $regex: search, $options: 'i' } },
       ]
     }
 
     if (status) {
-      query['values.Status'] = { $regex: status, $options: 'i' }
+      query['values.Lead Status'] = { $regex: status, $options: 'i' }
     }
     if (source) {
       query['values.Lead Source'] = { $regex: source, $options: 'i' }

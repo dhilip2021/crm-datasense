@@ -14,10 +14,10 @@ const calculateLeadScore = (values) => {
   const industry = values['Industry']
   const location = values['City']
 
-  if (designation && ['CXO', 'Founder', 'Manager','CEO','Architect'].includes(designation)) score += 25
-  if (companySize && parseInt(companySize) > 200) score += 15
-  if (industry && ['Pharma', 'IT', 'Education','Finance'].includes(industry)) score += 20
-  if (location && ['Chennai', 'Coimabtore', 'Bangalore','Delhi'].includes(location)) score += 10
+  if (designation && ['Chief Financial Officer', 'Architect', 'Building services engineer','Licensed conveyancer','Sports development officer'].includes(designation)) score += 25
+  if (companySize && parseInt(companySize) > 50) score += 15
+  if (industry && ['Logistics', 'Manufacturing', 'Logistics','FMCG','Education','Pharma','Retail'].includes(industry)) score += 20
+  if (location && ['Kennethchester','North Austinville','Port Heathertown','South Samanthamouth','Chennai', 'Coimabtore', 'Bangalore','Delhi'].includes(location)) score += 10
 
   // 📈 Behavioral
   if (Object.values(values).length >= 8) score += 15

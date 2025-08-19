@@ -142,7 +142,7 @@ const LeadTable = () => {
       Status: d.values['Lead Status'],
       'Assigned To': d.values['Lead Owner'],
       Source: d.values['Lead Source'],
-      Score: d.values['Lead Score'],
+      Score: d.values['lead_score'],
       // 'Last Contact Date': d.values['Last Contact Date'],
       'Last Contact Date': d.updatedAt,
       'Next Follow-up': d.values['Next Follow-up Date']
@@ -175,7 +175,7 @@ const LeadTable = () => {
       d.values['Lead Status'],
       d.values['Lead Owner'],
       d.values['Lead Source'],
-      d.values['Lead Score'],
+      d.values['lead_score'],
       // d.values['Last Contact Date'],
       d.updatedAt,
       d.values['Next Follow-up Date']
@@ -189,7 +189,7 @@ const LeadTable = () => {
   }, [dataFilter])
 
   const uniqueStatus = useMemo(() => {
-    return [...new Set(dataFilter.map(item => item.values['Status']))].filter(Boolean)
+    return [...new Set(dataFilter.map(item => item.values['Lead Status']))].filter(Boolean)
   }, [dataFilter])
 
 
@@ -540,9 +540,9 @@ const LeadTable = () => {
                           <Box
                             sx={{
                               backgroundColor:
-                                (row.values['Score'] || 0) >= 75
+                                (row.values['lead_score'] || 0) >= 75
                                   ? '#d32f2f'
-                                  : (row.values['Score'] || 0) >= 50
+                                  : (row.values['lead_score'] || 0) >= 50
                                     ? '#ff9800'
                                     : '#1976d2',
                               color: '#fff',
@@ -555,24 +555,24 @@ const LeadTable = () => {
                               textAlign: 'center'
                             }}
                           >
-                            {row.values['Score'] || 0}
+                            {row.values['lead_score'] || 0}
                           </Box>
                         </TableCell>
 
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           <Chip
                             label={
-                              (row.values['Score'] || 0) >= 75
+                              (row.values['lead_score'] || 0) >= 75
                                 ? '🔥 Hot Lead'
-                                : (row.values['Score'] || 0) >= 50
+                                : (row.values['lead_score'] || 0) >= 50
                                   ? '🟡 Warm Lead'
                                   : '❄️ Cold Lead'
                             }
                             sx={{
                               backgroundColor:
-                                (row.values['Score'] || 0) >= 75
+                                (row.values['lead_score'] || 0) >= 75
                                   ? '#ffcdd2'
-                                  : (row.values['Score'] || 0) >= 50
+                                  : (row.values['lead_score'] || 0) >= 50
                                     ? '#fff3cd'
                                     : '#bbdefb',
                               fontWeight: 'bold'
@@ -590,16 +590,17 @@ const LeadTable = () => {
                     ))}
                 {!loading && data?.length === 0 && (
                   <TableCell
-                    colSpan={8}
+                    colSpan={10}
                     align='center'
                     sx={{
-                      py: 4,
+                      py: 0,
                       border: 'none',
-                      backgroundColor: '#f9fafb'
+                      backgroundColor: '#f9fafb',
+                      height: 300
                     }}
                   >
                     <Typography
-                      variant='h6'
+                      variant='h5'
                       sx={{
                         fontWeight: 'bold',
                         color: '#9e9e9e',
@@ -608,15 +609,6 @@ const LeadTable = () => {
                     >
                       🚫 No record found!
                     </Typography>
-                    {/* <Typography
-                      variant='body2'
-                      sx={{
-                        color: '#b0bec5',
-                        mt: 0.5
-                      }}
-                    >
-                      Try adjusting filters or date range.
-                    </Typography> */}
                   </TableCell>
                 )}
               </TableBody>
