@@ -4,32 +4,31 @@ import connectMongoDB from '@/libs/mongodb'
 import Leadform from '@/models/Leadform'
 import { NextResponse } from 'next/server'
 
-
-// 🔥 Recalculate score logic
+// 🔥 Lead Scoring Logic
 const calculateLeadScore = (values) => {
   let score = 0
 
-  // Demographic
-  const designation = values['Designation']
+  // 🧩 Demographic
+  const designation = values['Job Tilte']
   const companySize = values['Company Size']
   const industry = values['Industry']
-  const location = values['City / Location']
+  const location = values['City']
 
-  if (designation && ['CXO', 'Founder'].includes(designation)) score += 25
-  if (companySize && parseInt(companySize) > 200) score += 15
-  if (industry && ['Pharma', 'Healthcare', 'Target'].includes(industry)) score += 20
-  if (location && ['Chennai', 'Tamil Nadu', 'Bangalore'].includes(location)) score += 10
+  if (designation && ['Chief Financial Officer', 'Architect', 'Building services engineer','Licensed conveyancer','Sports development officer', 'CEO', 'Manager', 'Founder'].includes(designation)) score += 25
+  if (companySize && parseInt(companySize) > 50) score += 15
+  if (industry && ['Logistics', 'Manufacturing', 'Logistics','FMCG','Education','Pharma','Retail'].includes(industry)) score += 20
+  if (location && ['Kennethchester','North Austinville','Port Heathertown','South Samanthamouth','Chennai', 'Coimabtore', 'Bangalore','Delhi'].includes(location)) score += 10
 
-  // Behavioral
+  // 📈 Behavioral
   if (Object.values(values).length >= 8) score += 15
   if (values['Clicked Email'] || values['Opened WhatsApp']) score += 10
   if (values['Requested Demo'] || values['Asked for Quote']) score += 20
   if (
-    values['Last Activity'] &&
-    new Date(values['Last Activity']) < Date.now() - 7 * 24 * 60 * 60 * 1000
+    values['Last Contact Date'] &&
+    new Date(values['Last Contact Date']) < Date.now() - 7 * 24 * 60 * 60 * 1000
   ) score -= 10
 
-  // Lead Label
+  // 🏷️ Lead Label
   let label = 'Cold Lead'
   if (score >= 75) label = 'Hot Lead'
   else if (score >= 50) label = 'Warm Lead'
@@ -50,7 +49,7 @@ export async function GET(req, { params }) {
       )
     }
 
-    const lead = await Leadform.findOne({ lead_id }).select('-__v -updatedAt').lean()
+    const lead = await Leadform.findOne({ lead_id }).select('-__v').lean()
 
     if (!lead) {
       return NextResponse.json(

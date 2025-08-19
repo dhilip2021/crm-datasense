@@ -15,7 +15,8 @@ import {
   Select,
   InputLabel,
   Tooltip,
-  FormControl
+  FormControl,
+  Switch
 } from '@mui/material'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
@@ -90,7 +91,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 label='Required'
               />
             </Box>
-             <Box>
+            <Box>
               <FormControlLabel
                 control={
                   <Checkbox
@@ -249,7 +250,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 label='Required'
               />
             </Box>
-             <Box>
+            <Box>
               <FormControlLabel
                 control={
                   <Checkbox
@@ -348,7 +349,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 label='Required'
               />
             </Box>
-             <Box>
+            <Box>
               <FormControlLabel
                 control={
                   <Checkbox
@@ -440,7 +441,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 <CloseIcon sx={{ color: 'red' }} />
               </IconButton>
             </Box>
-             <TextField
+            <TextField
               fullWidth
               size='small'
               label='Placeholder'
@@ -714,6 +715,98 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
           </Box>
         )
 
+      case 'Switch':
+        return (
+          <Box className='space-y-3'>
+            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+              <Typography variant='body2' fontWeight='medium'>
+                Toggle Settings:
+              </Typography>
+              <IconButton aria-label='close' onClick={() => editPropertyClick()}>
+                <CloseIcon sx={{ color: 'red' }} />
+              </IconButton>
+            </Box>
+
+            {/* Default Value Switch */}
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={field.defaultValue || false}
+                  onChange={e => onUpdate(index, { ...field, defaultValue: e.target.checked })}
+                />
+              }
+              label={`Default Value: ${field.defaultValue ? 'On' : 'Off'}`}
+            />
+
+            {/* History tracking */}
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={field.trackHistory || false}
+                  onChange={e => onUpdate(index, { ...field, trackHistory: e.target.checked })}
+                />
+              }
+              label='Enable history tracking for toggle changes'
+            />
+
+            {/* Extra common options */}
+            {[
+              { key: 'required', label: 'Required' },
+              { key: 'isPublic', label: 'Mark as Public' }
+            ].map(opt => (
+              <Box key={opt.key}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={field[opt.key] || false}
+                      onChange={e => onUpdate(index, { ...field, [opt.key]: e.target.checked })}
+                    />
+                  }
+                  label={opt.label}
+                />
+              </Box>
+            ))}
+
+            {/* Tooltip Settings */}
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={field.showTooltip || false}
+                  onChange={e => onUpdate(index, { ...field, showTooltip: e.target.checked })}
+                />
+              }
+              label='Show Tooltip'
+            />
+
+            {field.showTooltip && (
+              <>
+                <TextField
+                  label='Tooltip Message'
+                  multiline
+                  fullWidth
+                  rows={2}
+                  size='small'
+                  value={field.tooltipMessage || ''}
+                  onChange={e => onUpdate(index, { ...field, tooltipMessage: e.target.value })}
+                  inputProps={{ maxLength: 255 }}
+                  placeholder='Type tooltip message'
+                />
+
+                <FormLabel sx={{ mt: 1 }}>Tooltip Display Type</FormLabel>
+                <RadioGroup
+                  row
+                  name={`tooltipType-${field.id}`}
+                  value={field.tooltipType || 'icon'}
+                  onChange={e => onUpdate(index, { ...field, tooltipType: e.target.value })}
+                >
+                  <FormControlLabel value='icon' control={<Radio />} label='Info Icon' />
+                  <FormControlLabel value='static' control={<Radio />} label='Static Text' />
+                </RadioGroup>
+              </>
+            )}
+          </Box>
+        )
+
       case 'RadioButton':
         return (
           <Box className='space-y-3'>
@@ -767,46 +860,39 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
               + Add Option
             </Button>
 
-             <Box>
-               <FormLabel>Default Selected Option</FormLabel>
-            <RadioGroup
-              value={field.defaultValue || ''}
-              onChange={e => onUpdate(index, { ...field, defaultValue: e.target.value })}
-            >
-              {(field.options || []).map((opt, i) => (
-                <FormControlLabel key={i} value={opt} control={<Radio />} label={opt || `Option ${i + 1}`} />
-              ))}
-            </RadioGroup>
+            <Box>
+              <FormLabel>Default Selected Option</FormLabel>
+              <RadioGroup
+                value={field.defaultValue || ''}
+                onChange={e => onUpdate(index, { ...field, defaultValue: e.target.value })}
+              >
+                {(field.options || []).map((opt, i) => (
+                  <FormControlLabel key={i} value={opt} control={<Radio />} label={opt || `Option ${i + 1}`} />
+                ))}
+              </RadioGroup>
 
-              
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={field.trackHistory || false}
-                  onChange={e => onUpdate(index, { ...field, trackHistory: e.target.checked })}
-                />
-              }
-              label='Enable history tracking for radio selection'
-            />
-
-
-            
-             </Box>
-             <Box>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={field.trackHistory || false}
+                    onChange={e => onUpdate(index, { ...field, trackHistory: e.target.checked })}
+                  />
+                }
+                label='Enable history tracking for radio selection'
+              />
+            </Box>
+            <Box>
               <FormLabel>Sort order preference</FormLabel>
-            <RadioGroup
-              row
-              name={`sortOrder-${field.id}`}
-              value={field.sortOrder || 'entered'}
-              onChange={e => onUpdate(index, { ...field, sortOrder: e.target.value })}
-            >
-              <FormControlLabel value='entered' control={<Radio />} label='Entered order' />
-              <FormControlLabel value='alphabetical' control={<Radio />} label='Alphabetical order' />
-            </RadioGroup>
-             </Box>
-
-           
-
+              <RadioGroup
+                row
+                name={`sortOrder-${field.id}`}
+                value={field.sortOrder || 'entered'}
+                onChange={e => onUpdate(index, { ...field, sortOrder: e.target.value })}
+              >
+                <FormControlLabel value='entered' control={<Radio />} label='Entered order' />
+                <FormControlLabel value='alphabetical' control={<Radio />} label='Alphabetical order' />
+              </RadioGroup>
+            </Box>
 
             {[
               { key: 'required', label: 'Required' },
@@ -814,20 +900,20 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
             ].map(opt => (
               <Box key={opt.key}>
                 <Box>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={field[opt.key] || false}
-                      onChange={e =>
-                        onUpdate(index, {
-                          ...field,
-                          [opt.key]: e.target.checked
-                        })
-                      }
-                    />
-                  }
-                  label={opt.label}
-                />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={field[opt.key] || false}
+                        onChange={e =>
+                          onUpdate(index, {
+                            ...field,
+                            [opt.key]: e.target.checked
+                          })
+                        }
+                      />
+                    }
+                    label={opt.label}
+                  />
                 </Box>
               </Box>
             ))}
@@ -925,7 +1011,6 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
             >
               + Add Option
             </Button>
-
 
             {/* Default values multi-select */}
             <Box>
@@ -1077,7 +1162,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 label='Required'
               />
             </Box>
-             <Box>
+            <Box>
               <FormControlLabel
                 control={
                   <Checkbox
@@ -2175,10 +2260,8 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
 
   return (
     <div className='border rounded p-3 bg-white mb-4 shadow-sm'>
-     
       <div className='flex justify-between items-start'>
         <div>
-           
           <Typography fontWeight='medium'>
             {field.label}
             {field.required && (

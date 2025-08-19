@@ -16,10 +16,10 @@ const NavSearch = () => {
     </IconButton>
   ) : (
     <div className='flex items-center cursor-pointer gap-2'>
-      <IconButton className='text-textPrimary'>
+      {/* <IconButton className='text-textPrimary'>
         <i className='ri-search-line' />
       </IconButton>
-      <div className='whitespace-nowrap select-none text-textDisabled'>Search ⌘K</div>
+      <div className='whitespace-nowrap select-none text-textDisabled'>Search ⌘K</div> */}
     </div>
   )
 }

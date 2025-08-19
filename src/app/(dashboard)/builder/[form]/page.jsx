@@ -20,6 +20,7 @@ const fieldOptions = [
   'Dropdown',
   'RadioButton',
   'Multi-Select',
+  'Switch',
   'Date',
   'Date Time',
   'Number',

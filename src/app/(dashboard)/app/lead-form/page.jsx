@@ -10,6 +10,7 @@ import {
   MenuItem,
   Radio,
   RadioGroup,
+  Switch,
   TextField,
   Typography
 } from '@mui/material'
@@ -21,18 +22,15 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import LoaderGif from '@assets/gif/loader.gif'
 
-const shortName=(fullName)=>{
-const shortForm = fullName
-  .split(' ')
-  .map(word => word[0])
-  .join('')
-  .toUpperCase();
+const shortName = fullName => {
+  const shortForm = fullName
+    .split(' ')
+    .map(word => word[0])
+    .join('')
+    .toUpperCase()
 
-  return shortForm;
+  return shortForm
 }
-
-
-
 
 function LeadFormAppPage() {
   const organization_id = Cookies.get('organization_id')
@@ -57,7 +55,8 @@ function LeadFormAppPage() {
       }
       if (field.type === 'Email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Invalid email address'
       if (field.type === 'URL' && !/^(http|https):\/\/.+/.test(value)) return 'Invalid URL'
-      if (field.type === 'Date' && new Date(value) < new Date().setHours(0, 0, 0, 0)) return 'Date cannot be in the past'
+      if (field.type === 'Date' && new Date(value) < new Date().setHours(0, 0, 0, 0))
+        return 'Date cannot be in the past'
     }
     return ''
   }
@@ -75,7 +74,7 @@ function LeadFormAppPage() {
   const handleSubmit = async () => {
     const payload = {
       organization_id,
-      organization_name : shortName(organization_name),
+      organization_name: shortName(organization_name),
       form_name: lead_form,
       values: {},
       submittedAt: new Date().toISOString()
@@ -83,11 +82,7 @@ function LeadFormAppPage() {
 
     const newErrors = {}
     sections.forEach(section => {
-      const fields = [
-        ...(section.fields.left || []),
-        ...(section.fields.center || []),
-        ...(section.fields.right || [])
-      ]
+      const fields = [...(section.fields.left || []), ...(section.fields.center || []), ...(section.fields.right || [])]
       fields.forEach(field => {
         const value = values[field.id]
         const error = validateField(field, value)
@@ -103,7 +98,6 @@ function LeadFormAppPage() {
 
     setLoader(true)
 
-
     const res = await fetch('/api/v1/admin/lead-form/form-submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -118,14 +112,13 @@ function LeadFormAppPage() {
     } else {
       toast.error('Submission failed')
     }
-
-
-
   }
 
   const fetchForm = async () => {
     setLoader(true)
-    const res = await fetch(`/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${lead_form}`)
+    const res = await fetch(
+      `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${lead_form}`
+    )
     const data = await res.json()
     setLoader(false)
     if (data?.success && data.data?.sections?.length > 0) {
@@ -173,19 +166,19 @@ function LeadFormAppPage() {
         return (
           <TextField select {...commonProps}>
             {field.options?.map((opt, i) => (
-              <MenuItem key={i} value={opt}>{opt}</MenuItem>
+              <MenuItem key={i} value={opt}>
+                {opt}
+              </MenuItem>
             ))}
           </TextField>
         )
       case 'RadioButton':
         return (
           <Box>
-            <Typography variant='body2' fontWeight='bold'>{field.label}</Typography>
-            <RadioGroup
-              row
-              value={values[field.id] || ''}
-              onChange={e => handleChange(field.id, e.target.value)}
-            >
+            <Typography variant='body2' fontWeight='bold'>
+              {field.label}
+            </Typography>
+            <RadioGroup row value={values[field.id] || ''} onChange={e => handleChange(field.id, e.target.value)}>
               {field.options?.map((opt, i) => (
                 <FormControlLabel key={i} value={opt} control={<Radio />} label={opt} />
               ))}
@@ -202,6 +195,15 @@ function LeadFormAppPage() {
         return <TextField {...commonProps} type='url' />
       case 'Date':
         return <TextField {...commonProps} type='date' InputLabelProps={{ shrink: true }} />
+      case 'Switch':
+        return (
+          <FormControlLabel
+            control={
+              <Switch checked={values[field.id] || false} onChange={e => handleChange(field.id, e.target.checked)} />
+            }
+            label={field.label || 'Toggle'}
+          />
+        )
       default:
         return <TextField {...commonProps} />
     }
@@ -247,9 +249,9 @@ function LeadFormAppPage() {
 
   return (
     <Box px={4} py={4} sx={{ background: '#f9f9f9', minHeight: '100vh' }}>
-      <Typography variant='h4' fontWeight='bold' color='primary' mb={4}>
+      {/* <Typography variant='h4' fontWeight='bold' color='primary' mb={4}>
         Lead Submission
-      </Typography>
+      </Typography> */}
 
       {loader ? (
         <Box textAlign='center' py={6}>
@@ -262,14 +264,20 @@ function LeadFormAppPage() {
           {sections.map((section, sIndex) => (
             <Card key={sIndex} sx={{ mb: 4, borderLeft: '8px solid #8c57ff' }}>
               <CardContent>
-                <Typography variant='h6' fontWeight='bold' mb={2}>{section.title || `Section ${sIndex + 1}`}</Typography>
+                <Typography variant='h6' fontWeight='bold' mb={2}>
+                  {section.title || `Section ${sIndex + 1}`}
+                </Typography>
                 {renderLayoutGrid(section)}
               </CardContent>
             </Card>
           ))}
           <Box display='flex' justifyContent='flex-end' gap={2}>
-            <Button variant='outlined' color='secondary' onClick={() => router.push('/app/leads')}>Cancel</Button>
-            <Button variant='contained' color='primary' onClick={handleSubmit}>Submit</Button>
+            <Button variant='outlined' color='secondary' onClick={() => router.push('/app/leads')}>
+              Cancel
+            </Button>
+            <Button variant='contained' color='primary' onClick={handleSubmit}>
+              Submit
+            </Button>
           </Box>
         </>
       )}
