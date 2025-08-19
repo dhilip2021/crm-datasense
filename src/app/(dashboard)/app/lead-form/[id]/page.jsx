@@ -20,10 +20,19 @@ import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { useRouter, useParams } from 'next/navigation'
 
+const shortName = (fullName) => {
+  return fullName
+    ?.split(' ')
+    .map(word => word[0])
+    .join('')
+    .toUpperCase();
+}
+
 function LeadFormAppIdPage() {
   const params = useParams()
   const leadId = params.id
   const organization_id = Cookies.get('organization_id')
+  const organization_name = Cookies.get('organization_name')
   const lead_form = 'lead-form'
 
   const router = useRouter()
@@ -34,6 +43,24 @@ function LeadFormAppIdPage() {
   const [values, setValues] = useState({})
   const [loader, setLoader] = useState(false)
   const [errors, setErrors] = useState({})
+
+  // ✅ same validation logic from insert
+  const validateField = (field, value) => {
+    if (field.required && !value) return `${field.label} is required`
+    if (value) {
+      if (field.type === 'Single Line') {
+        if (value.length < field.minChars) return `Minimum ${field.minChars} characters required`
+        if (value.length > field.maxChars) return `Maximum ${field.maxChars} characters allowed`
+      }
+      if (field.type === 'Phone') {
+        if (!/^[6-9]\d{9}$/.test(value)) return 'Invalid phone number'
+      }
+      if (field.type === 'Email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Invalid email address'
+      if (field.type === 'URL' && !/^(http|https):\/\/.+/.test(value)) return 'Invalid URL'
+      if (field.type === 'Date' && new Date(value) < new Date().setHours(0, 0, 0, 0)) return 'Date cannot be in the past'
+    }
+    return ''
+  }
 
   const handleChange = (fieldId, value) => {
     setValues(prev => ({
@@ -47,29 +74,31 @@ function LeadFormAppIdPage() {
   }
 
   const handleBlur = (field) => {
-    const value = values[field.id]
-    if (field.required && !value) {
-      setErrors(prev => ({
-        ...prev,
-        [field.id]: `${field.label} is required`
-      }))
-    }
+    const error = validateField(field, values[field.id])
+    if (error) setErrors(prev => ({ ...prev, [field.id]: error }))
   }
 
   const handleSubmit = async () => {
     const newErrors = {}
-    const labelBasedValues = {}
+    const payload = {
+      organization_id,
+      organization_name: shortName(organization_name),
+      form_name: lead_form,
+      values: {},
+      submittedAt: new Date().toISOString()
+    }
 
     sections.forEach(section => {
-      const allFields = [...(section.fields.left || []), ...(section.fields.right || [])]
+      const allFields = [
+        ...(section.fields.left || []),
+        ...(section.fields.center || []),
+        ...(section.fields.right || [])
+      ]
       allFields.forEach(field => {
         const value = values[field.id]
-        if (field.required && !value) {
-          newErrors[field.id] = `${field.label} is required`
-        }
-        if (value !== undefined && value !== '') {
-          labelBasedValues[field.label] = value
-        }
+        const error = validateField(field, value)
+        if (error) newErrors[field.id] = error
+        if (value !== undefined && value !== '') payload.values[field.label] = value
       })
     })
 
@@ -78,19 +107,15 @@ function LeadFormAppIdPage() {
       return
     }
 
-    const payload = {
-      organization_id,
-      form_name: lead_form,
-      values: labelBasedValues,
-      submittedAt: new Date().toISOString()
-    }
-
     setLoader(true)
-    const res = await fetch(leadId ? `/api/v1/admin/lead-form/${leadId}` : '/api/v1/admin/lead-form/form-submit', {
-      method: leadId ? 'PUT' : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
+    const res = await fetch(
+      leadId ? `/api/v1/admin/lead-form/${leadId}` : '/api/v1/admin/lead-form/form-submit',
+      {
+        method: leadId ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }
+    )
 
     const data = await res.json()
     setLoader(false)
@@ -125,12 +150,17 @@ function LeadFormAppIdPage() {
       const fetchedValues = data.data.values
       const mappedValues = {}
       sections.forEach(section => {
-        const allFields = [...(section.fields.left || []), ...(section.fields.right || [])]
+        const allFields = [
+          ...(section.fields.left || []),
+          ...(section.fields.center || []),
+          ...(section.fields.right || [])
+        ]
         allFields.forEach(field => {
           if (fetchedValues[field.label]) {
-            mappedValues[field.id] = field.type === 'Date'
-              ? new Date(fetchedValues[field.label]).toISOString().split('T')[0]
-              : fetchedValues[field.label]
+            mappedValues[field.id] =
+              field.type === 'Date'
+                ? new Date(fetchedValues[field.label]).toISOString().split('T')[0]
+                : fetchedValues[field.label]
           }
         })
       })
@@ -153,22 +183,20 @@ function LeadFormAppIdPage() {
   }, [sections, leadId])
 
   const renderField = field => {
-    const label = (
-      <>
-        {field.label}
-        {field.required && <span style={{ color: 'red' }}> *</span>}
-      </>
-    )
-
     const commonProps = {
       fullWidth: true,
       size: 'small',
-      label,
+      label: (
+        <>
+          {field.label} {field.required && <span style={{ color: 'red' }}>*</span>}
+        </>
+      ),
       value: values[field.id] || '',
       onChange: e => handleChange(field.id, e.target.value),
       onBlur: () => handleBlur(field),
       error: !!errors[field.id],
       helperText: errors[field.id],
+      placeholder: field.placeholder || ''
     }
 
     switch (field.type) {
@@ -176,9 +204,7 @@ function LeadFormAppIdPage() {
         return (
           <TextField select {...commonProps}>
             {field.options?.map((option, i) => (
-              <MenuItem key={i} value={option}>
-                {option}
-              </MenuItem>
+              <MenuItem key={i} value={option}>{option}</MenuItem>
             ))}
           </TextField>
         )
@@ -186,9 +212,13 @@ function LeadFormAppIdPage() {
         return (
           <Box>
             <Typography variant='body2' fontWeight='bold' gutterBottom>
-              {label}
+              {field.label}
             </Typography>
-            <RadioGroup row value={values[field.id] || ''} onChange={e => handleChange(field.id, e.target.value)}>
+            <RadioGroup
+              row
+              value={values[field.id] || ''}
+              onChange={e => handleChange(field.id, e.target.value)}
+            >
               {field.options?.map((opt, i) => (
                 <FormControlLabel key={i} value={opt} control={<Radio />} label={opt} />
               ))}
@@ -198,28 +228,53 @@ function LeadFormAppIdPage() {
       case 'Multi-Line':
         return <TextField {...commonProps} multiline minRows={field.rows || 3} />
       case 'Phone':
-        return (
-          <TextField
-            {...commonProps}
-            type='tel'
-            inputProps={{ maxLength: 10 }}
-            onChange={e => {
-              const val = e.target.value
-              if (/^\d*$/.test(val)) handleChange(field.id, val)
-            }}
-          />
-        )
+        return <TextField {...commonProps} type='tel' inputProps={{ maxLength: 10 }} />
+      case 'Email':
+        return <TextField {...commonProps} type='email' />
+      case 'URL':
+        return <TextField {...commonProps} type='url' />
       case 'Date':
-        return (
-          <TextField
-            {...commonProps}
-            type='date'
-            InputLabelProps={{ shrink: true }}
-          />
-        )
+        return <TextField {...commonProps} type='date' InputLabelProps={{ shrink: true }} />
       default:
         return <TextField {...commonProps} />
     }
+  }
+
+  const renderLayoutGrid = (section) => {
+    const layout = section.layout || 'double'
+    const cols = layout === 'single' ? 12 : layout === 'double' ? 6 : 4
+
+    return (
+      <Grid container spacing={2}>
+        {section.fields.left?.length > 0 && (
+          <Grid item xs={12} sm={cols}>
+            {section.fields.left.map(field => (
+              <Box key={field.id} pb={3} pt={3}>
+                {renderField(field)}
+              </Box>
+            ))}
+          </Grid>
+        )}
+        {layout === 'triple' && section.fields.center?.length > 0 && (
+          <Grid item xs={12} sm={4}>
+            {section.fields.center.map(field => (
+              <Box key={field.id} pb={3} pt={3}>
+                {renderField(field)}
+              </Box>
+            ))}
+          </Grid>
+        )}
+        {(layout === 'double' || layout === 'triple') && section.fields.right?.length > 0 && (
+          <Grid item xs={12} sm={layout === 'double' ? 6 : 4}>
+            {section.fields.right.map(field => (
+              <Box key={field.id} pb={3} pt={3}>
+                {renderField(field)}
+              </Box>
+            ))}
+          </Grid>
+        )}
+      </Grid>
+    )
   }
 
   return (
@@ -243,66 +298,22 @@ function LeadFormAppIdPage() {
       )}
 
       {!loader && sections.map((section, sIndex) => (
-  <Card key={section.id} sx={{ mb: 3, borderLeft: '8px solid #8c57ff' }}>
-    <CardContent>
-      <Typography variant='h6' fontWeight='bold' mb={2}>
-        {section.title || `Section ${sIndex + 1}`}
-      </Typography>
-
-      <Grid container spacing={2}>
-        {/* Left */}
-        {(section.fields.left || []).length > 0 && (
-          <Grid
-            item
-            xs={12}
-            sm={section.layout === 'single' ? 12 : section.layout === 'double' ? 6 : 4}
-          >
-            {section.fields.left.map(field => (
-              <Box mb={3} key={field.id}>
-                {renderField(field)}
-              </Box>
-            ))}
-          </Grid>
-        )}
-
-        {/* Center */}
-        {section.layout === 'triple' && (section.fields.center || []).length > 0 && (
-          <Grid item xs={12} sm={4}>
-            {section.fields.center.map(field => (
-              <Box mb={3} key={field.id}>
-                {renderField(field)}
-              </Box>
-            ))}
-          </Grid>
-        )}
-
-        {/* Right */}
-        {(section.layout === 'double' || section.layout === 'triple') &&
-          (section.fields.right || []).length > 0 && (
-            <Grid
-              item
-              xs={12}
-              sm={section.layout === 'double' ? 6 : 4}
-            >
-              {section.fields.right.map(field => (
-                <Box mb={3} key={field.id}>
-                  {renderField(field)}
-                </Box>
-              ))}
-            </Grid>
-          )}
-      </Grid>
-    </CardContent>
-  </Card>
-))}
-
+        <Card key={sIndex} sx={{ mb: 4, borderLeft: '8px solid #8c57ff' }}>
+          <CardContent>
+            <Typography variant='h6' fontWeight='bold' mb={2}>
+              {section.title || `Section ${sIndex + 1}`}
+            </Typography>
+            {renderLayoutGrid(section)}
+          </CardContent>
+        </Card>
+      ))}
 
       {!loader && (
         <Box display='flex' justifyContent='space-between' mt={3}>
           <Button variant='outlined' color='error' onClick={() => router.push('/app/leads')}>
             Cancel
           </Button>
-          <Button variant='contained'  onClick={handleSubmit}>
+          <Button variant='contained' onClick={handleSubmit}>
             {leadId ? 'Update Lead' : 'Submit Lead'}
           </Button>
         </Box>

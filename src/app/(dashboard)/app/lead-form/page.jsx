@@ -217,7 +217,7 @@ function LeadFormAppPage() {
         {section.fields.left?.length > 0 && (
           <Grid item xs={12} sm={cols}>
             {section.fields.left.map(field => (
-              <Box key={field.id} mb={2}>
+              <Box key={field.id} pb={3} pt={3}>
                 {renderField(field)}
               </Box>
             ))}
@@ -226,7 +226,7 @@ function LeadFormAppPage() {
         {layout === 'triple' && section.fields.center?.length > 0 && (
           <Grid item xs={12} sm={4}>
             {section.fields.center.map(field => (
-              <Box key={field.id} mb={2}>
+              <Box key={field.id} pb={3} pt={3}>
                 {renderField(field)}
               </Box>
             ))}
@@ -235,7 +235,7 @@ function LeadFormAppPage() {
         {(layout === 'double' || layout === 'triple') && section.fields.right?.length > 0 && (
           <Grid item xs={12} sm={layout === 'double' ? 6 : 4}>
             {section.fields.right.map(field => (
-              <Box key={field.id} mb={2}>
+              <Box key={field.id} pb={3} pt={3}>
                 {renderField(field)}
               </Box>
             ))}

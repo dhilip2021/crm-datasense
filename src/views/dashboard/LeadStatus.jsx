@@ -169,7 +169,7 @@ export default function LeadStatus() {
     <>
       <CardHeader
         title='Leads Overview'
-        action={<OptionsMenu iconClassName='text-textPrimary' options={['Refresh']} />}
+        // action={<OptionsMenu iconClassName='text-textPrimary' options={['Refresh']} />}
       />
 
       {/* Filters */}

@@ -3,6 +3,39 @@ import connectMongoDB from '@/libs/mongodb'
 import Leadform from '@/models/Leadform'
 import * as XLSX from 'xlsx'
 
+
+// 🔥 Lead Scoring Logic
+const calculateLeadScore = (values) => {
+  let score = 0
+
+  // 🧩 Demographic
+  const designation = values['Job Tilte']
+  const companySize = values['Company Size']
+  const industry = values['Industry']
+  const location = values['City']
+
+  if (designation && ['CXO', 'Founder', 'Manager','CEO','Architect'].includes(designation)) score += 25
+  if (companySize && parseInt(companySize) > 200) score += 15
+  if (industry && ['Pharma', 'IT', 'Education','Finance'].includes(industry)) score += 20
+  if (location && ['Chennai', 'Coimabtore', 'Bangalore','Delhi'].includes(location)) score += 10
+
+  // 📈 Behavioral
+  if (Object.values(values).length >= 8) score += 15
+  if (values['Clicked Email'] || values['Opened WhatsApp']) score += 10
+  if (values['Requested Demo'] || values['Asked for Quote']) score += 20
+  if (
+    values['Last Contact Date'] &&
+    new Date(values['Last Contact Date']) < Date.now() - 7 * 24 * 60 * 60 * 1000
+  ) score -= 10
+
+  // 🏷️ Lead Label
+  let label = 'Cold Lead'
+  if (score >= 75) label = 'Hot Lead'
+  else if (score >= 50) label = 'Warm Lead'
+
+  return { lead_score: score, lead_label: label }
+}
+
 export async function POST(req) {
   await connectMongoDB()
 
@@ -20,6 +53,11 @@ export async function POST(req) {
     const sheetName = workbook.SheetNames[0]
     const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName])
 
+
+    console.log(sheetData,"<<< SHEET DATAAAA")
+
+
+
     let batch = []
     let savedCount = 0
     let skippedCount = 0
@@ -31,7 +69,7 @@ export async function POST(req) {
       const existingLead = await Leadform.findOne({
         $or: [
           { lead_id: row['Lead ID'] },
-          { 'values.Email Address': row['Email'] }
+          { 'values.Email': row['Email'] }
         ]
       }).lean()
 
@@ -39,6 +77,9 @@ export async function POST(req) {
         skippedCount++
         continue
       }
+
+
+      const { lead_score, lead_label } = calculateLeadScore(row)
 
       // Prepare new lead
       const leadData = {
@@ -49,20 +90,23 @@ export async function POST(req) {
         lead_slug_name: `crm-lead-2025-${String(i + 1).padStart(5, '0')}`,
         form_name: 'lead-form',
         values: {
-          'Full Name': `${row['First Name']} ${row['Last Name']}`.trim(),
-          'Email Address': row['Email'],
-          'Mobile Number': row['Phone'],
-          'Company Name': row['Company'],
-          Designation: row['Job Title'],
-          Industry: row['Industry'],
+          'First Name': `${row['First Name']}`.trim(),
+          'Last Name': `${row['Last Name']}`.trim(),
+          'Email': row['Email'],
+          'Phone': row['Phone'],
+          'Company': row['Company'],
+          'Job Title': row['Job Title'],
+          'Industry': row['Industry'],
           'Lead Source': row['Lead Source'],
-          Status: row['Lead Status'],
-          Country: row['Country'],
-          'City / Location': row['City'],
-          State: row['State'],
+          'Lead Status': row['Lead Status'],
+          'Country': row['Country'],
+          'City': row['City'],
+          'State': row['State'],
           'Created Date': row['Created Date'],
           'Last Contact Date': row['Last Contact Date'],
-          'Potential Deal Size': row['Potential Deal Size (USD)']
+          'Potential Deal Size': row['Potential Deal Size (USD)'],
+          'lead_score':lead_score,
+          'lead_label': lead_label
         },
         submittedAt: new Date(row['Created Date']),
         updatedAt: new Date(row['Last Contact Date'])

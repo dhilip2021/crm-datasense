@@ -1085,7 +1085,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                     onChange={e => onUpdate(index, { ...field, allowPastDate: e.target.checked })}
                   />
                 }
-                label='Allow Past Date'
+                label='Not Allow Past Date'
               />
             </Box>
             <Box>

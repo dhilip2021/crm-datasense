@@ -136,14 +136,15 @@ const LeadTable = () => {
   const exportToExcel = () => {
     const rows = data.map(d => ({
       'Lead ID': d.lead_id,
-      Name: d.values['Full Name'],
-      Company: d.values['Company Name'],
-      Location: d.values['City / Location'],
-      Status: d.values['Status'],
+      Name: d.values['First Name'],
+      Company: d.values['Company'],
+      Location: d.values['City'],
+      Status: d.values['Lead Status'],
       'Assigned To': d.values['Lead Owner'],
       Source: d.values['Lead Source'],
       Score: d.values['Lead Score'],
-      'Last Activity': d.values['Last Activity Date'],
+      // 'Last Contact Date': d.values['Last Contact Date'],
+      'Last Contact Date': d.updatedAt,
       'Next Follow-up': d.values['Next Follow-up Date']
     }))
     const sheet = XLSX.utils.json_to_sheet(rows)
@@ -163,19 +164,20 @@ const LeadTable = () => {
       'Assigned To',
       'Source',
       'Score',
-      'Last Activity',
+      'Last Contact Date',
       'Next Follow-up'
     ]
     const rows = data.map(d => [
       d.lead_id,
-      d.values['Full Name'],
-      d.values['Company Name'],
-      d.values['City / Location'],
-      d.values['Status'],
+      d.values['First Name'],
+      d.values['Company'],
+      d.values['City'],
+      d.values['Lead Status'],
       d.values['Lead Owner'],
       d.values['Lead Source'],
       d.values['Lead Score'],
-      d.values['Last Activity Date'],
+      // d.values['Last Contact Date'],
+      d.updatedAt,
       d.values['Next Follow-up Date']
     ])
     autoTable(doc, { head: [columns], body: rows })
@@ -260,11 +262,11 @@ const LeadTable = () => {
                         '&:hover': { borderColor: 'primary.main' }
                       }}
                     >
-                      Select Excel File
+                      Select Excel/CSV File
                       <input
                         type='file'
                         name='file'
-                        accept='.xlsx'
+                        accept=".csv, .xlsx"
                         hidden
                         onChange={e => {
                           const file = e.target.files[0]
@@ -449,15 +451,15 @@ const LeadTable = () => {
                   >
                     Lead Name
                   </TableCell> */}
-                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Full Name</TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>First Name</TableCell>
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Company</TableCell>
-                  <TableCell>Location</TableCell>
+                  <TableCell>City</TableCell>
                   <TableCell>Status</TableCell>
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Assigned To</TableCell>
                   <TableCell>Source</TableCell>
                   <TableCell>Score</TableCell>
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Label</TableCell>
-                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Last Activity</TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Last Contact Date</TableCell>
                   <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Next Follow-up</TableCell>
                 </TableRow>
               </TableHead>
@@ -501,29 +503,31 @@ const LeadTable = () => {
                           {row.lead_name}
                         </TableCell> */}
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
-                          {row.values['Full Name']}
+                          {row.values['First Name']}
                         </TableCell>
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
-                          {row.values['Company Name']}
+                          {row.values['Company']}
                         </TableCell>
-                        <TableCell>{row.values['City / Location']}</TableCell>
+                        <TableCell>{row.values['City']}</TableCell>
                         <TableCell>
                           <Chip
-                            label={row.values['Status'] || 'Unknown'}
+                            label={row.values['Lead Status'] || 'Unknown'}
                             color={
-                              row.values['Status'] === 'New'
+                              row.values['Lead Status'] === 'New'
                                 ? 'primary'
-                                : row.values['Status'] === 'Contacted'
+                                : row.values['Lead Status'] === 'Contacted'
                                   ? 'info'
-                                  : row.values['Status'] === 'Qualified'
+                                  : row.values['Lead Status'] === 'Qualified'
                                     ? 'success'
-                                    : row.values['Status'] === 'Proposal Sent'
+                                    : row.values['Lead Status'] === 'Proposal Sent'
                                       ? 'secondary'
-                                      : row.values['Status'] === 'Closed Lost'
-                                        ? 'warning'
-                                        : row.values['Status'] === 'Closed Won'
-                                          ? 'success'
-                                          : 'default'
+                                      : row.values['Lead Status'] === 'Negotiation'
+                                       ? 'default'
+                                          : row.values['Lead Status'] === 'Closed Lost'
+                                         ? 'warning'
+                                           : row.values['Lead Status'] === 'Closed Won'
+                                             ? 'success'
+                                             : 'default'
                             }
                             size='small'
                           />

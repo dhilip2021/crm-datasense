@@ -248,11 +248,11 @@ const CustomersTable = () => {
                         '&:hover': { borderColor: 'primary.main' }
                       }}
                     >
-                      Select Excel File
+                      Select Excel/CSV File
                       <input
                         type='file'
                         name='file'
-                        accept='.xlsx'
+                        accept=".csv, .xlsx"
                         hidden
                         onChange={e => {
                           const file = e.target.files[0]

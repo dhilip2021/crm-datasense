@@ -10,23 +10,23 @@ const calculateLeadScore = (values) => {
   let score = 0
 
   // 🧩 Demographic
-  const designation = values['Designation']
+  const designation = values['Job Tilte']
   const companySize = values['Company Size']
   const industry = values['Industry']
-  const location = values['City / Location']
+  const location = values['City']
 
-  if (designation && ['CXO', 'Founder'].includes(designation)) score += 25
+  if (designation && ['CXO', 'Founder', 'Manager','CEO','Architect'].includes(designation)) score += 25
   if (companySize && parseInt(companySize) > 200) score += 15
-  if (industry && ['Pharma', 'Healthcare', 'Target'].includes(industry)) score += 20
-  if (location && ['Chennai', 'Tamil Nadu', 'Bangalore'].includes(location)) score += 10
+  if (industry && ['Pharma', 'IT', 'Education','Finance'].includes(industry)) score += 20
+  if (location && ['Chennai', 'Coimabtore', 'Bangalore','Delhi'].includes(location)) score += 10
 
   // 📈 Behavioral
   if (Object.values(values).length >= 8) score += 15
   if (values['Clicked Email'] || values['Opened WhatsApp']) score += 10
   if (values['Requested Demo'] || values['Asked for Quote']) score += 20
   if (
-    values['Last Activity'] &&
-    new Date(values['Last Activity']) < Date.now() - 7 * 24 * 60 * 60 * 1000
+    values['Last Contact Date'] &&
+    new Date(values['Last Contact Date']) < Date.now() - 7 * 24 * 60 * 60 * 1000
   ) score -= 10
 
   // 🏷️ Lead Label
