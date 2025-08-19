@@ -63,14 +63,10 @@ export default function LeadStatus() {
   const [stats, setStats] = useState({})
   const [dataFilter, setDataFilter] = useState([])
   const [filters, setFilters] = useState({
-    status: '',
-    source: '',
-    region: '',
-    rep: '',
-    value: '',
-    fromDate: null,
-    toDate: null,
-    search: ''
+    lead_source: '',
+    city: '',
+    timeline_to_buy: '',
+    next_followup_date: ''
   })
 
   const cardConfig = [
@@ -103,6 +99,13 @@ export default function LeadStatus() {
     return [...new Set(dataFilter.map(item => item.values['Lead Status']))].filter(Boolean)
   }, [dataFilter])
 
+  const fetchFilteredLeads = async que => {
+    const query = new URLSearchParams(filters).toString()
+    const res = await fetch(`/api/v1/admin/lead-form/dashboard-list?${que}`)
+    const data = await res.json()
+    console.log('Filtered Leads:', data)
+  }
+
   const fetchData = async () => {
     setLoading(true)
 
@@ -111,14 +114,12 @@ export default function LeadStatus() {
     const query = new URLSearchParams({
       organization_id,
       form_name,
-      // page: page + 1,
-      // limit,
       ...(filters.search && { search: filters.search }),
       ...(filters.status && { status: filters.status }),
       ...(filters.source && { source: filters.source }),
-      ...(filters.region && { region: filters.region }),
-      ...(filters.rep && { rep: filters.rep }),
-      ...(filters.value && { value: filters.value }),
+      ...(filters.city && { city: filters.city }), // ✅ New
+      ...(filters.timeline && { timeline: filters.timeline }), // ✅ New
+      ...(filters.nextFollowup && { nextFollowup: dayjs(filters.nextFollowup).format('YYYY-MM-DD') }),
       ...(filters.fromDate && { from: dayjs(filters.fromDate).format('YYYY-MM-DD') }),
       ...(filters.toDate && { to: dayjs(filters.toDate).format('YYYY-MM-DD') })
     })
@@ -176,16 +177,52 @@ export default function LeadStatus() {
   }, [quickRange])
 
   useEffect(() => {
-    fetchData()
+    const allEmpty = Object.values(filters).every(value => value === '')
+
+    if (allEmpty) {
+      console.log('All fields are empty')
+       fetchData()
+    } else {
+      setLoading(true)
+
+      const form_name = 'lead-form'
+      const query = new URLSearchParams({
+        organization_id,
+        form_name,
+        ...(filters.search && { search: filters.search }),
+        ...(filters.status && { status: filters.status }),
+        ...(filters.source && { source: filters.source }),
+        ...(filters.city && { city: filters.city }), // ✅ New
+        ...(filters.timeline && { timeline: filters.timeline }), // ✅ New
+        ...(filters.nextFollowup && { nextFollowup: dayjs(filters.nextFollowup).format('YYYY-MM-DD') }),
+        ...(filters.fromDate && { from: dayjs(filters.fromDate).format('YYYY-MM-DD') }),
+        ...(filters.toDate && { to: dayjs(filters.toDate).format('YYYY-MM-DD') })
+      })
+
+      fetchFilteredLeads(query)
+      console.log('At least one filter is selected')
+    }
   }, [filters])
+
 
   return (
     <>
       {/* <CardHeader title='Leads Overview' /> */}
 
       {/* Filters */}
-      <Box display='flex' gap={2} p={2} flexWrap='wrap'>
-        <FormControl size='small' sx={{ minWidth: 150 }}>
+      <Box
+        display='flex'
+        gap={2}
+        flexWrap='wrap'
+        alignItems='center'
+        p={2}
+        sx={{
+          backgroundColor: '#fafafa',
+          borderRadius: 2,
+          mb: 3
+        }}
+      >
+        <FormControl size='small' sx={{ minWidth: 180 }}>
           <InputLabel>Lead Source</InputLabel>
           <Select value={leadSource} onChange={e => setLeadSource(e.target.value)}>
             <MenuItem value=''>All</MenuItem>
@@ -197,7 +234,7 @@ export default function LeadStatus() {
           </Select>
         </FormControl>
 
-        <FormControl size='small' sx={{ minWidth: 150 }}>
+        <FormControl size='small' sx={{ minWidth: 180 }}>
           <InputLabel>City</InputLabel>
           <Select value={city} onChange={e => setCity(e.target.value)}>
             <MenuItem value=''>All</MenuItem>
@@ -209,7 +246,7 @@ export default function LeadStatus() {
           </Select>
         </FormControl>
 
-        <FormControl size='small' sx={{ minWidth: 180 }}>
+        <FormControl size='small' sx={{ minWidth: 200 }}>
           <InputLabel>Timeline to Buy</InputLabel>
           <Select value={timeline} onChange={e => setTimeline(e.target.value)}>
             <MenuItem value=''>All</MenuItem>
@@ -249,29 +286,27 @@ export default function LeadStatus() {
         </FormControl>
       </Box>
 
-      <Grid container spacing={1} p={0}>
+      <Grid container spacing={3} p={2}>
         {loading
           ? [...Array(11)].map((_, i) => (
-              <Grid item xs={12} sm={6} md={2} key={i}>
+              <Grid item xs={12} sm={6} md={3} lg={2} key={i}>
                 <StatSkeleton />
               </Grid>
             ))
           : cardConfig.map((item, index) => (
-              <Grid item xs={12} sm={6} md={2} key={index}>
+              <Grid item xs={12} sm={6} md={3} lg={2} key={index}>
                 <StatCard>
-                  <CardContent className='flex items-center'>
+                  <CardContent className='flex items-center gap-3'>
+                    <CustomAvatar
+                      variant='rounded'
+                      color={item.color}
+                      className='shadow-md'
+                      sx={{ width: 40, height: 40, fontSize: 16 }}
+                    >
+                      <i className={item.icon}></i>
+                    </CustomAvatar>
                     <Box>
-                      <CustomAvatar
-                        variant='rounded'
-                        color={item.color}
-                        className='shadow-md'
-                        sx={{ width: 30, height: 30, fontSize: 10 }}
-                      >
-                        <i className={item.icon}></i>
-                      </CustomAvatar>
-                    </Box>
-                    <Box >
-                      <Typography variant='subtitle' sx={{ color: 'text.secondary' }}>
+                      <Typography variant='body2' sx={{ color: 'text.secondary' }}>
                         {item.title}
                       </Typography>
                       <Typography variant='h6' sx={{ fontWeight: 600 }}>
