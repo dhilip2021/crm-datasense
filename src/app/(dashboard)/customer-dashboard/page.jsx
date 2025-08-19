@@ -6,14 +6,14 @@ import Divider from '@mui/material/Divider'
 
 
 
-const Opportunity = () => {
+const CustomerDashboard = () => {
 
 
 
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
-        <Typography variant='h5'>Opportunity Dashboard</Typography>
+        <Typography variant='h5'>Customer Dashboard</Typography>
         <Divider />
       </Grid>
      
@@ -24,4 +24,4 @@ const Opportunity = () => {
   )
 }
 
-export default Opportunity
+export default CustomerDashboard

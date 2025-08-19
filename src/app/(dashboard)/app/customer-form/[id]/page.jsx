@@ -20,7 +20,7 @@ import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { useRouter, useParams } from 'next/navigation'
 
-function LeadFormAppIdPage() {
+function CustomerFormAppIdPage() {
   const params = useParams()
   const leadId = params.id
   const organization_id = Cookies.get('organization_id')
@@ -105,7 +105,7 @@ function LeadFormAppIdPage() {
 
   const fetchFormTemplate = async () => {
     setLoader(true)
-    const res = await fetch(`/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${lead_form}`)
+    const res = await fetch(`/api/v1/admin/customer-form-template/single?organization_id=${organization_id}&form_name=${lead_form}`)
     const json = await res.json()
     if (json?.success && json.data?.sections?.length > 0) {
       setSections(json.data.sections)
@@ -313,4 +313,4 @@ function LeadFormAppIdPage() {
   )
 }
 
-export default LeadFormAppIdPage
+export default CustomerFormAppIdPage

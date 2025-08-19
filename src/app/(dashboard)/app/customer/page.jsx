@@ -36,7 +36,7 @@ import GridOnIcon from '@mui/icons-material/GridOn'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import { toast, ToastContainer } from 'react-toastify'
 
-const LeadTable = () => {
+const CustomerTable = () => {
   const organization_id = Cookies.get('organization_id')
   const [data, setData] = useState([])
   const [dataFilter, setDataFilter] = useState([])
@@ -81,7 +81,7 @@ const LeadTable = () => {
     })
 
     try {
-      const res = await fetch(`/api/v1/admin/lead-form/list?${query}`)
+      const res = await fetch(`/api/v1/admin/customer-form/list?${query}`)
       const json = await res.json()
       if (json.success) {
         setData(json.data)
@@ -155,9 +155,9 @@ const LeadTable = () => {
   const exportToPDF = () => {
     const doc = new jsPDF()
     const columns = [
-      'Lead ID',
-      'Name',
-      'Company',
+      'Customer ID',
+      'First Name',
+      'Last Name',
       'Location',
       'Status',
       'Assigned To',
@@ -208,7 +208,7 @@ const LeadTable = () => {
     setLoader(true)
 
     try {
-      const res = await fetch('/api/v1/admin/lead-form/import', {
+      const res = await fetch('/api/v1/admin/customer-form/import', {
         method: 'POST',
         body: formData
       })
@@ -239,7 +239,7 @@ const LeadTable = () => {
           <Grid item>
             <Grid container justifyContent='space-between' alignItems='center'>
               <Typography variant='h5' fontWeight='bold'>
-                Leads
+                Customer
               </Typography>
 
               <form onSubmit={handleUpload}>
@@ -260,7 +260,7 @@ const LeadTable = () => {
                         '&:hover': { borderColor: 'primary.main' }
                       }}
                     >
-                      Select Excel File
+                      Select Excel /CSV File
                       <input
                         type='file'
                         name='file'
@@ -317,14 +317,14 @@ const LeadTable = () => {
                   {/* New Lead Button */}
                   <Box>
                     <Button
-                      href='/app/lead-form'
+                      href='/app/customer-form'
                       variant='contained'
                       color='primary'
                       fullWidth
                       disabled={loader}
                       sx={{ py: 1.5, fontWeight: 'bold' }}
                     >
-                      + New Lead
+                      + New Customer
                     </Button>
                   </Box>
                 </Box>
@@ -435,7 +435,7 @@ const LeadTable = () => {
                       minWidth: 120
                     }}
                   >
-                    Lead ID
+                    Customer ID
                   </TableCell>
                   {/* <TableCell
                     sx={{
@@ -449,10 +449,10 @@ const LeadTable = () => {
                   >
                     Lead Name
                   </TableCell> */}
-                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Full Name</TableCell>
-                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Company</TableCell>
-                  <TableCell>Location</TableCell>
-                  <TableCell>Status</TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>First Name</TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Last Name</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Phone</TableCell>
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Assigned To</TableCell>
                   <TableCell>Source</TableCell>
                   <TableCell>Score</TableCell>
@@ -638,4 +638,4 @@ const LeadTable = () => {
   )
 }
 
-export default LeadTable
+export default CustomerTable

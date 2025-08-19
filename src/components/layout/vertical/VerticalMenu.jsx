@@ -82,25 +82,34 @@ const VerticalMenu = ({ scrollMenu }) => {
           <MenuItem href='/opportunity' icon={<i className='ri-bar-chart-box-line' />}>
             Opportunity
           </MenuItem>
+          <MenuItem href='/customer-dashboard' icon={<i className='ri-bar-chart-box-line' />}>
+            Customer
+          </MenuItem>
         </SubMenu>
 
-        {/* <MenuSection label='Master'>
-          <MenuItem href='/salutation' icon={<i classNames="ri-id-card-line" />}>
+        <MenuSection label='Master'>
+          <MenuItem href='/salutation' icon={<i className="ri-id-card-line" />}>
             Salutation
           </MenuItem>
-          <MenuItem href='/gender' icon={<i classNames="ri-women-line" />}>
+          <MenuItem href='/gender' icon={<i className="ri-women-line" />}>
             Gender
           </MenuItem>
 
            <MenuItem href='/territory' icon={<i className="ri-map-pin-line" />}>
             Territory
           </MenuItem>
-        </MenuSection> */}
+           <MenuItem href='/campaign-type' icon={<i className="ri-map-pin-line" />}>
+            Campaign Type
+          </MenuItem>
+        </MenuSection>
         <MenuSection label='Apps & Pages'>
           <MenuItem href='/app/leads' icon={<i className='ri-user-star-line' />}>
             Leads
           </MenuItem>
-          <MenuItem href='/customer' icon={<i className='ri-user-settings-line' />}>
+          <MenuItem href='/app/opportunity' icon={<i className='ri-user-star-line' />}>
+            Opportunity
+          </MenuItem>
+          <MenuItem href='/app/customer' icon={<i className='ri-user-settings-line' />}>
             Customer
           </MenuItem>
           <MenuItem href='/notes' icon={<i className='ri-sticky-note-add-line'></i>}>

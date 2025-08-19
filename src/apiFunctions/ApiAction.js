@@ -479,3 +479,122 @@ export const deleteTerritoryApi = async (body,header) => {
       return err;
     });
 };
+
+// Campaign type api models
+
+export const addCampaignTypeApi = async (body, header) => {
+  
+  return await axios.post(`/api/v1/admin/campaign-types`, body,{ headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const getSinlgeCampaigntypeApi = async (body,header) => {
+  return await axios
+    .get(`/api/v1/admin/campaign-types`, body, { headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const getAllCampaigntypeApi = async (body,header) => {
+  return await axios
+    .get(`/api/v1/admin/campaign-types?page=${body.n_page}&limit=${body.n_limit}`, { headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const updateCampaigntypeApi = async (id,body,header) => {
+  return await axios
+    .put(`/api/v1/admin/campaign-types/${id}`,body,{ headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const deleteCampaignTypeApi = async (body,header) => {
+  return await axios
+    .delete(`/api/v1/admin/campaign-types/${body}`, {
+      headers: header,
+    })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+
+// Campaign type api models
+
+export const addCustomersApi = async (body, header) => {
+  
+  return await axios.post(`/api/v1/admin/customers`, body,{ headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const getSinlgeCustomerseApi = async (body,header) => {
+  return await axios
+    .get(`/api/v1/admin/customers`, body, { headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const getAllCustomerseApi = async (body,header) => {
+  return await axios
+    .get(`/api/v1/admin/customers?page=${body.n_page}&limit=${body.n_limit}`, { headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const updateCustomerseApi = async (id,body,header) => {
+  return await axios
+    .put(`/api/v1/admin/customers/${id}`,body,{ headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const deleteCustomerseApi = async (body,header) => {
+  return await axios
+    .delete(`/api/v1/admin/customers/${body}`, {
+      headers: header,
+    })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};

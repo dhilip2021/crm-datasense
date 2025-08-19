@@ -214,14 +214,14 @@ export default function LeadFormPage() {
 
     if (formId) {
       // update existing
-      res = await fetch('/api/v1/admin/form-template/update', {
+      res = await fetch('/api/v1/admin/lead-form-template/update', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...payload, _id: formId })
       })
     } else {
       // create new
-      res = await fetch('/api/v1/admin/form-template/save', {
+      res = await fetch('/api/v1/admin/lead-form-template/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -243,17 +243,34 @@ export default function LeadFormPage() {
   const fetchFormByOrgAndName = async () => {
     const orgId = organization_id
     const formName = lead_form
-    const res = await fetch(`/api/v1/admin/form-template/single?organization_id=${orgId}&form_name=${formName}`)
-    const json = await res.json()
-    if (json?.success) {
-      if (json?.data?.sections?.length > 0) {
-        setSections(json?.data?.sections)
-        setFormId(json.data._id)
+    if (formName === 'lead-form') {
+      const res = await fetch(`/api/v1/admin/lead-form-template/single?organization_id=${orgId}&form_name=${formName}`)
+      const json = await res.json()
+      if (json?.success) {
+        if (json?.data?.sections?.length > 0) {
+          setSections(json?.data?.sections)
+          setFormId(json.data._id)
+        }
+      } else {
+        setSections([])
+        console.error('Error:', json.error)
+        setFormId(null)
       }
-    } else {
-      setSections([])
-      console.error('Error:', json.error)
-      setFormId(null)
+    } else if (formName === 'customer-form') {
+      const res = await fetch(
+        `/api/v1/admin/customer-form-template/single?organization_id=${orgId}&form_name=${formName}`
+      )
+      const json = await res.json()
+      if (json?.success) {
+        if (json?.data?.sections?.length > 0) {
+          setSections(json?.data?.sections)
+          setFormId(json.data._id)
+        }
+      } else {
+        setSections([])
+        console.error('Error:', json.error)
+        setFormId(null)
+      }
     }
   }
 
@@ -344,7 +361,7 @@ export default function LeadFormPage() {
           <div className='max-h-[85vh] overflow-y-auto'>
             {sections.map((section, index) => (
               <>
-               <button
+                <button
                   onClick={() => handleDeleteSection(index)}
                   className='float-right right-6 cursor-pointer text-red-500 text-sm'
                 >
@@ -358,7 +375,6 @@ export default function LeadFormPage() {
                   onUpdateSection={handleUpdateSection}
                   onDeleteSection={handleDeleteSection}
                 />
-               
               </>
             ))}
           </div>

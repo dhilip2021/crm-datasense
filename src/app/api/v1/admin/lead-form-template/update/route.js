@@ -1,5 +1,3 @@
-// app/api/v1/admin/form-template/update/route.js
-
 import { NextResponse } from 'next/server'
 import LeadTemplate from '@/models/LeadTemplate' 
 import connectMongoDB from '@/libs/mongodb'

@@ -1,4 +1,3 @@
-// app/api/form-template/save/route.js
 import { NextResponse } from 'next/server'
 import LeadTemplate from '@/models/LeadTemplate' // optional if you're using mongoose
 import connectMongoDB from '@/libs/mongodb'

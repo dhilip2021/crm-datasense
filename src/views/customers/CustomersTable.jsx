@@ -35,8 +35,9 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import GridOnIcon from '@mui/icons-material/GridOn'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import { toast, ToastContainer } from 'react-toastify'
+import { getAllCustomerseApi } from '@/apiFunctions/ApiAction'
 
-const LeadTable = () => {
+const CustomersTable = () => {
   const organization_id = Cookies.get('organization_id')
   const [data, setData] = useState([])
   const [dataFilter, setDataFilter] = useState([])
@@ -62,26 +63,15 @@ const LeadTable = () => {
 
   const fetchData = async () => {
     setLoading(true)
-    
-    const form_name = 'lead-form'
-
-    const query = new URLSearchParams({
-      organization_id,
-      form_name,
-      page: page + 1,
-      limit,
-      ...(filters.search && { search: filters.search }),
-      ...(filters.status && { status: filters.status }),
-      ...(filters.source && { source: filters.source }),
-      ...(filters.region && { region: filters.region }),
-      ...(filters.rep && { rep: filters.rep }),
-      ...(filters.value && { value: filters.value }),
-      ...(filters.fromDate && { from: dayjs(filters.fromDate).format('YYYY-MM-DD') }),
-      ...(filters.toDate && { to: dayjs(filters.toDate).format('YYYY-MM-DD') })
-    })
 
     try {
-      const res = await fetch(`/api/v1/admin/lead-form/list?${query}`)
+      const body = {
+        n_page: page + 1,
+        n_limit: rowsPerPage,
+        c_search_term: search
+      }
+
+      const res = await getAllCustomerseApi(body, header)
       const json = await res.json()
       if (json.success) {
         setData(json.data)
@@ -190,7 +180,6 @@ const LeadTable = () => {
     return [...new Set(dataFilter.map(item => item.values['Status']))].filter(Boolean)
   }, [dataFilter])
 
-
   async function handleUpload(e) {
     e.preventDefault()
 
@@ -203,7 +192,6 @@ const LeadTable = () => {
     const formData = new FormData()
     formData.append('file', selectedFile)
     formData.append('organization_id', organization_id)
-    
 
     setLoader(true)
 
@@ -214,7 +202,7 @@ const LeadTable = () => {
       })
 
       const data = await res.json()
-      console.log(data,"<<< DATAAAA")
+      console.log(data, '<<< DATAAAA')
       toast.success(data.message)
       fetchData()
       setFileName('')
@@ -435,30 +423,19 @@ const LeadTable = () => {
                       minWidth: 120
                     }}
                   >
-                    Lead ID
+                    Customer Id
                   </TableCell>
-                  {/* <TableCell
-                    sx={{
-                      position: 'sticky',
-                      left: 120, // Same as Lead ID width
-                      zIndex: 9,
-                      minWidth: 180,
-                      maxWidth: 200,
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    Lead Name
-                  </TableCell> */}
-                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Full Name</TableCell>
-                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Company</TableCell>
-                  <TableCell>Location</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Assigned To</TableCell>
-                  <TableCell>Source</TableCell>
-                  <TableCell>Score</TableCell>
-                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Label</TableCell>
-                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Last Activity</TableCell>
-                  <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Next Follow-up</TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>First Name</TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Last Name</TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Email </TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Phone</TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Company Name</TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Industry</TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>City</TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Campaign Name</TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Campaign Start Date</TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Customer Status</TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Action</TableCell>
                 </TableRow>
               </TableHead>
 
@@ -485,21 +462,9 @@ const LeadTable = () => {
                           }}
                         >
                           <Link href={`/app/lead-form/${row.lead_id}`} style={{ textDecoration: 'none' }}>
-                            <strong>{row.lead_id}</strong>
+                            <strong>{row.customer_id}</strong>
                           </Link>
                         </TableCell>
-
-                        {/* <TableCell
-                          sx={{
-                            position: 'sticky',
-                            left: 120,
-                            zIndex: 2,
-                            backgroundColor: '#fff',
-                            fontWeight: 500
-                          }}
-                        >
-                          {row.lead_name}
-                        </TableCell> */}
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           {row.values['Full Name']}
                         </TableCell>
@@ -633,9 +598,9 @@ const LeadTable = () => {
           />
         </CardContent>
       </Card>
-       <ToastContainer position='top-right' />
+      <ToastContainer position='top-right' />
     </Box>
   )
 }
 
-export default LeadTable
+export default CustomersTable

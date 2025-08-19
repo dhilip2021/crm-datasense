@@ -34,10 +34,10 @@ const shortForm = fullName
 
 
 
-function LeadFormAppPage() {
+function CustomerFormAppPage() {
   const organization_id = Cookies.get('organization_id')
   const organization_name = Cookies.get('organization_name')
-  const lead_form = 'lead-form'
+  const customer_form = 'customer-form'
   const router = useRouter()
 
   const [sections, setSections] = useState([])
@@ -76,7 +76,7 @@ function LeadFormAppPage() {
     const payload = {
       organization_id,
       organization_name : shortName(organization_name),
-      form_name: lead_form,
+      form_name: customer_form,
       values: {},
       submittedAt: new Date().toISOString()
     }
@@ -104,7 +104,7 @@ function LeadFormAppPage() {
     setLoader(true)
 
 
-    const res = await fetch('/api/v1/admin/lead-form/form-submit', {
+    const res = await fetch('/api/v1/admin/customer-form/form-submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -114,7 +114,7 @@ function LeadFormAppPage() {
     setLoader(false)
     if (data.success) {
       toast.success('Form submitted successfully')
-      router.push('/app/leads')
+      router.push('/app/customer')
     } else {
       toast.error('Submission failed')
     }
@@ -125,7 +125,7 @@ function LeadFormAppPage() {
 
   const fetchForm = async () => {
     setLoader(true)
-    const res = await fetch(`/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${lead_form}`)
+    const res = await fetch(`/api/v1/admin/customer-form-template/single?organization_id=${organization_id}&form_name=${customer_form}`)
     const data = await res.json()
     setLoader(false)
     if (data?.success && data.data?.sections?.length > 0) {
@@ -217,7 +217,7 @@ function LeadFormAppPage() {
         {section.fields.left?.length > 0 && (
           <Grid item xs={12} sm={cols}>
             {section.fields.left.map(field => (
-              <Box key={field.id} mb={2}>
+              <Box key={field.id} pb={3} pt={3}>
                 {renderField(field)}
               </Box>
             ))}
@@ -226,7 +226,7 @@ function LeadFormAppPage() {
         {layout === 'triple' && section.fields.center?.length > 0 && (
           <Grid item xs={12} sm={4}>
             {section.fields.center.map(field => (
-              <Box key={field.id} mb={2}>
+              <Box key={field.id} pb={3} pt={3}>
                 {renderField(field)}
               </Box>
             ))}
@@ -235,7 +235,7 @@ function LeadFormAppPage() {
         {(layout === 'double' || layout === 'triple') && section.fields.right?.length > 0 && (
           <Grid item xs={12} sm={layout === 'double' ? 6 : 4}>
             {section.fields.right.map(field => (
-              <Box key={field.id} mb={2}>
+              <Box key={field.id} pb={3} pt={3}>
                 {renderField(field)}
               </Box>
             ))}
@@ -248,7 +248,7 @@ function LeadFormAppPage() {
   return (
     <Box px={4} py={4} sx={{ background: '#f9f9f9', minHeight: '100vh' }}>
       <Typography variant='h4' fontWeight='bold' color='primary' mb={4}>
-        Lead Submission
+        Customer Submission
       </Typography>
 
       {loader ? (
@@ -268,7 +268,7 @@ function LeadFormAppPage() {
             </Card>
           ))}
           <Box display='flex' justifyContent='flex-end' gap={2}>
-            <Button variant='outlined' color='secondary' onClick={() => router.push('/app/leads')}>Cancel</Button>
+            <Button variant='outlined' color='secondary' onClick={() => router.push('/app/customer')}>Cancel</Button>
             <Button variant='contained' color='primary' onClick={handleSubmit}>Submit</Button>
           </Box>
         </>
@@ -279,4 +279,4 @@ function LeadFormAppPage() {
   )
 }
 
-export default LeadFormAppPage
+export default CustomerFormAppPage
