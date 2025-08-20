@@ -69,9 +69,11 @@ const [data, total, statsResult] = await Promise.all([
     .limit(limit)
     .select('-__v')
     .lean(),
+
   Leadform.countDocuments(query),
+
   Leadform.aggregate([
-    { $match: { organization_id, form_name } },
+    { $match: query }, // 🔥 filter ku same query use pannunga
     {
       $group: {
         _id: null,
@@ -106,7 +108,7 @@ const [data, total, statsResult] = await Promise.all([
             ]
           }
         },
-         proposalsentLeads: {
+        proposalsentLeads: {
           $sum: {
             $cond: [
               { $regexMatch: { input: "$values.Lead Status", regex: "Proposal Sent", options: "i" } },
@@ -115,7 +117,7 @@ const [data, total, statsResult] = await Promise.all([
             ]
           }
         },
-         negotiationLeads: {
+        negotiationLeads: {
           $sum: {
             $cond: [
               { $regexMatch: { input: "$values.Lead Status", regex: "Negotiation", options: "i" } },
@@ -146,6 +148,7 @@ const [data, total, statsResult] = await Promise.all([
     }
   ])
 ])
+
 
 return NextResponse.json({
   success: true,

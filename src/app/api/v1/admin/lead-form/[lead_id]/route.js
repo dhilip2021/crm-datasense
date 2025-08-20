@@ -109,14 +109,117 @@ export async function PUT(req, { params }) {
 
     return NextResponse.json({
       success: true,
-      message: 'Lead updated with recalculated score',
+      message: 'Lead updated successfully !!!',
       data: updated
     })
   } catch (error) {
-    console.error('⨯ Lead update error:', error)
     return NextResponse.json(
       { success: false, message: 'Internal Server Error' },
       { status: 500 }
     )
   }
 }
+
+// 🔁 PATCH – Partial update
+// export async function PATCH(req, { params }) {
+//   await connectMongoDB()
+//   const { lead_id } = params
+//   const body = await req.json()
+
+//   try {
+//     const lead = await Leadform.findOne({ lead_id })
+
+//     if (!lead) {
+//       return NextResponse.json(
+//         { success: false, message: 'Lead not found' },
+//         { status: 404 }
+//       )
+//     }
+
+//     // Merge only updated fields with existing
+//     const updatedValues = {
+//       ...lead.values,
+//       ...body.values
+//     }
+
+//     // 🔁 Recalculate lead score
+//     const { lead_score, lead_label } = calculateLeadScore(updatedValues)
+
+//     updatedValues.Score = lead_score
+//     updatedValues.Label = lead_label
+
+//     const updated = await Leadform.findOneAndUpdate(
+//       { lead_id },
+//       {
+//         $set: {
+//           values: updatedValues,
+//           updatedAt: new Date()
+//         }
+//       },
+//       { new: true }
+//     )
+
+//     return NextResponse.json({
+//       success: true,
+//       message: 'Lead partially updated',
+//       data: updated
+//     })
+//   } catch (error) {
+//     console.error('⨯ Lead patch error:', error)
+//     return NextResponse.json(
+//       { success: false, message: 'Internal Server Error' },
+//       { status: 500 }
+//     )
+//   }
+// }
+
+
+// PATCH – Add Note to Lead
+export async function PATCH(req, { params }) {
+  await connectMongoDB()
+  const { lead_id } = params
+  const body = await req.json()
+
+  try {
+    const lead = await Leadform.findOne({ lead_id })
+
+    if (!lead) {
+      return NextResponse.json(
+        { success: false, message: 'Lead not found' },
+        { status: 404 }
+      )
+    }
+
+    const newNote = {
+      title: body.title,
+      note: body.note,
+      createdAt: new Date()
+    }
+
+    // append note into values.Notes (array)
+    const updated = await Leadform.findOneAndUpdate(
+      { lead_id },
+      {
+        $push: {
+          "values.Notes": newNote
+        },
+        $set: { updatedAt: new Date() }
+      },
+      { new: true, upsert: true }
+    )
+
+    return NextResponse.json({
+      success: true,
+      message: 'Note added successfully',
+      data: updated
+    })
+  } catch (error) {
+    console.error('⨯ Add note error:', error)
+    return NextResponse.json(
+      { success: false, message: 'Internal Server Error' },
+      { status: 500 }
+    )
+  }
+}
+
+

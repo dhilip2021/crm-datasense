@@ -20,6 +20,7 @@ import {
   TablePagination,
   TableRow,
   TextField,
+  Tooltip,
   Typography
 } from '@mui/material'
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
@@ -62,7 +63,7 @@ const LeadTable = () => {
 
   const fetchData = async () => {
     setLoading(true)
-    
+
     const form_name = 'lead-form'
 
     const query = new URLSearchParams({
@@ -192,7 +193,6 @@ const LeadTable = () => {
     return [...new Set(dataFilter.map(item => item.values['Lead Status']))].filter(Boolean)
   }, [dataFilter])
 
-
   async function handleUpload(e) {
     e.preventDefault()
 
@@ -205,7 +205,6 @@ const LeadTable = () => {
     const formData = new FormData()
     formData.append('file', selectedFile)
     formData.append('organization_id', organization_id)
-    
 
     setLoader(true)
 
@@ -216,7 +215,7 @@ const LeadTable = () => {
       })
 
       const data = await res.json()
-      console.log(data,"<<< DATAAAA")
+      console.log(data, '<<< DATAAAA')
       toast.success(data.message)
       fetchData()
       setFileName('')
@@ -266,7 +265,7 @@ const LeadTable = () => {
                       <input
                         type='file'
                         name='file'
-                        accept=".csv, .xlsx"
+                        accept='.csv, .xlsx'
                         hidden
                         onChange={e => {
                           const file = e.target.files[0]
@@ -462,6 +461,7 @@ const LeadTable = () => {
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Label</TableCell>
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Last Contact Date</TableCell>
                   <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Next Follow-up</TableCell>
+                  <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Action</TableCell>
                 </TableRow>
               </TableHead>
 
@@ -487,7 +487,7 @@ const LeadTable = () => {
                             minWidth: 120
                           }}
                         >
-                          <Link href={`/app/lead-form/${row.lead_id}`} style={{ textDecoration: 'none' }}>
+                          <Link href={`/view/lead-form/${row.lead_id}`} style={{ textDecoration: 'none' }}>
                             <strong>{row.lead_id}</strong>
                           </Link>
                         </TableCell>
@@ -509,7 +509,7 @@ const LeadTable = () => {
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           {row.values['Company']}
                         </TableCell>
-                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                        <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           {row.values['Timeline to Buy']}
                         </TableCell>
                         <TableCell>{row.values['City']}</TableCell>
@@ -526,12 +526,12 @@ const LeadTable = () => {
                                     : row.values['Lead Status'] === 'Proposal Sent'
                                       ? 'secondary'
                                       : row.values['Lead Status'] === 'Negotiation'
-                                       ? 'default'
-                                          : row.values['Lead Status'] === 'Closed Lost'
-                                         ? 'warning'
-                                           : row.values['Lead Status'] === 'Closed Won'
-                                             ? 'success'
-                                             : 'default'
+                                        ? 'default'
+                                        : row.values['Lead Status'] === 'Closed Lost'
+                                          ? 'warning'
+                                          : row.values['Lead Status'] === 'Closed Won'
+                                            ? 'success'
+                                            : 'default'
                             }
                             size='small'
                           />
@@ -590,6 +590,15 @@ const LeadTable = () => {
                         <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           {formatDateShort(row.values['Next Follow-up Date'])}
                         </TableCell>
+                        <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                          <Box display={'flex'}>
+                            <Tooltip title={`Edit ${row.values['First Name']} Lead`} arrow>
+                              <Link href={`/app/lead-form/${row.lead_id}`} style={{ textDecoration: 'none' }}>
+                                <i className='ri-edit-box-line' style={{ color: '#4caf50', cursor: 'pointer' }}></i>
+                              </Link>
+                            </Tooltip>
+                          </Box>
+                        </TableCell>
                       </TableRow>
                     ))}
                 {!loading && data?.length === 0 && (
@@ -633,7 +642,7 @@ const LeadTable = () => {
           />
         </CardContent>
       </Card>
-       <ToastContainer position='top-right' />
+      <ToastContainer position='top-right' />
     </Box>
   )
 }
