@@ -1,3 +1,5 @@
+ 'use client'
+
 import React, { useState } from "react";
 import {
   Box,
@@ -35,7 +37,7 @@ const EditableField = ({
     <Box
       display="flex"
       alignItems="center"
-      mb={2}
+      mb={1}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >

@@ -18,9 +18,19 @@ function getIntial(name = '') {
 }
 
 const NotesSection = ({ leadId, leadData }) => {
+
+
+const leadArrayData = leadData?.values?.Notes ? leadData.values.Notes : []
+
+// ✅ proper sorting
+const sortedNotes = [...leadArrayData].sort(
+  (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+)
+
+
   const [note, setNote] = useState('')
   const [title, setTitle] = useState('')
-  const [notes, setNotes] = useState(leadData?.values?.Notes ? leadData?.values?.Notes : [])
+  const [notes, setNotes] = useState(sortedNotes? sortedNotes : [])
 
   const [noteError, setNoteError] = useState(false)
   const [titleError, setTitleError] = useState(false)
@@ -46,45 +56,50 @@ const NotesSection = ({ leadId, leadData }) => {
   }
 
   // 🔹 Save new note
-  const handleSave = async () => {
-    if (note === '') {
-      setNoteError(true)
-    } else if (title === '') {
-      setTitleError(true)
-    } else {
-      setNoteError(false)
-      setTitleError(false)
-      try {
-        const newNote = {
-          title,
-          note,
-          createdAt: new Date().toISOString()
-        }
+const handleSave = async () => {
+  if (note === '') {
+    setNoteError(true)
+  } else if (title === '') {
+    setTitleError(true)
+  } else {
+    setNoteError(false)
+    setTitleError(false)
 
-        const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            values: {
-              Notes: [...notes, newNote] // append to existing
-            }
-          })
-        })
-
-        const result = await res.json()
-        console.log('Note saved:', result)
-
-        if (result.success) {
-          setNotes(prev => [...prev, newNote])
-        }
-
-        setTitle('')
-        setNote('')
-      } catch (err) {
-        console.error('Error saving note:', err)
+    try {
+      const newNote = {
+        title,
+        note,
+        createdAt: new Date().toISOString()
       }
+
+      console.log(newNote, "<<< new Note")
+
+      const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          values: {
+            Notes: [newNote] // ✅ only send new note
+          }
+        })
+      })
+
+      const result = await res.json()
+      console.log('Note saved:', result)
+
+      if (result.success) {
+        // ✅ update local state immutably
+        setNotes(prev => [newNote, ...prev]) // put newest on top
+      }
+
+      setTitle('')
+      setNote('')
+    } catch (err) {
+      console.error('Error saving note:', err)
     }
   }
+}
+
 
   return (
     <>
@@ -153,7 +168,7 @@ const NotesSection = ({ leadId, leadData }) => {
               </Box>
               <Box>
                 <Button onClick={() => handleClear()}>Clear</Button>
-                <Button variant='contained' onClick={handleSave}>
+                <Button variant='contained' onClick={()=>handleSave()}>
                   Save
                 </Button>
               </Box>

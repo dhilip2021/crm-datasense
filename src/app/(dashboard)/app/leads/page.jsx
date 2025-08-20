@@ -30,7 +30,7 @@ import * as XLSX from 'xlsx'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import Cookies from 'js-cookie'
-import { converDayJsDate, formatDateShort } from '@/helper/frontendHelper'
+import { converDayJsDate, encryptCryptoRes, encryptCryptoResponse, formatDateShort } from '@/helper/frontendHelper'
 import Link from 'next/link'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import GridOnIcon from '@mui/icons-material/GridOn'
@@ -487,7 +487,7 @@ const LeadTable = () => {
                             minWidth: 120
                           }}
                         >
-                          <Link href={`/view/lead-form/${row.lead_id}`} style={{ textDecoration: 'none' }}>
+                          <Link href={`/view/lead-form/${encodeURIComponent(encryptCryptoRes(row.lead_id))}`} style={{ textDecoration: 'none' }}>
                             <strong>{row.lead_id}</strong>
                           </Link>
                         </TableCell>
@@ -593,7 +593,7 @@ const LeadTable = () => {
                         <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           <Box display={'flex'}>
                             <Tooltip title={`Edit ${row.values['First Name']} Lead`} arrow>
-                              <Link href={`/app/lead-form/${row.lead_id}`} style={{ textDecoration: 'none' }}>
+                              <Link href={`/app/lead-form/${encodeURIComponent(encryptCryptoRes(row.lead_id))}`} style={{ textDecoration: 'none' }}>
                                 <i className='ri-edit-box-line' style={{ color: '#4caf50', cursor: 'pointer' }}></i>
                               </Link>
                             </Tooltip>

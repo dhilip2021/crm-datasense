@@ -182,27 +182,23 @@ export async function PATCH(req, { params }) {
 
   try {
     const lead = await Leadform.findOne({ lead_id })
-
     if (!lead) {
-      return NextResponse.json(
-        { success: false, message: 'Lead not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, message: 'Lead not found' }, { status: 404 })
     }
+
+    // pick first note from body.values.Notes
+    const noteFromBody = body.values?.Notes?.[0] || {}
 
     const newNote = {
-      title: body.title,
-      note: body.note,
-      createdAt: new Date()
+      title: noteFromBody.title || null,
+      note: noteFromBody.note || null,
+      createdAt: noteFromBody.createdAt ? new Date(noteFromBody.createdAt) : new Date()
     }
 
-    // append note into values.Notes (array)
     const updated = await Leadform.findOneAndUpdate(
       { lead_id },
       {
-        $push: {
-          "values.Notes": newNote
-        },
+        $push: { 'values.Notes': newNote },
         $set: { updatedAt: new Date() }
       },
       { new: true, upsert: true }
@@ -215,10 +211,7 @@ export async function PATCH(req, { params }) {
     })
   } catch (error) {
     console.error('⨯ Add note error:', error)
-    return NextResponse.json(
-      { success: false, message: 'Internal Server Error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
   }
 }
 

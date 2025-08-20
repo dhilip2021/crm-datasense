@@ -7,10 +7,14 @@ import Cookies from 'js-cookie'
 import { useParams, useRouter } from 'next/navigation'
 import { toast, ToastContainer } from 'react-toastify'
 import NotesSection from './NotesSection'
+import { decrypCryptoReq } from '@/helper/frontendHelper'
 
 const LeadDetailView = () => {
-  const params = useParams()
-  const leadId = params.id
+const params = useParams()
+const encryptedId = decodeURIComponent(params.id) // 👈 must decode
+const leadId = decrypCryptoReq(encryptedId)
+
+  // const leadId = params.id
 
   const organization_id = Cookies.get('organization_id')
   const lead_form = 'lead-form'
@@ -154,7 +158,7 @@ const LeadDetailView = () => {
       </Card>
       <Card sx={{ p: 3, borderRadius: 2, mt: 3 }}>
         <CardContent>
-          <NotesSection leadId={leadId} leadData={leadData}/>
+          <NotesSection leadId={leadId} leadData={leadData} />
         </CardContent>
       </Card>
 

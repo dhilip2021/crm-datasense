@@ -19,6 +19,7 @@ import React, { useEffect, useState } from 'react'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { useRouter, useParams } from 'next/navigation'
+import { decrypCryptoReq } from '@/helper/frontendHelper'
 
 const shortName = (fullName) => {
   return fullName
@@ -30,7 +31,8 @@ const shortName = (fullName) => {
 
 function LeadFormAppIdPage() {
   const params = useParams()
-  const leadId = params.id
+  const encryptedId = decodeURIComponent(params.id) // 👈 must decode
+  const leadId = decrypCryptoReq(encryptedId)
   const organization_id = Cookies.get('organization_id')
   const organization_name = Cookies.get('organization_name')
   const lead_form = 'lead-form'

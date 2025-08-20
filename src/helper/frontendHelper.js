@@ -81,3 +81,28 @@ export function maskEmail(email) {
     : name[0] + "*".repeat(name.length - 1);
   return `${maskedName}@${domain}`;
 }
+
+
+export function encryptCryptoRes(data) {
+  const secretPassphrase = process.env.NEXT_PUBLIC_ENCY_DECY_SECRET
+  // always stringify so decrypt side can JSON.parse safely
+  return CryptoJS.AES.encrypt(JSON.stringify(data), secretPassphrase).toString()
+}
+
+export function decrypCryptoReq(data) {
+  const secretPassphrase = process.env.NEXT_PUBLIC_ENCY_DECY_SECRET
+  const bytes = CryptoJS.AES.decrypt(data, secretPassphrase)
+  const decrypted = bytes.toString(CryptoJS.enc.Utf8)
+
+  if (!decrypted) {
+    console.error('Decryption failed: empty result')
+    return null
+  }
+
+  try {
+    return JSON.parse(decrypted)   // will give original lead_id back
+  } catch (err) {
+    console.error('Invalid JSON after decrypt:', decrypted)
+    return null
+  }
+}
