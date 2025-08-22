@@ -30,6 +30,7 @@ const FieldSchema = new mongoose.Schema(
     maxDigits: { type: String },
     decimalPlaces: { type: String },
     rounding: { type: String },
+    countryCode: { type: String },
     trackHistory: { type: Boolean },
     useSeparator: { type: Boolean },
     enableColor: { type: Boolean },

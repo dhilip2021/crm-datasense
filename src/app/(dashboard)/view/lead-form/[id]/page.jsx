@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Card, CardContent, Grid, Typography } from '@mui/material'
+import { Box, Card, CardContent, Grid, Typography } from '@mui/material'
 import EditableField from './EditableField'
 import Cookies from 'js-cookie'
 import { useParams, useRouter } from 'next/navigation'
@@ -9,10 +9,15 @@ import { toast, ToastContainer } from 'react-toastify'
 import NotesSection from './NotesSection'
 import { decrypCryptoReq } from '@/helper/frontendHelper'
 
+import Accordion from '@mui/material/Accordion'
+import AccordionSummary from '@mui/material/AccordionSummary'
+import AccordionDetails from '@mui/material/AccordionDetails'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+
 const LeadDetailView = () => {
-const params = useParams()
-const encryptedId = decodeURIComponent(params.id) // 👈 must decode
-const leadId = decrypCryptoReq(encryptedId)
+  const params = useParams()
+  const encryptedId = decodeURIComponent(params.id) // 👈 must decode
+  const leadId = decrypCryptoReq(encryptedId)
 
   // const leadId = params.id
 
@@ -135,25 +140,32 @@ const leadId = decrypCryptoReq(encryptedId)
     <>
       <Card sx={{ p: 3, borderRadius: 2 }}>
         <CardContent>
-          <Typography variant='h6' fontWeight='bold' mb={3}>
-            Lead Information
-          </Typography>
-
-          <Grid container spacing={3}>
-            {Object.entries(fields).map(([label, value]) => (
-              <Grid item xs={12} sm={6} key={label}>
-                {Array.isArray(value) ? null : ( // ❌ Notes array skip pannidalaam
-                  <EditableField
-                    label={label}
-                    value={value}
-                    type={fieldConfig[label] ? 'select' : 'text'}
-                    options={fieldConfig[label] || []}
-                    onSave={newValue => handleFieldSave(label, newValue)}
-                  />
-                )}
+          <Accordion>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls='panel3-content' id='panel3-header'>
+              <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
+                <Typography variant='h6' fontWeight='bold' mb={3}>
+                  Lead Information
+                </Typography>
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Grid container spacing={3}>
+                {Object.entries(fields).map(([label, value]) => (
+                  <Grid item xs={12} sm={6} key={label}>
+                    {Array.isArray(value) ? null : ( // ❌ Notes array skip pannidalaam
+                      <EditableField
+                        label={label}
+                        value={value}
+                        type={fieldConfig[label] ? 'select' : 'text'}
+                        options={fieldConfig[label] || []}
+                        onSave={newValue => handleFieldSave(label, newValue)}
+                      />
+                    )}
+                  </Grid>
+                ))}
               </Grid>
-            ))}
-          </Grid>
+            </AccordionDetails>
+          </Accordion>
         </CardContent>
       </Card>
       <Card sx={{ p: 3, borderRadius: 2, mt: 3 }}>

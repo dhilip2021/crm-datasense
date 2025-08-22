@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import connectMongoDB from '@/libs/mongodb'
 import Leadform from '@/models/Leadform'
 import * as XLSX from 'xlsx'
+import { tsid18 } from '@/libs/tsid18'
 
 
 // 🔥 Lead Scoring Logic
@@ -86,7 +87,8 @@ export async function POST(req) {
         organization_id,
         auto_inc_id: String(i + 1).padStart(5, '0'),
         lead_name: `CRM LEAD 2025 ${String(i + 1).padStart(5, '0')}`,
-        lead_id: `DT-${String(i + 1).padStart(5, '0')}`,
+        // lead_id: `DT-${String(i + 1).padStart(5, '0')}`,
+        lead_id: tsid18(),
         lead_slug_name: `crm-lead-2025-${String(i + 1).padStart(5, '0')}`,
         form_name: 'lead-form',
         values: {

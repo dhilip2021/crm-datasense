@@ -1,5 +1,6 @@
 import { create_UUID } from '@/helper/clientHelper'
 import connectMongoDB from '@/libs/mongodb'
+import { tsid18 } from '@/libs/tsid18'
 import Leadform from '@/models/Leadform'
 import Cookies from 'js-cookie'
 import { NextResponse } from 'next/server'
@@ -93,7 +94,8 @@ export async function POST(req) {
       organization_id,
       auto_inc_id: nextAutoId,
       // lead_id: create_UUID(),
-      lead_id: lead_slug_id,
+      // lead_id: lead_slug_id,
+      lead_id: tsid18(),
       lead_name,
       lead_slug_name,
       form_name,

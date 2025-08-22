@@ -5,6 +5,7 @@ import slugify from "slugify";
 import connectMongoDB from "@/libs/mongodb";
 import { create_UUID, verifyAccessToken } from "@/helper/clientHelper";
 import { Lead } from "@/models/leadModel";
+import { tsid18 } from "@/libs/tsid18";
 
 
 
@@ -313,7 +314,8 @@ export async function POST(request) {
 
           const body = {
             organization_id,
-            lead_id: create_UUID(),
+            // lead_id: create_UUID(),
+            lead_id: tsid18(),
             salutation,
             auto_inc_id: nextNumAutoInc,
             lead_name: nextLeadName1,

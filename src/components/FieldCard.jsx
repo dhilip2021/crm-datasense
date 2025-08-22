@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   IconButton,
   Menu,
@@ -31,6 +31,8 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
 
   const handleMenuOpen = event => setAnchorEl(event.currentTarget)
   const handleMenuClose = () => setAnchorEl(null)
+
+  const [countryCodes, setCountryCodes] = useState([])
 
   const editPropertyClick = () => {
     if (editingFieldIndex === null) {
@@ -434,13 +436,58 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
           <div className='space-y-3'>
             <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
               <Typography variant='body2' fontWeight='medium'>
-                {' '}
                 Phone Properties:
               </Typography>
               <IconButton aria-label='close' onClick={() => editPropertyClick()}>
                 <CloseIcon sx={{ color: 'red' }} />
               </IconButton>
             </Box>
+
+            {/* Country Code Selector */}
+            <FormControl fullWidth size='small'>
+              <InputLabel>Country Code</InputLabel>
+              <Select
+                value={field.countryCode || '+91'} // default India
+                label='Country Code'
+                onChange={e =>
+                  onUpdate(index, {
+                    ...field,
+                    countryCode: e.target.value
+                  })
+                }
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      maxHeight: 300 // 👈 height limit
+                    }
+                  }
+                }}
+              >
+                {countryCodes.map(country => (
+                  <MenuItem key={country.code} value={country.dial_code}>
+                    {country.code} {country.dial_code}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {/* 👉 Phone Input Preview (sync with country code) */}
+            {/* <TextField
+              fullWidth
+              size='small'
+              label='Phone Number'
+              value={`${field.countryCode || '+91'} ${field.value || ''}`}
+              onChange={e =>
+                onUpdate(index, {
+                  ...field,
+                  value: e.target.value.replace(field.countryCode || '+91', '').trim()
+                })
+              }
+              placeholder={field.placeholder || 'Enter phone number'}
+              inputProps={{ maxLength: field.maxLength || 10 }}
+            /> */}
+
+            {/* Placeholder */}
             <TextField
               fullWidth
               size='small'
@@ -449,6 +496,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
               onChange={e => onUpdate(index, { ...field, placeholder: e.target.value })}
             />
 
+            {/* Max length */}
             <TextField
               type='number'
               label='Max Characters'
@@ -464,6 +512,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
               placeholder='e.g. 10'
             />
 
+            {/* Options */}
             {[
               { key: 'autoComplte', label: 'Auto Complete' },
               { key: 'required', label: 'Required' },
@@ -471,9 +520,8 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
               { key: 'noDuplicates', label: 'Do not allow duplicate values' },
               { key: 'isEncrypted', label: 'Encrypt field' }
             ].map(opt => (
-              <Box>
+              <Box key={opt.key}>
                 <FormControlLabel
-                  key={opt.key}
                   control={
                     <Checkbox
                       checked={field[opt.key] || false}
@@ -490,6 +538,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
               </Box>
             ))}
 
+            {/* Tooltip Section */}
             <FormControlLabel
               control={
                 <Checkbox
@@ -2257,6 +2306,12 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
         return null
     }
   }
+
+  useEffect(() => {
+    fetch('/json/country.json')
+      .then(res => res.json())
+      .then(data => setCountryCodes(data))
+  }, [])
 
   return (
     <div className='border rounded p-3 bg-white mb-4 shadow-sm'>

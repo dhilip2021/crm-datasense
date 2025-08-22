@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 import Cookies from 'js-cookie'
 import CryptoJS from "crypto-js"
+import { parsePhoneNumberFromString } from "libphonenumber-js"
 
 
 export function capitalizeWords(str) {
@@ -103,6 +104,19 @@ export function decrypCryptoReq(data) {
     return JSON.parse(decrypted)   // will give original lead_id back
   } catch (err) {
     console.error('Invalid JSON after decrypt:', decrypted)
+    return null
+  }
+}
+
+
+export function toE164(number, defaultCountry = "IN") {
+  try {
+    const phoneNumber = parsePhoneNumberFromString(number, defaultCountry)
+    if (phoneNumber && phoneNumber.isValid()) {
+      return phoneNumber.number // always in +E.164 format
+    }
+    return null // invalid number
+  } catch (err) {
     return null
   }
 }

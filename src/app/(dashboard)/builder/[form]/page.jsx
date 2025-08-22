@@ -106,7 +106,8 @@ export default function LeadFormPage() {
       newField.isEncrypted = false
       newField.showTooltip = false
       newField.tooltipMessage = ''
-      newField.tooltipType = 'icon' // or 'static'
+      newField.countryCode = ''
+      newField.tooltipType = 'icon'
       newField.createFor = []
       newField.placeholder = 'Enter a phone number'
     }
