@@ -22,6 +22,8 @@ import MoreVertIcon from '@mui/icons-material/MoreVert'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import CloseIcon from '@mui/icons-material/Close'
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
+
 
 const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRequired, handleSetPermission }) => {
   const [editingFieldIndex, setEditingFieldIndex] = useState(null)
@@ -55,7 +57,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 Single Line Properties:
               </Typography>
               <IconButton aria-label='close' onClick={() => editPropertyClick()}>
-                <CloseIcon sx={{ color: 'red' }} />
+               <VisibilityOffIcon sx={{ color: 'gray' }} />
               </IconButton>
             </Box>
             <TextField
@@ -206,7 +208,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 Multi-Line Properties:
               </Typography>
               <IconButton aria-label='close' onClick={() => editPropertyClick()}>
-                <CloseIcon sx={{ color: 'red' }} />
+                <VisibilityOffIcon sx={{ color: 'gray' }} />
               </IconButton>
             </Box>
             <TextField
@@ -330,7 +332,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 Email Properties:
               </Typography>
               <IconButton aria-label='close' onClick={() => editPropertyClick()}>
-                <CloseIcon sx={{ color: 'red' }} />
+               <VisibilityOffIcon sx={{ color: 'gray' }} />
               </IconButton>
             </Box>
             <TextField
@@ -439,7 +441,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 Phone Properties:
               </Typography>
               <IconButton aria-label='close' onClick={() => editPropertyClick()}>
-                <CloseIcon sx={{ color: 'red' }} />
+                <VisibilityOffIcon sx={{ color: 'gray' }} />
               </IconButton>
             </Box>
 
@@ -1196,7 +1198,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 Date Properties::
               </Typography>
               <IconButton aria-label='close' onClick={() => editPropertyClick()}>
-                <CloseIcon sx={{ color: 'red' }} />
+                <VisibilityOffIcon sx={{ color: 'gray' }} />
               </IconButton>
             </Box>
 
@@ -1289,7 +1291,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 Date and Time Properties:
               </Typography>
               <IconButton aria-label='close' onClick={() => editPropertyClick()}>
-                <CloseIcon sx={{ color: 'red' }} />
+                <VisibilityOffIcon sx={{ color: 'gray' }} />
               </IconButton>
             </Box>
             <Box>
@@ -1370,7 +1372,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 Number Properties:
               </Typography>
               <IconButton aria-label='close' onClick={() => editPropertyClick()}>
-                <CloseIcon sx={{ color: 'red' }} />
+                <VisibilityOffIcon sx={{ color: 'gray' }} />
               </IconButton>
             </Box>
             {/* Field Label */}
@@ -1528,7 +1530,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 Auto Number Properties:
               </Typography>
               <IconButton aria-label='close' onClick={() => editPropertyClick()}>
-                <CloseIcon sx={{ color: 'red' }} />
+                <VisibilityOffIcon sx={{ color: 'gray' }} />
               </IconButton>
             </Box>
             {/* Field Label */}
@@ -1662,7 +1664,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 Currency Properties:
               </Typography>
               <IconButton aria-label='close' onClick={() => editPropertyClick()}>
-                <CloseIcon sx={{ color: 'red' }} />
+                <VisibilityOffIcon sx={{ color: 'gray' }} />
               </IconButton>
             </Box>
             {/* Field Label */}
@@ -1819,7 +1821,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 Decimal Properties:
               </Typography>
               <IconButton aria-label='close' onClick={() => editPropertyClick()}>
-                <CloseIcon sx={{ color: 'red' }} />
+               <VisibilityOffIcon sx={{ color: 'gray' }} />
               </IconButton>
             </Box>
             {/* Field Label */}
@@ -1973,7 +1975,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 User Properties:
               </Typography>
               <IconButton aria-label='close' onClick={() => editPropertyClick()}>
-                <CloseIcon sx={{ color: 'red' }} />
+               <VisibilityOffIcon sx={{ color: 'gray' }} />
               </IconButton>
             </Box>
             {/* Field Label */}
@@ -2113,7 +2115,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 Checkbox Properties:
               </Typography>
               <IconButton aria-label='close' onClick={() => editPropertyClick()}>
-                <CloseIcon sx={{ color: 'red' }} />
+                <VisibilityOffIcon sx={{ color: 'gray' }} />
               </IconButton>
             </Box>
 
@@ -2185,7 +2187,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 URL Properties:
               </Typography>
               <IconButton aria-label='close' onClick={() => editPropertyClick()}>
-                <CloseIcon sx={{ color: 'red' }} />
+                <VisibilityOffIcon sx={{ color: 'gray' }} />
               </IconButton>
             </Box>
             {/* Field Label */}

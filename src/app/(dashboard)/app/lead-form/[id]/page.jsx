@@ -30,6 +30,13 @@ const shortName = fullName =>
     .join('')
     .toUpperCase()
 
+function isValidEmailPragmatic(email) {
+  if (typeof email !== 'string') return false
+  // Accepts most valid addresses, avoids pathological corner-cases
+  const re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,}$/
+  return re.test(email)
+}
+
 function LeadFormAppIdPage() {
   const params = useParams()
   const encryptedId = decodeURIComponent(params.id)
@@ -59,10 +66,32 @@ function LeadFormAppIdPage() {
   // ✅ Validation
   const validateField = (field, value) => {
     if (field.type === 'Phone') {
-      const number = values[`${field.id}_number`]
-      if (field.required && !number) return `${field.label} is required`
-      if (number && !/^[6-9]\d{9}$/.test(number)) return 'Invalid phone number'
+      const countryCode = values[`${field.id}_countryCode`] || field.countryCode || '+91'
+      const phoneNumber = values[`${field.id}_number`] || ''
+
+      // Basic regex: digits only, length between 6 and 15 (adjust as needed)
+      const phoneRegex = /^[0-9]{6,15}$/
+
+      if (field.required && phoneNumber.trim() === '') {
+        return `${field.label} is required`
+      }
+
+      if (phoneNumber && !phoneRegex.test(phoneNumber)) {
+        return 'Invalid phone number format'
+      }
+
+      // Optionally, you can add more checks here if needed
+
       return ''
+    }
+
+    if (field.type === 'Email') {
+      const response = isValidEmailPragmatic(value)
+      if (!response) {
+        return 'Invalid email address'
+      } else {
+        return ''
+      }
     }
 
     if (field.required && !value) return `${field.label} is required`
@@ -89,10 +118,11 @@ function LeadFormAppIdPage() {
       [fieldId]: ''
     }))
   }
-
+  // ---- handleBlur ----
   const handleBlur = field => {
     const error = validateField(field, values[field.id])
     if (error) setErrors(prev => ({ ...prev, [field.id]: error }))
+    else setErrors(prev => ({ ...prev, [field.id]: '' }))
   }
 
   // ✅ Submit
@@ -266,52 +296,50 @@ function LeadFormAppIdPage() {
 
       case 'Multi-Line':
         return <TextField {...commonProps} multiline minRows={field.rows || 3} />
-case "Phone":
-  return (
-    <TextField
-      fullWidth
-      size="small"
-      placeholder="Enter phone number"
-      value={values[`${field.id}_number`] || ""}
-      onChange={(e) => handleChange(`${field.id}_number`, e.target.value)}
-      error={!!errors[field.id]}
-      helperText={errors[field.id]}
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">
-            <Select
-              value={values[`${field.id}_countryCode`] || "+91"}
-              onChange={(e) =>
-                handleChange(`${field.id}_countryCode`, e.target.value)
-              }
-              size="small"
-              variant="outlined"
-              MenuProps={{
-                PaperProps: {
-                  sx: {
-                    maxHeight: 250, // 👈 limit dropdown height
-                  },
-                },
-              }}
-              sx={{
-                ".MuiOutlinedInput-notchedOutline": { border: "none" },
-                ".MuiSelect-select": {
-                  padding: "4px 8px",
-                  minWidth: "60px",
-                },
-              }}
-            >
-              {countryCodes.map((country) => (
-                <MenuItem key={country.code} value={country.dial_code}>
-                  {country.code} {country.dial_code}
-                </MenuItem>
-              ))}
-            </Select>
-          </InputAdornment>
-        ),
-      }}
-    />
-  )
+      case 'Phone':
+        return (
+          <TextField
+            fullWidth
+            size='small'
+            placeholder='Enter phone number'
+            value={values[`${field.id}_number`] || ''}
+            onChange={e => handleChange(`${field.id}_number`, e.target.value)}
+            error={!!errors[field.id]}
+            helperText={errors[field.id]}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position='start'>
+                  <Select
+                    value={values[`${field.id}_countryCode`] || '+91'}
+                    onChange={e => handleChange(`${field.id}_countryCode`, e.target.value)}
+                    size='small'
+                    variant='outlined'
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          maxHeight: 250 // 👈 limit dropdown height
+                        }
+                      }
+                    }}
+                    sx={{
+                      '.MuiOutlinedInput-notchedOutline': { border: 'none' },
+                      '.MuiSelect-select': {
+                        padding: '4px 8px',
+                        minWidth: '60px'
+                      }
+                    }}
+                  >
+                    {countryCodes.map(country => (
+                      <MenuItem key={country.code} value={country.dial_code}>
+                        {country.code} {country.dial_code}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </InputAdornment>
+              )
+            }}
+          />
+        )
 
       case 'Email':
         return <TextField {...commonProps} type='email' />
