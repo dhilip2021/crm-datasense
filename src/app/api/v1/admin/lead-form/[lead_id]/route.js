@@ -72,6 +72,56 @@ export async function GET(req, { params }) {
 }
 
 // 🔁 PUT – Update lead by lead_id
+// export async function PUT(req, { params }) {
+//   await connectMongoDB()
+//   const { lead_id } = params
+//   const body = await req.json()
+
+//   try {
+//     const lead = await Leadform.findOne({ lead_id })
+
+//     if (!lead) {
+//       return NextResponse.json(
+//         { success: false, message: 'Lead not found' },
+//         { status: 404 }
+//       )
+//     }
+
+//     // 🔁 Recalculate lead score before update
+//     const { lead_score, lead_label } = calculateLeadScore(body.values)
+
+//     const updatedValues = {
+//       ...body.values,
+//       Score: lead_score,
+//       Label: lead_label
+//     }
+
+//     const updated = await Leadform.findOneAndUpdate(
+//       { lead_id },
+//       {
+//         $set: {
+//           values: updatedValues,
+//           updatedAt: new Date()
+//         }
+//       },
+//       { new: true }
+//     )
+
+//     return NextResponse.json({
+//       success: true,
+//       message: 'Lead updated successfully !!!',
+//       data: updated
+//     })
+//   } catch (error) {
+//     return NextResponse.json(
+//       { success: false, message: 'Internal Server Error' },
+//       { status: 500 }
+//     )
+//   }
+// }
+
+
+// 🔁 PUT – Update lead by lead_id
 export async function PUT(req, { params }) {
   await connectMongoDB()
   const { lead_id } = params
@@ -88,7 +138,7 @@ export async function PUT(req, { params }) {
     }
 
     // 🔁 Recalculate lead score before update
-    const { lead_score, lead_label } = calculateLeadScore(body.values)
+    const { lead_score, lead_label } = calculateLeadScore(body.values || {})
 
     const updatedValues = {
       ...body.values,
@@ -96,14 +146,29 @@ export async function PUT(req, { params }) {
       Label: lead_label
     }
 
+    // 📝 Fields to update
+    const updateFields = {
+      values: updatedValues,
+      updatedAt: new Date()
+    }
+
+    // 🚀 Include lead_name if provided
+    if (body.lead_name) {
+      updateFields.lead_name = body.lead_name
+    }
+
+     if (body.lead_slug_name) {
+      updateFields.lead_slug_name = body.lead_slug_name
+    }
+
+    // 🚀 Include form_name if provided
+    if (body.form_name) {
+      updateFields.form_name = body.form_name
+    }
+
     const updated = await Leadform.findOneAndUpdate(
       { lead_id },
-      {
-        $set: {
-          values: updatedValues,
-          updatedAt: new Date()
-        }
-      },
+      { $set: updateFields },
       { new: true }
     )
 
@@ -113,6 +178,7 @@ export async function PUT(req, { params }) {
       data: updated
     })
   } catch (error) {
+    console.error('⨯ Lead update error:', error)
     return NextResponse.json(
       { success: false, message: 'Internal Server Error' },
       { status: 500 }
@@ -120,58 +186,7 @@ export async function PUT(req, { params }) {
   }
 }
 
-// 🔁 PATCH – Partial update
-// export async function PATCH(req, { params }) {
-//   await connectMongoDB()
-//   const { lead_id } = params
-//   const body = await req.json()
 
-//   try {
-//     const lead = await Leadform.findOne({ lead_id })
-
-//     if (!lead) {
-//       return NextResponse.json(
-//         { success: false, message: 'Lead not found' },
-//         { status: 404 }
-//       )
-//     }
-
-//     // Merge only updated fields with existing
-//     const updatedValues = {
-//       ...lead.values,
-//       ...body.values
-//     }
-
-//     // 🔁 Recalculate lead score
-//     const { lead_score, lead_label } = calculateLeadScore(updatedValues)
-
-//     updatedValues.Score = lead_score
-//     updatedValues.Label = lead_label
-
-//     const updated = await Leadform.findOneAndUpdate(
-//       { lead_id },
-//       {
-//         $set: {
-//           values: updatedValues,
-//           updatedAt: new Date()
-//         }
-//       },
-//       { new: true }
-//     )
-
-//     return NextResponse.json({
-//       success: true,
-//       message: 'Lead partially updated',
-//       data: updated
-//     })
-//   } catch (error) {
-//     console.error('⨯ Lead patch error:', error)
-//     return NextResponse.json(
-//       { success: false, message: 'Internal Server Error' },
-//       { status: 500 }
-//     )
-//   }
-// }
 
 
 // PATCH – Add Note to Lead

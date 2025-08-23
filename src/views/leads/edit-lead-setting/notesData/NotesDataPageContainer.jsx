@@ -117,8 +117,13 @@ const NotesDataPageContainer = () => {
     } else {
       getParticularLeadFn(organization_id)
       setLoader(false)
-      toast?.success(results?.message)
+      // toast?.success(results?.message)
       setOpen(false)
+
+      toast.success(results?.message, {
+        duration: 2000, // 2 seconds la close aagum
+        position: 'center'
+      })
 
       // router.push(`/en/deal/edit-deal/${results?.payloadJson?.lead_slug_name}`);
     }
@@ -184,8 +189,6 @@ const NotesDataPageContainer = () => {
 
   const handleAction = (option, item) => {
     if (option === 'Edit') {
-      
-
       setTitles('Edit your notes')
       setInputs({
         title: item.title,
@@ -198,8 +201,6 @@ const NotesDataPageContainer = () => {
 
       // navigateToEdit(item)
     } else if (option === 'Delete') {
-      
-
       const obj = {
         title: item.title,
         comment: item.comment,
@@ -234,7 +235,6 @@ const NotesDataPageContainer = () => {
 
   React.useEffect(() => {
     if (callFag) {
-      
       getParticularLeadFn(organization_id)
       setCallFlag(false)
     }
@@ -306,34 +306,32 @@ const NotesDataPageContainer = () => {
             notesArr.map(
               (item, index) =>
                 item.status === 1 && (
-               
-                      <Grid item xs={12} sm={12} md={3} key={index}>
-                        <Card>
-                          <CardHeader
-                            title={`${item.title}`}
-                            action={
-                              <OptionsMenu
-                                iconClassName='text-textPrimary'
-                                options={['Edit', 'Delete']}
-                                onOptionClick={(option, e) => handleAction(option, item)}
-                              />
-                            }
+                  <Grid item xs={12} sm={12} md={3} key={index}>
+                    <Card>
+                      <CardHeader
+                        title={`${item.title}`}
+                        action={
+                          <OptionsMenu
+                            iconClassName='text-textPrimary'
+                            options={['Edit', 'Delete']}
+                            onOptionClick={(option, e) => handleAction(option, item)}
                           />
-                          <CardContent>
-                            <div className='flex flex-col items-start'>
-                              <Typography>{item.comment}</Typography>
-                            </div>
-                            <div className='flex justify-between items-center flex-wrap gap-x-4 gap-y-2 mbe-5 mbs-[30px]'>
-                              <div className='flex justify-between items-center flex-wrap gap-x-4 gap-y-2'>
-                                <Typography variant='subtitle2' color='text.disabled'>
-                                  {getHours(item.createdAt)}
-                                </Typography>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                  
+                        }
+                      />
+                      <CardContent>
+                        <div className='flex flex-col items-start'>
+                          <Typography>{item.comment}</Typography>
+                        </div>
+                        <div className='flex justify-between items-center flex-wrap gap-x-4 gap-y-2 mbe-5 mbs-[30px]'>
+                          <div className='flex justify-between items-center flex-wrap gap-x-4 gap-y-2'>
+                            <Typography variant='subtitle2' color='text.disabled'>
+                              {getHours(item.createdAt)}
+                            </Typography>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Grid>
                 )
             )}
         </Grid>

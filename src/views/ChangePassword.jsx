@@ -69,7 +69,16 @@ const ChangePassword = ({ mode }) => {
     let results = await changePasswordApi(body, tokenPath)
 
     if (results) {
-      toast.success('Password Changed Successfully')
+      toast.success('Password Changed Successfully', {
+                                  autoClose: 500, // 1 second la close
+                                  position: 'bottom-center',
+                                  hideProgressBar: true, // progress bar venam na
+                                  closeOnClick: true,
+                                  pauseOnHover: false,
+                                  draggable: false,
+                                  progress: undefined
+                                })
+
       setTimeout(() => {
         router.push('/login')
       }, 3000)

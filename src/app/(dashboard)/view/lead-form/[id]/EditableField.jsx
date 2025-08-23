@@ -1,64 +1,52 @@
- 'use client'
+'use client'
 
-import React, { useState } from "react";
-import {
-  Box,
-  Typography,
-  TextField,
-  IconButton,
-  MenuItem
-} from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import CheckIcon from "@mui/icons-material/Check";
-import CloseIcon from "@mui/icons-material/Close";
+import React, { useState } from 'react'
+import { Box, Typography, TextField, IconButton, MenuItem } from '@mui/material'
+import EditIcon from '@mui/icons-material/Edit'
+import CheckIcon from '@mui/icons-material/Check'
+import CloseIcon from '@mui/icons-material/Close'
 
-const EditableField = ({ 
-  label, 
-  value: initialValue, 
-  type = "text", 
-  options = [], 
-  onSave 
-}) => {
-  const [value, setValue] = useState(initialValue);
-  const [editing, setEditing] = useState(false);
-  const [hover, setHover] = useState(false);
+const EditableField = ({ label, value: initialValue, type = 'text', options = [], onSave }) => {
+  const [value, setValue] = useState(initialValue)
+  const [editing, setEditing] = useState(false)
+  const [hover, setHover] = useState(false)
 
   const handleSave = () => {
-    setEditing(false);
-    if (onSave) onSave(value);
-  };
+    setEditing(false)
+    if (onSave) onSave(value)
+  }
 
   const handleCancel = () => {
-    setEditing(false);
-    setValue(initialValue);
-  };
+    setEditing(false)
+    setValue(initialValue)
+  }
 
   return (
     <Box
-      display="flex"
-      alignItems="center"
-      mb={1}
+      display='flex'
+      flexDirection='column'
+      gap={0.5}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
+      sx={{ mb: 2 }}
     >
-
       {/* Label */}
-      <Typography variant="body2" fontWeight="bold" sx={{ width: "40%" }}>
+      <Typography variant='caption' sx={{ color: 'text.secondary' }}>
         {label}
       </Typography>
 
       {/* Value / Editor */}
       {editing ? (
-        <>
-          {type === "select" ? (
+        <Box display='flex' alignItems='center' gap={1}>
+          {type === 'select' ? (
             <TextField
               select
-              size="small"
+              size='small'
               value={value}
-              onChange={(e) => setValue(e.target.value)}
-              sx={{ minWidth: 180 }}
+              onChange={e => setValue(e.target.value)}
+              sx={{ flex: 1, backgroundColor: '#f9fafb' }}
             >
-              {options.map((opt) => (
+              {options.map(opt => (
                 <MenuItem key={opt} value={opt}>
                   {opt}
                 </MenuItem>
@@ -66,37 +54,44 @@ const EditableField = ({
             </TextField>
           ) : (
             <TextField
-              size="small"
+              size='small'
               value={value}
-              onChange={(e) => setValue(e.target.value)}
-              sx={{ minWidth: 180 }}
+              onChange={e => setValue(e.target.value)}
+              sx={{ flex: 1, backgroundColor: '#f9fafb' }}
             />
           )}
-          <IconButton color="success" onClick={handleSave}>
-            <CheckIcon fontSize="small" />
+          <IconButton color='success' size='small' onClick={handleSave}>
+            <CheckIcon fontSize='small' />
           </IconButton>
-          <IconButton color="error" onClick={handleCancel}>
-            <CloseIcon fontSize="small" />
+          <IconButton color='error' size='small' onClick={handleCancel}>
+            <CloseIcon fontSize='small' />
           </IconButton>
-        </>
+        </Box>
       ) : (
-        <>
-          <Typography
-            variant="body2"
-            color={value ? "text.secondary" : "text.disabled"}
-            sx={{ flex: 1 }}
-          >
-            {value || "—"}
+        <Box
+          display='flex'
+          alignItems='center'
+          justifyContent='space-between'
+          sx={{
+            px: 1.5,
+            py: 1,
+            borderRadius: 1,
+            backgroundColor: '#f9fafb',
+            border: '1px solid #e5e7eb'
+          }}
+        >
+          <Typography variant='body2' color={value ? 'text.primary' : 'text.disabled'}>
+            {value || '—'}
           </Typography>
           {hover && (
-            <IconButton size="small" onClick={() => setEditing(true)}>
-              <EditIcon fontSize="small" />
+            <IconButton size='small' onClick={() => setEditing(true)}>
+              <EditIcon fontSize='small' />
             </IconButton>
           )}
-        </>
+        </Box>
       )}
     </Box>
-  );
-};
+  )
+}
 
-export default EditableField;
+export default EditableField

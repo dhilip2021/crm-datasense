@@ -92,7 +92,15 @@ const TerritoryTable = () => {
       if (body.n_status === 0) {
         toast.error(`${updatedRows[index].territory_name} Status Inactive `)
       } else {
-        toast.success(`${updatedRows[index].territory_name} Status Active `)
+        toast.success(`${updatedRows[index].territory_name} Status Active `, {
+          autoClose: 500, // 1 second la close
+          position: 'bottom-center',
+          hideProgressBar: true, // progress bar venam na
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined
+        })
       }
     } else {
       toast.error(results?.error)
@@ -160,12 +168,29 @@ const TerritoryTable = () => {
 
     if (deleteRes?.appStatusCode !== 0) {
       setLoader(false)
-      toast.success(deleteRes?.error)
+      toast.success(deleteRes?.error, {
+        autoClose: 500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
       postTerritoryList()
     } else {
       setLoader(false)
       postTerritoryList()
-      toast.success(deleteRes?.message)
+
+      toast.success(deleteRes?.message, {
+        autoClose: 500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
     }
   }
 
@@ -434,7 +459,6 @@ const TerritoryTable = () => {
                 page={page}
                 onPageChange={SwitchPage}
                 onRowsPerPageChange={SwitchRowsPerPage}
-                
               />
             </Paper>
           </CardContent>

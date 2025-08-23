@@ -215,7 +215,15 @@ const CustomerTable = () => {
 
       const data = await res.json()
       console.log(data,"<<< DATAAAA")
-      toast.success(data.message)
+       toast.success(data.message, {
+                autoClose: 500, // 1 second la close
+                position: 'bottom-center',
+                hideProgressBar: true, // progress bar venam na
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: false,
+                progress: undefined
+              })
       fetchData()
       setFileName('')
       setSelectedFile(null)

@@ -113,7 +113,15 @@ function CustomerFormAppPage() {
     const data = await res.json()
     setLoader(false)
     if (data.success) {
-      toast.success('Form submitted successfully')
+      toast.success('Form submitted successfully', {
+                      autoClose: 500, // 1 second la close
+                      position: 'bottom-center',
+                      hideProgressBar: true, // progress bar venam na
+                      closeOnClick: true,
+                      pauseOnHover: false,
+                      draggable: false,
+                      progress: undefined
+                    })
       router.push('/app/customer')
     } else {
       toast.error('Submission failed')

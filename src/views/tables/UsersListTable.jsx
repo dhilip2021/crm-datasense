@@ -76,12 +76,29 @@ const UsersListTable = () => {
     const deleteRes = await deleteUserApi(id,header)
      if (deleteRes?.appStatusCode !== 0) {
           setLoader(false)
-          toast.success(deleteRes?.error)
+           toast.success(deleteRes?.error, {
+          autoClose: 500, // 1 second la close
+          position: 'bottom-center',
+          hideProgressBar: true, // progress bar venam na
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined
+        })
+
           GetAllUserList()
         } else {
           setLoader(false)
           GetAllUserList()
-          toast.success(deleteRes?.message)
+          toast.success(deleteRes?.message, {
+          autoClose: 500, // 1 second la close
+          position: 'bottom-center',
+          hideProgressBar: true, // progress bar venam na
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined
+        })
         }
 
   }
