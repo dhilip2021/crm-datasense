@@ -241,7 +241,10 @@ function LeadFormAppPage() {
       case 'Dropdown':
         return (
           <TextField select {...commonProps}>
-            {field.options?.map((opt, i) => (
+            {(field.label === 'Lead Status'
+              ? field.options.slice(0, 6) // 👈 only first 6
+              : field.options
+            )?.map((opt, i) => (
               <MenuItem key={i} value={opt}>
                 {opt}
               </MenuItem>

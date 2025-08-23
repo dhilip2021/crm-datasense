@@ -168,11 +168,15 @@ const LeadDetailView = () => {
           </Accordion>
         </CardContent>
       </Card>
-      <Card sx={{ p: 3, borderRadius: 2, mt: 3 }}>
+
+
+
+
+      {/* <Card sx={{ p: 3, borderRadius: 2, mt: 3 }}>
         <CardContent>
           <NotesSection leadId={leadId} leadData={leadData} />
         </CardContent>
-      </Card>
+      </Card> */}
 
       <ToastContainer position='top-right' />
     </>
