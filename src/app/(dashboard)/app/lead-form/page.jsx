@@ -35,10 +35,10 @@ const shortName = fullName => {
 }
 
 function isValidEmailPragmatic(email) {
-  if (typeof email !== 'string') return false;
+  if (typeof email !== 'string') return false
   // Accepts most valid addresses, avoids pathological corner-cases
-  const re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,}$/;
-  return re.test(email);
+  const re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,}$/
+  return re.test(email)
 }
 
 function LeadFormAppPage() {
@@ -81,11 +81,11 @@ function LeadFormAppPage() {
       return ''
     }
 
-    if(field.type === 'Email'){
+    if (field.type === 'Email') {
       const response = isValidEmailPragmatic(value)
-      if(!response){
+      if (!response) {
         return 'Invalid email address'
-      }else{
+      } else {
         return ''
       }
     }
@@ -273,7 +273,8 @@ function LeadFormAppPage() {
             inputProps={{ maxLength: field.maxLength }}
             fullWidth
             size='small'
-            label={field.label || 'Phone'}
+            label={field.label}
+            required={field.required}
             placeholder='Enter a phone number'
             InputProps={{
               startAdornment: (
@@ -306,6 +307,15 @@ function LeadFormAppPage() {
                   </Select>
                 </InputAdornment>
               )
+            }}
+            InputLabelProps={{
+              required: field.required,
+              sx: {
+                '& .MuiFormLabel-asterisk': {
+                  color: 'red', // 👈 make star red
+                  marginLeft: '2px' // 👈 spacing for nice look
+                }
+              }
             }}
           />
         )

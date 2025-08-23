@@ -85,6 +85,11 @@ const LeadTable = () => {
       const res = await fetch(`/api/v1/admin/lead-form/list?${query}`)
       const json = await res.json()
       if (json.success) {
+
+        console.log(json.data,"<<< DATAAAAAA")
+
+
+
         setData(json.data)
         setDataFilter(json.data)
         setTotal(json.total)
@@ -491,28 +496,32 @@ const LeadTable = () => {
                             <strong>{row.lead_id}</strong>
                           </Link>
                         </TableCell>
-
-                        {/* <TableCell
-                          sx={{
-                            position: 'sticky',
-                            left: 120,
-                            zIndex: 2,
-                            backgroundColor: '#fff',
-                            fontWeight: 500
-                          }}
-                        >
-                          {row.lead_name}
-                        </TableCell> */}
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           {row.values['First Name']}
                         </TableCell>
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           {row.values['Company']}
                         </TableCell>
-                        <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
-                          {row.values['Timeline to Buy']}
-                        </TableCell>
                         <TableCell>{row.values['City']}</TableCell>
+                        <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                          <Chip 
+                          label={row.values['Timeline to Buy']}
+
+                             sx={{
+                              backgroundColor:
+                                (row.values['Timeline to Buy']) == "3–6 Months"
+                                  ? '#00FF48'
+                                  : (row.values['Timeline to Buy'] ) == "6+ Months"
+                                    ? '#FF8800'
+                                    : '#FF0000',
+                              fontWeight: 'bold'
+                            }}
+                            size='small'
+
+
+                          />
+                          
+                        </TableCell>
                         <TableCell>
                           <Chip
                             label={row.values['Lead Status'] || 'Unknown'}
@@ -566,17 +575,17 @@ const LeadTable = () => {
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           <Chip
                             label={
-                              (row.values['lead_score'] || 0) >= 75
+                              (row.values['Score'] || 0) >= 75
                                 ? '🔥 Hot Lead'
-                                : (row.values['lead_score'] || 0) >= 50
+                                : (row.values['Score'] || 0) >= 40
                                   ? '🟡 Warm Lead'
                                   : '❄️ Cold Lead'
                             }
                             sx={{
                               backgroundColor:
-                                (row.values['lead_score'] || 0) >= 75
+                                (row.values['Score'] || 0) >= 75
                                   ? '#ffcdd2'
-                                  : (row.values['lead_score'] || 0) >= 50
+                                  : (row.values['Score'] || 0) >= 40
                                     ? '#fff3cd'
                                     : '#bbdefb',
                               fontWeight: 'bold'

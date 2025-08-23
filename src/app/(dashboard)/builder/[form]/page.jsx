@@ -181,7 +181,7 @@ export default function LeadFormPage() {
       newField.maxDigits = ''
       newField.decimalPlaces = '2'
       newField.rounding = 'normal'
-      newField.placeholder = 'CheckBox Label'
+      newField.placeholder = 'Currency'
     }
 
     // ✅ Safely create the column array if it's missing

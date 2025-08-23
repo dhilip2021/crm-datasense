@@ -606,7 +606,7 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 Dropdown Options:
               </Typography>
               <IconButton aria-label='close' onClick={() => editPropertyClick()}>
-                <CloseIcon sx={{ color: 'red' }} />
+                <VisibilityOffIcon sx={{ color: 'gray' }} />
               </IconButton>
             </Box>
 
