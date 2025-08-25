@@ -33,6 +33,7 @@ import {
   sendOtpApi
 } from '@/apiFunctions/ApiAction'
 import { Box, IconButton, InputAdornment } from '@mui/material'
+import { encryptCryptoResponse } from '@/helper/frontendHelper'
 
 function capitalizeWords(str) {
   return str
@@ -273,10 +274,37 @@ const Register = ({ mode }) => {
           role: '',
           c_role_id: '16f01165898b',
           c_user_img_url: '',
-          organization_id: result?.payloadJson?.organization_id
         }
         setLoader(true)
-        const resultData = await craeteUserApi(body1)
+
+
+         const body = {
+                organization_id: result?.payloadJson?.organization_id,
+                first_name: inputs?.first_name,
+                last_name: inputs?.last_name,
+                 c_about_user: 'Admin',
+                email: inputs?.email,
+                mobile: inputs?.mobile,
+                role: '',
+                c_user_img_url: '',
+                c_role_id: '16f01165898b',
+                // n_status: inputs?.n_status
+              }
+        
+               const enycryptDAta = encryptCryptoResponse(body) 
+
+
+
+
+
+
+          const dataValue= {
+        data : enycryptDAta
+      }
+
+
+
+        const resultData = await craeteUserApi(dataValue)
 
         if (resultData?.appStatusCode === 0) {
           toast.success('Please check your email.. your password send your mail!', {

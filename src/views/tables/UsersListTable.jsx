@@ -22,12 +22,11 @@ import { allUserListApi, deleteUserApi } from '@/apiFunctions/ApiAction'
 import LoaderGif from '@assets/gif/loader1.gif'
 import DeleteConformPopup from '../leads/DeleteConformPopup'
 import { toast, ToastContainer } from 'react-toastify'
+import { decrypCryptoRequest } from '@/helper/frontendHelper'
 
 const UsersListTable = () => {
   const organization_id = Cookies.get('organization_id')
   const getToken = Cookies.get('_token')
-
-  const [isClient, setIsClient] = useState(false)
   const [usersList, setUsersList] = useState([])
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -36,9 +35,9 @@ const UsersListTable = () => {
   const [count, setCount] = useState(0)
   const [callFlag, setCallFlag] = useState(false)
 
-    const [delOpen, setDelOpen] = useState(false)
-    const [delId, setDelId] = useState('')
-    const [delTitle, setDelTitle] = useState('')
+  const [delOpen, setDelOpen] = useState(false)
+  const [delId, setDelId] = useState('')
+  const [delTitle, setDelTitle] = useState('')
 
   const handleOnChange = e => {
     const { name, value } = e.target
@@ -46,15 +45,12 @@ const UsersListTable = () => {
     setSearch(value)
   }
 
-
-
-
   const delClose = () => {
     setDelOpen(false)
     setDelId('')
     setDelTitle('')
   }
-  const deleteFn = (id) => {
+  const deleteFn = id => {
     setDelOpen(true)
     setDelId(id)
     setDelTitle('Are you sure you want to delete this?')
@@ -65,42 +61,39 @@ const UsersListTable = () => {
     deleteUserFn(delId)
   }
 
-
-
-  const deleteUserFn = async(id)=>{
+  const deleteUserFn = async id => {
     const header = {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${getToken}`
     }
     setLoader(false)
-    const deleteRes = await deleteUserApi(id,header)
-     if (deleteRes?.appStatusCode !== 0) {
-          setLoader(false)
-           toast.success(deleteRes?.error, {
-          autoClose: 500, // 1 second la close
-          position: 'bottom-center',
-          hideProgressBar: true, // progress bar venam na
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: false,
-          progress: undefined
-        })
+    const deleteRes = await deleteUserApi(id, header)
+    if (deleteRes?.appStatusCode !== 0) {
+      setLoader(false)
+      toast.success(deleteRes?.error, {
+        autoClose: 500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
 
-          GetAllUserList()
-        } else {
-          setLoader(false)
-          GetAllUserList()
-          toast.success(deleteRes?.message, {
-          autoClose: 500, // 1 second la close
-          position: 'bottom-center',
-          hideProgressBar: true, // progress bar venam na
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: false,
-          progress: undefined
-        })
-        }
-
+      GetAllUserList()
+    } else {
+      setLoader(false)
+      GetAllUserList()
+      toast.success(deleteRes?.message, {
+        autoClose: 500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
+    }
   }
   const GetAllUserList = async () => {
     setLoader(true)
@@ -120,13 +113,17 @@ const UsersListTable = () => {
         organization_id: organization_id
       }
 
-      const results = await allUserListApi(body, header)
+      const res = await allUserListApi(body, header)
+
+      const results = decrypCryptoRequest(res?.payloadJson)
+
+      console.log(results, '<<< RESULTSSS')
 
       setLoader(false)
 
-      if (results.payloadJson.length > 0) {
-        setUsersList(results?.payloadJson[0]?.data)
-        setCount(results?.payloadJson?.at(0)?.total_count?.at(0)?.count)
+      if (results?.length > 0) {
+        setUsersList(results[0]?.data)
+        setCount(results?.at(0)?.total_count?.at(0)?.count)
       } else {
         setUsersList([])
         setCount(0)
@@ -184,20 +181,23 @@ const UsersListTable = () => {
             )
           }}
           size='small'
-            // sx={{
-            //   width: { xs: '50%', sm: 'auto' },
-            //   fontSize: { xs: '0.85rem', sm: '1rem' }
-            // }}
+          // sx={{
+          //   width: { xs: '50%', sm: 'auto' },
+          //   fontSize: { xs: '0.85rem', sm: '1rem' }
+          // }}
         />
         <Link href={'/add-user'}>
-          <Button startIcon={<i className='ri-add-line'></i>} variant='contained' className='mis-4'
-          //  sx={{
-          //   fontSize: { xs: '1.25rem', sm: '0.875rem' },
-          //   padding: { xs: '4px 8px', sm: '6px 16px' },
-          //   minWidth: { xs: 'unset', sm: 'auto' }
-          // }}
+          <Button
+            startIcon={<i className='ri-add-line'></i>}
+            variant='contained'
+            className='mis-4'
+            //  sx={{
+            //   fontSize: { xs: '1.25rem', sm: '0.875rem' },
+            //   padding: { xs: '4px 8px', sm: '6px 16px' },
+            //   minWidth: { xs: 'unset', sm: 'auto' }
+            // }}
           >
-            Add user 
+            Add user
           </Button>
         </Link>
       </Box>
@@ -283,27 +283,23 @@ const UsersListTable = () => {
                       />
                     </td>
                     <td className='!pb-1'>
-                    <Box display={'flex'}>
-                            {' '}
-                            <Tooltip title="Edit User" arrow>
-                            <Link href={`/edit-user/${row?.user_id}`}>
-                              <i 
-                              className='ri-edit-box-line'
-                              style={{ color: '#4caf50', cursor: 'pointer' }}
-                              ></i>
-                            </Link>
-                            </Tooltip>
-                            {' '}
-                            <Box>
-                            <Tooltip title="Delete User" arrow>
-                              <i
-                                className='ri-delete-bin-3-fill'
-                                style={{ color: '#ff5555', cursor: 'pointer' }}
-                                onClick={() => deleteFn(row?._id)}
-                              ></i>
-                              </Tooltip>
-                            </Box>
-                          </Box>
+                      <Box display={'flex'}>
+                        {' '}
+                        <Tooltip title='Edit User' arrow>
+                          <Link href={`/edit-user/${row?.user_id}`}>
+                            <i className='ri-edit-box-line' style={{ color: '#4caf50', cursor: 'pointer' }}></i>
+                          </Link>
+                        </Tooltip>{' '}
+                        <Box>
+                          <Tooltip title='Delete User' arrow>
+                            <i
+                              className='ri-delete-bin-3-fill'
+                              style={{ color: '#ff5555', cursor: 'pointer' }}
+                              onClick={() => deleteFn(row?._id)}
+                            ></i>
+                          </Tooltip>
+                        </Box>
+                      </Box>
                     </td>
                   </tr>
                 ))}
@@ -326,7 +322,7 @@ const UsersListTable = () => {
         </div>
       </Card>
       <ToastContainer />
-       <DeleteConformPopup open={delOpen} title={delTitle} close={delClose} deleteConfirm={deleteConfirm} />
+      <DeleteConformPopup open={delOpen} title={delTitle} close={delClose} deleteConfirm={deleteConfirm} />
     </Box>
   )
 }

@@ -48,10 +48,12 @@ export const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   auth: {
     user: "dhilipbeece001@gmail.com",
-    pass: "xbqqtwhtwhbplirt",
+    pass: "zvahwkhollpdknwr",
   },
   secure: true,
 })
+
+
 
 export function getRandomNumber(){
   return Math.random().toFixed(16).split(".")[1];

@@ -11,10 +11,10 @@ import OptionsMenu from '@core/components/option-menu'
 export default function ConversionFunnel() {
   // Example funnel data (replace with API)
   const funnelData = [
-    { stage: 'Submitted', count: 120, color: 'info.main', icon: <SendIcon /> },
-    { stage: 'Contacted', count: 90, color: 'primary.main', icon: <PhoneInTalkIcon /> },
-    { stage: 'Demo', count: 45, color: 'warning.main', icon: <DesktopWindowsIcon /> },
     { stage: 'Won', count: 20, color: 'success.main', icon: <EmojiEventsIcon /> },
+    { stage: 'Demo', count: 45, color: 'warning.main', icon: <DesktopWindowsIcon /> },
+    { stage: 'Contacted', count: 90, color: 'primary.main', icon: <PhoneInTalkIcon /> },
+    { stage: 'Submitted', count: 120, color: 'info.main', icon: <SendIcon /> },
   ];
 
   const maxCount = funnelData[0].count; // Starting point for % calc

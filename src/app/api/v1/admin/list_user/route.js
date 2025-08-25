@@ -5,7 +5,7 @@ import { User } from '@/models/userModel'
 
 import { verifyAccessToken } from '@/helper/clientHelper'
 import connectMongoDB from '@/libs/mongodb'
-import { decrypCryptoRequest, maskEmail } from '@/helper/frontendHelper'
+import { decrypCryptoRequest, encryptCryptoResponse, maskEmail } from '@/helper/frontendHelper'
 
 let sendResponse = {
   appStatusCode: '',
@@ -146,7 +146,6 @@ export async function POST(request) {
         ])
           .then(data => {
 
-            console.log(data,"<< DATA")
             if (data[0].data.length > 0) {
 
                  // Modify each record before sending
@@ -170,7 +169,7 @@ export async function POST(request) {
 
               sendResponse['appStatusCode'] = 0
               sendResponse['message'] = ''
-              sendResponse['payloadJson'] = updatedData
+              sendResponse['payloadJson'] = encryptCryptoResponse(updatedData)
               sendResponse['error'] = []
             } else {
               sendResponse['appStatusCode'] = 0

@@ -38,7 +38,7 @@ import themeConfig from '@configs/themeConfig'
 
 // Hook Imports
 import { useImageVariant } from '@core/hooks/useImageVariant'
-import { addFieldApi, getFieldListApi, LoginApi } from '@/apiFunctions/ApiAction'
+import { addFieldFormApi, getFieldFormListApi, LoginApi } from '@/apiFunctions/ApiAction'
 
 //react-toastify
 import 'react-toastify/dist/ReactToastify.css'
@@ -58,324 +58,389 @@ const isEmail = email => {
   return false
 }
 
-const staticFields = [
+const staticFiledForm = [
   {
-    position: 1,
-    label: 'Salutation',
-    slug_label: 'salutation',
-    type: 'select',
-    items: [
-      {
-        menu_value: 'Mr'
-      },
-      {
-        menu_value: 'Mrs'
-      },
-      {
-        menu_value: 'Miss'
-      },
-      {
-        menu_value: 'Madam'
-      },
-      {
-        menu_value: 'Dr'
-      },
-      {
-        menu_value: 'Proff'
-      }
-    ],
-    mandatory: 'no'
+    fields: {
+      left: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Single Line',
+          label: 'First Name',
+          placeholder: 'Enter a value',
+          required: true,
+          minChars: 3,
+          maxChars: 50,
+          allowDuplicate: true,
+          allowSplCharacter: false,
+          autoComplte: true,
+          isPublic: false,
+          isEncrypted: false,
+          isExternal: false,
+          showTooltip: false,
+          options: [],
+          createFor: []
+        },
+        {
+          id: crypto.randomUUID(),
+          type: 'Phone',
+          label: 'Phone',
+          placeholder: 'Enter a phone number',
+          required: false,
+          maxLength: 50,
+          autoComplte: true,
+          noDuplicates: false,
+          isPublic: false,
+          isEncrypted: false,
+          showTooltip: false,
+          tooltipMessage: '',
+          tooltipType: 'icon',
+          options: [],
+          countryCode: '+91',
+          createFor: []
+        }
+      ],
+      center: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Single Line',
+          label: 'Last Name',
+          placeholder: 'Enter a value',
+          required: false,
+          minChars: 3,
+          maxChars: 50,
+          allowDuplicate: true,
+          allowSplCharacter: false,
+          autoComplte: true,
+          isPublic: false,
+          isEncrypted: false,
+          isExternal: false,
+          showTooltip: false,
+          options: [],
+          createFor: []
+        },
+        {
+          id: crypto.randomUUID(),
+          type: 'Dropdown',
+          label: 'Gender',
+          placeholder: 'Enter a value',
+          required: false,
+          isPublic: false,
+          showTooltip: false,
+          tooltipMessage: '',
+          tooltipType: 'icon',
+          options: ['Male', 'Female', 'Genderqueer', 'Non-Conforming', 'Transgender', 'Other'],
+          defaultValue: 'Male',
+          sortOrder: 'entered',
+          trackHistory: false,
+          enableColor: false,
+          createFor: []
+        }
+      ],
+      right: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Email',
+          label: 'Email',
+          placeholder: 'Enter a value',
+          required: true,
+          autoComplte: true,
+          noDuplicates: false,
+          isPublic: false,
+          isEncrypted: false,
+          showTooltip: false,
+          options: [],
+          createFor: []
+        }
+      ]
+    },
+
+    id: crypto.randomUUID(),
+    title: 'Contact Information',
+    layout: 'triple'
   },
   {
-    position: 2,
-    label: 'First Name',
-    slug_label: 'first-name',
-    type: 'text',
-    items: [
-      {
-        menu_value: ''
-      }
-    ],
-    mandatory: 'yes'
+    fields: {
+      left: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Single Line',
+          label: 'Company',
+          placeholder: 'Enter a value',
+          required: false,
+          minChars: 3,
+          maxChars: 255,
+          allowDuplicate: true,
+          allowSplCharacter: false,
+          autoComplte: true,
+          isPublic: false,
+          isEncrypted: false,
+          isExternal: false,
+          showTooltip: false,
+          options: [],
+          createFor: []
+        },
+        {
+          id: crypto.randomUUID(),
+          type: 'Dropdown',
+          label: 'Lead Status',
+          placeholder: 'Enter a value',
+          required: false,
+          isPublic: false,
+          showTooltip: false,
+          tooltipMessage: '',
+          tooltipType: 'icon',
+          options: [
+            'New',
+            'Contacted',
+            'Qualified',
+            'Proposal Sent',
+            'Unqualified',
+            'Junk',
+            'Qualification',
+            'Quotation',
+            'Negatiation',
+            'Ready to close',
+            'Closed Won',
+            'Closed Lost'
+          ],
+          defaultValue: 'New',
+          sortOrder: 'entered',
+          trackHistory: false,
+          enableColor: false,
+          createFor: []
+        },
+        {
+          id: crypto.randomUUID(),
+          type: 'Currency',
+          label: 'Annual Revenue',
+          placeholder: 'Currency',
+          required: false,
+          options: [],
+          minDigits: '',
+          maxDigits: '',
+          decimalPlaces: '2',
+          rounding: 'normal',
+          createFor: []
+        }
+      ],
+      center: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Single Line',
+          label: 'Job Title',
+          placeholder: 'Enter a value',
+          required: false,
+          minChars: 3,
+          maxChars: 255,
+          allowDuplicate: true,
+          allowSplCharacter: false,
+          autoComplte: true,
+          isPublic: false,
+          isEncrypted: false,
+          isExternal: false,
+          showTooltip: false,
+          options: [],
+          createFor: []
+        },
+        {
+          id: crypto.randomUUID(),
+          type: 'Dropdown',
+          label: 'Industry',
+          placeholder: 'Enter a value',
+          required: false,
+          isPublic: false,
+          showTooltip: false,
+          tooltipMessage: '',
+          tooltipType: 'icon',
+          options: ['Logistics', 'Manufacturing', 'FMCG', 'Education', 'Pharma', 'IT', 'Finance'],
+          defaultValue: '',
+          sortOrder: 'entered',
+          trackHistory: false,
+          enableColor: false,
+          createFor: []
+        }
+      ],
+      right: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Dropdown',
+          label: 'Lead Source',
+          placeholder: 'Enter a value',
+          required: false,
+          isPublic: false,
+          showTooltip: false,
+          tooltipMessage: '',
+          tooltipType: 'icon',
+          options: ['Facebook', 'LinkedIn', 'Email Campaign', 'Referral', 'Trade Show', 'Cold Call'],
+          defaultValue: '',
+          sortOrder: 'entered',
+          trackHistory: false,
+          enableColor: false,
+          createFor: []
+        },
+        {
+          id: crypto.randomUUID(),
+          type: 'Dropdown',
+          label: 'Company Size',
+          placeholder: 'Enter a value',
+          required: false,
+          isPublic: false,
+          showTooltip: false,
+          tooltipMessage: '',
+          tooltipType: 'icon',
+          options: ['1 to 10', '11 to 50', '51 to 100', '100 +'],
+          defaultValue: '1 to 10',
+          sortOrder: 'entered',
+          trackHistory: false,
+          enableColor: false,
+          createFor: []
+        }
+      ]
+    },
+
+    id: crypto.randomUUID(),
+    title: 'Company Information',
+    layout: 'triple'
   },
   {
-    position: 3,
-    label: 'Last Name',
-    slug_label: 'last-name',
-    type: 'text',
-    items: [
-      {
-        menu_value: ''
-      }
-    ],
-    mandatory: 'no'
+    fields: {
+      left: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Single Line',
+          label: 'Country',
+          placeholder: 'Enter a value',
+          required: false,
+          minChars: 3,
+          maxChars: 255,
+          allowDuplicate: true,
+          allowSplCharacter: false,
+          autoComplte: true,
+          isPublic: false,
+          isEncrypted: false,
+          isExternal: false,
+          showTooltip: false,
+          options: [],
+          createFor: []
+        },
+        {
+          id: crypto.randomUUID(),
+          type: 'Single Line',
+          label: 'Street',
+          placeholder: 'Enter a value',
+          required: false,
+          minChars: 3,
+          maxChars: 255,
+          allowDuplicate: true,
+          allowSplCharacter: false,
+          autoComplte: true,
+          isPublic: false,
+          isEncrypted: false,
+          isExternal: false,
+          showTooltip: false,
+          options: [],
+          createFor: []
+        }
+      ],
+      center: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Single Line',
+          label: 'State',
+          placeholder: 'Enter a value',
+          required: false,
+          minChars: 3,
+          maxChars: 255,
+          allowDuplicate: true,
+          allowSplCharacter: false,
+          autoComplte: true,
+          isPublic: false,
+          isEncrypted: false,
+          isExternal: false,
+          showTooltip: false,
+          options: [],
+          createFor: []
+        },
+        {
+          id: crypto.randomUUID(),
+          type: 'Number',
+          label: 'Pincode',
+          placeholder: 'Enter a value',
+          required: false,
+          options: [],
+          minDigits: '',
+          maxDigits: '',
+          useSeparator: false,
+          createFor: []
+        }
+      ],
+      right: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Single Line',
+          label: 'City',
+          placeholder: 'Enter a value',
+          required: false,
+          minChars: 3,
+          maxChars: 255,
+          allowDuplicate: true,
+          allowSplCharacter: false,
+          autoComplte: true,
+          isPublic: false,
+          isEncrypted: false,
+          isExternal: false,
+          showTooltip: false,
+          options: [],
+          createFor: []
+        }
+      ]
+    },
+    id: crypto.randomUUID(),
+    title: 'Address Information',
+    layout: 'triple'
   },
   {
-    position: 4,
-    label: 'Email',
-    slug_label: 'email',
-    type: 'text',
-    items: [
-      {
-        menu_value: ''
-      }
-    ],
-    mandatory: 'no'
-  },
-  {
-    position: 5,
-    label: 'Mobile',
-    slug_label: 'mobile',
-    type: 'text',
-    items: [
-      {
-        menu_value: ''
-      }
-    ],
-    mandatory: 'no'
-  },
-  {
-    position: 6,
-    label: 'Phone',
-    slug_label: 'phone',
-    type: 'text',
-    items: [
-      {
-        menu_value: ''
-      }
-    ],
-    mandatory: 'no'
-  },
-  {
-    position: 7,
-    label: 'Gender',
-    slug_label: 'gender',
-    type: 'select',
-    items: [
-      {
-        menu_value: 'Female'
-      },
-      {
-        menu_value: 'Genderqueer'
-      },
-      {
-        menu_value: 'Male'
-      },
-      {
-        menu_value: 'Non-Conforming'
-      },
-      {
-        menu_value: 'Other'
-      },
-      {
-        menu_value: 'Prefer Not To Say'
-      },
-      {
-        menu_value: 'Transgender'
-      }
-    ],
-    mandatory: 'no'
-  },
-  {
-    position: 8,
-    label: 'Organization',
-    slug_label: 'organization',
-    type: 'text',
-    items: [
-      {
-        menu_value: ''
-      }
-    ],
-    mandatory: 'no'
-  },
-  {
-    position: 9,
-    label: 'Website',
-    slug_label: 'website',
-    type: 'text',
-    items: [
-      {
-        menu_value: ''
-      }
-    ],
-    mandatory: 'no'
-  },
-  {
-    position: 10,
-    label: 'No Of Employees',
-    slug_label: 'no-of-employees',
-    type: 'select',
-    items: [
-      {
-        menu_value: '1-10'
-      },
-      {
-        menu_value: '11-50'
-      },
-      {
-        menu_value: '51-200'
-      },
-      {
-        menu_value: '201-500'
-      },
-      {
-        menu_value: '501-1000'
-      },
-      {
-        menu_value: '1000+'
-      }
-    ],
-    mandatory: 'no'
-  },
-  {
-    position: 11,
-    label: 'Annual Revenue',
-    slug_label: 'annual-revenue',
-    type: 'text',
-    items: [
-      {
-        menu_value: ''
-      }
-    ],
-    mandatory: 'no'
-  },
-  {
-    position: 12,
-    label: 'Industry',
-    slug_label: 'industry',
-    type: 'select',
-    items: [
-      {
-        menu_value: 'Securities & Commodity Exchanges'
-      },
-      {
-        menu_value: 'Service'
-      },
-      {
-        menu_value: 'Soap & Detergent'
-      },
-      {
-        menu_value: 'Software'
-      },
-      {
-        menu_value: 'Sports'
-      },
-      {
-        menu_value: 'Technology'
-      },
-      {
-        menu_value: 'Telecommunications'
-      },
-      {
-        menu_value: 'Television'
-      },
-      {
-        menu_value: 'Transportation'
-      },
-      {
-        menu_value: 'Venture Capital'
-      }
-    ],
-    mandatory: 'no'
-  },
-  {
-    position: 13,
-    label: 'Job Title',
-    slug_label: 'job-title',
-    type: 'text',
-    items: [
-      {
-        menu_value: ''
-      }
-    ],
-    mandatory: 'no'
-  },
-  {
-    position: 14,
-    label: 'Lead Source',
-    slug_label: 'lead-source',
-    type: 'select',
-    items: [
-      {
-        menu_value: 'Advertisement'
-      },
-      {
-        menu_value: 'Campaign'
-      },
-      {
-        menu_value: 'Cold Calling'
-      },
-      {
-        menu_value: "Customer's Vendor"
-      },
-      {
-        menu_value: 'Exhibition'
-      },
-      {
-        menu_value: 'Existing Customer'
-      },
-      {
-        menu_value: 'Mass Mailing'
-      },
-      {
-        menu_value: 'Reference'
-      },
-      {
-        menu_value: 'Supplier Reference'
-      },
-      {
-        menu_value: 'Walk In'
-      }
-    ],
-    mandatory: 'no'
-  },
-  {
-    position: 15,
-    label: 'Status',
-    slug_label: 'status',
-    type: 'select',
-    items: [
-      {
-        menu_value: 'New'
-      },
-      {
-        menu_value: 'Contacted'
-      },
-      {
-        menu_value: 'Nurture'
-      },
-      {
-        menu_value: 'Qualified'
-      },
-      {
-        menu_value: 'Unqualified'
-      },
-      {
-        menu_value: 'Junk'
-      },
-      {
-        menu_value: 'Qualification'
-      },
-      {
-        menu_value: 'Demo/Making'
-      },
-      {
-        menu_value: 'Proposal/Quotation'
-      },
-      {
-        menu_value: 'Negotiation'
-      },
-      {
-        menu_value: 'Ready To Close'
-      },
-      {
-        menu_value: 'Won'
-      },
-      {
-        menu_value: 'Lost'
-      }
-    ],
-    mandatory: 'no'
+    fields: {
+      left: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Date',
+          label: 'Next Follow-up Date',
+          placeholder: 'Enter a value',
+          required: true,
+          allowPastDate: true,
+          noDuplicates: false,
+          isPublic: false,
+          isEncrypted: false,
+          showTooltip: false,
+          options: [],
+          createFor: []
+        }
+      ],
+      center: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Dropdown',
+          label: 'Timeline to Buy',
+          placeholder: 'Enter a value',
+          required: false,
+          isPublic: false,
+          showTooltip: false,
+          tooltipMessage: '',
+          tooltipType: 'icon',
+          options: ['Immediately', '3–6 Months', '6+ Months'],
+          defaultValue: '',
+          sortOrder: 'entered',
+          trackHistory: false,
+          enableColor: false,
+          createFor: []
+        }
+      ],
+      right: []
+    },
+    id: crypto.randomUUID(),
+    title: 'New Section',
+    layout: 'triple'
   }
 ]
 
@@ -479,20 +544,22 @@ const Login = ({ mode }) => {
         Authorization: `Bearer ${resultsPayloadJson?.tokenAccess}`
       }
 
-      const fieldResponse = await getFieldListApi(resultsPayloadJson?.organization_id, header)
+      const fieldFormResponse = await getFieldFormListApi(resultsPayloadJson?.organization_id, header)
 
-      if (fieldResponse?.payloadJson?.length === 0) {
+      if (fieldFormResponse?.payloadJson?.length === 0) {
         const body2 = {
           organization_id: resultsPayloadJson?.organization_id,
-          fields: staticFields
+          form_name: 'lead-form',
+          version: 1,
+          sections: staticFiledForm
         }
 
-        const header = {
+        const header1 = {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${resultsPayloadJson?.tokenAccess}`
         }
 
-        const resultFields = await addFieldApi(body2, header)
+        const resultFields = await addFieldFormApi(body2, header1)
       }
 
       if (resultsPayloadJson?.c_version === 'Trial') {
@@ -533,8 +600,15 @@ const Login = ({ mode }) => {
           handleSuccess()
 
           toast.success('login successful', {
-            autoClose: 1000
+            autoClose: 500,
+            position: 'bottom-center',
+            hideProgressBar: true, // progress bar venam na
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: false,
+            progress: undefined
           })
+
           setLoader(false)
         } else if (today > endDate) {
           setTitle('Sorry ! Your trial period has ended. Please get in touch with your administrator.')
@@ -577,8 +651,15 @@ const Login = ({ mode }) => {
         handleSuccess()
 
         toast.success('login successful', {
-          autoClose: 1000
+          autoClose: 500,
+          position: 'bottom-center',
+          hideProgressBar: true, // progress bar venam na
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined
         })
+
         setLoader(false)
       }
     } else {

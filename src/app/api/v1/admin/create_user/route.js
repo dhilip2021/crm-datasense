@@ -34,6 +34,8 @@ export async function POST(request) {
 
   const dData = decrypCryptoRequest(data)
 
+  console.log(dData, '<<< DECRYPT DATAAAA')
+
   let passwordCheck = dData?.password ? dData?.password : 'Password@123'
 
   try {
@@ -65,7 +67,7 @@ export async function POST(request) {
           trim: true
         })
 
-          const encEmail = encryptCryptoResponse(dData?.email) 
+        const encEmail = encryptCryptoResponse(dData?.email)
         const body = {
           organization_id: dData?.organization_id,
           first_name: dData?.first_name,
@@ -121,8 +123,10 @@ export async function POST(request) {
         return NextResponse.json(sendResponse, { status: 200 })
       }
     } else {
-      const encEmail = encryptCryptoResponse(dData?.email) 
+      const encEmail = encryptCryptoResponse(dData?.email)
+
       const checkUserEmail = await User.findOne({
+        organization_id: dData?.organization_id,
         email: encEmail
       })
 
@@ -173,11 +177,14 @@ export async function POST(request) {
         if (dData?.role !== 'admin' || dData?.role === undefined || dData?.role === '') {
           if (dData?.role === undefined || dData?.role === null || dData?.role === '') {
             console.log('coming 1')
+
             let data = {
+              organization_id: dData?.organization_id,
               role: 'admin'
             }
             const resulData = await User.find(data)
-            const encEmail = encryptCryptoResponse(dData?.email) 
+            const encEmail = encryptCryptoResponse(dData?.email)
+            const encMobile = encryptCryptoResponse(dData?.mobile)
             const userdata = new User({
               user_id: create_UUID(),
               organization_id: dData?.organization_id,
@@ -185,7 +192,7 @@ export async function POST(request) {
               last_name: dData?.last_name,
               user_name,
               email: encEmail,
-              mobile: dData?.mobile,
+              mobile: encMobile,
               role: dData?.role ? dData?.role : 'user',
               slug_name,
               c_about_user: dData?.c_about_user,
@@ -256,7 +263,8 @@ export async function POST(request) {
               sendResponse['payloadJson'] = []
               sendResponse['error'] = []
             } else {
-               const encEmail = encryptCryptoResponse(dData?.email) 
+              const encEmail = encryptCryptoResponse(dData?.email)
+              const encMobile = encryptCryptoResponse(dData?.mobile)
               const userdata = new User({
                 organization_id: dData?.organization_id,
                 user_id: create_UUID(),
@@ -265,7 +273,7 @@ export async function POST(request) {
                 user_name,
                 slug_name,
                 email: encEmail,
-                mobile: dData?.mobile,
+                mobile: encMobile,
                 c_about_user: dData?.c_about_user,
                 role: dData?.role,
                 c_role_id: dData?.c_role_id,

@@ -598,3 +598,26 @@ export const deleteCustomerseApi = async (body,header) => {
       return err;
     });
 };
+
+export const getFieldFormListApi = async (body,header) => {
+  return await axios
+    .get(`/api/v1/admin/lead-form-template/get-list?id=${body}`,{ headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+
+export const addFieldFormApi = async (body, header) => {
+  return await axios
+    .post(`/api/v1/admin/lead-form-template/add`, body,{ headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
