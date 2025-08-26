@@ -70,6 +70,7 @@ export async function POST(request) {
               user_name: { $first: '$user_name' },
               user_id: { $first: '$user_id' },
               email: { $first: '$email' },
+              mobile: { $first: '$mobile' },
               c_about_user: { $first: '$c_about_user' },
               password: { $first: '$password' },
               role: { $first: '$role' },
@@ -117,6 +118,7 @@ export async function POST(request) {
               last_name: 1,
               user_name: 1,
               email: 1,
+              mobile: 1,
               c_about_user: 1,
               password: 1,
               role: 1,
@@ -158,6 +160,7 @@ export async function POST(request) {
                     if (user.email) {
                         try {
                             user.email = maskEmail(decrypCryptoRequest(user.email));
+                            user.mobile = maskEmail(decrypCryptoRequest(user.mobile));
                         } catch (err) {
                             console.error("Email decryption failed:", err);
                         }

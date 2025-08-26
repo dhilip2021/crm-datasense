@@ -13,7 +13,17 @@ import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import CardContent from '@mui/material/CardContent'
 import InputAdornment from '@mui/material/InputAdornment'
-import { Box, Checkbox, FormControl, FormControlLabel, IconButton, InputLabel, MenuItem, OutlinedInput, Select } from '@mui/material'
+import {
+  Box,
+  Checkbox,
+  FormControl,
+  FormControlLabel,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  OutlinedInput,
+  Select
+} from '@mui/material'
 
 //3rd Party api
 import { ToastContainer, toast } from 'react-toastify'
@@ -21,9 +31,8 @@ import { ToastContainer, toast } from 'react-toastify'
 // Component Imports
 import Form from '@components/Form'
 import { capitalizeWords, decrypCryptoRequest, encryptCryptoResponse, normalizeEmail } from '@/helper/frontendHelper'
-import { craeteUserApi, getUserListApi, userPrivilegeApi } from '@/apiFunctions/ApiAction'
+import { checkMailApi, craeteUserApi, getUserListApi, userPrivilegeApi } from '@/apiFunctions/ApiAction'
 import Link from 'next/link'
-
 
 const isEmail = email => {
   var emailFormat = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/
@@ -61,14 +70,6 @@ const UserTable = () => {
     n_status: 1
   })
 
-  const handleCheck = (e) => {
-    if (e.target.checked) {
-      setInputs({ ...inputs, n_status: 1 });
-    } else {
-      setInputs({ ...inputs, n_status: 0 });
-    }
-  };
-
   const [errors, setErrors] = useState({
     id: false,
     first_name: false,
@@ -77,10 +78,70 @@ const UserTable = () => {
     password: false,
     c_role_id: false,
     c_about_user: false,
-    n_status:false
+    n_status: false
   })
 
+  const handleCheck = e => {
+    if (e.target.checked) {
+      setInputs({ ...inputs, n_status: 1 })
+    } else {
+      setInputs({ ...inputs, n_status: 0 })
+    }
+  }
+
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
+
+  const handleBlur = e => {
+    const { name, value } = e.target
+    if(name === "email"){
+      checkMail(value)
+    }
+  }
+
+  const checkMail = async mail => {
+    try {
+      if (!mail || mail.trim() === '') return false
+
+      const body = { email: mail }
+
+      setLoader(true)
+      const checkEmail = await checkMailApi(body)
+      setLoader(false)
+
+      if (checkEmail?.appStatusCode === 4) {
+        // user exists
+        setErrors(prev => ({ ...prev, email: true }))
+
+        toast.error('Email already exists!', {
+          autoClose: 500, // 1 second la close
+          position: 'bottom-center',
+          hideProgressBar: true, // progress bar venam na
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined
+        })
+
+        return false
+      } else {
+        setErrors(prev => ({ ...prev, email: false }))
+        return true
+      }
+    } catch (err) {
+      setLoader(false)
+      toast.error('Something went wrong while checking email', {
+        autoClose: 500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
+
+      return false
+    }
+  }
 
   const handleOnChange = e => {
     const { name, value } = e.target
@@ -96,23 +157,66 @@ const UserTable = () => {
       setErrors({ ...errors, [name]: false })
     }
   }
-
+  // ✅ form submit
   const handleSubmit = async () => {
-    if (inputs?.first_name === '') {
-      setErrors({ ...errors, first_name: true })
-    } else if (inputs?.last_name === '') {
-      setErrors({ ...errors, last_name: true })
-    } else if (inputs?.email === '') {
-      setErrors({ ...errors, email: true })
-    } else if (!isEmail(inputs?.email)) {
-      setErrors({ ...errors, email: true })
-    } else if (inputs?.password === '') {
-      setErrors({ ...errors, password: true })
-    } else if (!inputs?.password.match(passRegex) && !edit) {
-      setErrors({ ...errors, password: true })
-    } else if (inputs?.c_role_id === '') {
-      setErrors({ ...errors, c_role_id: true })
-    } else {
+    try {
+      // validate required fields
+      if (inputs?.first_name === '') {
+        setErrors({ ...errors, first_name: true })
+        return
+      }
+      if (inputs?.last_name === '') {
+        setErrors({ ...errors, last_name: true })
+        return
+      }
+      if (inputs?.email === '') {
+        setErrors({ ...errors, email: true })
+        return
+      }
+      if (!isEmail(inputs?.email)) {
+        setErrors({ ...errors, email: true })
+
+        toast.error('Please enter valid Email', {
+          autoClose: 500, // 1 second la close
+          position: 'bottom-center',
+          hideProgressBar: true, // progress bar venam na
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined
+        })
+
+        return
+      }
+      if (inputs?.password === '' && !edit) {
+        setErrors({ ...errors, password: true })
+        return
+      }
+      if (!inputs?.password.match(passRegex) && !edit) {
+        setErrors({ ...errors, password: true })
+
+        toast.error('Use strong password with letters, numbers & symbols', {
+          autoClose: 500, // 1 second la close
+          position: 'bottom-center',
+          hideProgressBar: true, // progress bar venam na
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined
+        })
+
+        return
+      }
+      if (inputs?.c_role_id === '') {
+        setErrors({ ...errors, c_role_id: true })
+        return
+      }
+
+      // ✅ check email availability before submit
+      const emailAvailable = await checkMail(inputs?.email)
+      if (!emailAvailable) return // stop if already exists
+
+      // ✅ prepare body
       const body = {
         organization_id: organization_id,
         first_name: inputs?.first_name,
@@ -124,32 +228,45 @@ const UserTable = () => {
         n_status: inputs?.n_status
       }
 
-       const enycryptDAta = encryptCryptoResponse(body) 
-      //  const deCrypttDAta = decrypCryptoRequest(enycryptDAta) 
-
-      const dataValue= {
-        data : enycryptDAta
-      }
-
-      if(!edit){
+      if (!edit) {
         body['password'] = inputs?.password
       }
       if (inputs?.id !== '') {
         body['Id'] = inputs?.id
       }
 
-      setLoader(true)
+      const enycryptDAta = encryptCryptoResponse(body)
+      const dataValue = { data: enycryptDAta }
 
+      // ✅ API call
+      setLoader(true)
       const results = await craeteUserApi(dataValue)
+      setLoader(false)
+
       if (results?.appStatusCode !== 0) {
-        setLoader(false)
-        toast?.error(results?.error)
+        toast.error(results?.error || 'Something went wrong', {
+          autoClose: 500, // 1 second la close
+          position: 'bottom-center',
+          hideProgressBar: true, // progress bar venam na
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined
+        })
       } else {
-        setLoader(false)
-        toast?.success(results?.message)
+        toast.success(results?.message || 'User created successfully!', {
+          autoClose: 500, // 1 second la close
+          position: 'bottom-center',
+          hideProgressBar: true, // progress bar venam na
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined
+        })
+
         router.push('/users-list')
         setInputs({
-          id:"",
+          id: '',
           first_name: '',
           last_name: '',
           email: '',
@@ -158,6 +275,17 @@ const UserTable = () => {
           c_about_user: ''
         })
       }
+    } catch (err) {
+      setLoader(false)
+      toast.error('Unexpected error occurred!', {
+        autoClose: 500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
     }
   }
 
@@ -175,7 +303,7 @@ const UserTable = () => {
           id: results?.payloadJson[0]?._id,
           first_name: results?.payloadJson[0]?.first_name,
           last_name: results?.payloadJson[0]?.last_name,
-          email: results?.payloadJson[0]?.email,
+          email: decrypCryptoRequest(results?.payloadJson[0]?.email),
           password: results?.payloadJson[0]?.password,
           c_role_id: results?.payloadJson[0]?.c_role_id,
           c_about_user: results?.payloadJson[0]?.c_about_user,
@@ -209,13 +337,11 @@ const UserTable = () => {
     }
   }, [userId])
 
-
   useEffect(() => {
-    if(menuList?.length === 1 ){
-      setInputs({ ...inputs, "c_role_id":  menuList[0]?.c_role_id})
+    if (menuList?.length === 1) {
+      setInputs({ ...inputs, c_role_id: menuList[0]?.c_role_id })
     }
   }, [menuList])
-  
 
   useEffect(() => {
     GetAllRoleList()
@@ -291,7 +417,13 @@ const UserTable = () => {
                   value={inputs.email}
                   onChange={handleOnChange}
                   error={errors?.email}
-                  helperText={errors?.email && 'Please enter valid Email'}
+                  helperText={
+                    errors?.email && inputs?.email === ''
+                      ? 'Please enter valid Email'
+                      : errors?.email
+                        ? 'Email already exists!'
+                        : ''
+                  }
                   placeholder='johndoe@gmail.com'
                   InputProps={{
                     startAdornment: (
@@ -301,6 +433,7 @@ const UserTable = () => {
                     )
                   }}
                   size='small'
+                  onBlur={e => handleBlur(e)}
                 />
               </Grid>
               <Grid item xs={12} md={4}>
@@ -385,15 +518,14 @@ const UserTable = () => {
                 />
               </Grid>
               <Grid item xs={12} md={12}>
-              <FormControlLabel
-              control={<Checkbox />}
-              onChange={handleCheck}
-              checked={inputs?.n_status === 1}
-              label="Status"
-            />
-                </Grid>
-            
-         
+                <FormControlLabel
+                  control={<Checkbox />}
+                  onChange={handleCheck}
+                  checked={inputs?.n_status === 1}
+                  label='Status'
+                />
+              </Grid>
+
               <Grid item xs={12}>
                 <Box display={'flex'} justifyContent={'space-between'} width={'100%'} pl={2} pr={2} mt={4}>
                   <Link href={'/users-list'}>

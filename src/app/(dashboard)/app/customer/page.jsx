@@ -214,7 +214,6 @@ const CustomerTable = () => {
       })
 
       const data = await res.json()
-      console.log(data,"<<< DATAAAA")
        toast.success(data.message, {
                 autoClose: 500, // 1 second la close
                 position: 'bottom-center',
