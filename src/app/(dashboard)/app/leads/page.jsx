@@ -7,10 +7,13 @@ import {
   Button,
   Card,
   CardContent,
+  Checkbox,
   Chip,
   Divider,
   Grid,
   LinearProgress,
+  ListItemText,
+  Menu,
   MenuItem,
   Skeleton,
   Table,
@@ -50,6 +53,16 @@ const LeadTable = () => {
   const [fileName, setFileName] = useState('')
   const [selectedFile, setSelectedFile] = React.useState(null)
 
+  const [anchorPdfEl, setAnchorPdfEl] = useState(null)
+  const [selectedPdfFields, setSelectedPdfFields] = useState([])
+  const dynamicPdfFields = data.length > 0 ? Object.keys(data[0].values) : []
+  const fieldsPdf = [...new Set([...dynamicPdfFields])]
+
+  const [anchorExcelEl, setAnchorExcelEl] = useState(null)
+  const [selectedExcelFields, setSelectedExcelFields] = useState([])
+  const dynamicExcelFields = data.length > 0 ? Object.keys(data[0].values) : []
+  const fieldsExcel = [...new Set([...dynamicPdfFields])]
+
   const [filters, setFilters] = useState({
     status: '',
     source: '',
@@ -85,11 +98,6 @@ const LeadTable = () => {
       const res = await fetch(`/api/v1/admin/lead-form/list?${query}`)
       const json = await res.json()
       if (json.success) {
-
-        console.log(json.data,"<<< DATAAAAAA")
-
-
-
         setData(json.data)
         setDataFilter(json.data)
         setTotal(json.total)
@@ -98,6 +106,38 @@ const LeadTable = () => {
       console.error(err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handlePDFClick = event => {
+    setAnchorPdfEl(event.currentTarget)
+  }
+
+  const handlePdfClose = () => {
+    setAnchorPdfEl(null)
+  }
+
+  const handlePdfToggle = field => {
+    if (selectedPdfFields.includes(field)) {
+      setSelectedPdfFields(prev => prev.filter(f => f !== field))
+    } else {
+      setSelectedPdfFields(prev => [...prev, field])
+    }
+  }
+
+  const handleExcelClick = event => {
+    setAnchorExcelEl(event.currentTarget)
+  }
+
+  const handleExcelClose = () => {
+    setAnchorExcelEl(null)
+  }
+
+  const handleExcelToggle = field => {
+    if (selectedExcelFields.includes(field)) {
+      setSelectedExcelFields(prev => prev.filter(f => f !== field))
+    } else {
+      setSelectedExcelFields(prev => [...prev, field])
     }
   }
 
@@ -140,54 +180,121 @@ const LeadTable = () => {
   }, [page, limit])
 
   const exportToExcel = () => {
-    const rows = data.map(d => ({
-      'Lead ID': d.lead_id,
-      Name: d.values['First Name'],
-      Company: d.values['Company'],
-      Location: d.values['City'],
-      Status: d.values['Lead Status'],
-      'Assigned To': d.values['Lead Owner'],
-      Source: d.values['Lead Source'],
-      Score: d.values['lead_score'],
-      // 'Last Contact Date': d.values['Last Contact Date'],
-      'Last Contact Date': d.updatedAt,
-      'Next Follow-up': d.values['Next Follow-up Date']
-    }))
-    const sheet = XLSX.utils.json_to_sheet(rows)
+    if (selectedExcelFields.length === 0) {
+      toast.error('Please select at least one field to export')
+      return
+    }
+
+    // Columns → selected fields
+    const columns = selectedExcelFields
+
+    // Rows → map each lead values to only selected fields
+    const rows = data.map(d => {
+      const row = {}
+      selectedExcelFields.forEach(field => {
+        switch (field) {
+          case 'Lead ID':
+            row[field] = d.lead_id
+            break
+          case 'Name':
+            row[field] = d.values['First Name'] || ''
+            break
+          case 'Company':
+            row[field] = d.values['Company'] || ''
+            break
+          case 'Status':
+            row[field] = d.values['Lead Status'] || ''
+            break
+          case 'Assigned To':
+            row[field] = d.values['Lead Owner'] || ''
+            break
+          case 'Phone':
+            row[field] = d.values['Phone'] || ''
+            break
+          case 'Email':
+            row[field] = d.values['Email'] || ''
+            break
+          case 'City':
+            row[field] = d.values['City'] || ''
+            break
+          case 'Country':
+            row[field] = d.values['Country'] || ''
+            break
+          case 'Next Follow-up Date':
+            row[field] = d.values['Next Follow-up Date'] ? formatDateShort(d.values['Next Follow-up Date']) : ''
+            break
+          case 'Last Contact Date':
+            row[field] = converDayJsDate(d.updatedAt)
+            break
+          case 'Score':
+            row[field] = d.values['Score'] || 0
+            break
+          default:
+            row[field] = d.values[field] || '' // fallback for dynamic fields
+        }
+      })
+      return row
+    })
+
+    // Convert to sheet
+    const sheet = XLSX.utils.json_to_sheet(rows, { header: columns })
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, sheet, 'Leads')
     XLSX.writeFile(wb, 'leads_export.xlsx')
+
+    handleExcelClose()
   }
 
+  // Replace your existing exportToPDF function with this:
   const exportToPDF = () => {
+    if (selectedPdfFields.length === 0) {
+      toast.error('Please select at least one field to export')
+      return
+    }
+
     const doc = new jsPDF()
-    const columns = [
-      'Lead ID',
-      'Name',
-      'Company',
-      'Location',
-      'Status',
-      'Assigned To',
-      'Source',
-      'Score',
-      'Last Contact Date',
-      'Next Follow-up'
-    ]
-    const rows = data.map(d => [
-      d.lead_id,
-      d.values['First Name'],
-      d.values['Company'],
-      d.values['City'],
-      d.values['Lead Status'],
-      d.values['Lead Owner'],
-      d.values['Lead Source'],
-      d.values['lead_score'],
-      // d.values['Last Contact Date'],
-      d.updatedAt,
-      d.values['Next Follow-up Date']
-    ])
+
+    // PDF columns → selectedPdfFields la irukkara names
+    const columns = selectedPdfFields
+
+    // PDF rows → dynamic mapping from data
+    const rows = data.map(d =>
+      selectedPdfFields.map(field => {
+        switch (field) {
+          case 'Lead ID':
+            return d.lead_id
+          case 'Name':
+            return d.values['First Name'] || ''
+          case 'Company':
+            return d.values['Company'] || ''
+          case 'Status':
+            return d.values['Lead Status'] || ''
+          case 'Assigned To':
+            return d.values['Lead Owner'] || ''
+          case 'Phone':
+            return d.values['Phone'] || ''
+          case 'Email':
+            return d.values['Email'] || ''
+          case 'City':
+            return d.values['City'] || ''
+          case 'Country':
+            return d.values['Country'] || ''
+          case 'Next Follow-up Date':
+            return d.values['Next Follow-up Date'] ? formatDateShort(d.values['Next Follow-up Date']) : ''
+          case 'Last Contact Date':
+            return converDayJsDate(d.updatedAt)
+          case 'Score':
+            return d.values['Score'] || 0
+          default:
+            return d.values[field] || '' // fallback
+        }
+      })
+    )
+
     autoTable(doc, { head: [columns], body: rows })
     doc.save('leads_export.pdf')
+
+    handlePdfClose()
   }
 
   const uniqueSources = useMemo(() => {
@@ -417,12 +524,98 @@ const LeadTable = () => {
           </Grid>
 
           <Box mt={2} display='flex' justifyContent={'flex-end'} gap={1}>
-            <Button variant='outlined' onClick={exportToExcel} startIcon={<GridOnIcon />}>
+            <Button variant='outlined' onClick={handleExcelClick} startIcon={<GridOnIcon />}>
               Export Excel
             </Button>
-            <Button variant='outlined' onClick={exportToPDF} startIcon={<PictureAsPdfIcon />}>
+
+            {/* Excel Menu */}
+            <Menu
+              anchorEl={anchorExcelEl}
+              open={Boolean(anchorExcelEl)}
+              onClose={handleExcelClose}
+              PaperProps={{
+                style: { maxHeight: 300, width: 250 }
+              }}
+            >
+              {/* Select All */}
+              <MenuItem
+                onClick={() => {
+                  if (selectedExcelFields.length === fieldsExcel.length) {
+                    setSelectedExcelFields([]) // unselect all
+                  } else {
+                    setSelectedExcelFields(fieldsExcel) // select all
+                  }
+                }}
+              >
+                <Checkbox
+                  checked={selectedExcelFields.length === fieldsExcel.length}
+                  indeterminate={selectedExcelFields.length > 0 && selectedExcelFields.length < fieldsExcel.length}
+                />
+                <ListItemText primary='Select All' primaryTypographyProps={{ fontWeight: 'bold' }} />
+              </MenuItem>
+
+              <Divider />
+
+              {/* Individual fields */}
+              {fieldsExcel.map(field => (
+                <MenuItem key={field} onClick={() => handleExcelToggle(field)}>
+                  <Checkbox checked={selectedExcelFields.includes(field)} />
+                  <ListItemText primary={field} />
+                </MenuItem>
+              ))}
+
+              <Divider />
+              <MenuItem onClick={exportToExcel} sx={{ fontWeight: 'bold', color: 'red', textAlign:'center' }}>
+                Confirm Export
+              </MenuItem>
+            </Menu>
+
+            {/* 🔥 FIX HERE - use handlePDFClick instead of handleDrop */}
+            <Button variant='outlined' onClick={handlePDFClick} startIcon={<PictureAsPdfIcon />}>
               Export PDF
             </Button>
+
+            {/* PDF Menu */}
+            <Menu
+              anchorEl={anchorPdfEl}
+              open={Boolean(anchorPdfEl)}
+              onClose={handlePdfClose}
+              PaperProps={{
+                style: { maxHeight: 300, width: 250 }
+              }}
+            >
+              {/* Select All */}
+              <MenuItem
+                onClick={() => {
+                  if (selectedPdfFields.length === fieldsPdf.length) {
+                    setSelectedPdfFields([]) // unselect all
+                  } else {
+                    setSelectedPdfFields(fieldsPdf) // select all
+                  }
+                }}
+              >
+                <Checkbox
+                  checked={selectedPdfFields.length === fieldsPdf.length}
+                  indeterminate={selectedPdfFields.length > 0 && selectedPdfFields.length < fieldsPdf.length}
+                />
+                <ListItemText primary='Select All' primaryTypographyProps={{ fontWeight: 'bold' }} />
+              </MenuItem>
+
+              <Divider />
+
+              {/* Individual fields */}
+              {fieldsPdf.map(field => (
+                <MenuItem key={field} onClick={() => handlePdfToggle(field)}>
+                  <Checkbox checked={selectedPdfFields.includes(field)} />
+                  <ListItemText primary={field} />
+                </MenuItem>
+              ))}
+
+              <Divider />
+              <MenuItem onClick={exportToPDF} sx={{ fontWeight: 'bold', color: 'red', textAlign:'center' }}>
+                Confirm Export
+              </MenuItem>
+            </Menu>
           </Box>
 
           <Divider sx={{ my: 2 }} />
@@ -492,7 +685,10 @@ const LeadTable = () => {
                             minWidth: 120
                           }}
                         >
-                          <Link href={`/view/lead-form/${encodeURIComponent(encryptCryptoRes(row.lead_id))}`} style={{ textDecoration: 'none' }}>
+                          <Link
+                            href={`/view/lead-form/${encodeURIComponent(encryptCryptoRes(row.lead_id))}`}
+                            style={{ textDecoration: 'none' }}
+                          >
                             <strong>{row.lead_id}</strong>
                           </Link>
                         </TableCell>
@@ -504,23 +700,19 @@ const LeadTable = () => {
                         </TableCell>
                         <TableCell>{row.values['City']}</TableCell>
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
-                          <Chip 
-                          label={row.values['Timeline to Buy']}
-
-                             sx={{
+                          <Chip
+                            label={row.values['Timeline to Buy']}
+                            sx={{
                               backgroundColor:
-                                (row.values['Timeline to Buy']) == "3–6 Months"
+                                row.values['Timeline to Buy'] == '3–6 Months'
                                   ? '#00FF48'
-                                  : (row.values['Timeline to Buy'] ) == "6+ Months"
+                                  : row.values['Timeline to Buy'] == '6+ Months'
                                     ? '#FF8800'
                                     : '#FF0000',
                               fontWeight: 'bold'
                             }}
                             size='small'
-
-
                           />
-                          
                         </TableCell>
                         <TableCell>
                           <Chip
@@ -602,7 +794,10 @@ const LeadTable = () => {
                         <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           <Box display={'flex'}>
                             <Tooltip title={`Edit ${row.values['First Name']} Lead`} arrow>
-                              <Link href={`/app/lead-form/${encodeURIComponent(encryptCryptoRes(row.lead_id))}`} style={{ textDecoration: 'none' }}>
+                              <Link
+                                href={`/app/lead-form/${encodeURIComponent(encryptCryptoRes(row.lead_id))}`}
+                                style={{ textDecoration: 'none' }}
+                              >
                                 <i className='ri-edit-box-line' style={{ color: '#4caf50', cursor: 'pointer' }}></i>
                               </Link>
                             </Tooltip>
