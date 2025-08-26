@@ -1,0 +1,23 @@
+┌────────────┐       ┌────────────┐        ┌─────────────┐
+│   User     │       │    Role    │        │ Permission  │
+│────────────│       │────────────│        │─────────────│
+│ user_id PK │◄─────▶│ role_id PK │◄──────▶│ permission_id PK
+│ name       │       │ name       │        │ name        │
+│ email      │       │ parent_role│        │ module      │
+│ role_id FK │       │ desc       │        │ description │
+└────────────┘       └────────────┘        └─────────────┘
+                          ▲  ▲
+                          │  │
+                          │  │
+                 ┌─────────┘  └───────────┐
+                 │                        │
+        ┌───────────────────┐     ┌───────────────────┐
+        │   RolePermission  │     │   SharingRule     │
+        │───────────────────│     │───────────────────│
+        │ id (PK)           │     │ rule_id (PK)      │
+        │ role_id (FK)      │     │ module            │
+        │ permission_id (FK)│     │ shared_by_role_id │
+        └───────────────────┘     │ shared_to_role_id │
+                                   │ permission        │
+                                   │ conditions (JSON) │
+                                   └───────────────────┘
