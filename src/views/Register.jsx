@@ -282,7 +282,7 @@ const Register = ({ mode }) => {
                 organization_id: result?.payloadJson?.organization_id,
                 first_name: inputs?.first_name,
                 last_name: inputs?.last_name,
-                 c_about_user: 'Admin',
+                c_about_user: 'Admin',
                 email: inputs?.email,
                 mobile: inputs?.mobile,
                 role: '',

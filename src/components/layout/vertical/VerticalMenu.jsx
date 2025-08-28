@@ -86,22 +86,21 @@ const VerticalMenu = ({ scrollMenu }) => {
             Customer
           </MenuItem>
         </SubMenu>
-          <SubMenu label='Master' icon={<i className='ri-bar-chart-box-line' />}>
-            <MenuItem href='/salutation' icon={<i className='ri-id-card-line' />}>
-              Salutation
-            </MenuItem>
-            <MenuItem href='/gender' icon={<i className='ri-women-line' />}>
-              Gender
-            </MenuItem>
+        <SubMenu label='Master' icon={<i className='ri-bar-chart-box-line' />}>
+          <MenuItem href='/salutation' icon={<i className='ri-id-card-line' />}>
+            Salutation
+          </MenuItem>
+          <MenuItem href='/gender' icon={<i className='ri-women-line' />}>
+            Gender
+          </MenuItem>
 
-            <MenuItem href='/territory' icon={<i className='ri-map-pin-line' />}>
-              Territory
-            </MenuItem>
-            <MenuItem href='/campaign-type' icon={<i className='ri-map-pin-line' />}>
-              Campaign Type
-            </MenuItem>
-          </SubMenu>
-
+          <MenuItem href='/territory' icon={<i className='ri-map-pin-line' />}>
+            Territory
+          </MenuItem>
+          <MenuItem href='/campaign-type' icon={<i className='ri-map-pin-line' />}>
+            Campaign Type
+          </MenuItem>
+        </SubMenu>
 
         {/* <MenuSection label='Master'>
           
@@ -157,19 +156,16 @@ const VerticalMenu = ({ scrollMenu }) => {
         <MenuSection label='Settings'>
           <SubMenu label='Settings' icon={<i className='ri-settings-3-line' />}>
             <MenuItem href='/profile-settings'>Profile Setting</MenuItem>
+            <MenuItem href='/users-list' icon={<i className='ri-user-line' />}>
+              Users List
+            </MenuItem>
+            <SubMenu label='Roles & Permissions' icon={<i className='ri-settings-3-line' />}>
+              <MenuItem href='/roles'>Roles</MenuItem>
+              <MenuItem href='/permissions'>Permissions</MenuItem>
+            </SubMenu>
 
-            {(role_id === '16f01165898b' || role_id === '27f01165688z') && (
-              <MenuItem href='/users-list' icon={<i className='ri-user-line' />}>
-                Users List
-              </MenuItem>
-            )}
 
-            {(role_id === '16f01165898b' || role_id === '27f01165688z') && (
-              <SubMenu label='Roles & Permissions' icon={<i className='ri-settings-3-line' />}>
-                <MenuItem href='/roles'>Roles</MenuItem>
-                <MenuItem href='/permissions'>Permissions</MenuItem>
-              </SubMenu>
-            )}
+
             <MenuItem href='/fields/list-fields' icon={<i className='ri-input-field' />}>
               Lead Field
             </MenuItem>
