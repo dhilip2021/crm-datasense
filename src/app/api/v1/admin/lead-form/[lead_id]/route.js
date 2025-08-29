@@ -1,11 +1,12 @@
 // File: app/api/v1/admin/lead-form/[lead_id]/route.js
 
+import { verifyAccessToken } from '@/helper/clientHelper'
 import connectMongoDB from '@/libs/mongodb'
 import Leadform from '@/models/Leadform'
 import { NextResponse } from 'next/server'
 
 // 🔥 Lead Scoring Logic
-const calculateLeadScore = (values) => {
+const calculateLeadScore = values => {
   let score = 0
 
   // 🧩 Demographic
@@ -14,19 +15,47 @@ const calculateLeadScore = (values) => {
   const industry = values['Industry']
   const location = values['City']
 
-  if (designation && ['Chief Financial Officer', 'Architect', 'Building services engineer','Licensed conveyancer','Sports development officer', 'CEO', 'Manager', 'Founder'].includes(designation)) score += 25
+  if (
+    designation &&
+    [
+      'Chief Financial Officer',
+      'Architect',
+      'Building services engineer',
+      'Licensed conveyancer',
+      'Sports development officer',
+      'CEO',
+      'Manager',
+      'Founder'
+    ].includes(designation)
+  )
+    score += 25
   if (companySize && parseInt(companySize) > 50) score += 15
-  if (industry && ['Logistics', 'Manufacturing', 'Logistics','FMCG','Education','Pharma','Retail'].includes(industry)) score += 20
-  if (location && ['Kennethchester','North Austinville','Port Heathertown','South Samanthamouth','Chennai', 'Coimabtore', 'Bangalore','Delhi'].includes(location)) score += 10
+  if (
+    industry &&
+    ['Logistics', 'Manufacturing', 'Logistics', 'FMCG', 'Education', 'Pharma', 'Retail'].includes(industry)
+  )
+    score += 20
+  if (
+    location &&
+    [
+      'Kennethchester',
+      'North Austinville',
+      'Port Heathertown',
+      'South Samanthamouth',
+      'Chennai',
+      'Coimabtore',
+      'Bangalore',
+      'Delhi'
+    ].includes(location)
+  )
+    score += 10
 
   // 📈 Behavioral
   if (Object.values(values).length >= 8) score += 15
   if (values['Clicked Email'] || values['Opened WhatsApp']) score += 10
   if (values['Requested Demo'] || values['Asked for Quote']) score += 20
-  if (
-    values['Last Contact Date'] &&
-    new Date(values['Last Contact Date']) < Date.now() - 7 * 24 * 60 * 60 * 1000
-  ) score -= 10
+  if (values['Last Contact Date'] && new Date(values['Last Contact Date']) < Date.now() - 7 * 24 * 60 * 60 * 1000)
+    score -= 10
 
   // 🏷️ Lead Label
   let label = 'Cold Lead'
@@ -37,36 +66,38 @@ const calculateLeadScore = (values) => {
 }
 
 export async function GET(req, { params }) {
+  const verified = verifyAccessToken()
   await connectMongoDB()
+  if (verified.success) {
+    try {
+      const { lead_id } = params
 
-  try {
-    const { lead_id } = params
+      if (!lead_id) {
+        return NextResponse.json({ success: false, message: 'Missing lead_id' }, { status: 400 })
+      }
 
-    if (!lead_id) {
-      return NextResponse.json(
-        { success: false, message: 'Missing lead_id' },
-        { status: 400 }
-      )
+      const lead = await Leadform.findOne({ lead_id }).select('-__v').lean()
+
+      if (!lead) {
+        return NextResponse.json({ success: false, message: 'Lead not found' }, { status: 404 })
+      }
+
+      return NextResponse.json({
+        success: true,
+        data: lead
+      })
+    } catch (error) {
+      console.error('⨯ Lead fetch error:', error)
+      return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
     }
-
-    const lead = await Leadform.findOne({ lead_id }).select('-__v').lean()
-
-    if (!lead) {
-      return NextResponse.json(
-        { success: false, message: 'Lead not found' },
-        { status: 404 }
-      )
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: lead
-    })
-  } catch (error) {
-    console.error('⨯ Lead fetch error:', error)
+  } else {
     return NextResponse.json(
-      { success: false, message: 'Internal Server Error' },
-      { status: 500 }
+      {
+        success: false,
+        message: '',
+        error: 'token expired!'
+      },
+      { status: 400 }
     )
   }
 }
@@ -120,114 +151,123 @@ export async function GET(req, { params }) {
 //   }
 // }
 
-
 // 🔁 PUT – Update lead by lead_id
 export async function PUT(req, { params }) {
+  const verified = verifyAccessToken()
+
   await connectMongoDB()
   const { lead_id } = params
   const body = await req.json()
 
-  try {
-    const lead = await Leadform.findOne({ lead_id })
+  if (verified.success) {
+    try {
+      const lead = await Leadform.findOne({ lead_id })
 
-    if (!lead) {
-      return NextResponse.json(
-        { success: false, message: 'Lead not found' },
-        { status: 404 }
-      )
+      if (!lead) {
+        return NextResponse.json({ success: false, message: 'Lead not found' }, { status: 404 })
+      }
+
+      // 🔁 Recalculate lead score before update
+      const { lead_score, lead_label } = calculateLeadScore(body.values || {})
+
+      const updatedValues = {
+        ...body.values,
+        Score: lead_score,
+        Label: lead_label
+      }
+
+      // 📝 Fields to update
+      const updateFields = {
+        values: updatedValues,
+        updatedAt: new Date()
+      }
+
+      // 🚀 Include lead_name if provided
+      if (body.lead_name) {
+        updateFields.lead_name = body.lead_name
+      }
+
+      if (body.lead_slug_name) {
+        updateFields.lead_slug_name = body.lead_slug_name
+      }
+
+      // 🚀 Include form_name if provided
+      if (body.form_name) {
+        updateFields.form_name = body.form_name
+      }
+
+      const updated = await Leadform.findOneAndUpdate({ lead_id }, { $set: updateFields }, { new: true })
+
+      return NextResponse.json({
+        success: true,
+        message: 'Lead updated successfully !!!',
+        data: updated
+      })
+    } catch (error) {
+      console.error('⨯ Lead update error:', error)
+      return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
     }
-
-    // 🔁 Recalculate lead score before update
-    const { lead_score, lead_label } = calculateLeadScore(body.values || {})
-
-    const updatedValues = {
-      ...body.values,
-      Score: lead_score,
-      Label: lead_label
-    }
-
-    // 📝 Fields to update
-    const updateFields = {
-      values: updatedValues,
-      updatedAt: new Date()
-    }
-
-    // 🚀 Include lead_name if provided
-    if (body.lead_name) {
-      updateFields.lead_name = body.lead_name
-    }
-
-     if (body.lead_slug_name) {
-      updateFields.lead_slug_name = body.lead_slug_name
-    }
-
-    // 🚀 Include form_name if provided
-    if (body.form_name) {
-      updateFields.form_name = body.form_name
-    }
-
-    const updated = await Leadform.findOneAndUpdate(
-      { lead_id },
-      { $set: updateFields },
-      { new: true }
-    )
-
-    return NextResponse.json({
-      success: true,
-      message: 'Lead updated successfully !!!',
-      data: updated
-    })
-  } catch (error) {
-    console.error('⨯ Lead update error:', error)
+  } else {
     return NextResponse.json(
-      { success: false, message: 'Internal Server Error' },
-      { status: 500 }
+      {
+        success: false,
+        message: '',
+        error: 'token expired!'
+      },
+      { status: 400 }
     )
   }
 }
-
-
-
 
 // PATCH – Add Note to Lead
 export async function PATCH(req, { params }) {
+  const verified = verifyAccessToken()
   await connectMongoDB()
   const { lead_id } = params
   const body = await req.json()
 
-  try {
-    const lead = await Leadform.findOne({ lead_id })
-    if (!lead) {
-      return NextResponse.json({ success: false, message: 'Lead not found' }, { status: 404 })
+  if (verified.success) {
+    try {
+      const lead = await Leadform.findOne({ lead_id })
+      if (!lead) {
+        return NextResponse.json({ success: false, message: 'Lead not found' }, { status: 404 })
+      }
+
+      // pick first note from body.values.Notes
+      const noteFromBody = body.values?.Notes?.[0] || {}
+
+      const newNote = {
+        title: noteFromBody.title || null,
+        note: noteFromBody.note || null,
+        createdAt: noteFromBody.createdAt ? new Date(noteFromBody.createdAt) : new Date()
+      }
+
+      const updated = await Leadform.findOneAndUpdate(
+        { lead_id },
+        {
+          $push: { 'values.Notes': newNote },
+          $set: { updatedAt: new Date() }
+        },
+        { new: true, upsert: true }
+      )
+
+      return NextResponse.json({
+        success: true,
+        message: 'Note added successfully',
+        data: updated
+      })
+    } catch (error) {
+      console.error('⨯ Add note error:', error)
+      return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
     }
-
-    // pick first note from body.values.Notes
-    const noteFromBody = body.values?.Notes?.[0] || {}
-
-    const newNote = {
-      title: noteFromBody.title || null,
-      note: noteFromBody.note || null,
-      createdAt: noteFromBody.createdAt ? new Date(noteFromBody.createdAt) : new Date()
-    }
-
-    const updated = await Leadform.findOneAndUpdate(
-      { lead_id },
+  } else {
+    return NextResponse.json(
       {
-        $push: { 'values.Notes': newNote },
-        $set: { updatedAt: new Date() }
+        success: false,
+        message: '',
+        error: 'token expired!'
       },
-      { new: true, upsert: true }
+      { status: 400 }
     )
-
-    return NextResponse.json({
-      success: true,
-      message: 'Note added successfully',
-      data: updated
-    })
-  } catch (error) {
-    console.error('⨯ Add note error:', error)
-    return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
   }
 }
-
-

@@ -175,22 +175,27 @@ function LeadFormAppIdPage() {
     setLoader(false)
 
     if (data.success) {
-     
-
       toast.success(leadId ? 'Lead updated successfully' : 'Form submitted successfully', {
-                            autoClose: 500, // 1 second la close
-                            position: 'bottom-center',
-                            hideProgressBar: true, // progress bar venam na
-                            closeOnClick: true,
-                            pauseOnHover: false,
-                            draggable: false,
-                            progress: undefined
-                          })
-
+        autoClose: 500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
 
       router.push('/app/leads')
     } else {
-      toast.error('Submission failed')
+      toast.error('Submission failed', {
+        autoClose: 500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
     }
   }
 
@@ -205,7 +210,15 @@ function LeadFormAppIdPage() {
       setSections(json.data.sections)
       setFormId(json.data._id)
     } else {
-      toast.error('Form not found')
+      toast.error('Form not found', {
+        autoClose: 500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
     }
     setLoader(false)
   }
@@ -246,7 +259,15 @@ function LeadFormAppIdPage() {
 
       setValues(mappedValues)
     } else {
-      toast.error(data.message || 'Lead not found')
+      toast.error(data.message || 'Lead not found', {
+        autoClose: 500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
     }
     setLoader(false)
   }

@@ -27,6 +27,7 @@ const LeadDetailView = () => {
   const lead_form = 'lead-form'
   const deal_form = 'deal-form'
   const organization_name = Cookies.get('organization_name')
+  const getToken = Cookies.get('_token')
 
   const router = useRouter()
 
@@ -38,8 +39,16 @@ const LeadDetailView = () => {
   // 🔹 fetch template (form structure)
   const fetchFormTemplate = async () => {
     setLoader(true)
+
+    const header = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken}`
+    }
     const res = await fetch(
-      `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${lead_form}`
+      `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${lead_form}`,
+      {
+        headers: header
+      }
     )
     const json = await res.json()
     if (json?.success && json.data?.sections?.length > 0) {
@@ -64,8 +73,14 @@ const LeadDetailView = () => {
   // 🔹 fetch lead by ID
   const fetchLeadFromId = async () => {
     try {
+      const header = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getToken}`
+      }
       setLoader(true)
-      const res = await fetch(`/api/v1/admin/lead-form/${leadId}`)
+      const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
+        headers: header
+      })
       const data = await res.json()
 
       if (data.success) {
@@ -121,9 +136,14 @@ const LeadDetailView = () => {
 
     const bodyData = updateLeadName(leadData?.lead_name, 'DEAL')
 
+    const header = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken}`
+    }
+
     const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: header,
       body: JSON.stringify(bodyData)
     })
 
@@ -134,7 +154,7 @@ const LeadDetailView = () => {
       toast.error('Failed to update field')
       fetchLeadFromId() // rollback if failed
     } else {
-       setLoader(false)
+      setLoader(false)
       toast.success('Lead Converted Successfully', {
         autoClose: 1000, // 1 second la close
         position: 'bottom-center',
@@ -160,10 +180,13 @@ const LeadDetailView = () => {
           [label]: newValue
         }
       }))
-
+      const header = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getToken}`
+      }
       const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: header,
         body: JSON.stringify({
           values: {
             ...leadData.values,
@@ -318,11 +341,14 @@ const LeadDetailView = () => {
 
             {/* Right Side - Button */}
             <Grid item xs={12} md={6} sm={6}>
-              <Button 
-              disabled={loader}
-              startIcon={loader ? <CircularProgress size={18} color="inherit" /> : null}
-              fullWidth variant='contained' onClick={() => handleConvertDeal()}>
-                 {loader ? 'Converting...' : 'Convert to Deal'}
+              <Button
+                disabled={loader}
+                startIcon={loader ? <CircularProgress size={18} color='inherit' /> : null}
+                fullWidth
+                variant='contained'
+                onClick={() => handleConvertDeal()}
+              >
+                {loader ? 'Converting...' : 'Convert to Deal'}
               </Button>
             </Grid>
           </Grid>

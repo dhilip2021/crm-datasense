@@ -16,6 +16,7 @@ import {
   Menu,
   MenuItem,
   Skeleton,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -201,7 +202,15 @@ const LeadTable = () => {
 
   const exportToExcel = () => {
     if (selectedExcelFields.length === 0) {
-      toast.error('Please select at least one field to export')
+       toast.error('Please select at least one field to export', {
+                autoClose: 500, // 1 second la close
+                position: 'bottom-center',
+                hideProgressBar: true, // progress bar venam na
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: false,
+                progress: undefined
+              })
       return
     }
 
@@ -268,7 +277,16 @@ const LeadTable = () => {
   // Replace your existing exportToPDF function with this:
   const exportToPDF = () => {
     if (selectedPdfFields.length === 0) {
-      toast.error('Please select at least one field to export')
+      
+      toast.error('Please select at least one field to export', {
+                autoClose: 500, // 1 second la close
+                position: 'bottom-center',
+                hideProgressBar: true, // progress bar venam na
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: false,
+                progress: undefined
+              })
       return
     }
 
@@ -329,7 +347,15 @@ const LeadTable = () => {
     e.preventDefault()
 
     if (!selectedFile) {
-      toast.error('Please select a file')
+      toast.error('Please select a file', {
+                      autoClose: 500, // 1 second la close
+                      position: 'bottom-center',
+                      hideProgressBar: true, // progress bar venam na
+                      closeOnClick: true,
+                      pauseOnHover: false,
+                      draggable: false,
+                      progress: undefined
+                    })
       return
     }
 
@@ -349,7 +375,20 @@ const LeadTable = () => {
       })
 
       const data = await res.json()
-      toast.success(data.message)
+      
+
+      toast.success(data.message, {
+                      autoClose: 500, // 1 second la close
+                      position: 'bottom-center',
+                      hideProgressBar: true, // progress bar venam na
+                      closeOnClick: true,
+                      pauseOnHover: false,
+                      draggable: false,
+                      progress: undefined
+                    })
+
+
+
       fetchData()
       setFileName('')
       setSelectedFile(null)

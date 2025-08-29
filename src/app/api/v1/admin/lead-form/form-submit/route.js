@@ -71,13 +71,10 @@ export async function POST(req) {
   const body = await req.json()
 
   const verified = verifyAccessToken();
+  console.log(verified,"<<< VERIFIEDDDDD")
 
 
     if (verified.success) {
-
-      console.log(verified,"<<<< VERIFIEDDDDD")
-
-
 
        try {
     const { organization_id, organization_name, form_name, values } = body
@@ -175,9 +172,6 @@ export async function POST(req) {
       },
       { status: 400 }
     )
-
-
-
     }
 
 

@@ -119,6 +119,7 @@ export async function POST(req) {
           'lead_label': lead_label
         },
         c_createdBy: verified.data.user_id,
+        c_role_id: verified.data.c_role_id,
         submittedAt: new Date(row['Created Date']),
         updatedAt: new Date(row['Last Contact Date'])
       }

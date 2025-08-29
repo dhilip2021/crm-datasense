@@ -193,12 +193,27 @@ function LeadFormAppPage() {
         })
         router.push('/app/leads')
       } else {
-        toast.error('Submission failed')
+        toast.error('Submission failed', {
+                      autoClose: 500, // 1 second la close
+                      position: 'bottom-center',
+                      hideProgressBar: true, // progress bar venam na
+                      closeOnClick: true,
+                      pauseOnHover: false,
+                      draggable: false,
+                      progress: undefined
+                    })
       }
     } catch (err) {
       setLoader(false)
-      console.error(err)
-      toast.error('Submission failed')
+      toast.error('Submission failed', {
+                      autoClose: 500, // 1 second la close
+                      position: 'bottom-center',
+                      hideProgressBar: true, // progress bar venam na
+                      closeOnClick: true,
+                      pauseOnHover: false,
+                      draggable: false,
+                      progress: undefined
+                    })
     }
   }
 
@@ -226,7 +241,15 @@ function LeadFormAppPage() {
       })
       setValues(defaultValues)
     } else {
-      toast.error('Form not found')
+      toast.error('Form not found', {
+                      autoClose: 500, // 1 second la close
+                      position: 'bottom-center',
+                      hideProgressBar: true, // progress bar venam na
+                      closeOnClick: true,
+                      pauseOnHover: false,
+                      draggable: false,
+                      progress: undefined
+                    })
     }
   }
 
