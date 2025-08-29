@@ -59,6 +59,7 @@ export async function POST(request) {
           }))
 
           const matchedUser = findUserByEmail(dbUsers, dData?.email)
+
           const dataArray = respon.filter(user => user.email.startsWith(matchedUser.email))
           const data = dataArray?.length > 0 ? dataArray[0] : {}
 
@@ -66,11 +67,20 @@ export async function POST(request) {
 
           const orgData = await Organization.findOne({ organization_id: data.organization_id })
 
-          await bcrypt.compare(dData?.password, data.password)
-            .then(async (response) => {
 
+
+
+
+          await bcrypt
+            .compare(dData?.password, data.password)
+            .then(async response => {
               if (response) {
+
+
                 const UserPrivilege = await UserPrivileges.findOne({ c_role_id: data.c_role_id })
+
+               
+
 
                 const date_time = getDateTime()
 
@@ -87,14 +97,21 @@ export async function POST(request) {
 
                 const today = new Date()
                 const nextTenDays = new Date(today.getTime())
-
                 nextTenDays.setDate(nextTenDays.getDate() + 10)
                 const sampleData = [tokenVerify]
+
                 const secretKey = process.env.NEXT_PUBLIC_ENCY_DECY_SECRET
 
                 const encryptedResults = urlEncoder(secretKey, JSON.stringify(sampleData))
 
+               
+
                 if (data.c_role_id) {
+
+                  
+
+                  
+
                   let dataResults = {
                     organization_id: data.organization_id,
                     organization_name: orgData?.organization_name,
@@ -104,7 +121,7 @@ export async function POST(request) {
                     last_name: data.last_name,
                     user_name: data.user_name,
                     c_about_user: data.c_about_user,
-                    email:  maskEmail(decrypCryptoRequest(data.email)),
+                    email: maskEmail(decrypCryptoRequest(data.email)),
                     c_role_id: data.c_role_id,
                     user_id: data.user_id,
                     role: listRes.c_role_name,
@@ -112,6 +129,11 @@ export async function POST(request) {
                     tokenExpiry: nextTenDays,
                     privileges: UserPrivilege.c_role_privileges
                   }
+
+
+                  
+
+                   
 
                   const consolelogdata = new Consolelog({
                     user_id: data._id,
@@ -125,7 +147,7 @@ export async function POST(request) {
 
                   const encdataResults = encryptCryptoResponse(dataResults)
 
-
+                
 
                   sendResponse['appStatusCode'] = 0
                   sendResponse['message'] = `login successfully`
@@ -137,28 +159,29 @@ export async function POST(request) {
                   sendResponse['error'] = 'Invalid role'
                   sendResponse['payloadJson'] = []
                 }
+
+                return NextResponse.json(sendResponse, { status: 200 })
               } else {
                 sendResponse['appStatusCode'] = 4
                 sendResponse['message'] = ''
-                sendResponse['error'] = 'Invalid credential'
+                sendResponse['error'] = 'Invalid credential1'
                 sendResponse['payloadJson'] = []
               }
             })
-            .catch((err) => {
+            .catch(err => {
               sendResponse['appStatusCode'] = 4
               sendResponse['message'] = ''
-              sendResponse['payloadJson'] = []
-              sendResponse['error'] = 'Invalid credential'
+              sendResponse['payloadJson'] = err
+              sendResponse['error'] = 'Invalid credential3'
             })
-
-          
-        }).catch(err => {
+        })
+        .catch(err => {
           sendResponse['appStatusCode'] = 4
           sendResponse['message'] = ''
           sendResponse['payloadJson'] = err
           sendResponse['error'] = 'Please contact your administrator'
         })
-        return NextResponse.json(sendResponse, { status: 200 })
+      return NextResponse.json(sendResponse, { status: 200 })
     } else {
       sendResponse['appStatusCode'] = 4
       sendResponse['message'] = ''

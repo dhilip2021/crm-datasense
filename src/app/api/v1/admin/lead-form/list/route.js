@@ -8,6 +8,9 @@ export async function GET(req) {
   await connectMongoDB()
 
   const verified = verifyAccessToken()
+
+  console.log(verified, '<<< VERIFIEDDD')
+
   if (!verified.success) {
     return NextResponse.json({ success: false, error: 'token expired!' }, { status: 400 })
   }
@@ -33,66 +36,116 @@ export async function GET(req) {
 
     const currentPriority = userRole.c_role_priority
 
-    // 🟢 STEP 2: Find roles within hierarchy (priority >= currentPriority)
-    const allowedRoles = await UserRole.find({ c_role_priority: { $gte: currentPriority } })
-      .select('c_role_id c_role_priority')
-      .lean()
-
-    const allowedRoleIds = allowedRoles.map(r => r.c_role_id)
-
-    // 🟢 STEP 3: Build query
+    // 🟢 STEP 2: Build base query
     let query = {}
 
     if (userRole.c_role_name === 'Super Admin') {
-      // 🔥 Super Admin → All leads
+      // 🔥 Super Admin => All leads
       if (form_name) query.form_name = form_name
     } else {
-      // Others → restrict by org & form
       if (!organization_id || !form_name) {
         return NextResponse.json({ success: false, message: 'Missing organization_id or form_name' }, { status: 400 })
       }
+
       query.organization_id = organization_id
       query.form_name = form_name
 
-      // 🔥 Only include allowed roles leads
-      query.c_role_id = { $in: allowedRoleIds }
-
-      // 🔥 Special case → Sales Executive (lowest priority) can only see own leads
       if (userRole.c_role_name.toLowerCase() === 'sales executive') {
-        query.c_createdBy = verified.data.c_user_id // only own created leads
+        // 🔥 Sales Exec => only own leads
+        query.c_createdBy = verified.data.user_id
+      } else {
+        // 🔥 Admin / Manager => own + lower role leads
+        const lowerRoles = await UserRole.find({ c_role_priority: { $gt: currentPriority } })
+          .select('c_role_id')
+          .lean()
+
+        let lowerRoleIds = lowerRoles.map(r => r.c_role_id)
+
+        // verified.data.c_role_id add pannanum
+        // lowerRoleIds = [...lowerRoleIds]
+        // lowerRoleIds = [verified.data.c_role_id, ...lowerRoleIds]
+
+        // const roleIdsToFetch = [...new Set([verified.data.c_role_id, ...lowerRoleIds])]
+        // console.log(roleIdsToFetch,"<< roleIdsToFetch")
+        
+        query.$or = [
+          { c_createdBy: verified.data.user_id }, // ✅ own leads always
+          { c_role_id: { $in: lowerRoleIds } } // ✅ same role + lower roles
+        ]
       }
     }
 
     // 🔍 Search
     if (search) {
-      query.$or = [
-        { lead_id: { $regex: search, $options: 'i' } },
-        { 'values.First Name': { $regex: search, $options: 'i' } },
-        { 'values.Last Name': { $regex: search, $options: 'i' } },
-        { 'values.Company': { $regex: search, $options: 'i' } },
-        { 'values.Email': { $regex: search, $options: 'i' } },
-        { 'values.Phone': { $regex: search, $options: 'i' } },
-        { 'values.City': { $regex: search, $options: 'i' } },
-        { 'values.Job Title': { $regex: search, $options: 'i' } }
-      ]
+      const searchFilter = {
+        $or: [
+          { lead_id: { $regex: search, $options: 'i' } },
+          { 'values.First Name': { $regex: search, $options: 'i' } },
+          { 'values.Last Name': { $regex: search, $options: 'i' } },
+          { 'values.Company': { $regex: search, $options: 'i' } },
+          { 'values.Email': { $regex: search, $options: 'i' } },
+          { 'values.Phone': { $regex: search, $options: 'i' } },
+          { 'values.City': { $regex: search, $options: 'i' } },
+          { 'values.Job Title': { $regex: search, $options: 'i' } }
+        ]
+      }
+
+      query.$and = query.$and || []
+      query.$and.push(searchFilter)
     }
 
-    if (status) query['values.Lead Status'] = { $regex: status, $options: 'i' }
-    if (source) query['values.Lead Source'] = { $regex: source, $options: 'i' }
+    // 🔍 Status
+    if (status) {
+      query.$and = query.$and || []
+      query.$and.push({ 'values.Lead Status': { $regex: status, $options: 'i' } })
+    }
 
+    // 🔍 Source
+    if (source) {
+      query.$and = query.$and || []
+      query.$and.push({ 'values.Lead Source': { $regex: source, $options: 'i' } })
+    }
+
+    // 🔍 Date Range
     if (from || to) {
-      query.submittedAt = {}
-      if (from) query.submittedAt.$gte = new Date(from)
-      if (to) query.submittedAt.$lte = new Date(to + 'T23:59:59')
+      const dateFilter = {}
+      if (from) dateFilter.$gte = new Date(from)
+      if (to) dateFilter.$lte = new Date(to + 'T23:59:59')
+
+      query.$and = query.$and || []
+      query.$and.push({ submittedAt: dateFilter })
     }
 
     // 🟢 Pagination
     const skip = (page - 1) * limit
 
-    console.log(query, '<<< queryyyy')
-
+    // 🔄 Replace find() with aggregate + lookup
     const [data, total] = await Promise.all([
-      Leadform.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).select('-__v').lean(),
+      Leadform.aggregate([
+        { $match: query },
+        { $sort: { createdAt: -1 } },
+        { $skip: skip },
+        { $limit: limit },
+        {
+          $lookup: {
+            from: 'users', // 🔥 collection name in DB
+            localField: 'c_createdBy',
+            foreignField: 'user_id',
+            as: 'createdUser'
+          }
+        },
+        {
+          $addFields: {
+            createdByName: { $arrayElemAt: ['$createdUser.user_name', 0] }
+          }
+        },
+        {
+          $project: {
+            __v: 0,
+            createdUser: 0
+          }
+        }
+      ]),
       Leadform.countDocuments(query)
     ])
 
