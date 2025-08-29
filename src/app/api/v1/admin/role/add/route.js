@@ -14,7 +14,7 @@ let sendResponse = {
 };
 
 export async function POST(request) {
-  const { c_role_name, Id, n_status } = await request.json();
+  const { c_role_name,c_description, Id, n_status } = await request.json();
 
   try {
     await connectMongoDB();
@@ -34,6 +34,7 @@ export async function POST(request) {
       } else {
         const body = {
           c_role_name: c_role_name,
+          c_description: c_description,
           n_status: n_status,
         };
 
@@ -73,8 +74,15 @@ export async function POST(request) {
 
         return NextResponse.json(sendResponse, { status: 200 });
       } else {
+
+        const lastRole = await UserRole.findOne().sort({ c_role_priority: -1 });
+console.log(lastRole.c_role_priority);
+
+
         let userrole = new UserRole({
           c_role_name,
+          c_description,
+          c_role_priority: lastRole.c_role_priority + 1,
           c_role_id: create_UUID(),
         });
 

@@ -40,6 +40,18 @@ const LeadFormSchema = new mongoose.Schema(
     updatedAt: {
       type: Date,
       default: Date.now
+    },
+    c_role_id: {
+      type: String
+    },
+    c_createdBy: {
+      type: String
+    },
+    c_updatedBy: {
+      type: String
+    },
+    c_deletedBy: {
+      type: String
     }
   },
   { strict: false, versionKey: false, timestamps: true }

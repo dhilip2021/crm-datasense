@@ -7,6 +7,7 @@ import connectMongoDB from '@/libs/mongodb'
 import { User } from '@/models/userModel'
 import { create_UUID, transporter } from '@/helper/clientHelper'
 import { decrypCryptoRequest, encryptCryptoResponse } from '@/helper/frontendHelper'
+import { UserRole } from '@/models/userRoleModel'
 
 const bcrypt = require('bcryptjs')
 
@@ -33,8 +34,6 @@ export async function POST(request) {
   const { data } = await request.json()
 
   const dData = decrypCryptoRequest(data)
-
-  console.log(dData, '<<< DECRYPT DATAAAA')
 
   let passwordCheck = dData?.password ? dData?.password : 'Password@123'
 
@@ -176,33 +175,49 @@ export async function POST(request) {
 
         if (dData?.role !== 'admin' || dData?.role === undefined || dData?.role === '') {
           if (dData?.role === undefined || dData?.role === null || dData?.role === '') {
-            console.log('coming 1')
-
             let data = {
-              organization_id: dData?.organization_id,
-              role: 'admin'
+              organization_id: dData?.organization_id
             }
             const resulData = await User.find(data)
-            const encEmail = encryptCryptoResponse(dData?.email)
-            const encMobile = encryptCryptoResponse(dData?.mobile)
-            const userdata = new User({
-              user_id: create_UUID(),
-              organization_id: dData?.organization_id,
-              first_name: dData?.first_name,
-              last_name: dData?.last_name,
-              user_name,
-              email: encEmail,
-              mobile: encMobile,
-              role: dData?.role ? dData?.role : 'user',
-              slug_name,
-              c_about_user: dData?.c_about_user,
-              c_role_id: dData?.c_role_id,
-              c_user_img_url: dData?.c_user_img_url,
-              password: hashPass,
-              n_status: dData?.n_status ? dData?.n_status : 1
-            })
 
-            if (resulData.length === 0 || resulData === null) {
+            const currentRole = await UserRole.findOne({ c_role_id: resulData[0]?.c_role_id }) // id from JWT/session
+            const newRole = await UserRole.findOne({ c_role_id: dData?.c_role_id })
+
+            if (!currentRole || !newRole) {
+              sendResponse['appStatusCode'] = 4
+              sendResponse['message'] = 'Invalid role setup'
+              sendResponse['payloadJson'] = []
+              sendResponse['error'] = 'Role not found'
+              return NextResponse.json(sendResponse, { status: 200 })
+            }
+
+            // Priority check: only allow creating lower priority role
+            else if (newRole.c_role_priority <= currentRole.c_role_priority) {
+              sendResponse['appStatusCode'] = 4
+              sendResponse['message'] = 'You cannot create this role'
+              sendResponse['payloadJson'] = []
+              sendResponse['error'] = 'Not enough permission'
+              return NextResponse.json(sendResponse, { status: 200 })
+            } else {
+              const encEmail = encryptCryptoResponse(dData?.email)
+              const encMobile = encryptCryptoResponse(dData?.mobile)
+              const userdata = new User({
+                user_id: create_UUID(),
+                organization_id: dData?.organization_id,
+                first_name: dData?.first_name,
+                last_name: dData?.last_name,
+                user_name,
+                email: encEmail,
+                mobile: encMobile,
+                role: dData?.role ? dData?.role : 'user',
+                slug_name,
+                c_about_user: dData?.c_about_user,
+                c_role_id: dData?.c_role_id,
+                c_user_img_url: dData?.c_user_img_url,
+                password: hashPass,
+                n_status: dData?.n_status ? dData?.n_status : 1
+              })
+
               await userdata.save().then(result => {
                 let mailData = {
                   from: '"No Reply" <dhilipbeece001@gmail.com>', // sender address
@@ -221,32 +236,32 @@ export async function POST(request) {
             `
                 const emailRes = emailSend(mailData)
 
-                if (emailRes) {
-                  sendResponse['appStatusCode'] = 0
-                  sendResponse['message'] = 'User added Successfully'
-                  sendResponse['payloadJson'] = result
-                  sendResponse['error'] = 'Email send successfully!'
-                } else {
-                  sendResponse['appStatusCode'] = 0
-                  sendResponse['message'] = 'User added Successfully'
-                  sendResponse['payloadJson'] = result
-                  sendResponse['error'] = 'Email could not send!'
-                }
+                sendResponse['appStatusCode'] = 0
+              sendResponse['message'] = 'User added Successfully'
+              sendResponse['payloadJson'] = result
+              sendResponse['error'] = ''
+              return NextResponse.json(sendResponse, { status: 200 })
+
+                // if (emailRes) {
+                //   sendResponse['appStatusCode'] = 0
+                //   sendResponse['message'] = 'User added Successfully'
+                //   sendResponse['payloadJson'] = result
+                //   sendResponse['error'] = 'Email send successfully!'
+                // } else {
+                //   sendResponse['appStatusCode'] = 0
+                //   sendResponse['message'] = 'User added Successfully'
+                //   sendResponse['payloadJson'] = result
+                //   sendResponse['error'] = 'Email could not send!'
+                // }
               })
-            } else {
-              if (resulData[0].role === 'admin') {
-                sendResponse['appStatusCode'] = 4
-                sendResponse['message'] = 'This access not allowed'
-                sendResponse['payloadJson'] = []
-                sendResponse['error'] = []
-              } else {
-                sendResponse['appStatusCode'] = 4
-                sendResponse['message'] = 'other role not allowed'
-                sendResponse['payloadJson'] = []
-                sendResponse['error'] = []
-              }
+
+              
             }
           } else {
+
+
+
+
             if (dData?.first_name === '') {
               sendResponse['appStatusCode'] = 4
               sendResponse['message'] = 'Please check first name'

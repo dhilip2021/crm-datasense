@@ -621,3 +621,53 @@ export const addFieldFormApi = async (body, header) => {
       return err;
     });
 };
+
+
+
+// role model api's
+  
+export const createRole = async (body, header) => {
+  
+  return await axios.post(`/api/v1/admin/role/add`, body,{ headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const postRoleListApi = async (body,header) => {
+  return await axios
+    .post(`/api/v1/admin/role/list`, body, { headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const getRoleListApi = async (body) => {
+  return await axios
+    .get(`/api/v1/admin/role/list?name=${body}`,{ headers: AppHeader })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const deleteRoleApi = async (body,header) => {
+  return await axios
+    .delete(`/api/v1/admin/role/delete?id=${body}`, {
+      headers: header,
+    })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};

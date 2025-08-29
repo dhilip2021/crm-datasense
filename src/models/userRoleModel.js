@@ -22,6 +22,9 @@ const UserRoleSchema = new Schema(
       trim: true,
       unique: true
     },
+     c_description:{
+      type: String,
+    },
     c_role_priority:{
       type: Number,
       unique: true

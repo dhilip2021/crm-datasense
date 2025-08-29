@@ -1,4 +1,4 @@
-import { create_UUID } from '@/helper/clientHelper'
+import { create_UUID, verifyAccessToken } from '@/helper/clientHelper'
 import connectMongoDB from '@/libs/mongodb'
 import { tsid18 } from '@/libs/tsid18'
 import Leadform from '@/models/Leadform'
@@ -7,7 +7,7 @@ import { NextResponse } from 'next/server'
 import slugify from 'slugify'
 
 // 🔥 Lead Scoring Logic
-const calculateLeadScore = (values) => {
+const calculateLeadScore = values => {
   let score = 0
 
   // 🧩 Demographic
@@ -16,19 +16,47 @@ const calculateLeadScore = (values) => {
   const industry = values['Industry']
   const location = values['City']
 
-  if (designation && ['Chief Financial Officer', 'Architect', 'Building services engineer','Licensed conveyancer','Sports development officer', 'CEO', 'Manager', 'Founder'].includes(designation)) score += 25
+  if (
+    designation &&
+    [
+      'Chief Financial Officer',
+      'Architect',
+      'Building services engineer',
+      'Licensed conveyancer',
+      'Sports development officer',
+      'CEO',
+      'Manager',
+      'Founder'
+    ].includes(designation)
+  )
+    score += 25
   if (companySize && parseInt(companySize) > 50) score += 15
-  if (industry && ['Logistics', 'Manufacturing', 'Logistics','FMCG','Education','Pharma','Retail'].includes(industry)) score += 20
-  if (location && ['Kennethchester','North Austinville','Port Heathertown','South Samanthamouth','Chennai', 'Coimabtore', 'Bangalore','Delhi'].includes(location)) score += 10
+  if (
+    industry &&
+    ['Logistics', 'Manufacturing', 'Logistics', 'FMCG', 'Education', 'Pharma', 'Retail'].includes(industry)
+  )
+    score += 20
+  if (
+    location &&
+    [
+      'Kennethchester',
+      'North Austinville',
+      'Port Heathertown',
+      'South Samanthamouth',
+      'Chennai',
+      'Coimabtore',
+      'Bangalore',
+      'Delhi'
+    ].includes(location)
+  )
+    score += 10
 
   // 📈 Behavioral
   if (Object.values(values).length >= 8) score += 15
   if (values['Clicked Email'] || values['Opened WhatsApp']) score += 10
   if (values['Requested Demo'] || values['Asked for Quote']) score += 20
-  if (
-    values['Last Contact Date'] &&
-    new Date(values['Last Contact Date']) < Date.now() - 7 * 24 * 60 * 60 * 1000
-  ) score -= 10
+  if (values['Last Contact Date'] && new Date(values['Last Contact Date']) < Date.now() - 7 * 24 * 60 * 60 * 1000)
+    score -= 10
 
   // 🏷️ Lead Label
   let label = 'Cold Lead'
@@ -39,22 +67,23 @@ const calculateLeadScore = (values) => {
 }
 
 export async function POST(req) {
-
   await connectMongoDB()
   const body = await req.json()
 
+  const verified = verifyAccessToken();
 
 
-  try {
-    const { organization_id,organization_name, form_name, values } = body
+    if (verified.success) {
 
-     
+      console.log(verified,"<<<< VERIFIEDDDDD")
+
+
+
+       try {
+    const { organization_id, organization_name, form_name, values } = body
 
     if (!organization_id || !form_name || !values) {
-      return NextResponse.json(
-        { success: false, message: 'Missing required fields' },
-        { status: 400 }
-      )
+      return NextResponse.json({ success: false, message: 'Missing required fields' }, { status: 400 })
     }
 
     // Safe prefix fallback
@@ -76,7 +105,7 @@ export async function POST(req) {
       trim: true
     })
 
-        // Generate id & slug id
+    // Generate id & slug id
     const lead_id = `${prefixId} ${nextAutoId}`
     const slugBaseId = lead_id.replace(/[^\w\s]/gi, '')
     const lead_slug_id = slugify(slugBaseId, {
@@ -84,8 +113,6 @@ export async function POST(req) {
       lower: false,
       trim: true
     })
-
-
 
     // ✅ Lead Scoring
     const { lead_score, lead_label } = calculateLeadScore(values)
@@ -104,6 +131,8 @@ export async function POST(req) {
         Score: lead_score,
         Label: lead_label
       },
+      c_createdBy: verified.data.user_id,
+      c_role_id: verified.data.c_role_id,      
       submittedAt: new Date()
     })
 
@@ -125,7 +154,7 @@ export async function POST(req) {
       }
     })
   } catch (error) {
-    console.error('⨯ leadform Error:', error)
+   
     return NextResponse.json(
       {
         success: false,
@@ -135,4 +164,23 @@ export async function POST(req) {
       { status: 500 }
     )
   }
+
+
+    }else{
+       return NextResponse.json(
+      {
+        success: false,
+        message: '',
+        error: 'token expired!'
+      },
+      { status: 400 }
+    )
+
+
+
+    }
+
+
+
+ 
 }

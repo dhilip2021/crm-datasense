@@ -32,9 +32,8 @@ const BadgeContentSpan = styled('span')({
 })
 
 const UserDropdown = () => {
-  const user_name = Cookies.get('user_name');
-  const role_name = Cookies.get('role_name');
-
+  const user_name = Cookies.get('user_name')
+  const role_name = Cookies.get('role_name')
 
   // States
   const [open, setOpen] = useState(false)
@@ -51,22 +50,22 @@ const UserDropdown = () => {
 
   const handleDropdownClose = (event, url) => {
     if (url) {
-      if(url === "/login"){
-        Cookies.remove("riho_token");
-        Cookies.remove("_token");
-        Cookies.remove("_token_expiry");
-        Cookies.remove("privileges");
-        Cookies.remove("role_id");
-        Cookies.remove("role_name");
-        Cookies.remove("user_name");
-        Cookies.remove("organization_id");
-        Cookies.remove("organization_name");
-        Cookies.remove("user_id");
-        Cookies.remove("c_version");
-        Cookies.remove("endedAt");
+      if (url === '/login') {
+        Cookies.remove('riho_token')
+        Cookies.remove('_token')
+        Cookies.remove('_token_expiry')
+        Cookies.remove('privileges')
+        Cookies.remove('role_id')
+        Cookies.remove('role_name')
+        Cookies.remove('user_name')
+        Cookies.remove('organization_id')
+        Cookies.remove('organization_name')
+        Cookies.remove('user_id')
+        Cookies.remove('c_version')
+        Cookies.remove('endedAt')
       }
-     
-      router.push(url);
+
+      router.push(url)
     }
 
     if (anchorRef.current && anchorRef.current.contains(event?.target)) {
@@ -75,8 +74,6 @@ const UserDropdown = () => {
 
     setOpen(false)
   }
-
-
 
   return (
     <>
@@ -95,13 +92,24 @@ const UserDropdown = () => {
           className='cursor-pointer bs-[38px] is-[38px]'
         />
       </Badge>
+
       <Popper
         open={open}
         transition
         disablePortal
         placement='bottom-end'
         anchorEl={anchorRef.current}
-        className='min-is-[240px] !mbs-4 z-[1]'
+        className='min-is-[240px] !mbs-4 z-[9999]' // add high z-index here
+        modifiers={[
+          {
+            name: 'zIndex',
+            enabled: true,
+            phase: 'write',
+            fn: ({ state }) => {
+              state.styles.popper.zIndex = 9999
+            }
+          }
+        ]}
       >
         {({ TransitionProps, placement }) => (
           <Fade
@@ -110,10 +118,12 @@ const UserDropdown = () => {
               transformOrigin: placement === 'bottom-end' ? 'right top' : 'left top'
             }}
           >
-            <Paper className='shadow-lg'>
+            <Paper className='shadow-lg' sx={{ zIndex: 9999 }}>
+              {' '}
+              {/* also add here */}
               <ClickAwayListener onClickAway={e => handleDropdownClose(e)}>
-                <MenuList>
-                  <div className='flex items-center plb-2 pli-4 gap-2' tabIndex={-1} style={{zIndex:"9"}}>
+                <MenuList sx={{ zIndex: 9999 }}>
+                  <div className='flex items-center plb-2 pli-4 gap-2' tabIndex={-1} style={{ zIndex: '9' }}>
                     <Avatar alt='John Doe' src='/images/avatars/1.png' />
                     <div className='flex items-start flex-col'>
                       <Typography className='font-medium' color='text.primary'>
@@ -123,7 +133,7 @@ const UserDropdown = () => {
                     </div>
                   </div>
                   <Divider className='mlb-1' />
-                  <MenuItem className='gap-3' onClick={e => handleDropdownClose(e, "/account-settings")}>
+                  <MenuItem className='gap-3' onClick={e => handleDropdownClose(e, '/account-settings')}>
                     <i className='ri-user-3-line' />
                     <Typography color='text.primary'>My Profile</Typography>
                   </MenuItem>

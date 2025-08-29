@@ -42,6 +42,7 @@ function isValidEmailPragmatic(email) {
 }
 
 function LeadFormAppPage() {
+  const getToken = Cookies.get('_token')
   const organization_id = Cookies.get('organization_id')
   const organization_name = Cookies.get('organization_name')
   const lead_form = 'lead-form'
@@ -166,25 +167,30 @@ function LeadFormAppPage() {
 
     setLoader(true)
 
+    const header = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken}`
+    }
+
     try {
       const res = await fetch('/api/v1/admin/lead-form/form-submit', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: header,
         body: JSON.stringify(payload)
       })
 
       const data = await res.json()
       setLoader(false)
       if (data.success) {
-         toast.success('Form submitted successfully', {
-                      autoClose: 500, // 1 second la close
-                      position: 'bottom-center',
-                      hideProgressBar: true, // progress bar venam na
-                      closeOnClick: true,
-                      pauseOnHover: false,
-                      draggable: false,
-                      progress: undefined
-                    })
+        toast.success('Form submitted successfully', {
+          autoClose: 500, // 1 second la close
+          position: 'bottom-center',
+          hideProgressBar: true, // progress bar venam na
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined
+        })
         router.push('/app/leads')
       } else {
         toast.error('Submission failed')
