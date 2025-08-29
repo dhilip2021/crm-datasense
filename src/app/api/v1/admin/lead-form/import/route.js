@@ -3,6 +3,7 @@ import connectMongoDB from '@/libs/mongodb'
 import Leadform from '@/models/Leadform'
 import * as XLSX from 'xlsx'
 import { tsid18 } from '@/libs/tsid18'
+import { verifyAccessToken } from '@/helper/clientHelper'
 
 
 // 🔥 Lead Scoring Logic
@@ -40,7 +41,14 @@ const calculateLeadScore = (values) => {
 export async function POST(req) {
   await connectMongoDB()
 
-  try {
+
+   const verified = verifyAccessToken();
+
+   console.log(verified,"<<< VERIFIEDDDDD")
+
+   
+    if (verified.success) {
+       try {
     const formData = await req.formData()
     const file = formData.get('file')
     const organization_id = formData.get('organization_id')
@@ -55,7 +63,7 @@ export async function POST(req) {
     const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName])
 
 
-    console.log(sheetData,"<<< SHEET DATAAAA")
+  
 
 
 
@@ -110,6 +118,7 @@ export async function POST(req) {
           'lead_score':lead_score,
           'lead_label': lead_label
         },
+        c_createdBy: verified.data.user_id,
         submittedAt: new Date(row['Created Date']),
         updatedAt: new Date(row['Last Contact Date'])
       }
@@ -140,4 +149,16 @@ export async function POST(req) {
     console.error('Import Error:', error)
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })
   }
+    }else{
+       return NextResponse.json(
+      {
+        success: false,
+        message: '',
+        error: 'token expired!'
+      },
+      { status: 400 }
+    )
+    }
+
+ 
 }

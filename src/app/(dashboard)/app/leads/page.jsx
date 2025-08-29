@@ -44,7 +44,6 @@ const LeadTable = () => {
   const organization_id = Cookies.get('organization_id')
   const getToken = Cookies.get('_token')
 
-
   const [data, setData] = useState([])
   const [dataFilter, setDataFilter] = useState([])
   const [page, setPage] = useState(0)
@@ -77,6 +76,8 @@ const LeadTable = () => {
     search: ''
   })
 
+  const handleDownloadSample = () => {}
+
   const fetchData = async () => {
     setLoading(true)
 
@@ -103,7 +104,7 @@ const LeadTable = () => {
     }
 
     try {
-      const res = await fetch(`/api/v1/admin/lead-form/list?${query}`,{
+      const res = await fetch(`/api/v1/admin/lead-form/list?${query}`, {
         method: 'GET',
         headers: header
       })
@@ -173,13 +174,12 @@ const LeadTable = () => {
     })
 
     try {
-
       const header = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getToken}`
-    }
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getToken}`
+      }
 
-      const res = await fetch(`/api/v1/admin/lead-form/list?${query}`,{
+      const res = await fetch(`/api/v1/admin/lead-form/list?${query}`, {
         method: 'GET',
         headers: header
       })
@@ -329,7 +329,6 @@ const LeadTable = () => {
     e.preventDefault()
 
     if (!selectedFile) {
-      // alert('Please select a file')
       toast.error('Please select a file')
       return
     }
@@ -343,18 +342,19 @@ const LeadTable = () => {
     try {
       const res = await fetch('/api/v1/admin/lead-form/import', {
         method: 'POST',
+        headers: {
+          Authorization: `Bearer ${getToken}` // ✅ only auth header
+        },
         body: formData
       })
 
       const data = await res.json()
-      console.log(data, '<<< DATAAAA')
       toast.success(data.message)
       fetchData()
       setFileName('')
       setSelectedFile(null)
       document.querySelector('input[name="file"]').value = ''
     } catch (err) {
-      // toast.error(err)
       console.error(err)
       setFileName('')
       setSelectedFile(null)
@@ -379,6 +379,7 @@ const LeadTable = () => {
                 <Box display='flex' flexDirection='row' gap={2}>
                   {/* File Upload */}
                   <Box>
+                    {/* Upload Button */}
                     <Button
                       component='label'
                       variant='outlined'
@@ -409,16 +410,29 @@ const LeadTable = () => {
                       />
                     </Button>
 
+                    {/* Loader */}
                     {loader && <LinearProgress sx={{ mb: 2 }} color='info' />}
 
-                    {/* Show File Name + Remove */}
+                    {/* File name + Remove button */}
                     {fileName && (
-                      <Box display='flex' alignItems='center' gap={1}>
-                        <Typography variant='body2' sx={{ mt: 1, color: '#4CAF50', fontWeight: 500 }}>
+                      <Stack
+                        direction='row'
+                        alignItems='center'
+                        justifyContent='space-between'
+                        sx={{
+                          p: 1,
+                          border: '1px solid',
+                          borderColor: 'grey.300',
+                          borderRadius: 1,
+                          mb: 1,
+                          backgroundColor: '#fafafa'
+                        }}
+                      >
+                        <Typography variant='body2' sx={{ color: '#4CAF50', fontWeight: 500 }} noWrap>
                           {fileName}
                         </Typography>
                         <Button
-                          variant='text'
+                          variant='outlined'
                           color='error'
                           size='small'
                           onClick={() => {
@@ -426,14 +440,33 @@ const LeadTable = () => {
                             setSelectedFile(null)
                             document.querySelector('input[name="file"]').value = ''
                           }}
+                          sx={{ textTransform: 'none', fontSize: '12px', py: 0.3, px: 1.2 }}
                         >
-                          X
+                          Remove
                         </Button>
-                      </Box>
+                      </Stack>
                     )}
+
+                    {/* Download link */}
+                    <Box display='flex' justifyContent='flex-end'>
+                      <Typography
+                        component='a'
+                        href='/sample/sample_lead_data.xlsx'
+                        download
+                        variant='body2'
+                        sx={{
+                          cursor: 'pointer',
+                          color: '#1976d2',
+                          fontWeight: 500,
+                          textDecoration: 'underline',
+                          '&:hover': { color: 'primary.dark' }
+                        }}
+                      >
+                        Download sample excel
+                      </Typography>
+                    </Box>
                   </Box>
 
-                  {/* Upload Button */}
                   <Box>
                     <Button
                       type='submit'
@@ -585,7 +618,7 @@ const LeadTable = () => {
               ))}
 
               <Divider />
-              <MenuItem onClick={exportToExcel} sx={{ fontWeight: 'bold', color: 'red', textAlign:'center' }}>
+              <MenuItem onClick={exportToExcel} sx={{ fontWeight: 'bold', color: 'red', textAlign: 'center' }}>
                 Confirm Export
               </MenuItem>
             </Menu>
@@ -632,7 +665,7 @@ const LeadTable = () => {
               ))}
 
               <Divider />
-              <MenuItem onClick={exportToPDF} sx={{ fontWeight: 'bold', color: 'red', textAlign:'center' }}>
+              <MenuItem onClick={exportToPDF} sx={{ fontWeight: 'bold', color: 'red', textAlign: 'center' }}>
                 Confirm Export
               </MenuItem>
             </Menu>
@@ -815,7 +848,7 @@ const LeadTable = () => {
                         <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           {row.createdByName}
                         </TableCell>
-                        
+
                         <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           <Box display={'flex'}>
                             <Tooltip title={`Edit ${row.values['First Name']} Lead`} arrow>

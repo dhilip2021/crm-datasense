@@ -646,9 +646,20 @@ const Login = ({ mode }) => {
         Cookies.set('user_name', resultsPayloadJson?.user_name)
         Cookies.set('privileges', JSON.stringify(dummyArray))
 
-        router.push('/')
-        router.refresh()
-        handleSuccess()
+
+        if (resultsPayloadJson?.c_role_id === '27f01165688z') {
+          router.push('/')
+          router.refresh()
+          handleSuccess()
+        } else if (resultsPayloadJson?.c_role_id === '16f01165898b') {
+          router.push('/')
+          router.refresh()
+          handleSuccess()
+        } else {
+          router.push('/app/leads')
+          router.refresh()
+          handleSuccess()
+        }
 
         toast.success('login successful', {
           autoClose: 500,

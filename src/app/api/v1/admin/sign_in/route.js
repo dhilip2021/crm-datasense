@@ -67,23 +67,12 @@ export async function POST(request) {
 
           const orgData = await Organization.findOne({ organization_id: data.organization_id })
 
-
-
-
-
           await bcrypt
             .compare(dData?.password, data.password)
             .then(async response => {
               if (response) {
-
-
                 const UserPrivilege = await UserPrivileges.findOne({ c_role_id: data.c_role_id })
-
-               
-
-
                 const date_time = getDateTime()
-
                 const tokenVerify = generateAccessToken({
                   _id: data._id,
                   user_id: data.user_id,
