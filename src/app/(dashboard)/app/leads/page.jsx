@@ -831,7 +831,7 @@ const LeadTable = () => {
                           />
                         </TableCell>
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
-                          {row.values['Assigned To']}
+                          {row.assignedTo}
                         </TableCell>
                         <TableCell>{row.values['Lead Source']}</TableCell>
                         <TableCell>

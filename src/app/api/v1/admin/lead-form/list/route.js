@@ -9,7 +9,7 @@ export async function GET(req) {
 
   const verified = verifyAccessToken()
 
-  console.log(verified, '<<< VERIFIEDDD')
+  console.log(verified.data.user_id, '<<< VERRIIIII')
 
   if (!verified.success) {
     return NextResponse.json({ success: false, error: 'token expired!' }, { status: 400 })
@@ -52,7 +52,18 @@ export async function GET(req) {
 
       if (userRole.c_role_name === 'Sales Executive') {
         // 🔥 Sales Exec => only own leads
-        query.c_createdBy = verified.data.user_id
+        // query.c_createdBy = verified.data.user_id
+        const lowerRoles = await UserRole.find({ c_role_priority: { $gt: currentPriority } })
+          .select('c_role_id')
+          .lean()
+
+        let lowerRoleIds = lowerRoles.map(r => r.c_role_id)
+
+        query.$or = [
+          { c_createdBy: verified.data.user_id }, // ✅ own leads always
+          { c_role_id: { $in: lowerRoleIds } }, // ✅ lower roles
+          { 'values.Assigned To': String(verified.data.user_id) } // ✅ assigned to me
+        ]
       } else {
         // 🔥 Admin / Manager => own + lower role leads
         const lowerRoles = await UserRole.find({ c_role_priority: { $gt: currentPriority } })
@@ -61,20 +72,14 @@ export async function GET(req) {
 
         let lowerRoleIds = lowerRoles.map(r => r.c_role_id)
 
-        // verified.data.c_role_id add pannanum
-        // lowerRoleIds = [...lowerRoleIds]
-        // lowerRoleIds = [verified.data.c_role_id, ...lowerRoleIds]
-
-        // const roleIdsToFetch = [...new Set([verified.data.c_role_id, ...lowerRoleIds])]
-        // console.log(roleIdsToFetch,"<< roleIdsToFetch")
-        
         query.$or = [
           { c_createdBy: verified.data.user_id }, // ✅ own leads always
-          { c_role_id: { $in: lowerRoleIds } } // ✅ same role + lower roles
+          { c_role_id: { $in: lowerRoleIds } }, // ✅ lower roles
+          { 'values.Assigned To': String(verified.data.user_id) } // ✅ assigned to me
         ]
       }
     }
-
+    console.log(query, '<<< query')
     // 🔍 Search
     if (search) {
       const searchFilter = {
@@ -135,8 +140,20 @@ export async function GET(req) {
           }
         },
         {
+          $lookup: {
+            from: 'users',
+            let: { assignedId: '$values.Assigned To' }, // 👈 take from nested field
+            pipeline: [
+              { $match: { $expr: { $eq: ['$user_id', '$$assignedId'] } } },
+              { $project: { user_name: 1, user_id: 1, _id: 0 } }
+            ],
+            as: 'assignedTo'
+          }
+        },
+        {
           $addFields: {
-            createdByName: { $arrayElemAt: ['$createdUser.user_name', 0] }
+            createdByName: { $arrayElemAt: ['$createdUser.user_name', 0] },
+            assignedTo: { $arrayElemAt: ['$assignedTo.user_name', 0] } // 👈 pick assigned user name
           }
         },
         {
