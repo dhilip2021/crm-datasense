@@ -23,21 +23,21 @@ import 'react-toastify/dist/ReactToastify.css'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import LoaderGif from '@assets/gif/loader.gif'
+import { getAllUserListApi } from '@/apiFunctions/ApiAction'
 
-const shortName = fullName => {
-  const shortForm = fullName
-    .split(' ')
+// Short name (ORG)
+const shortName = fullName =>
+  fullName
+    ?.split(' ')
     .map(word => word[0])
     .join('')
     .toUpperCase()
 
-  return shortForm
-}
-
+// Pragmatic email validation
 function isValidEmailPragmatic(email) {
   if (typeof email !== 'string') return false
-  // Accepts most valid addresses, avoids pathological corner-cases
-  const re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,}$/
+  const re =
+    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,}$/
   return re.test(email)
 }
 
@@ -52,47 +52,52 @@ function LeadFormAppPage() {
   const [values, setValues] = useState({})
   const [errors, setErrors] = useState({})
   const [loader, setLoader] = useState(false)
-
   const [countryCodes, setCountryCodes] = useState([])
+  const [userList, setUserList] = useState([])
 
+  // Fetch user list
+  const getUserListFn = async () => {
+    try {
+      const results = await getAllUserListApi()
+      if (results?.appStatusCode === 0 && Array.isArray(results.payloadJson)) {
+        setUserList(results.payloadJson)
+      } else {
+        setUserList([])
+      }
+    } catch (err) {
+      console.error('User list error:', err)
+      setUserList([])
+    }
+  }
+
+  // Fetch country codes + users
   useEffect(() => {
     fetch('/json/country.json')
       .then(res => res.json())
       .then(data => setCountryCodes(data))
+      .catch(() => setCountryCodes([]))
+
+    getUserListFn()
   }, [])
 
   // ---- validation function ----
   const validateField = (field, value) => {
-    // Special handling for Phone because value for phone is stored in values[`${field.id}_number`]
     if (field.type === 'Phone') {
-      const countryCode = values[`${field.id}_countryCode`] || field.countryCode || '+91'
-      const phoneNumber = values[`${field.id}_number`] || ''
-
-      // Basic regex: digits only, length between 6 and 15 (adjust as needed)
       const phoneRegex = /^[0-9]{6,15}$/
-
-      if (field.required && phoneNumber.trim() === '') {
-        return `${field.label} is required`
-      }
-
-      if (phoneNumber && !phoneRegex.test(phoneNumber)) {
-        return 'Invalid phone number format'
-      }
-
+      if (field.required && !value) return `${field.label} is required`
+      if (value && !phoneRegex.test(value)) return 'Invalid phone number format'
       return ''
     }
 
     if (field.type === 'Email') {
-      const response = isValidEmailPragmatic(value)
-      if (!response) {
-        return 'Invalid email address'
-      } else {
-        return ''
-      }
+      if (field.required && !value) return `${field.label} is required`
+      if (value && !isValidEmailPragmatic(value)) return 'Invalid email address'
+      return ''
     }
 
-    // Generic required check (for other field types)
-    if (field.required && (value === undefined || value === '' || value === null)) return `${field.label} is required`
+    if (field.required && (value === undefined || value === '' || value === null)) {
+      return `${field.label} is required`
+    }
 
     if (value) {
       if (field.type === 'Single Line') {
@@ -101,25 +106,27 @@ function LeadFormAppPage() {
         if (min && value.length < min) return `Minimum ${min} characters required`
         if (max && value.length > max) return `Maximum ${max} characters allowed`
       }
-
-      if (field.type === 'Email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Invalid email address'
       if (field.type === 'URL' && !/^(http|https):\/\/.+/.test(value)) return 'Invalid URL'
-      if (field.type === 'Date' && new Date(value) < new Date().setHours(0, 0, 0, 0))
+      if (field.type === 'Date' && new Date(value) < new Date().setHours(0, 0, 0, 0)) {
         return 'Date cannot be in the past'
+      }
     }
 
     return ''
   }
 
+  // Handle change
   const handleChange = (id, value) => {
     setValues(prev => ({ ...prev, [id]: value }))
     setErrors(prev => ({ ...prev, [id]: '' }))
   }
-  // ---- handleBlur ----
+
+  // Handle blur
   const handleBlur = field => {
-    const error = validateField(field, values[field.id])
+    const valueForValidation =
+      field.type === 'Phone' ? values[`${field.id}_number`] : values[field.id]
+    const error = validateField(field, valueForValidation)
     if (error) setErrors(prev => ({ ...prev, [field.id]: error }))
-    else setErrors(prev => ({ ...prev, [field.id]: '' }))
   }
 
   // ---- handleSubmit ----
@@ -135,27 +142,26 @@ function LeadFormAppPage() {
     const newErrors = {}
 
     sections.forEach(section => {
-      const fields = [...(section.fields.left || []), ...(section.fields.center || []), ...(section.fields.right || [])]
+      const fields = [
+        ...(section.fields.left || []),
+        ...(section.fields.center || []),
+        ...(section.fields.right || [])
+      ]
       fields.forEach(field => {
-        // determine the "value to validate" depending on the field type
-        const valueForValidation = field.type === 'Phone' ? values[`${field.id}_number`] : values[field.id]
+        const valueForValidation =
+          field.type === 'Phone' ? values[`${field.id}_number`] : values[field.id]
         const error = validateField(field, valueForValidation)
         if (error) {
           newErrors[field.id] = error
-          return
-        }
-
-        // Build payload.values properly
-        if (field.type === 'Phone') {
-          const country = values[`${field.id}_countryCode`] || field.countryCode || '+91'
-          const number = values[`${field.id}_number`] || ''
-          if (number) {
-            // store combined string in payload; change if you want split storage
-            payload.values[field.label] = `${country}${number.replace(/\s+/g, '')}` // e.g. +919876543210
-          }
         } else {
-          const v = values[field.id]
-          if (v !== undefined && v !== '') payload.values[field.label] = v
+          if (field.type === 'Phone') {
+            const country = values[`${field.id}_countryCode`] || field.countryCode || '+91'
+            const number = values[`${field.id}_number`] || ''
+            if (number) payload.values[field.label] = `${country}${number.replace(/\s+/g, '')}`
+          } else {
+            const v = values[field.id]
+            if (v !== undefined && v !== '') payload.values[field.label] = v
+          }
         }
       })
     })
@@ -167,89 +173,65 @@ function LeadFormAppPage() {
 
     setLoader(true)
 
-    const header = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getToken}`
-    }
-
     try {
       const res = await fetch('/api/v1/admin/lead-form/form-submit', {
         method: 'POST',
-        headers: header,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken}`
+        },
         body: JSON.stringify(payload)
       })
 
       const data = await res.json()
       setLoader(false)
+
       if (data.success) {
         toast.success('Form submitted successfully', {
-          autoClose: 500, // 1 second la close
+          autoClose: 1500,
           position: 'bottom-center',
-          hideProgressBar: true, // progress bar venam na
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: false,
-          progress: undefined
+          hideProgressBar: true
         })
         router.push('/app/leads')
       } else {
-        toast.error('Submission failed', {
-                      autoClose: 500, // 1 second la close
-                      position: 'bottom-center',
-                      hideProgressBar: true, // progress bar venam na
-                      closeOnClick: true,
-                      pauseOnHover: false,
-                      draggable: false,
-                      progress: undefined
-                    })
+        toast.error('Submission failed', { autoClose: 1500, position: 'bottom-center' })
       }
     } catch (err) {
       setLoader(false)
-      toast.error('Submission failed', {
-                      autoClose: 500, // 1 second la close
-                      position: 'bottom-center',
-                      hideProgressBar: true, // progress bar venam na
-                      closeOnClick: true,
-                      pauseOnHover: false,
-                      draggable: false,
-                      progress: undefined
-                    })
+      toast.error('Submission failed', { autoClose: 1500, position: 'bottom-center' })
     }
   }
 
+  // Fetch form
   const fetchForm = async () => {
     setLoader(true)
-    const res = await fetch(
-      `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${lead_form}`
-    )
-    const data = await res.json()
-    console.log(data, '<<< FETCH FORMSSSSS')
+    try {
+      const res = await fetch(
+        `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${lead_form}`
+      )
+      const data = await res.json()
+      setLoader(false)
 
-    setLoader(false)
-    if (data?.success && data.data?.sections?.length > 0) {
-      setSections(data.data.sections)
-      const defaultValues = {}
-      data.data.sections.forEach(section => {
-        const fields = [
-          ...(section.fields.left || []),
-          ...(section.fields.center || []),
-          ...(section.fields.right || [])
-        ]
-        fields.forEach(field => {
-          if (field.defaultValue) defaultValues[field.id] = field.defaultValue
+      if (data?.success && data.data?.sections?.length > 0) {
+        setSections(data.data.sections)
+        const defaultValues = {}
+        data.data.sections.forEach(section => {
+          const fields = [
+            ...(section.fields.left || []),
+            ...(section.fields.center || []),
+            ...(section.fields.right || [])
+          ]
+          fields.forEach(field => {
+            if (field.defaultValue) defaultValues[field.id] = field.defaultValue
+          })
         })
-      })
-      setValues(defaultValues)
-    } else {
-      toast.error('Form not found', {
-                      autoClose: 500, // 1 second la close
-                      position: 'bottom-center',
-                      hideProgressBar: true, // progress bar venam na
-                      closeOnClick: true,
-                      pauseOnHover: false,
-                      draggable: false,
-                      progress: undefined
-                    })
+        setValues(defaultValues)
+      } else {
+        toast.error('Form not found', { autoClose: 1500, position: 'bottom-center' })
+      }
+    } catch (err) {
+      setLoader(false)
+      toast.error('Error fetching form', { autoClose: 1500, position: 'bottom-center' })
     }
   }
 
@@ -257,6 +239,7 @@ function LeadFormAppPage() {
     fetchForm()
   }, [])
 
+  // Render field
   const renderField = field => {
     const commonProps = {
       fullWidth: true,
@@ -275,34 +258,49 @@ function LeadFormAppPage() {
     }
 
     switch (field.type) {
-      case 'Dropdown':
+      case 'Dropdown': {
+        let options = field.options || []
+        if (
+          (field.label === 'Assigned To' || field.label === 'Sales Executive') &&
+          userList.length > 0
+        ) {
+          options = userList.map(user => ({
+            value: user.user_id,
+            label: user.user_name
+          }))
+        }
         return (
           <TextField select {...commonProps}>
-            {(field.label === 'Lead Status'
-              ? field.options.slice(0, 6) // 👈 only first 6
-              : field.options
-            )?.map((opt, i) => (
-              <MenuItem key={i} value={opt}>
-                {opt}
+            {options.map((opt, i) => (
+              <MenuItem key={i} value={opt.value || opt}>
+                {opt.label || opt}
               </MenuItem>
             ))}
           </TextField>
         )
+      }
+
       case 'RadioButton':
         return (
           <Box>
             <Typography variant='body2' fontWeight='bold'>
               {field.label}
             </Typography>
-            <RadioGroup row value={values[field.id] || ''} onChange={e => handleChange(field.id, e.target.value)}>
+            <RadioGroup
+              row
+              value={values[field.id] || ''}
+              onChange={e => handleChange(field.id, e.target.value)}
+            >
               {field.options?.map((opt, i) => (
                 <FormControlLabel key={i} value={opt} control={<Radio />} label={opt} />
               ))}
             </RadioGroup>
           </Box>
         )
+
       case 'Multi-Line':
         return <TextField {...commonProps} multiline minRows={field.rows || 3} />
+
       case 'Phone':
         return (
           <TextField
@@ -311,11 +309,6 @@ function LeadFormAppPage() {
             onChange={e => handleChange(`${field.id}_number`, e.target.value)}
             type='tel'
             inputProps={{ maxLength: field.maxLength }}
-            fullWidth
-            size='small'
-            label={field.label}
-            required={field.required}
-            placeholder='Enter a phone number'
             InputProps={{
               startAdornment: (
                 <InputAdornment position='start'>
@@ -323,20 +316,9 @@ function LeadFormAppPage() {
                     value={values[`${field.id}_countryCode`] || field.countryCode || '+91'}
                     onChange={e => handleChange(`${field.id}_countryCode`, e.target.value)}
                     size='small'
-                    variant='outlined'
-                    MenuProps={{
-                      PaperProps: {
-                        sx: {
-                          maxHeight: 250 // 👈 fix height here
-                        }
-                      }
-                    }}
                     sx={{
-                      '.MuiOutlinedInput-notchedOutline': { border: 'none' }, // remove border
-                      '.MuiSelect-select': {
-                        padding: '4px 8px',
-                        minWidth: '60px'
-                      }
+                      '.MuiOutlinedInput-notchedOutline': { border: 'none' },
+                      '.MuiSelect-select': { padding: '4px 8px', minWidth: '60px' }
                     }}
                   >
                     {countryCodes.map(country => (
@@ -348,17 +330,9 @@ function LeadFormAppPage() {
                 </InputAdornment>
               )
             }}
-            InputLabelProps={{
-              required: field.required,
-              sx: {
-                '& .MuiFormLabel-asterisk': {
-                  color: 'red', // 👈 make star red
-                  marginLeft: '2px' // 👈 spacing for nice look
-                }
-              }
-            }}
           />
         )
+
       case 'Email':
         return <TextField {...commonProps} type='email' />
       case 'URL':
@@ -369,7 +343,10 @@ function LeadFormAppPage() {
         return (
           <FormControlLabel
             control={
-              <Switch checked={values[field.id] || false} onChange={e => handleChange(field.id, e.target.checked)} />
+              <Switch
+                checked={values[field.id] || false}
+                onChange={e => handleChange(field.id, e.target.checked)}
+              />
             }
             label={field.label || 'Toggle'}
           />
@@ -379,7 +356,7 @@ function LeadFormAppPage() {
     }
   }
 
-  // 🆕 Dynamic layout rendering
+  // Render layout
   const renderLayoutGrid = section => {
     const layout = section.layout || 'double'
     const cols = layout === 'single' ? 12 : layout === 'double' ? 6 : 4
@@ -423,7 +400,7 @@ function LeadFormAppPage() {
         <Box textAlign='center' py={6}>
           <Image src={LoaderGif} alt='loading' width={100} height={100} />
         </Box>
-      ) : !loader && sections.length === 0 ? (
+      ) : sections.length === 0 ? (
         <></>
       ) : (
         <>
@@ -447,7 +424,6 @@ function LeadFormAppPage() {
           </Box>
         </>
       )}
-
       <ToastContainer />
     </Box>
   )

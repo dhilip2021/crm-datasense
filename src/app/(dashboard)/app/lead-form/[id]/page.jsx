@@ -22,7 +22,10 @@ import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { useRouter, useParams } from 'next/navigation'
 import { decrypCryptoReq } from '@/helper/frontendHelper'
+import { getAllUserListApi } from '@/apiFunctions/ApiAction'
+// import { getAllUserListApi } from '@/api/user' // ✅ make sure this exists
 
+// ✅ Short name generator for org name
 const shortName = fullName =>
   fullName
     ?.split(' ')
@@ -30,10 +33,10 @@ const shortName = fullName =>
     .join('')
     .toUpperCase()
 
-function isValidEmailPragmatic(email) {
+// ✅ Email validator
+function isValidEmail(email) {
   if (typeof email !== 'string') return false
-  // Accepts most valid addresses, avoids pathological corner-cases
-  const re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,}$/
+  const re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,}$/
   return re.test(email)
 }
 
@@ -44,88 +47,83 @@ function LeadFormAppIdPage() {
 
   const organization_id = Cookies.get('organization_id')
   const organization_name = Cookies.get('organization_name')
+  const getToken = Cookies.get('_token')
   const lead_form = 'lead-form'
 
   const router = useRouter()
 
-  const [callFlag, setCallFlag] = useState(false)
   const [sections, setSections] = useState([])
-  const [formId, setFormId] = useState(null)
   const [values, setValues] = useState({})
   const [loader, setLoader] = useState(false)
   const [errors, setErrors] = useState({})
-
   const [countryCodes, setCountryCodes] = useState([])
+  const [userList, setUserList] = useState([])
 
+  // ✅ Fetch user list
+  const getUserListFn = async () => {
+    try {
+      const results = await getAllUserListApi()
+      if (results?.appStatusCode === 0 && Array.isArray(results.payloadJson)) {
+        setUserList(results.payloadJson)
+      } else {
+        setUserList([])
+      }
+    } catch (err) {
+      console.error('User list error:', err)
+      setUserList([])
+    }
+  }
+
+  // ✅ Fetch country list for phone fields
   useEffect(() => {
     fetch('/json/country.json')
       .then(res => res.json())
       .then(data => setCountryCodes(data))
+    getUserListFn()
   }, [])
 
-  // ✅ Validation
+  // ✅ Validation logic
   const validateField = (field, value) => {
     if (field.type === 'Phone') {
-      const countryCode = values[`${field.id}_countryCode`] || field.countryCode || '+91'
-      const phoneNumber = values[`${field.id}_number`] || ''
-
-      // Basic regex: digits only, length between 6 and 15 (adjust as needed)
-      const phoneRegex = /^[0-9]{6,15}$/
-
-      if (field.required && phoneNumber.trim() === '') {
-        return `${field.label} is required`
-      }
-
-      if (phoneNumber && !phoneRegex.test(phoneNumber)) {
-        return 'Invalid phone number format'
-      }
-
-      // Optionally, you can add more checks here if needed
-
+      const number = values[`${field.id}_number`] || ''
+      const regex = /^[0-9]{6,15}$/
+      if (field.required && number.trim() === '') return `${field.label} is required`
+      if (number && !regex.test(number)) return 'Invalid phone number'
       return ''
     }
 
     if (field.type === 'Email') {
-      const response = isValidEmailPragmatic(value)
-      if (!response) {
-        return 'Invalid email address'
-      } else {
-        return ''
-      }
+      if (field.required && !value) return `${field.label} is required`
+      if (value && !isValidEmail(value)) return 'Invalid email address'
+      return ''
     }
 
     if (field.required && !value) return `${field.label} is required`
-    if (value) {
-      if (field.type === 'Single Line') {
-        if (value.length < field.minChars) return `Minimum ${field.minChars} characters required`
-        if (value.length > field.maxChars) return `Maximum ${field.maxChars} characters allowed`
-      }
-      if (field.type === 'Email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Invalid email address'
-      if (field.type === 'URL' && !/^(http|https):\/\/.+/.test(value)) return 'Invalid URL'
-      if (field.type === 'Date' && new Date(value) < new Date().setHours(0, 0, 0, 0))
-        return 'Date cannot be in the past'
+
+    if (field.type === 'Single Line') {
+      if (value && field.minChars && value.length < field.minChars) return `Minimum ${field.minChars} characters`
+      if (value && field.maxChars && value.length > field.maxChars) return `Maximum ${field.maxChars} characters`
     }
+
+    if (field.type === 'URL' && value && !/^(http|https):\/\/.+/.test(value)) return 'Invalid URL'
+
+    if (field.type === 'Date' && value && new Date(value) < new Date().setHours(0, 0, 0, 0))
+      return 'Date cannot be in the past'
+
     return ''
   }
 
   const handleChange = (fieldId, value) => {
-    setValues(prev => ({
-      ...prev,
-      [fieldId]: value
-    }))
-    setErrors(prev => ({
-      ...prev,
-      [fieldId]: ''
-    }))
+    setValues(prev => ({ ...prev, [fieldId]: value }))
+    setErrors(prev => ({ ...prev, [fieldId]: '' }))
   }
-  // ---- handleBlur ----
+
   const handleBlur = field => {
     const error = validateField(field, values[field.id])
     if (error) setErrors(prev => ({ ...prev, [field.id]: error }))
-    else setErrors(prev => ({ ...prev, [field.id]: '' }))
   }
 
-  // ✅ Submit
+  // ✅ Submit Form
   const handleSubmit = async () => {
     const newErrors = {}
     const payload = {
@@ -145,7 +143,6 @@ function LeadFormAppIdPage() {
       allFields.forEach(field => {
         let value = values[field.id]
 
-        // special handling for phone
         if (field.type === 'Phone') {
           const number = values[`${field.id}_number`]
           const code = values[`${field.id}_countryCode`] || '+91'
@@ -154,8 +151,7 @@ function LeadFormAppIdPage() {
 
         const error = validateField(field, value)
         if (error) newErrors[field.id] = error
-
-        if (value !== undefined && value !== '') payload.values[field.label] = value
+        if (value) payload.values[field.label] = value
       })
     })
 
@@ -167,7 +163,10 @@ function LeadFormAppIdPage() {
     setLoader(true)
     const res = await fetch(leadId ? `/api/v1/admin/lead-form/${leadId}` : '/api/v1/admin/lead-form/form-submit', {
       method: leadId ? 'PUT' : 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getToken}`
+      },
       body: JSON.stringify(payload)
     })
 
@@ -175,27 +174,10 @@ function LeadFormAppIdPage() {
     setLoader(false)
 
     if (data.success) {
-      toast.success(leadId ? 'Lead updated successfully' : 'Form submitted successfully', {
-        autoClose: 500, // 1 second la close
-        position: 'bottom-center',
-        hideProgressBar: true, // progress bar venam na
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: false,
-        progress: undefined
-      })
-
-      router.push('/app/leads')
+      toast.success(leadId ? 'Lead updated successfully' : 'Form submitted successfully', { autoClose: 1000 })
+      setTimeout(() => router.push('/app/leads'), 1200)
     } else {
-      toast.error('Submission failed', {
-        autoClose: 500, // 1 second la close
-        position: 'bottom-center',
-        hideProgressBar: true, // progress bar venam na
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: false,
-        progress: undefined
-      })
+      toast.error(data.message || 'Submission failed', { autoClose: 1000 })
     }
   }
 
@@ -206,27 +188,24 @@ function LeadFormAppIdPage() {
       `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${lead_form}`
     )
     const json = await res.json()
+
     if (json?.success && json.data?.sections?.length > 0) {
       setSections(json.data.sections)
-      setFormId(json.data._id)
     } else {
-      toast.error('Form not found', {
-        autoClose: 500, // 1 second la close
-        position: 'bottom-center',
-        hideProgressBar: true, // progress bar venam na
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: false,
-        progress: undefined
-      })
+      toast.error('Form template not found')
     }
     setLoader(false)
   }
 
-  // ✅ Fetch Lead for Edit
+  // ✅ Fetch Lead (edit mode)
   const fetchLeadFromId = async () => {
+    if (!leadId) return
     setLoader(true)
-    const res = await fetch(`/api/v1/admin/lead-form/${leadId}`)
+    const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
+      headers: {
+        Authorization: `Bearer ${getToken}`
+      }
+    })
     const data = await res.json()
 
     if (data.success && data.data?.values) {
@@ -243,7 +222,7 @@ function LeadFormAppIdPage() {
           if (fetchedValues[field.label]) {
             if (field.type === 'Phone') {
               const phoneVal = fetchedValues[field.label]
-              const match = phoneVal.match(/^(\+\d{1,3})(\d{10})$/)
+              const match = phoneVal.match(/^(\+\d{1,3})(\d{6,15})$/)
               if (match) {
                 mappedValues[`${field.id}_countryCode`] = match[1]
                 mappedValues[`${field.id}_number`] = match[2]
@@ -256,34 +235,23 @@ function LeadFormAppIdPage() {
           }
         })
       })
-
       setValues(mappedValues)
     } else {
-      toast.error(data.message || 'Lead not found', {
-        autoClose: 500, // 1 second la close
-        position: 'bottom-center',
-        hideProgressBar: true, // progress bar venam na
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: false,
-        progress: undefined
-      })
+      toast.error(data.error || 'Lead not found')
     }
     setLoader(false)
   }
 
+  // ✅ Init load
   useEffect(() => {
-    setCallFlag(true)
     fetchFormTemplate()
   }, [])
 
   useEffect(() => {
-    if (sections.length > 0 && leadId) {
-      fetchLeadFromId()
-    }
+    if (sections.length > 0 && leadId) fetchLeadFromId()
   }, [sections, leadId])
 
-  // ✅ Render Fields
+  // ✅ Render Form Field
   const renderField = field => {
     const commonProps = {
       fullWidth: true,
@@ -302,21 +270,28 @@ function LeadFormAppIdPage() {
     }
 
     switch (field.type) {
-      case 'Dropdown':
+      case 'Dropdown': {
+        let options = field.options || []
+        if ((field.label === 'Assigned To' || field.label === 'Sales Executive') && userList.length > 0) {
+          options = userList.map(user => ({
+            value: user.user_id,
+            label: user.user_name
+          }))
+        }
         return (
           <TextField select {...commonProps}>
-            {field.options?.map((option, i) => (
-              <MenuItem key={i} value={option}>
-                {option}
+            {options.map((opt, i) => (
+              <MenuItem key={i} value={opt.value || opt}>
+                {opt.label || opt}
               </MenuItem>
             ))}
           </TextField>
         )
-
+      }
       case 'RadioButton':
         return (
           <Box>
-            <Typography variant='body2' fontWeight='bold' gutterBottom>
+            <Typography variant='body2' fontWeight='bold'>
               {field.label}
             </Typography>
             <RadioGroup row value={values[field.id] || ''} onChange={e => handleChange(field.id, e.target.value)}>
@@ -326,7 +301,6 @@ function LeadFormAppIdPage() {
             </RadioGroup>
           </Box>
         )
-
       case 'Multi-Line':
         return <TextField {...commonProps} multiline minRows={field.rows || 3} />
       case 'Phone':
@@ -346,25 +320,11 @@ function LeadFormAppIdPage() {
                     value={values[`${field.id}_countryCode`] || '+91'}
                     onChange={e => handleChange(`${field.id}_countryCode`, e.target.value)}
                     size='small'
-                    variant='outlined'
-                    MenuProps={{
-                      PaperProps: {
-                        sx: {
-                          maxHeight: 250 // 👈 limit dropdown height
-                        }
-                      }
-                    }}
-                    sx={{
-                      '.MuiOutlinedInput-notchedOutline': { border: 'none' },
-                      '.MuiSelect-select': {
-                        padding: '4px 8px',
-                        minWidth: '60px'
-                      }
-                    }}
+                    sx={{ '.MuiOutlinedInput-notchedOutline': { border: 'none' } }}
                   >
-                    {countryCodes.map(country => (
-                      <MenuItem key={country.code} value={country.dial_code}>
-                        {country.code} {country.dial_code}
+                    {countryCodes.map(c => (
+                      <MenuItem key={c.code} value={c.dial_code}>
+                        {c.code} {c.dial_code}
                       </MenuItem>
                     ))}
                   </Select>
@@ -373,21 +333,18 @@ function LeadFormAppIdPage() {
             }}
           />
         )
-
       case 'Email':
         return <TextField {...commonProps} type='email' />
-
       case 'URL':
         return <TextField {...commonProps} type='url' />
-
       case 'Date':
         return <TextField {...commonProps} type='date' InputLabelProps={{ shrink: true }} />
-
       default:
         return <TextField {...commonProps} />
     }
   }
 
+  // ✅ Section Layout Renderer
   const renderLayoutGrid = section => {
     const layout = section.layout || 'double'
     const cols = layout === 'single' ? 12 : layout === 'double' ? 6 : 4
@@ -396,29 +353,27 @@ function LeadFormAppIdPage() {
       <Grid container spacing={2}>
         {section.fields.left?.length > 0 && (
           <Grid item xs={12} sm={cols}>
-            {section.fields.left.map(field => (
-              <Box key={field.id} pb={3} pt={3}>
-                {renderField(field)}
+            {section.fields.left.map(f => (
+              <Box key={f.id} py={2}>
+                {renderField(f)}
               </Box>
             ))}
           </Grid>
         )}
-
         {layout === 'triple' && section.fields.center?.length > 0 && (
           <Grid item xs={12} sm={4}>
-            {section.fields.center.map(field => (
-              <Box key={field.id} pb={3} pt={3}>
-                {renderField(field)}
+            {section.fields.center.map(f => (
+              <Box key={f.id} py={2}>
+                {renderField(f)}
               </Box>
             ))}
           </Grid>
         )}
-
-        {(layout === 'double' || layout === 'triple') && section.fields.right?.length > 0 && (
+        {layout !== 'single' && section.fields.right?.length > 0 && (
           <Grid item xs={12} sm={layout === 'double' ? 6 : 4}>
-            {section.fields.right.map(field => (
-              <Box key={field.id} pb={3} pt={3}>
-                {renderField(field)}
+            {section.fields.right.map(f => (
+              <Box key={f.id} py={2}>
+                {renderField(f)}
               </Box>
             ))}
           </Grid>
@@ -439,7 +394,7 @@ function LeadFormAppIdPage() {
         </Box>
       )}
 
-      {!loader && sections.length === 0 && callFlag && (
+      {!loader && sections.length === 0 && (
         <Card>
           <CardContent>
             <Typography textAlign='center'>No Lead Form Found</Typography>
@@ -448,11 +403,11 @@ function LeadFormAppIdPage() {
       )}
 
       {!loader &&
-        sections.map((section, sIndex) => (
-          <Card key={sIndex} sx={{ mb: 4, borderLeft: '8px solid #8c57ff' }}>
+        sections.map((section, i) => (
+          <Card key={i} sx={{ mb: 4, borderLeft: '8px solid #8c57ff' }}>
             <CardContent>
               <Typography variant='h6' fontWeight='bold' mb={2}>
-                {section.title || `Section ${sIndex + 1}`}
+                {section.title || `Section ${i + 1}`}
               </Typography>
               {renderLayoutGrid(section)}
             </CardContent>
@@ -470,7 +425,7 @@ function LeadFormAppIdPage() {
         </Box>
       )}
 
-      <ToastContainer position='top-right' />
+      <ToastContainer position='bottom-center' hideProgressBar />
     </Box>
   )
 }

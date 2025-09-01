@@ -235,7 +235,7 @@ const LeadTable = () => {
             row[field] = d.values['Lead Status'] || ''
             break
           case 'Assigned To':
-            row[field] = d.values['Lead Owner'] || ''
+            row[field] = d.values['Assigned To'] || ''
             break
           case 'Phone':
             row[field] = d.values['Phone'] || ''
@@ -308,7 +308,7 @@ const LeadTable = () => {
           case 'Status':
             return d.values['Lead Status'] || ''
           case 'Assigned To':
-            return d.values['Lead Owner'] || ''
+            return d.values['Assigned To'] || ''
           case 'Phone':
             return d.values['Phone'] || ''
           case 'Email':
@@ -831,7 +831,7 @@ const LeadTable = () => {
                           />
                         </TableCell>
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
-                          {row.values['Lead Owner']}
+                          {row.values['Assigned To']}
                         </TableCell>
                         <TableCell>{row.values['Lead Source']}</TableCell>
                         <TableCell>

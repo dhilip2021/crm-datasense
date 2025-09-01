@@ -436,7 +436,25 @@ const staticFiledForm = [
           createFor: []
         }
       ],
-      right: []
+      right: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Dropdown',
+          label: 'Assigned To',
+          placeholder: 'Enter a value',
+          required: false,
+          isPublic: false,
+          showTooltip: false,
+          tooltipMessage: '',
+          tooltipType: 'icon',
+          options: ['Option 1', 'Option 1'],
+          defaultValue: '',
+          sortOrder: 'entered',
+          trackHistory: false,
+          enableColor: false,
+          createFor: []
+        }
+      ]
     },
     id: crypto.randomUUID(),
     title: 'New Section',

@@ -62,6 +62,16 @@ export const craeteUserApi = async (body) => {
         return err;
       });
   };
+    export const getAllUserListApi = async () => {
+    return await axios
+      .get(`/api/v1/admin/list_user`,{ headers: AppHeader })
+      .then((res) => {
+        return res.data;
+      })
+      .catch((err) => {
+        return err;
+      });
+  };
 
   export const deleteUserApi = async (body,header) => {
     return await axios
