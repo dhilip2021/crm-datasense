@@ -50,7 +50,7 @@ export async function GET(req) {
       query.organization_id = organization_id
       query.form_name = form_name
 
-      if (userRole.c_role_name.toLowerCase() === 'sales executive') {
+      if (userRole.c_role_name === 'Sales Executive') {
         // 🔥 Sales Exec => only own leads
         query.c_createdBy = verified.data.user_id
       } else {

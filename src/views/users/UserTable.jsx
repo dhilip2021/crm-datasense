@@ -31,7 +31,13 @@ import { ToastContainer, toast } from 'react-toastify'
 // Component Imports
 import Form from '@components/Form'
 import { capitalizeWords, decrypCryptoRequest, encryptCryptoResponse, normalizeEmail } from '@/helper/frontendHelper'
-import { checkMailApi, craeteUserApi, getUserListApi, userPrivilegeApi } from '@/apiFunctions/ApiAction'
+import {
+  checkMailApi,
+  craeteUserApi,
+  getAllOrganizationApi,
+  getUserListApi,
+  userPrivilegeApi
+} from '@/apiFunctions/ApiAction'
 import Link from 'next/link'
 
 const isEmail = email => {
@@ -49,10 +55,13 @@ const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@.#$!%*?&^])[A-Za-z\d@.#
 const UserTable = () => {
   const organization_id = Cookies.get('organization_id')
   const getToken = Cookies.get('_token')
+  const rollId = Cookies.get('role_id')
   const router = useRouter()
 
   const [userId, setUserId] = useState('')
   const [edit, setEdit] = useState(false)
+  const [orgList, setOrgList] = useState([])
+  const [orgId, setOrgId] = useState('')
 
   // States
   const [isPasswordShown, setIsPasswordShown] = useState(false)
@@ -89,11 +98,20 @@ const UserTable = () => {
     }
   }
 
+  const getAllOrganizationList = async () => {
+    const checkOrg = await getAllOrganizationApi()
+    if (checkOrg?.appStatusCode === 0) {
+      setOrgList(checkOrg?.payloadJson)
+    } else {
+      setOrgList([])
+    }
+  }
+
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
 
   const handleBlur = e => {
     const { name, value } = e.target
-    if(name === "email"){
+    if (name === 'email') {
       checkMail(value)
     }
   }
@@ -141,6 +159,10 @@ const UserTable = () => {
 
       return false
     }
+  }
+
+  const handleOnOrgChange = e => {
+    setOrgId(e.target.value)
   }
 
   const handleOnChange = e => {
@@ -218,7 +240,7 @@ const UserTable = () => {
 
       // ✅ prepare body
       const body = {
-        organization_id: organization_id,
+        organization_id: organization_id ? organization_id : orgId,
         first_name: inputs?.first_name,
         last_name: inputs?.last_name,
         c_about_user: inputs?.c_about_user,
@@ -345,6 +367,7 @@ const UserTable = () => {
 
   useEffect(() => {
     GetAllRoleList()
+    getAllOrganizationList()
     const fullUrl = window.location.href
     const segments = fullUrl.split('/')
     const id = segments.at(4) // or segments[segments.length - 1]
@@ -496,6 +519,29 @@ const UserTable = () => {
                   </Select>
                 </FormControl>
               </Grid>
+              {rollId === '27f01165688z' && (
+                <Grid item xs={12} sm={4}>
+                  <FormControl fullWidth>
+                    <InputLabel id='form-layouts-separator-multiple-select-label'>Select Organization</InputLabel>
+                    <Select
+                      name='org_id'
+                      value={orgId}
+                      onChange={handleOnOrgChange}
+                      id='form-layouts-separator-multiple-select'
+                      labelId='form-layouts-separator-multiple-select-label'
+                      input={<OutlinedInput label='Language' id='select-multiple-language' />}
+                      size='small'
+                    >
+                      {Array.isArray(orgList) &&
+                        orgList?.map((data, index) => (
+                          <MenuItem value={data?.organization_id} key={index}>
+                            {data?.organization_name}
+                          </MenuItem>
+                        ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              )}
 
               <Grid item xs={12} md={8}>
                 <TextField

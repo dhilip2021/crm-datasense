@@ -27,10 +27,11 @@ const RenderExpandIcon = ({ open, transitionDuration }) => (
   </StyledVerticalNavExpandIcon>
 )
 
-const VerticalMenu = ({ scrollMenu }) => {
+const VerticalMenu = ({ scrollMenu, roles }) => {
   const router = useRouter()
   const role_id = Cookies.get('role_id')
 
+  
   // Hooks
   const theme = useTheme()
   const { isBreakpointReached, transitionDuration } = useVerticalNav()
@@ -52,9 +53,12 @@ const VerticalMenu = ({ scrollMenu }) => {
     router.push('/login')
   }
 
+  const hasMenu = (index) =>
+    Array.isArray(roles?.c_menu_privileges) &&
+    roles?.c_menu_privileges.length > index &&
+    roles?.c_menu_privileges[index]?.menu_privileage_status
+
   return (
-    // eslint-disable-next-line lines-around-comment
-    /* Custom scrollbar instead of browser scroll, remove if you want browser scroll only */
     <ScrollWrapper
       {...(isBreakpointReached
         ? {
@@ -66,119 +70,130 @@ const VerticalMenu = ({ scrollMenu }) => {
             onScrollY: container => scrollMenu(container, true)
           })}
     >
-      {/* Incase you also want to scroll NavHeader to scroll with Vertical Menu, remove NavHeader from above and paste it below this comment */}
-      {/* Vertical Menu */}
-
       <Menu
         menuItemStyles={menuItemStyles(theme)}
         renderExpandIcon={({ open }) => <RenderExpandIcon open={open} transitionDuration={transitionDuration} />}
         renderExpandedMenuItemIcon={{ icon: <i className='ri-circle-line' /> }}
         menuSectionStyles={menuSectionStyles(theme)}
       >
-        <SubMenu label='Dashboard' icon={<i className='ri-bar-chart-box-line' />}>
-          <MenuItem href='/' icon={<i className='ri-id-card-line' />}>
-            Leads
-          </MenuItem>
-          <MenuItem href='/opportunity' icon={<i className='ri-bar-chart-box-line' />}>
-            Opportunity
-          </MenuItem>
-          <MenuItem href='/customer-dashboard' icon={<i className='ri-bar-chart-box-line' />}>
-            Customer
-          </MenuItem>
-        </SubMenu>
-        <SubMenu label='Master' icon={<i className='ri-bar-chart-box-line' />}>
-          <MenuItem href='/salutation' icon={<i className='ri-id-card-line' />}>
-            Salutation
-          </MenuItem>
-          <MenuItem href='/gender' icon={<i className='ri-women-line' />}>
-            Gender
-          </MenuItem>
+        {hasMenu(0) && (
+          <SubMenu label={roles.c_menu_privileges[0].menu_privileage_name} icon={<i className='ri-bar-chart-box-line' />}>
+            {hasMenu(1) && (
+              <MenuItem href='/' icon={<i className='ri-id-card-line' />}>
+                {roles.c_menu_privileges[1].menu_privileage_name}
+              </MenuItem>
+            )}
+            {hasMenu(2) && (
+              <MenuItem href='/opportunity' icon={<i className='ri-bar-chart-box-line' />}>
+                {roles.c_menu_privileges[2].menu_privileage_name}
+              </MenuItem>
+            )}
+          </SubMenu>
+        )}
 
-          <MenuItem href='/territory' icon={<i className='ri-map-pin-line' />}>
-            Territory
-          </MenuItem>
-          <MenuItem href='/campaign-type' icon={<i className='ri-map-pin-line' />}>
-            Campaign Type
-          </MenuItem>
-        </SubMenu>
-
-        {/* <MenuSection label='Master'>
-          
-        </MenuSection> */}
+        {hasMenu(3) && (
+          <SubMenu label={roles.c_menu_privileges[3].menu_privileage_name} icon={<i className='ri-bar-chart-box-line' />}>
+            {hasMenu(4) && (
+              <MenuItem href='/salutation' icon={<i className='ri-id-card-line' />}>
+                {roles.c_menu_privileges[4].menu_privileage_name}
+              </MenuItem>
+            )}
+            {hasMenu(5) && (
+              <MenuItem href='/gender' icon={<i className='ri-women-line' />}>
+                {roles.c_menu_privileges[5].menu_privileage_name}
+              </MenuItem>
+            )}
+            {hasMenu(6) && (
+              <MenuItem href='/territory' icon={<i className='ri-map-pin-line' />}>
+                {roles.c_menu_privileges[6].menu_privileage_name}
+              </MenuItem>
+            )}
+            {hasMenu(7) && (
+              <MenuItem href='/campaign-type' icon={<i className='ri-map-pin-line' />}>
+                {roles.c_menu_privileges[7].menu_privileage_name}
+              </MenuItem>
+            )}
+          </SubMenu>
+        )}
 
         <MenuSection label='Apps & Pages'>
-          <MenuItem href='/app/leads' icon={<i className='ri-user-star-line' />}>
-            Leads
-          </MenuItem>
-          <MenuItem href='/app/opportunity' icon={<i className='ri-user-star-line' />}>
-            Opportunity
-          </MenuItem>
-          <MenuItem href='/app/customer' icon={<i className='ri-user-settings-line' />}>
-            Customer
-          </MenuItem>
-          <MenuItem href='/notes' icon={<i className='ri-sticky-note-add-line'></i>}>
-            Notes
-          </MenuItem>
-          <MenuItem href='/tasks' icon={<i className='ri-list-check-3'></i>}>
-            Tasks
-          </MenuItem>
-          <MenuItem href='/organization' icon={<i className='ri-community-line'></i>}>
-            Organization
-          </MenuItem>
-          <MenuItem href='/calls' icon={<i className='ri-phone-line'></i>}>
-            Calls
-          </MenuItem>
-          <MenuItem href='/emails' icon={<i className='ri-mail-line'></i>}>
-            Emails
-          </MenuItem>
-          <MenuItem href='/comments' icon={<i className='ri-chat-1-line'></i>}>
-            Comments
-          </MenuItem>
-
-          <MenuItem href='/deals' icon={<i className='ri-user-settings-line' />}>
-            Deals
-          </MenuItem>
-
-          {/* <MenuItem href='/card-basic' icon={<i className='ri-bar-chart-box-line' />}>
-            {' '}
-            Cards
-          </MenuItem>
-
-          <MenuItem href='/use-dispatch' icon={<i className='ri-bar-chart-box-line' />}>
-            {' '}
-            Use Dispatch
-          </MenuItem>
-          <MenuItem href='/use-select' icon={<i className='ri-bar-chart-box-line' />}>
-            {' '}
-            Use Select
-          </MenuItem> */}
+          {hasMenu(8) && (
+            <MenuItem href='/app/leads' icon={<i className='ri-user-star-line' />}>
+              {roles.c_menu_privileges[8].menu_privileage_name}
+            </MenuItem>
+          )}
+          {hasMenu(9) && (
+            <MenuItem href='/app/opportunity' icon={<i className='ri-user-star-line' />}>
+              {roles.c_menu_privileges[9].menu_privileage_name}
+            </MenuItem>
+          )}
+          {hasMenu(10) && (
+            <MenuItem href='/app/customer' icon={<i className='ri-user-settings-line' />}>
+              {roles.c_menu_privileges[10].menu_privileage_name}
+            </MenuItem>
+          )}
+          {hasMenu(11) && (
+            <MenuItem href='/notes' icon={<i className='ri-sticky-note-add-line'></i>}>
+              {roles.c_menu_privileges[11].menu_privileage_name}
+            </MenuItem>
+          )}
+          {hasMenu(12) && (
+            <MenuItem href='/tasks' icon={<i className='ri-list-check-3'></i>}>
+              {roles.c_menu_privileges[12].menu_privileage_name}
+            </MenuItem>
+          )}
+          {hasMenu(13) && (
+            <MenuItem href='/organization' icon={<i className='ri-community-line'></i>}>
+              {roles.c_menu_privileges[13].menu_privileage_name}
+            </MenuItem>
+          )}
+          {hasMenu(14) && (
+            <MenuItem href='/calls' icon={<i className='ri-phone-line'></i>}>
+              {roles.c_menu_privileges[14].menu_privileage_name}
+            </MenuItem>
+          )}
+          {hasMenu(15) && (
+            <MenuItem href='/emails' icon={<i className='ri-mail-line'></i>}>
+              {roles.c_menu_privileges[15].menu_privileage_name}
+            </MenuItem>
+          )}
+          {hasMenu(16) && (
+            <MenuItem href='/comments' icon={<i className='ri-chat-1-line'></i>}>
+              {roles.c_menu_privileges[16].menu_privileage_name}
+            </MenuItem>
+          )}
         </MenuSection>
+
         <MenuSection label='Settings'>
-          <SubMenu label='Settings' icon={<i className='ri-settings-3-line' />}>
-            <MenuItem href='/profile-settings'>Profile Setting</MenuItem>
-            <MenuItem href='/users-list' icon={<i className='ri-user-line' />}>
-              Users List
-            </MenuItem>
-            <SubMenu label='Roles & Permissions' icon={<i className='ri-settings-3-line' />}>
-              <MenuItem href='/roles'>Roles</MenuItem>
-              <MenuItem href='/permissions'>Permissions</MenuItem>
+          {hasMenu(17) && (
+            <SubMenu label={roles.c_menu_privileges[17].menu_privileage_name} icon={<i className='ri-settings-3-line' />}>
+              {hasMenu(18) && <MenuItem href='/profile-settings'>{roles.c_menu_privileges[18].menu_privileage_name}</MenuItem>}
+              {hasMenu(19) && (
+                <MenuItem href='/users-list' icon={<i className='ri-user-line' />}>
+                  {roles.c_menu_privileges[19].menu_privileage_name}
+                </MenuItem>
+              )}
+
+              {hasMenu(20) && (
+                <SubMenu label={roles.c_menu_privileges[20].menu_privileage_name} icon={<i className='ri-settings-3-line' />}>
+                  {hasMenu(21) && <MenuItem href='/roles'>{roles.c_menu_privileges[21].menu_privileage_name}</MenuItem>}
+                  {hasMenu(22) && <MenuItem href='/permissions'>{roles.c_menu_privileges[22].menu_privileage_name}</MenuItem>}
+                </SubMenu>
+              )}
             </SubMenu>
+          )}
 
-
-
-            <MenuItem href='/fields/list-fields' icon={<i className='ri-input-field' />}>
-              Lead Field
+          {hasMenu(23) && (
+            <MenuItem href='/builder' icon={<i className='ri-tools-line text-xl' />}>
+              {roles.c_menu_privileges[23].menu_privileage_name}
             </MenuItem>
-            <MenuItem href='/customer/fields' icon={<i className='ri-input-field' />}>
-              Customer Field
+          )}
+
+          {hasMenu(24) && (
+            <MenuItem href='/login' icon={<i className='ri-logout-box-line'></i>}>
+              <div onClick={logoutFn}>{roles.c_menu_privileges[24].menu_privileage_name}</div>
             </MenuItem>
-          </SubMenu>
-          <MenuItem href='/builder' icon={<i className='ri-tools-line text-xl' />}>
-            Setup
-          </MenuItem>
-          <MenuItem href='/login' icon={<i className='ri-logout-box-line'></i>}>
-            <div onClick={logoutFn}>Logout</div>{' '}
-          </MenuItem>
+          )}
         </MenuSection>
       </Menu>
     </ScrollWrapper>

@@ -25,9 +25,9 @@ const UserPrivilegesSchema = new Schema(
       {
         role_privileage: {
           type: String,
-
-          //   enum: ["add", "edit", "delete", "view"],
-          //   default: "add",
+        },
+        role_privileage_status: {
+          type: Boolean,
         },
       },
     ],
@@ -49,6 +49,10 @@ const UserPrivilegesSchema = new Schema(
         menu_privileage_name: {
           type: String,
         },
+         menu_privileage_status: {
+          type: Boolean,
+        }
+         
       },
     ],
     c_createdBy: {

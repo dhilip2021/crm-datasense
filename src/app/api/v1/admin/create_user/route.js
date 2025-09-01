@@ -18,6 +18,10 @@ let sendResponse = {
   error: ''
 }
 
+
+
+
+
 function emailSend(mailData) {
   return new Promise(async (resolve, reject) => {
     await transporter.sendMail(mailData, function async(err, data) {
@@ -124,6 +128,11 @@ export async function POST(request) {
     } else {
       const encEmail = encryptCryptoResponse(dData?.email)
 
+
+ 
+
+
+
       const checkUserEmail = await User.findOne({
         organization_id: dData?.organization_id,
         email: encEmail
@@ -173,6 +182,7 @@ export async function POST(request) {
           trim: true
         })
 
+
         if (dData?.role !== 'admin' || dData?.role === undefined || dData?.role === '') {
           if (dData?.role === undefined || dData?.role === null || dData?.role === '') {
             let data = {
@@ -180,25 +190,7 @@ export async function POST(request) {
             }
             const resulData = await User.find(data)
 
-            const currentRole = await UserRole.findOne({ c_role_id: resulData[0]?.c_role_id }) // id from JWT/session
-            const newRole = await UserRole.findOne({ c_role_id: dData?.c_role_id })
-
-            if (!currentRole || !newRole) {
-              sendResponse['appStatusCode'] = 4
-              sendResponse['message'] = 'Invalid role setup'
-              sendResponse['payloadJson'] = []
-              sendResponse['error'] = 'Role not found'
-              return NextResponse.json(sendResponse, { status: 200 })
-            }
-
-            // Priority check: only allow creating lower priority role
-            else if (newRole.c_role_priority <= currentRole.c_role_priority) {
-              sendResponse['appStatusCode'] = 4
-              sendResponse['message'] = 'You cannot create this role'
-              sendResponse['payloadJson'] = []
-              sendResponse['error'] = 'Not enough permission'
-              return NextResponse.json(sendResponse, { status: 200 })
-            } else {
+            if (resulData?.length === 0) {
               const encEmail = encryptCryptoResponse(dData?.email)
               const encMobile = encryptCryptoResponse(dData?.mobile)
               const userdata = new User({
@@ -229,39 +221,108 @@ export async function POST(request) {
 
                 mailData['html'] = `
               <b>Hai ${user_name},</b>
-              <h4>Your Login Credential</h4>
+              <h4>Your Login Credentials</h4>
+               <h4>url: https://crm-datasense-bj4n.vercel.app/login</h4>
               <h4>your email : <b>${dData?.email} </b></h4>
               <h4>your password : <b>${passwordCheck} </b></h4>
               <h5><b>Thank you, </b> <br /> CRM Datasense</h5>
             `
                 const emailRes = emailSend(mailData)
-
                 sendResponse['appStatusCode'] = 0
-              sendResponse['message'] = 'User added Successfully'
-              sendResponse['payloadJson'] = result
-              sendResponse['error'] = ''
-              return NextResponse.json(sendResponse, { status: 200 })
-
-                // if (emailRes) {
-                //   sendResponse['appStatusCode'] = 0
-                //   sendResponse['message'] = 'User added Successfully'
-                //   sendResponse['payloadJson'] = result
-                //   sendResponse['error'] = 'Email send successfully!'
-                // } else {
-                //   sendResponse['appStatusCode'] = 0
-                //   sendResponse['message'] = 'User added Successfully'
-                //   sendResponse['payloadJson'] = result
-                //   sendResponse['error'] = 'Email could not send!'
-                // }
+                sendResponse['message'] = 'User added Successfully'
+                sendResponse['payloadJson'] = result
+                sendResponse['error'] = ''
+                return NextResponse.json(sendResponse, { status: 200 })
               })
+            } else {
+              const currentRole = await UserRole.findOne({ c_role_id: resulData[0]?.c_role_id }) // id from JWT/session
+              const newRole = await UserRole.findOne({ c_role_id: dData?.c_role_id })
 
-              
+              console.log(newRole.c_role_priority, '<<<< NEW PRIO')
+              console.log(currentRole.c_role_priority, '<<<< CUR PRIO')
+
+              if (!currentRole || !newRole) {
+                sendResponse['appStatusCode'] = 4
+                sendResponse['message'] = 'Invalid role setup'
+                sendResponse['payloadJson'] = []
+                sendResponse['error'] = 'Role not found'
+                return NextResponse.json(sendResponse, { status: 200 })
+              }
+
+              // Priority check: only allow creating lower priority role
+              else if (newRole.c_role_priority <= currentRole.c_role_priority) {
+                sendResponse['appStatusCode'] = 4
+                sendResponse['message'] = 'You cannot create this role'
+                sendResponse['payloadJson'] = []
+                sendResponse['error'] = 'Not enough permission'
+                return NextResponse.json(sendResponse, { status: 200 })
+              } else {
+                const encEmail = encryptCryptoResponse(dData?.email)
+                const encMobile = encryptCryptoResponse(dData?.mobile)
+                const userdata = new User({
+                  user_id: create_UUID(),
+                  organization_id: dData?.organization_id,
+                  first_name: dData?.first_name,
+                  last_name: dData?.last_name,
+                  user_name,
+                  email: encEmail,
+                  mobile: encMobile,
+                  role: 'admin',
+                  slug_name,
+                  c_about_user: dData?.c_about_user,
+                  c_role_id: dData?.c_role_id,
+                  c_user_img_url: dData?.c_user_img_url,
+                  password: hashPass,
+                  n_status: dData?.n_status ? dData?.n_status : 1
+                })
+
+                await userdata.save().then(result => {
+                  let mailData = {
+                    from: '"No Reply" <dhilipbeece001@gmail.com>', // sender address
+                    to: `${dData?.email}`, // receiver
+                    subject: '🔑 CRM Datasense - Login Credentials',
+                    text: 'Your login credentials for CRM Datasense',
+                    html: `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 10px; padding: 30px; background: #f9fafc;">
+      
+      <h2 style="text-align: center; color: #1976d2; margin-bottom: 20px;">CRM Datasense</h2>
+      
+      <p style="font-size: 15px; color: #333;">Hi <b>${user_name}</b>,</p>
+      <p style="font-size: 15px; color: #333; line-height: 1.6;">
+        Your account has been created successfully. Please find your login credentials below:
+      </p>
+      
+      <div style="margin: 25px 0; padding: 15px; background: #e3f2fd; border-radius: 8px;">
+        <p style="font-size: 16px; color: #333; margin: 5px 0;">
+          📧 <b>Email:</b> <span style="color: #1976d2;">${dData?.email}</span>
+        </p>
+        <p style="font-size: 16px; color: #333; margin: 5px 0;">
+          🔑 <b>Password:</b> <span style="color: #1976d2;">${passwordCheck}</span>
+        </p>
+      </div>
+      
+      <p style="font-size: 14px; color: #555;">⚠️ Please change your password after first login for better security.</p>
+      
+      <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;" />
+      
+      <p style="font-size: 14px; color: #555; text-align: center;">
+        Thank you, <br />
+        <b style="color: #1976d2;">CRM Datasense Tech</b>
+      </p>
+    </div>
+  `
+                  }
+
+                  const emailRes = emailSend(mailData)
+                  sendResponse['appStatusCode'] = 0
+                  sendResponse['message'] = 'User added Successfully'
+                  sendResponse['payloadJson'] = result
+                  sendResponse['error'] = ''
+                  return NextResponse.json(sendResponse, { status: 200 })
+                })
+              }
             }
           } else {
-
-
-
-
             if (dData?.first_name === '') {
               sendResponse['appStatusCode'] = 4
               sendResponse['message'] = 'Please check first name'
@@ -301,19 +362,40 @@ export async function POST(request) {
                 if (result) {
                   let mailData = {
                     from: '"No Reply" <dhilipbeece001@gmail.com>', // sender address
-                    to: `${dData?.email}`, // list of receivers
-                    subject: 'CRM Datasense Login Credential',
-                    text: 'Login Credential',
-                    html: ``
+                    to: `${dData?.email}`, // receiver
+                    subject: '🔑 CRM Datasense - Login Credentials',
+                    text: 'Your login credentials for CRM Datasense',
+                    html: `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 10px; padding: 30px; background: #f9fafc;">
+      
+      <h2 style="text-align: center; color: #1976d2; margin-bottom: 20px;">CRM Datasense</h2>
+      
+      <p style="font-size: 15px; color: #333;">Hi <b>${user_name}</b>,</p>
+      <p style="font-size: 15px; color: #333; line-height: 1.6;">
+        Your account has been created successfully. Please find your login credentials below:
+      </p>
+      
+      <div style="margin: 25px 0; padding: 15px; background: #e3f2fd; border-radius: 8px;">
+        <p style="font-size: 16px; color: #333; margin: 5px 0;">
+          📧 <b>Email:</b> <span style="color: #1976d2;">${dData?.email}</span>
+        </p>
+        <p style="font-size: 16px; color: #333; margin: 5px 0;">
+          🔑 <b>Password:</b> <span style="color: #1976d2;">${passwordCheck}</span>
+        </p>
+      </div>
+      
+      <p style="font-size: 14px; color: #555;">⚠️ Please change your password after first login for better security.</p>
+      
+      <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;" />
+      
+      <p style="font-size: 14px; color: #555; text-align: center;">
+        Thank you, <br />
+        <b style="color: #1976d2;">CRM Datasense Tech</b>
+      </p>
+    </div>
+  `
                   }
 
-                  mailData['html'] = `
-              <b>Hai ${user_name},</b>
-              <h4>Your Login Credential</h4>
-              <h4>your email : <b>${dData?.email} </b></h4>
-              <h4>your password : <b>${passwordCheck} </b></h4>
-              <h5><b>Thank you, </b> <br /> CRM Datasense Tech</h5>
-            `
                   const emailRes = await emailSend(mailData)
 
                   if (emailRes) {

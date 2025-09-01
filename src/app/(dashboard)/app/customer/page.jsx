@@ -62,7 +62,7 @@ const CustomerTable = () => {
 
   const fetchData = async () => {
     setLoading(true)
-    
+
     const form_name = 'lead-form'
 
     const query = new URLSearchParams({
@@ -190,7 +190,6 @@ const CustomerTable = () => {
     return [...new Set(dataFilter.map(item => item.values['Status']))].filter(Boolean)
   }, [dataFilter])
 
-
   async function handleUpload(e) {
     e.preventDefault()
 
@@ -203,7 +202,6 @@ const CustomerTable = () => {
     const formData = new FormData()
     formData.append('file', selectedFile)
     formData.append('organization_id', organization_id)
-    
 
     setLoader(true)
 
@@ -214,15 +212,15 @@ const CustomerTable = () => {
       })
 
       const data = await res.json()
-       toast.success(data.message, {
-                autoClose: 500, // 1 second la close
-                position: 'bottom-center',
-                hideProgressBar: true, // progress bar venam na
-                closeOnClick: true,
-                pauseOnHover: false,
-                draggable: false,
-                progress: undefined
-              })
+      toast.success(data.message, {
+        autoClose: 500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
       fetchData()
       setFileName('')
       setSelectedFile(null)
@@ -271,7 +269,7 @@ const CustomerTable = () => {
                       <input
                         type='file'
                         name='file'
-                        accept=".csv, .xlsx"
+                        accept='.csv, .xlsx'
                         hidden
                         onChange={e => {
                           const file = e.target.files[0]
@@ -640,7 +638,7 @@ const CustomerTable = () => {
           />
         </CardContent>
       </Card>
-       <ToastContainer position='top-right' />
+      <ToastContainer position='top-right' />
     </Box>
   )
 }

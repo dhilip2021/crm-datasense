@@ -238,8 +238,15 @@ const Register = ({ mode }) => {
     if (otpRes?.appStatusCode === 0) {
       setOtpCheck(true)
       toast.success('OTP send your mail', {
-        autoClose: 5000 // closes in 8 seconds
-      })
+                      autoClose: 500, // 1 second la close
+                      position: 'bottom-center',
+                      hideProgressBar: true, // progress bar venam na
+                      closeOnClick: true,
+                      pauseOnHover: false,
+                      draggable: false,
+                      progress: undefined
+                    })
+
     } else {
       setOtpCheck(false)
     }
@@ -308,20 +315,38 @@ const Register = ({ mode }) => {
 
         if (resultData?.appStatusCode === 0) {
           toast.success('Please check your email.. your password send your mail!', {
-            autoClose: 8000 // closes in 8 seconds
-          })
+                          autoClose: 500, // 1 second la close
+                          position: 'bottom-center',
+                          hideProgressBar: true, // progress bar venam na
+                          closeOnClick: true,
+                          pauseOnHover: false,
+                          draggable: false,
+                          progress: undefined
+                        })
           router.push('/login')
           setLoader(false)
         } else {
           toast.error('Something Went wrong, Please try after some time', {
-            autoClose: 3000 // closes in 3 seconds
-          })
+                          autoClose: 500, // 1 second la close
+                          position: 'bottom-center',
+                          hideProgressBar: true, // progress bar venam na
+                          closeOnClick: true,
+                          pauseOnHover: false,
+                          draggable: false,
+                          progress: undefined
+                        })
           setLoader(false)
         }
       } else {
         toast.error('Something Went wrong, Please try after some time', {
-          autoClose: 3000 // closes in 3 seconds
-        })
+                        autoClose: 500, // 1 second la close
+                        position: 'bottom-center',
+                        hideProgressBar: true, // progress bar venam na
+                        closeOnClick: true,
+                        pauseOnHover: false,
+                        draggable: false,
+                        progress: undefined
+                      })
       }
     }
   }

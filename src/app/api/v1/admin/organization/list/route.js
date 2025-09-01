@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { Organization } from "@/models/organizationModel";
 import connectMongoDB from "@/libs/mongodb";
+import { verifyAccessToken } from "@/helper/clientHelper";
 
 
 
@@ -17,6 +18,9 @@ export async function GET(request) {
   const id = request.nextUrl.searchParams.get("id");
   const name = request.nextUrl.searchParams.get("name");
 
+   const verified = verifyAccessToken();
+   if (verified.success) {
+    
     if (id) {
     await connectMongoDB();
 
@@ -103,9 +107,7 @@ export async function GET(request) {
 
         return NextResponse.json(sendResponse, { status: 400 });
       }
-    }
-
-    if (name) {
+    }else if (name) {
 
         await connectMongoDB();
 
@@ -262,6 +264,15 @@ export async function GET(request) {
         return NextResponse.json(sendResponse, { status: 400 });
       }
     }
+   }else {
+         sendResponse["appStatusCode"] = 4;
+         sendResponse["message"] = "";
+         sendResponse["payloadJson"] = [];
+         sendResponse["error"] = verified.error;
+   
+         return NextResponse.json(sendResponse, { status: 400 });
+       }
+
   
 
    

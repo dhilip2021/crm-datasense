@@ -153,7 +153,7 @@ export async function POST(request) {
               } else {
                 sendResponse['appStatusCode'] = 4
                 sendResponse['message'] = ''
-                sendResponse['error'] = 'Invalid credential1'
+                sendResponse['error'] = 'Invalid credential'
                 sendResponse['payloadJson'] = []
               }
             })
@@ -161,7 +161,7 @@ export async function POST(request) {
               sendResponse['appStatusCode'] = 4
               sendResponse['message'] = ''
               sendResponse['payloadJson'] = err
-              sendResponse['error'] = 'Invalid credential3'
+              sendResponse['error'] = 'Invalid credential'
             })
         })
         .catch(err => {

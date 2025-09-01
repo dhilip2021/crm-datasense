@@ -31,10 +31,6 @@ export async function POST(request) {
           }
         })
 
-        console.log(emailList, '<<< MATCHED1111')
-
-
-
 
         const matched = response.find(u => decrypCryptoRequest(u.email) === email)
         if (!matched) {

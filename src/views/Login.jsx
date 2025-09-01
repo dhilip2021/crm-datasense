@@ -517,9 +517,29 @@ const Login = ({ mode }) => {
     }
 
     let results = await LoginApi(dataValue)
-    const resultsPayloadJson = decrypCryptoRequest(results.payloadJson)
+    
+    
+    if (results?.appStatusCode === 4) {
+      setLoader(false)
+       toast.error(results?.error, {
+            autoClose: 500,
+            position: 'bottom-center',
+            hideProgressBar: true, // progress bar venam na
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: false,
+            progress: undefined
+          })
 
-    const dispatchLogin = {
+
+      if (results.error !== 'Invalid credential') {
+        setEmail('')
+        setPassword('')
+        setIsChecked(false)
+      }
+    } else if (results?.appStatusCode === 0) {
+      const resultsPayloadJson = decrypCryptoRequest(results.payloadJson)
+       const dispatchLogin = {
       appStatusCode: results?.appStatusCode,
       message: results?.message,
       payloadJson: resultsPayloadJson,
@@ -528,17 +548,7 @@ const Login = ({ mode }) => {
 
     dispatch(loginData(dispatchLogin))
 
-    if (results?.appStatusCode === 4) {
-      setLoader(false)
 
-      toast.error(results?.error)
-
-      if (results.error !== 'Invalid credential') {
-        setEmail('')
-        setPassword('')
-        setIsChecked(false)
-      }
-    } else if (results?.appStatusCode === 0) {
       const header = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${resultsPayloadJson?.tokenAccess}`
@@ -582,6 +592,8 @@ const Login = ({ mode }) => {
           let dummyArray = []
 
           resultsPayloadJson?.privileges.map(data => dummyArray.push(data?.role_privileage))
+
+
 
           Cookies.set('_token', resultsPayloadJson?.tokenAccess)
           Cookies.set('_token_expiry', resultsPayloadJson?.tokenExpiry)
@@ -673,9 +685,19 @@ const Login = ({ mode }) => {
 
         setLoader(false)
       }
+      setLoader(false)
     } else {
       setLoader(false)
-      toast.error('Something Went wrong, Please try after some time')
+     
+       toast.error('Something Went wrong, Please try after some time', {
+            autoClose: 500,
+            position: 'bottom-center',
+            hideProgressBar: true, // progress bar venam na
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: false,
+            progress: undefined
+          })
     }
   }
 
@@ -776,10 +798,10 @@ const Login = ({ mode }) => {
                   <Typography>New on our platform?</Typography>
                   <Typography component={Link} href='/register' color='primary'>
                     Create your Organization
-                  </Typography>
+                  </Typography> 
                 </div>
-                <Divider sx={{ my: 5 }}>or</Divider>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {/* <Divider sx={{ my: 5 }}>or</Divider> */}
+                {/* <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Link href='/' passHref>
                     <IconButton component='a' onClick={e => e.preventDefault()}>
                       <Facebook sx={{ color: '#497ce2' }} />
@@ -802,7 +824,7 @@ const Login = ({ mode }) => {
                       <Google sx={{ color: '#db4437' }} />
                     </IconButton>
                   </Link>
-                </Box>
+                </Box> */}
               </form>
             </div>
           </CardContent>

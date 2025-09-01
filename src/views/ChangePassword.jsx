@@ -83,7 +83,15 @@ const ChangePassword = ({ mode }) => {
         router.push('/login')
       }, 3000)
     } else {
-      toast.error('Password not changed')
+      toast.error('Password not changed', {
+                                  autoClose: 500, // 1 second la close
+                                  position: 'bottom-center',
+                                  hideProgressBar: true, // progress bar venam na
+                                  closeOnClick: true,
+                                  pauseOnHover: false,
+                                  draggable: false,
+                                  progress: undefined
+                                })
     }
   }
 

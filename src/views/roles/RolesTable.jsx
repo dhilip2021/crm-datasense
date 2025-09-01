@@ -76,12 +76,36 @@ const RolesTable = () => {
 
     if (results?.appStatusCode === 0) {
       if (body.n_status === 0) {
-        toast.error(`${updatedRows[index].c_role_name} Status Inactive `)
+         toast.error(`${updatedRows[index].c_role_name} Status Inactive `, {
+                        autoClose: 500, // 1 second la close
+                        position: 'bottom-center',
+                        hideProgressBar: true, // progress bar venam na
+                        closeOnClick: true,
+                        pauseOnHover: false,
+                        draggable: false,
+                        progress: undefined
+                      })
       } else {
-        toast.success(`${updatedRows[index].c_role_name} Status Active `)
+         toast.success(`${updatedRows[index].c_role_name} Status Active `, {
+                        autoClose: 500, // 1 second la close
+                        position: 'bottom-center',
+                        hideProgressBar: true, // progress bar venam na
+                        closeOnClick: true,
+                        pauseOnHover: false,
+                        draggable: false,
+                        progress: undefined
+                      })
       }
     } else {
-      toast.error(results?.error)
+       toast.error(results?.error, {
+                      autoClose: 500, // 1 second la close
+                      position: 'bottom-center',
+                      hideProgressBar: true, // progress bar venam na
+                      closeOnClick: true,
+                      pauseOnHover: false,
+                      draggable: false,
+                      progress: undefined
+                    })
     }
 
     //  setLoader(false)
@@ -148,12 +172,28 @@ const RolesTable = () => {
 
     if (deleteRes?.appStatusCode !== 0) {
       setLoader(false)
-      toast.success(deleteRes?.error)
+      toast.success(deleteRes?.error, {
+                      autoClose: 500, // 1 second la close
+                      position: 'bottom-center',
+                      hideProgressBar: true, // progress bar venam na
+                      closeOnClick: true,
+                      pauseOnHover: false,
+                      draggable: false,
+                      progress: undefined
+                    })
       getRolesList()
     } else {
       setLoader(false)
       getRolesList()
-      toast.success(deleteRes?.message)
+      toast.success(deleteRes?.message, {
+                      autoClose: 500, // 1 second la close
+                      position: 'bottom-center',
+                      hideProgressBar: true, // progress bar venam na
+                      closeOnClick: true,
+                      pauseOnHover: false,
+                      draggable: false,
+                      progress: undefined
+                    })
     }
   }
 

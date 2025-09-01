@@ -73,11 +73,27 @@ const ForgotPassword = ({ mode }) => {
 
     if (results.appStatusCode !== 0) {
       setLoader(false)
-      toast.error(results?.error)
+      toast.error(results?.error, {
+              autoClose: 500, // 1 second la close
+              position: 'bottom-center',
+              hideProgressBar: true, // progress bar venam na
+              closeOnClick: true,
+              pauseOnHover: false,
+              draggable: false,
+              progress: undefined
+            })
     } else {
       setLoader(false)
       setstatusCode(results.appStatusCode)
-      toast.success(results?.message)
+      toast.success(results?.message, {
+              autoClose: 500, // 1 second la close
+              position: 'bottom-center',
+              hideProgressBar: true, // progress bar venam na
+              closeOnClick: true,
+              pauseOnHover: false,
+              draggable: false,
+              progress: undefined
+            })
       setSuccessFlag(true)
     }
   }
@@ -94,7 +110,15 @@ const ForgotPassword = ({ mode }) => {
     if (results?.appStatusCode !== 4) {
       setLoaderEmail(false)
       setCheckFlag(false)
-      toast.error('This email is not registered with us')
+      toast.error('This email is not registered with us', {
+              autoClose: 500, // 1 second la close
+              position: 'bottom-center',
+              hideProgressBar: true, // progress bar venam na
+              closeOnClick: true,
+              pauseOnHover: false,
+              draggable: false,
+              progress: undefined
+            })
       setToastFlag(true)
       setstatusCode(results?.appStatusCode)
     } else {
