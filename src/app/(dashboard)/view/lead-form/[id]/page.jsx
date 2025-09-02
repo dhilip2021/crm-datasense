@@ -317,9 +317,9 @@ const LeadDetailView = () => {
             <NotesSection leadId={leadId} leadData={leadData} />
           </Box>
 
-          <Box>
+          {/* <Box>
             <TaskSection leadId={leadId} leadData={leadData} />
-          </Box>
+          </Box> */}
         </Grid>
 
         {/* Right side (summary card) */}
