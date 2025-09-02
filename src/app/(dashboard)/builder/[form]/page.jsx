@@ -37,6 +37,7 @@ const fieldOptions = [
 
 export default function LeadFormPage() {
   const organization_id = Cookies.get('organization_id')
+   const getToken = Cookies.get('_token')
   const { form } = useParams()
   const lead_form = form
 
@@ -218,14 +219,20 @@ export default function LeadFormPage() {
       // update existing
       res = await fetch('/api/v1/admin/lead-form-template/update', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken}`
+        },
         body: JSON.stringify({ ...payload, _id: formId })
       })
     } else {
       // create new
       res = await fetch('/api/v1/admin/lead-form-template/save', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken}`
+        },
         body: JSON.stringify(payload)
       })
     }

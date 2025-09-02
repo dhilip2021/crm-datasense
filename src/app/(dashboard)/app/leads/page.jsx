@@ -369,6 +369,7 @@ const LeadTable = () => {
       const res = await fetch('/api/v1/admin/lead-form/import', {
         method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${getToken}` // ✅ only auth header
         },
         body: formData

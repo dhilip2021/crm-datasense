@@ -8,6 +8,7 @@ import Accordion from '@mui/material/Accordion'
 import AccordionSummary from '@mui/material/AccordionSummary'
 import AccordionDetails from '@mui/material/AccordionDetails'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import Cookies from 'js-cookie'
 
 function getIntial(name = '') {
   const reIntial = (name.match(/\p{L}+/gu) || []) // words with letters (Unicode-safe)
@@ -19,6 +20,9 @@ function getIntial(name = '') {
 
 const NotesSection = ({ leadId, leadData }) => {
 
+ const getToken = Cookies.get('_token')
+ const user_name = Cookies.get('user_name')
+ 
 
 const leadArrayData = leadData?.values?.Notes ? leadData.values.Notes : []
 
@@ -69,14 +73,19 @@ const handleSave = async () => {
       const newNote = {
         title,
         note,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        createdBy: user_name
       }
 
       console.log(newNote, "<<< new Note")
 
       const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken}`
+        
+        },
         body: JSON.stringify({
           values: {
             Notes: [newNote] // ✅ only send new note
@@ -123,7 +132,7 @@ const handleSave = async () => {
                     <Typography>{n.note}</Typography>
                     <Typography variant='caption' color='text.secondary'>
                       Lead - <b>{`${leadData?.values?.['First Name']} ${leadData?.values?.['Last Name']}`}</b> •{' '}
-                      {new Date(n.createdAt).toLocaleString()} by {n.createdBy}
+                      {new Date(n.createdAt).toLocaleString()} by <b>{n.createdBy}</b>
                     </Typography>
                   </Box>
                 </Box>

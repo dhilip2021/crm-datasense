@@ -8,6 +8,7 @@ import Accordion from '@mui/material/Accordion'
 import AccordionSummary from '@mui/material/AccordionSummary'
 import AccordionDetails from '@mui/material/AccordionDetails'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import Cookies from 'js-cookie'
 
 function getIntial(name = '') {
   const reIntial = (name.match(/\p{L}+/gu) || []) // words with letters (Unicode-safe)
@@ -18,7 +19,8 @@ function getIntial(name = '') {
 }
 
 const TaskSection = ({ leadId, leadData }) => {
-
+  
+ const getToken = Cookies.get('_token');
 
 const leadArrayData = leadData?.values?.Tasks ? leadData.values.Tasks : []
 
@@ -76,7 +78,11 @@ const handleSave = async () => {
 
       const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken}`
+        
+        },
         body: JSON.stringify({
           values: {
             Tasks: [newTask] // ✅ only send new task

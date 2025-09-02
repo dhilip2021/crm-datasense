@@ -239,7 +239,8 @@ export async function PATCH(req, { params }) {
       const newNote = {
         title: noteFromBody.title || null,
         note: noteFromBody.note || null,
-        createdAt: noteFromBody.createdAt ? new Date(noteFromBody.createdAt) : new Date()
+        createdAt: noteFromBody.createdAt ? new Date(noteFromBody.createdAt) : new Date(),
+        createdBy: noteFromBody.createdBy || null,
       }
 
       const updated = await Leadform.findOneAndUpdate(
