@@ -17,6 +17,7 @@ import TaskSection from './TaskSection'
 import LeadCard from './LeadCard'
 import EventIcon from '@mui/icons-material/Event'
 import StatusFiled from './StatusFiled'
+import OpenActivities from './OpenActivities'
 
 const LeadDetailView = () => {
   const params = useParams()
@@ -320,6 +321,10 @@ const LeadDetailView = () => {
           {/* <Box>
             <TaskSection leadId={leadId} leadData={leadData} />
           </Box> */}
+
+          <Box>
+            <OpenActivities />
+          </Box>
         </Grid>
 
         {/* Right side (summary card) */}

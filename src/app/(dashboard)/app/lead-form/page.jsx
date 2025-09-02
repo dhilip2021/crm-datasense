@@ -36,8 +36,7 @@ const shortName = fullName =>
 // Pragmatic email validation
 function isValidEmailPragmatic(email) {
   if (typeof email !== 'string') return false
-  const re =
-    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,}$/
+  const re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,}$/
   return re.test(email)
 }
 
@@ -116,18 +115,57 @@ function LeadFormAppPage() {
   }
 
   // Handle change
-  const handleChange = (id, value) => {
-    setValues(prev => ({ ...prev, [id]: value }))
-    setErrors(prev => ({ ...prev, [id]: '' }))
+  const handleChange = (id, value, type) => {
+
+    console.log(id, '<<< IDDDDDD')
+
+
+    if (type === 'Phone') {
+      console.log("1")
+      const fieldKey = id.replace('_number', '')
+      setValues(prev => ({ ...prev, [id]: value }))
+      setErrors(prev => ({ ...prev, [fieldKey]: '' }))
+    } else {
+      console.log("2")
+      setValues(prev => ({ ...prev, [id]: value }))
+      setErrors(prev => ({ ...prev, [id]: '' }))
+    }
+
+    //
   }
 
   // Handle blur
   const handleBlur = field => {
-    const valueForValidation =
-      field.type === 'Phone' ? values[`${field.id}_number`] : values[field.id]
+    
+
+    const valueForValidation = field.type === 'Phone' ? values[`${field.id}_number`] : values[field.id]
     const error = validateField(field, valueForValidation)
-    if (error) setErrors(prev => ({ ...prev, [field.id]: error }))
+
+    // if (error) setErrors(prev => ({ ...prev, [field.id]: error }))
+
+    if (error) {
+      setErrors(prev => ({ ...prev, [field.id]: error }))
+    } else {
+      setErrors(prev => ({ ...prev, [field.id]: '' }))
+    }
   }
+
+  // Handle blur
+  // const handleBlur = field => {
+
+  //   const valueForValidation =
+  //     field.type === 'Phone'
+  //       ? values[field.id]   // FIX: no `_number`
+  //       : values[field.id]
+
+  //   const error = validateField(field, valueForValidation)
+
+  //   if (error) {
+  //     setErrors(prev => ({ ...prev, [field.id]: error }))
+  //   } else {
+  //     setErrors(prev => ({ ...prev, [field.id]: '' }))
+  //   }
+  // }
 
   // ---- handleSubmit ----
   const handleSubmit = async () => {
@@ -142,14 +180,9 @@ function LeadFormAppPage() {
     const newErrors = {}
 
     sections.forEach(section => {
-      const fields = [
-        ...(section.fields.left || []),
-        ...(section.fields.center || []),
-        ...(section.fields.right || [])
-      ]
+      const fields = [...(section.fields.left || []), ...(section.fields.center || []), ...(section.fields.right || [])]
       fields.forEach(field => {
-        const valueForValidation =
-          field.type === 'Phone' ? values[`${field.id}_number`] : values[field.id]
+        const valueForValidation = field.type === 'Phone' ? values[`${field.id}_number`] : values[field.id]
         const error = validateField(field, valueForValidation)
         if (error) {
           newErrors[field.id] = error
@@ -250,7 +283,7 @@ function LeadFormAppPage() {
         </>
       ),
       value: values[field.id] || '',
-      onChange: e => handleChange(field.id, e.target.value),
+      onChange: e => handleChange(field.id, e.target.value, field.type),
       onBlur: () => handleBlur(field),
       error: !!errors[field.id],
       helperText: errors[field.id],
@@ -260,10 +293,7 @@ function LeadFormAppPage() {
     switch (field.type) {
       case 'Dropdown': {
         let options = field.options || []
-        if (
-          (field.label === 'Assigned To' || field.label === 'Sales Executive') &&
-          userList.length > 0
-        ) {
+        if ((field.label === 'Assigned To' || field.label === 'Sales Executive') && userList.length > 0) {
           options = userList.map(user => ({
             value: user.user_id,
             label: user.user_name
@@ -289,7 +319,7 @@ function LeadFormAppPage() {
             <RadioGroup
               row
               value={values[field.id] || ''}
-              onChange={e => handleChange(field.id, e.target.value)}
+              onChange={e => handleChange(field.id, e.target.value, field.type)}
             >
               {field.options?.map((opt, i) => (
                 <FormControlLabel key={i} value={opt} control={<Radio />} label={opt} />
@@ -306,7 +336,7 @@ function LeadFormAppPage() {
           <TextField
             {...commonProps}
             value={values[`${field.id}_number`] || ''}
-            onChange={e => handleChange(`${field.id}_number`, e.target.value)}
+            onChange={e => handleChange(`${field.id}_number`, e.target.value, field.type)}
             type='tel'
             inputProps={{ maxLength: field.maxLength }}
             InputProps={{
@@ -314,7 +344,7 @@ function LeadFormAppPage() {
                 <InputAdornment position='start'>
                   <Select
                     value={values[`${field.id}_countryCode`] || field.countryCode || '+91'}
-                    onChange={e => handleChange(`${field.id}_countryCode`, e.target.value)}
+                    onChange={e => handleChange(`${field.id}_countryCode`, e.target.value, field.type)}
                     size='small'
                     sx={{
                       '.MuiOutlinedInput-notchedOutline': { border: 'none' },
@@ -345,7 +375,7 @@ function LeadFormAppPage() {
             control={
               <Switch
                 checked={values[field.id] || false}
-                onChange={e => handleChange(field.id, e.target.checked)}
+                onChange={e => handleChange(field.id, e.target.checked, field.type)}
               />
             }
             label={field.label || 'Toggle'}
