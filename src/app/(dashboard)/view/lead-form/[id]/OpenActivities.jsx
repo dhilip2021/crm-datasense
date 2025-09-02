@@ -7,7 +7,6 @@ import {
   Typography,
   Button,
   Menu,
-  MenuItem,
   Divider,
   Tabs,
   Tab,
@@ -15,8 +14,21 @@ import {
   TableHead,
   TableRow,
   TableCell,
-  TableBody
+  TableBody,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Select,
+  MenuItem,
+  MenuItem as MuiMenuItem,
+  FormControl,
+  InputLabel,
+  Switch,
+  FormControlLabel
 } from '@mui/material'
+
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import Accordion from '@mui/material/Accordion'
 import AccordionSummary from '@mui/material/AccordionSummary'
@@ -79,6 +91,9 @@ export default function OpenActivities() {
   const [viewAnchor, setViewAnchor] = useState(null)
   const [view, setView] = useState('column') // column | tab | chronological
   const [tab, setTab] = useState(0)
+  const [openTaskDialog, setOpenTaskDialog] = useState(false)
+  const [reminderEnabled, setReminderEnabled] = useState(false)
+
 
   // Merge + sort activities
   const allActivities = [...tasks, ...meetings, ...calls].sort(
@@ -87,63 +102,327 @@ export default function OpenActivities() {
 
   return (
     <Accordion defaultExpanded>
-  <AccordionSummary
-    expandIcon={<ExpandMoreIcon />} // remove stopPropagation here
-    aria-controls="panel3-content"
-    id="panel3-header"
-  >
-    <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
-      <Typography variant="h6" fontWeight="bold">
-        Open Activities
-      </Typography>
+      <AccordionSummary
+        expandIcon={<ExpandMoreIcon />} // remove stopPropagation here
+        aria-controls='panel3-content'
+        id='panel3-header'
+      >
+        <Box display='flex' justifyContent='space-between' alignItems='center' width='100%'>
+          <Typography variant='h6' fontWeight='bold'>
+            Open Activities
+          </Typography>
 
-      {/* Add New */}
-<Button
-  variant="contained"
-  size="small"
-  sx={{ marginRight: "20px" }}
-  onClick={e => {
-    e.stopPropagation() // ✅ stop accordion toggle
-    setAddAnchor(e.currentTarget)
+          <Button
+            variant='contained'
+            size='small'
+            sx={{ marginRight: '20px' }}
+            onClick={e => {
+              e.stopPropagation() // ✅ prevent accordion toggle
+              setAddAnchor(e.currentTarget)
+            }}
+          >
+            + Add New
+          </Button>
+          <Menu
+            anchorEl={addAnchor}
+            open={Boolean(addAnchor)}
+            onClose={() => setAddAnchor(null)} // ✅ fix closing issue
+          >
+            <MenuItem
+              onClick={() => {
+                setOpenTaskDialog(true) // ✅ Open the popup
+                setAddAnchor(null)
+              }}
+            >
+              Create Task
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                alert('Add new Call')
+                setAddAnchor(null)
+              }}
+            >
+              Create Call
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                alert('Add new Meeting')
+                setAddAnchor(null)
+              }}
+            >
+              Create Meeting
+            </MenuItem>
+          </Menu>
+
+
+
+
+
+
+          {/* <Dialog
+            open={openTaskDialog}
+            onClose={() => setOpenTaskDialog(false)}
+            maxWidth='sm'
+            fullWidth
+            PaperProps={{
+              sx: {
+                borderRadius: 3,
+                p: 1,
+                boxShadow: '0px 8px 24px rgba(0,0,0,0.15)',
+                bgcolor: '#fdfdff'
+              }
+            }}
+          >
+            <DialogTitle
+              sx={{
+                fontWeight: 'bold',
+                fontSize: '1.25rem',
+                textAlign: 'center',
+                borderBottom: '1px solid #eee'
+              }}
+            >
+              ✨ Create Task
+            </DialogTitle>
+
+            <DialogContent dividers sx={{ p: 3 }}>
+              <Box display='flex' flexDirection='column' gap={3}>
+                <TextField label='Subject' fullWidth variant='outlined' sx={{ bgcolor: '#fff', borderRadius: 2 }} />
+
+                <TextField
+                  label='Due Date'
+                  placeholder='DD/MM/YYYY'
+                  fullWidth
+                  variant='outlined'
+                  sx={{ bgcolor: '#fff', borderRadius: 2 }}
+                />
+
+                <FormControl fullWidth sx={{ bgcolor: '#fff', borderRadius: 2 }}>
+                  <InputLabel>Priority</InputLabel>
+                  <Select defaultValue='High' label='Priority'>
+                    <MuiMenuItem value='Low'>Low</MuiMenuItem>
+                    <MuiMenuItem value='Medium'>Medium</MuiMenuItem>
+                    <MuiMenuItem value='High'>High</MuiMenuItem>
+                  </Select>
+                </FormControl>
+
+                <TextField
+                  label='Owner'
+                  defaultValue='Dhilip'
+                  fullWidth
+                  variant='outlined'
+                  sx={{ bgcolor: '#fff', borderRadius: 2 }}
+                />
+
+                <Box display='flex' justifyContent='space-between'>
+                  <FormControlLabel control={<Switch />} label='Reminder' />
+                  <FormControlLabel control={<Switch />} label='Repeat' />
+                </Box>
+              </Box>
+            </DialogContent>
+
+            <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #eee' }}>
+              <Button
+                onClick={() => setOpenTaskDialog(false)}
+                variant='outlined'
+                sx={{ borderRadius: 2, textTransform: 'none' }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant='contained'
+                onClick={() => setOpenTaskDialog(false)}
+                sx={{
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  px: 3,
+                  bgcolor: '#1976d2',
+                  '&:hover': { bgcolor: '#1565c0' }
+                }}
+              >
+                Save
+              </Button>
+            </DialogActions>
+          </Dialog> */}
+
+            <Dialog
+  open={openTaskDialog}
+  onClose={() => setOpenTaskDialog(false)}
+  maxWidth="sm"
+  fullWidth
+  PaperProps={{
+    sx: { borderRadius: 3, p: 1, boxShadow: '0px 8px 24px rgba(0,0,0,0.15)', bgcolor: '#fdfdff' }
   }}
 >
-  + Add New
-</Button>
+  <DialogTitle
+    sx={{
+      fontWeight: 'bold',
+      fontSize: '1.25rem',
+      textAlign: 'center',
+      borderBottom: '1px solid #eee'
+    }}
+  >
+    ✨ Create Task
+  </DialogTitle>
 
-<Menu
-  anchorEl={addAnchor}
-  open={Boolean(addAnchor)}
-  onClose={() => setAddAnchor(null)} // ✅ FIXED (no event.currentTarget here)
->
-  <MenuItem
-    onClick={() => {
-      alert("Add new Task")
-      setAddAnchor(null)
-    }}
-  >
-    Task
-  </MenuItem>
-  <MenuItem
-    onClick={() => {
-      alert("Add new Meeting")
-      setAddAnchor(null)
-    }}
-  >
-    Meeting
-  </MenuItem>
-  <MenuItem
-    onClick={() => {
-      alert("Add new Call")
-      setAddAnchor(null)
-    }}
-  >
-    Call
-  </MenuItem>
-</Menu>
+  <DialogContent dividers sx={{ p: 3 }}>
+    <Box display="flex" flexDirection="column" gap={3}>
+      {/* Subject */}
+      <TextField label="Subject" fullWidth variant="outlined" sx={{ bgcolor: '#fff', borderRadius: 2 }} />
+
+      {/* Due Date */}
+      <TextField
+        label="Due Date"
+        type="date"
+        fullWidth
+        InputLabelProps={{ shrink: true }}
+        sx={{ bgcolor: '#fff', borderRadius: 2 }}
+      />
+
+      {/* Priority */}
+      <FormControl fullWidth sx={{ bgcolor: '#fff', borderRadius: 2 }}>
+        <InputLabel>Priority</InputLabel>
+        <Select defaultValue="High" label="Priority">
+          <MuiMenuItem value="Low">Low</MuiMenuItem>
+          <MuiMenuItem value="Medium">Medium</MuiMenuItem>
+          <MuiMenuItem value="High">High</MuiMenuItem>
+        </Select>
+      </FormControl>
+
+      {/* Owner */}
+      <TextField
+        label="Owner"
+        defaultValue="Dhilip"
+        fullWidth
+        variant="outlined"
+        sx={{ bgcolor: '#fff', borderRadius: 2 }}
+      />
+
+     {/* Reminder Section */}
+<Box sx={{ border: '1px solid #eee', p: 2, borderRadius: 2, bgcolor: '#fafafa' }}>
+  <Typography fontWeight="bold" mb={2}>
+    Reminder
+  </Typography>
+
+  {/* Enable Reminder */}
+  <FormControlLabel
+    control={
+      <Switch
+        checked={reminderEnabled}
+        onChange={(e) => setReminderEnabled(e.target.checked)}
+      />
+    }
+    label="Enable Reminder"
+  />
+
+  {/* Show fields only if Reminder Enabled */}
+  {reminderEnabled && (
+    <>
+      {/* Date & Time Picker */}
+      <Box display="flex" gap={2} mt={2}>
+        <TextField
+          label="Date"
+          type="date"
+          fullWidth
+          InputLabelProps={{ shrink: true }}
+          sx={{ bgcolor: '#fff', borderRadius: 2 }}
+        />
+        <TextField
+          label="Time"
+          type="time"
+          fullWidth
+          InputLabelProps={{ shrink: true }}
+          sx={{ bgcolor: '#fff', borderRadius: 2 }}
+        />
+      </Box>
+
+      {/* Alert Type */}
+      <FormControl fullWidth sx={{ mt: 2, bgcolor: '#fff', borderRadius: 2 }}>
+        <InputLabel>Alert Type</InputLabel>
+        <Select defaultValue="Email" label="Alert Type">
+          <MuiMenuItem value="Email">Email</MuiMenuItem>
+          <MuiMenuItem value="Popup">Pop-up</MuiMenuItem>
+          <MuiMenuItem value="Both">Both</MuiMenuItem>
+        </Select>
+      </FormControl>
+    </>
+  )}
+</Box>
+
+      {/* Repeat */}
+      {/* <FormControlLabel control={<Switch />} label="Repeat" /> */}
     </Box>
-  </AccordionSummary>
+  </DialogContent>
+
+  <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #eee', marginTop:"15px" }}>
+
+    <Button onClick={() => setOpenTaskDialog(false)} variant="outlined" sx={{ borderRadius: 2, textTransform: 'none' }}>
+      Cancel
+    </Button>
+    <Button
+      variant="contained"
+      onClick={() => setOpenTaskDialog(false)}
+      sx={{
+        borderRadius: 2,
+        textTransform: 'none',
+        px: 3,
+        bgcolor: '#1976d2',
+        '&:hover': { bgcolor: '#1565c0' }
+      }}
+    >
+      Save
+    </Button>
+  </DialogActions>
+</Dialog>
+
+
+
+
+
+
+        </Box>
+      </AccordionSummary>
 
       <AccordionDetails>
+        <Box display='flex' justifyContent='flex-end'>
+          <Button
+            sx={{ marginRight: '25px' }}
+            variant='outlined'
+            endIcon={<ArrowDropDownIcon />}
+            onClick={e => {
+              e.stopPropagation() // ✅ prevent accordion toggle
+              setViewAnchor(e.currentTarget)
+            }}
+          >
+            {view === 'column' ? 'Column View' : view === 'tab' ? 'Tab View' : 'Chronological View'}
+          </Button>
+        </Box>
+        <Menu anchorEl={viewAnchor} open={Boolean(viewAnchor)} onClose={() => setViewAnchor(null)}>
+          <MenuItem
+            onClick={() => {
+              setView('column')
+              setViewAnchor(null)
+            }}
+          >
+            Column View
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setView('tab')
+              setViewAnchor(null)
+            }}
+          >
+            Tab View
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setView('chronological')
+              setViewAnchor(null)
+            }}
+          >
+            Chronological View
+          </MenuItem>
+        </Menu>
+
         <Card sx={{ p: 2, borderRadius: 3 }}>
           {/* Column View */}
           {view === 'column' && (
