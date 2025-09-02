@@ -129,8 +129,9 @@ const NotesSection = ({ leadId, leadData }) => {
                 e.stopPropagation()
                 setOpen(true)
               }}
+              sx={{marginRight: "20px"}}
             >
-              + Add Note
+              + Create Note
             </Button>
           </Box>
         </AccordionSummary>
@@ -158,7 +159,7 @@ const NotesSection = ({ leadId, leadData }) => {
       {/* 🔹 Modal */}
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='sm'>
         <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          Add New Note
+          Create New Note
           <IconButton edge='end' color='inherit' onClick={() => setOpen(false)} aria-label='close' sx={{ ml: 2 }}>
             <CloseIcon />
           </IconButton>
