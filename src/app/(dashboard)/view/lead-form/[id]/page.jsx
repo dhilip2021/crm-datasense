@@ -323,7 +323,7 @@ const LeadDetailView = () => {
           </Box> */}
 
           <Box>
-            <OpenActivities />
+            <OpenActivities leadId={leadId} leadData={leadData} />
           </Box>
         </Grid>
 

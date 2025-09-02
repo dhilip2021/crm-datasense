@@ -220,6 +220,150 @@ export async function PUT(req, { params }) {
 }
 
 // PATCH – Add Note to Lead
+// export async function PATCH(req, { params }) {
+//   const verified = verifyAccessToken()
+//   await connectMongoDB()
+//   const { lead_id } = params
+//   const body = await req.json()
+
+//   if (verified.success) {
+//     try {
+//       const lead = await Leadform.findOne({ lead_id })
+//       if (!lead) {
+//         return NextResponse.json({ success: false, message: 'Lead not found' }, { status: 404 })
+//       }
+
+//       // pick first note from body.values.Notes
+//       const noteFromBody = body.values?.Notes?.[0] || {}
+
+//       const newNote = {
+//         title: noteFromBody.title || null,
+//         note: noteFromBody.note || null,
+//         createdAt: noteFromBody.createdAt ? new Date(noteFromBody.createdAt) : new Date(),
+//         createdBy: noteFromBody.createdBy || null,
+//       }
+
+//       const updated = await Leadform.findOneAndUpdate(
+//         { lead_id },
+//         {
+//           $push: { 'values.Notes': newNote },
+//           $set: { updatedAt: new Date() }
+//         },
+//         { new: true, upsert: true }
+//       )
+
+//       return NextResponse.json({
+//         success: true,
+//         message: 'Added successfully',
+//         data: updated
+//       })
+//     } catch (error) {
+//       console.error('⨯ Add note error:', error)
+//       return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
+//     }
+//   } else {
+//     return NextResponse.json(
+//       {
+//         success: false,
+//         message: '',
+//         error: 'token expired!'
+//       },
+//       { status: 400 }
+//     )
+//   }
+// }
+
+
+
+// export async function PATCH(req, { params }) {
+//   const verified = verifyAccessToken()
+//   await connectMongoDB()
+//   const { lead_id } = params
+//   const body = await req.json()
+
+//   if (verified.success) {
+//     try {
+//       const lead = await Leadform.findOne({ lead_id })
+//       if (!lead) {
+//         return NextResponse.json(
+//           { success: false, message: 'Lead not found' },
+//           { status: 404 }
+//         )
+//       }
+
+//       // Note pick
+//       const noteFromBody = body.values?.Notes?.[0] || {}
+
+//       console.log(noteFromBody,"<<<NOTES FROM BODY")
+//       const newNote = {
+//         title: noteFromBody.title || null,
+//         note: noteFromBody.note || null,
+//         createdAt: noteFromBody.createdAt
+//           ? new Date(noteFromBody.createdAt)
+//           : new Date(),
+//         createdBy: noteFromBody.createdBy || null,
+//       }
+
+//       // Activity → Task pick
+//       const activityFromBody = body.values?.Activity?.[0] || {}
+//       const taskFromBody = activityFromBody.task?.[0] || {}
+//       console.log(taskFromBody,"<<<TASKS FROM BODY")
+//       const newTask = {
+//         subject: taskFromBody.subject || null,
+//         dueDate: taskFromBody.dueDate ? new Date(taskFromBody.dueDate) : null,
+//         priority: taskFromBody.priority || null,
+//         owner: taskFromBody.owner || null,
+//         reminderEnabled: !!taskFromBody.reminderEnabled,
+//         reminderDate: taskFromBody.reminderDate
+//           ? new Date(taskFromBody.reminderDate)
+//           : null,
+//         reminderTime: taskFromBody.reminderTime || null,
+//         alertType: taskFromBody.alertType || 'Email',
+//         createdAt: new Date(),
+//       }
+
+//       // If no Activity array exist → create one
+//       if (!lead.values?.Activity || lead.values.Activity.length === 0) {
+//         lead.values.Activity = [{ task: [] }]
+//       }
+
+//       // Push into Notes + Activity.0.task
+//       const updated = await Leadform.findOneAndUpdate(
+//         { lead_id },
+//         {
+//           $push: {
+//             'values.Notes': newNote,
+//             'values.Activity.0.task': newTask,
+//           },
+//           $set: { updatedAt: new Date() },
+//         },
+//         { new: true, upsert: true }
+//       )
+
+//       return NextResponse.json({
+//         success: true,
+//         message: 'Note & Activity Task added successfully',
+//         data: updated,
+//       })
+//     } catch (error) {
+//       console.error('⨯ Add note+activity error:', error)
+//       return NextResponse.json(
+//         { success: false, message: 'Internal Server Error' },
+//         { status: 500 }
+//       )
+//     }
+//   } else {
+//     return NextResponse.json(
+//       {
+//         success: false,
+//         message: '',
+//         error: 'token expired!',
+//       },
+//       { status: 400 }
+//     )
+//   }
+// }
+
 export async function PATCH(req, { params }) {
   const verified = verifyAccessToken()
   await connectMongoDB()
@@ -230,45 +374,104 @@ export async function PATCH(req, { params }) {
     try {
       const lead = await Leadform.findOne({ lead_id })
       if (!lead) {
-        return NextResponse.json({ success: false, message: 'Lead not found' }, { status: 404 })
+        return NextResponse.json(
+          { success: false, message: 'Lead not found' },
+          { status: 404 }
+        )
       }
 
-      // pick first note from body.values.Notes
+      // ---------------- NOTES ----------------
       const noteFromBody = body.values?.Notes?.[0] || {}
+      console.log(noteFromBody, '<<<NOTES FROM BODY')
 
-      const newNote = {
-        title: noteFromBody.title || null,
-        note: noteFromBody.note || null,
-        createdAt: noteFromBody.createdAt ? new Date(noteFromBody.createdAt) : new Date(),
-        createdBy: noteFromBody.createdBy || null,
+      let newNote = null
+      if (noteFromBody && (noteFromBody.title || noteFromBody.note)) {
+        newNote = {
+          title: noteFromBody.title || null,
+          note: noteFromBody.note || null,
+          createdAt: noteFromBody.createdAt
+            ? new Date(noteFromBody.createdAt)
+            : new Date(),
+          createdBy: noteFromBody.createdBy || null,
+        }
+      }
+
+      // ---------------- TASK ----------------
+      const activityFromBody = body.values?.Activity?.[0] || {}
+      const taskFromBody = activityFromBody.task?.[0] || {}
+      console.log(taskFromBody, '<<<TASKS FROM BODY')
+
+      let newTask = null
+      if (taskFromBody && (taskFromBody.subject || taskFromBody.dueDate)) {
+        newTask = {
+          subject: taskFromBody.subject || null,
+          dueDate: taskFromBody.dueDate ? new Date(taskFromBody.dueDate) : null,
+          priority: taskFromBody.priority || null,
+          owner: taskFromBody.owner || null,
+          reminderEnabled: !!taskFromBody.reminderEnabled,
+          reminderDate: taskFromBody.reminderDate
+            ? new Date(taskFromBody.reminderDate)
+            : null,
+          reminderTime: taskFromBody.reminderTime || null,
+          alertType: taskFromBody.alertType || 'Email',
+          createdAt: new Date(),
+        }
+      }
+
+      // ---------------- UPDATE QUERY ----------------
+      const updateQuery = {
+        $set: { updatedAt: new Date() },
+      }
+
+      if (newNote) {
+        updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Notes': newNote }
+      }
+
+      if (newTask) {
+        // If no Activity array exist → create one
+        if (!lead.values?.Activity || lead.values.Activity.length === 0) {
+          lead.values.Activity = [{ task: [] }]
+          await lead.save()
+        }
+        updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Activity.0.task': newTask }
+      }
+
+      if (!updateQuery.$push) {
+        return NextResponse.json(
+          { success: false, message: 'Nothing to update' },
+          { status: 400 }
+        )
       }
 
       const updated = await Leadform.findOneAndUpdate(
         { lead_id },
-        {
-          $push: { 'values.Notes': newNote },
-          $set: { updatedAt: new Date() }
-        },
+        updateQuery,
         { new: true, upsert: true }
       )
 
       return NextResponse.json({
         success: true,
-        message: 'Note added successfully',
-        data: updated
+        message: 'Note & Activity Task added successfully',
+        data: updated,
       })
     } catch (error) {
-      console.error('⨯ Add note error:', error)
-      return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
+      console.error('⨯ Add note+activity error:', error)
+      return NextResponse.json(
+        { success: false, message: 'Internal Server Error' },
+        { status: 500 }
+      )
     }
   } else {
     return NextResponse.json(
       {
         success: false,
         message: '',
-        error: 'token expired!'
+        error: 'token expired!',
       },
       { status: 400 }
     )
   }
 }
+
+
+

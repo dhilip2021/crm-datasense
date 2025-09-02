@@ -137,7 +137,7 @@ const NotesSection = ({ leadId, leadData }) => {
         </AccordionSummary>
 
         <AccordionDetails>
-          {Array.isArray(notes) &&
+          {/* {Array.isArray(notes) &&
             notes.map((n, i) => (
               <Card key={i} sx={{ p: 2, mb: 2 }}>
                 <Box display='flex' alignItems='flex-start' gap={2}>
@@ -152,7 +152,77 @@ const NotesSection = ({ leadId, leadData }) => {
                   </Box>
                 </Box>
               </Card>
-            ))}
+            ))} */}
+
+            {Array.isArray(notes) &&
+  notes.map((n, i) => (
+    <Card
+      key={i}
+      sx={{
+        p: 2,
+        mb: 2,
+        bgcolor: '#f9f9ff',
+        borderRadius: 2,
+        border: '1px solid #ddd'
+      }}
+    >
+      <Box display='flex' alignItems='flex-start' gap={2}>
+        {/* Avatar */}
+        <Avatar>
+          {getIntial(
+            `${leadData?.values?.['First Name']} ${leadData?.values?.['Last Name']}`
+          )}
+        </Avatar>
+
+        {/* Content */}
+        <Box flex={1}>
+          {/* Title */}
+          <Typography fontWeight='bold' color='primary'>
+            {n.title || 'Untitled Note'}
+          </Typography>
+
+          {/* Note content */}
+          <Typography sx={{ mt: 0.5 }}>{n.note}</Typography>
+
+          {/* Metadata */}
+          <Typography variant='caption' color='text.secondary' display='block' mt={1}>
+            Lead - <b>👤 {`${leadData?.values?.['First Name']} ${leadData?.values?.['Last Name']}`}</b> •{' '} 📅 ⏰
+            {new Date(n.createdAt).toLocaleString()} by <b> 👤 {n.createdBy}</b>
+          </Typography>
+
+          {/* Optional status / priority chips for visual consistency with tasks */}
+          {n.status && n.priority && (
+            <Stack direction='row' spacing={1} mt={1}>
+              <Chip
+                label={n.status}
+                size='small'
+                sx={{
+                  bgcolor:
+                    n.status === 'Completed'
+                      ? 'success.light'
+                      : n.status === 'In Progress'
+                      ? 'warning.light'
+                      : 'grey.300'
+                }}
+              />
+              <Chip
+                label={`Priority: ${n.priority}`}
+                size='small'
+                sx={{
+                  bgcolor:
+                    n.priority === 'High'
+                      ? 'error.light'
+                      : n.priority === 'Low'
+                      ? 'info.light'
+                      : 'grey.200'
+                }}
+              />
+            </Stack>
+          )}
+        </Box>
+      </Box>
+    </Card>
+  ))}
         </AccordionDetails>
       </Accordion>
 
