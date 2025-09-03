@@ -80,14 +80,20 @@ const EditableField = ({ label, value: initialValue, type = 'text', options = []
             border: '1px solid #e5e7eb'
           }}
         >
-          <Typography variant='body2' color={value ? 'text.primary' : 'text.disabled'}>
+          <Typography variant='body2' color={value ? 'text.primary' : 'text.disabled'} sx={{ flex: 1 }}>
             {value || '—'}
           </Typography>
-          {hover && (
-            <IconButton size='small' onClick={() => setEditing(true)}>
-              <EditIcon fontSize='small' />
-            </IconButton>
-          )}
+
+          <IconButton
+            size='small'
+            onClick={() => setEditing(true)}
+            sx={{
+              opacity: hover ? 1 : 0,
+              transition: 'opacity 0.2s ease-in-out'
+            }}
+          >
+            <EditIcon fontSize='small' />
+          </IconButton>
         </Box>
       )}
     </Box>
