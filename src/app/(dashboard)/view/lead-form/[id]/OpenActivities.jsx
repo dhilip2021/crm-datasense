@@ -67,22 +67,37 @@ function parseDateTime(date, time) {
 }
 
 export default function OpenActivities({ leadId, leadData }) {
-
   const leadArrayTasks = leadData?.values?.Activity?.[0]?.task || []
 
-  console.log(leadArrayTasks, '<<< LEAD leadArrayTasks')
-  // sort + convert format
   const sortedTasks = [...leadArrayTasks]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .map(t => ({
-      type: 'Task',
-      title: t.subject || 'Untitled Task',
-      date: t.dueDate ? new Date(t.dueDate).toLocaleDateString() : '',
-      time: t.dueDate ? new Date(t.dueDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
-      owner: t.owner || 'Unknown',
-      status: t.status || 'Not Started',
-      priority: t.priority || 'Medium'
-    }))
+    .map(t => {
+      let reminderDateTime = ''
+      let reminderDateFormatted = ''
+      let reminderTimeFormatted = ''
+
+      if (t.reminderDate && t.reminderTime) {
+        // Combine reminderDate + reminderTime into a full datetime
+        const reminderDateTimeObj = new Date(`${t.reminderDate.split('T')[0]}T${t.reminderTime}:00`)
+        reminderDateFormatted = reminderDateTimeObj.toLocaleDateString()
+        reminderTimeFormatted = reminderDateTimeObj.toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+        reminderDateTime = reminderDateTimeObj
+      }
+
+      return {
+        type: 'Task',
+        title: t.subject || 'Untitled Task',
+        date: reminderDateFormatted, // ✅ Using reminderDate
+        time: reminderTimeFormatted, // ✅ Using reminderTime
+        owner: t.owner || 'Unknown',
+        status: t.status || 'Not Started',
+        priority: t.priority || 'Medium',
+        reminderDateTime // keep raw Date object if needed
+      }
+    })
 
   const getToken = Cookies.get('_token')
   const user_name = Cookies.get('user_name')
@@ -92,22 +107,9 @@ export default function OpenActivities({ leadId, leadData }) {
   const [view, setView] = useState('column') // column | tab | chronological
   const [tab, setTab] = useState(0)
   const [openTaskDialog, setOpenTaskDialog] = useState(false)
-
-  // 🟢 Sorted Tasks (from backend)
-console.log(sortedTasks,"<<< sorted tasks")
   const [tasks, setTasks] = useState(sortedTasks || [])
 
-  // 🟢 Dynamic Tasks from leadData
-  // const tasks =
-  //   leadData?.values?.Activity?.[0]?.task?.map(t => ({
-  //     type: 'Task',
-  //     title: t.subject || 'Untitled Task',
-  //     date: t.dueDate ? new Date(t.dueDate).toLocaleDateString() : '',
-  //     time: t.dueDate ? new Date(t.dueDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
-  //     owner: t.owner || 'Unknown',
-  //     status: t.status || 'Not Started',
-  //     priority: t.priority || 'Medium'
-  //   })) || []
+    const [loader, setLoader] = useState(false)
 
   // 🟢 Calls + Meetings (still dummy, later API integrate pannalaam)
   const meetings = []
@@ -190,16 +192,25 @@ console.log(sortedTasks,"<<< sorted tasks")
 
       if (result.success) {
         // 👉 UI display format ku convert
+
+        // Format reminderDate + reminderTime
+        let reminderDateFormatted = ''
+        let reminderTimeFormatted = ''
+
+        if (newTask.reminderDate && newTask.reminderTime) {
+          const reminderDateTimeObj = new Date(`${newTask.reminderDate.split('T')[0]}T${newTask.reminderTime}:00`)
+          reminderDateFormatted = reminderDateTimeObj.toLocaleDateString()
+          reminderTimeFormatted = reminderDateTimeObj.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+        }
+
         const formattedTask = {
           type: 'Task',
           title: newTask.subject || 'Untitled Task',
-          date: newTask.dueDate ? new Date(newTask.dueDate).toLocaleDateString() : '',
-          time: newTask.dueDate
-            ? new Date(newTask.dueDate).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit'
-              })
-            : '',
+          date: reminderDateFormatted, // ✅ reminderDate use pannom
+          time: reminderTimeFormatted, // ✅ reminderTime use pannom
           owner: newTask.owner || 'Unknown',
           status: newTask.status || 'Not Started',
           priority: newTask.priority || 'Medium'

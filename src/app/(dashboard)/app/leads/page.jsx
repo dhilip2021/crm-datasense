@@ -202,15 +202,15 @@ const LeadTable = () => {
 
   const exportToExcel = () => {
     if (selectedExcelFields.length === 0) {
-       toast.error('Please select at least one field to export', {
-                autoClose: 500, // 1 second la close
-                position: 'bottom-center',
-                hideProgressBar: true, // progress bar venam na
-                closeOnClick: true,
-                pauseOnHover: false,
-                draggable: false,
-                progress: undefined
-              })
+      toast.error('Please select at least one field to export', {
+        autoClose: 500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
       return
     }
 
@@ -277,16 +277,15 @@ const LeadTable = () => {
   // Replace your existing exportToPDF function with this:
   const exportToPDF = () => {
     if (selectedPdfFields.length === 0) {
-      
       toast.error('Please select at least one field to export', {
-                autoClose: 500, // 1 second la close
-                position: 'bottom-center',
-                hideProgressBar: true, // progress bar venam na
-                closeOnClick: true,
-                pauseOnHover: false,
-                draggable: false,
-                progress: undefined
-              })
+        autoClose: 500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
       return
     }
 
@@ -348,14 +347,14 @@ const LeadTable = () => {
 
     if (!selectedFile) {
       toast.error('Please select a file', {
-                      autoClose: 500, // 1 second la close
-                      position: 'bottom-center',
-                      hideProgressBar: true, // progress bar venam na
-                      closeOnClick: true,
-                      pauseOnHover: false,
-                      draggable: false,
-                      progress: undefined
-                    })
+        autoClose: 500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
       return
     }
 
@@ -376,19 +375,16 @@ const LeadTable = () => {
       })
 
       const data = await res.json()
-      
 
       toast.success(data.message, {
-                      autoClose: 500, // 1 second la close
-                      position: 'bottom-center',
-                      hideProgressBar: true, // progress bar venam na
-                      closeOnClick: true,
-                      pauseOnHover: false,
-                      draggable: false,
-                      progress: undefined
-                    })
-
-
+        autoClose: 500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
 
       fetchData()
       setFileName('')
@@ -729,18 +725,6 @@ const LeadTable = () => {
                   >
                     Lead ID
                   </TableCell>
-                  {/* <TableCell
-                    sx={{
-                      position: 'sticky',
-                      left: 120, // Same as Lead ID width
-                      zIndex: 9,
-                      minWidth: 180,
-                      maxWidth: 200,
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    Lead Name
-                  </TableCell> */}
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>First Name</TableCell>
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Company</TableCell>
                   <TableCell>City</TableCell>
@@ -789,8 +773,18 @@ const LeadTable = () => {
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           {row.values['First Name']}
                         </TableCell>
-                        <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
-                          {row.values['Company']}
+                        <TableCell
+                          sx={{
+                            minWidth: 180,
+                            maxWidth: 200,
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                          }}
+                        >
+                          <Tooltip title={row.values['Company'] || ''} arrow>
+                            <span>{row.values['Company']}</span>
+                          </Tooltip>
                         </TableCell>
                         <TableCell>{row.values['City']}</TableCell>
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
