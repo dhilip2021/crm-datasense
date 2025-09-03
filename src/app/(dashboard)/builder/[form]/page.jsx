@@ -241,11 +241,28 @@ export default function LeadFormPage() {
 
     if (data?.success) {
       setLoader(false)
-      toast.success(formId ? 'Form updated successfully!' : 'Form saved successfully!')
+      toast.success(formId ? 'Form updated successfully!' : 'Form saved successfully!', {
+              autoClose: 500, // 1 second la close
+              position: 'bottom-center',
+              hideProgressBar: true, // progress bar venam na
+              closeOnClick: true,
+              pauseOnHover: false,
+              draggable: false,
+              progress: undefined
+            })
+
       if (!formId) setFormId(data.data._id) // in case it's newly created
     } else {
       setLoader(false)
-      toast.error('Form save/update failed!')
+      toast.error('Form save/update failed!', {
+              autoClose: 500, // 1 second la close
+              position: 'bottom-center',
+              hideProgressBar: true, // progress bar venam na
+              closeOnClick: true,
+              pauseOnHover: false,
+              draggable: false,
+              progress: undefined
+            })
     }
   }
 

@@ -40,6 +40,30 @@ function isValidEmail(email) {
   return re.test(email)
 }
 
+function isValidCurrency(value, field) {
+  if (value === null || value === undefined || value === '') return true // empty ok unless required check
+
+  // Convert to string
+  value = value.toString().trim()
+
+  // Build regex based on field config
+  let regexStr = '^\\d*' // whole number part
+  if (field.decimalPlaces && parseInt(field.decimalPlaces) > 0) {
+    regexStr += `(\\.\\d{1,${field.decimalPlaces}})?` // decimal part
+  }
+  regexStr += '$'
+
+  const regex = new RegExp(regexStr)
+  if (!regex.test(value)) return false
+
+  // ✅ min/max digits check
+  const [intPart] = value.split('.')
+  if (field.minDigits && intPart.length < parseInt(field.minDigits)) return false
+  if (field.maxDigits && intPart.length > parseInt(field.maxDigits)) return false
+
+  return true
+}
+
 function LeadFormAppIdPage() {
   const params = useParams()
   const encryptedId = decodeURIComponent(params.id)
@@ -98,6 +122,14 @@ function LeadFormAppIdPage() {
       return ''
     }
 
+    if (field.type === 'Currency') {
+      if (field.required && !value) return `${field.label} is required`
+      if (value && !isValidCurrency(value, field)) {
+        return `Invalid ${field.label} (max ${field.maxDigits || '∞'} digits, ${field.decimalPlaces || 0} decimals)`
+      }
+      return ''
+    }
+
     if (field.required && !value) return `${field.label} is required`
 
     if (field.type === 'Single Line') {
@@ -118,9 +150,35 @@ function LeadFormAppIdPage() {
     setErrors(prev => ({ ...prev, [fieldId]: '' }))
   }
 
-  const handleBlur = field => {
-    const error = validateField(field, values[field.id])
-    if (error) setErrors(prev => ({ ...prev, [field.id]: error }))
+ // Handle blur
+  const handleBlur = (e, field) => {
+    
+
+    if (field.type === 'Phone') {
+      const valueForValidation = values[`${field.id}_number`]
+      const error = validateField(field, valueForValidation)
+      if (error) {
+        setErrors(prev => ({ ...prev, [field.id]: error }))
+      } else {
+        setErrors(prev => ({ ...prev, [field.id]: '' }))
+      }
+    } else if (field.type === 'Currency') {
+      const valueForValidation = values[field.id]
+      const error = validateField(field, valueForValidation)
+      if (error) {
+        setErrors(prev => ({ ...prev, [field.id]: error }))
+      } else {
+        setErrors(prev => ({ ...prev, [field.id]: '' }))
+      }
+    } else {
+      const valueForValidation = values[field.id]
+      const error = validateField(field, valueForValidation)
+      if (error) {
+        setErrors(prev => ({ ...prev, [field.id]: error }))
+      } else {
+        setErrors(prev => ({ ...prev, [field.id]: '' }))
+      }
+    }
   }
 
   // ✅ Submit Form
@@ -263,7 +321,7 @@ function LeadFormAppIdPage() {
       ),
       value: values[field.id] || '',
       onChange: e => handleChange(field.id, e.target.value),
-      onBlur: () => handleBlur(field),
+      onBlur: (e) => handleBlur(e,field),
       error: !!errors[field.id],
       helperText: errors[field.id],
       placeholder: field.placeholder || ''

@@ -40,6 +40,30 @@ function isValidEmailPragmatic(email) {
   return re.test(email)
 }
 
+function isValidCurrency(value, field) {
+  if (value === null || value === undefined || value === '') return true // empty ok unless required check
+
+  // Convert to string
+  value = value.toString().trim()
+
+  // Build regex based on field config
+  let regexStr = '^\\d*' // whole number part
+  if (field.decimalPlaces && parseInt(field.decimalPlaces) > 0) {
+    regexStr += `(\\.\\d{1,${field.decimalPlaces}})?` // decimal part
+  }
+  regexStr += '$'
+
+  const regex = new RegExp(regexStr)
+  if (!regex.test(value)) return false
+
+  // ✅ min/max digits check
+  const [intPart] = value.split('.')
+  if (field.minDigits && intPart.length < parseInt(field.minDigits)) return false
+  if (field.maxDigits && intPart.length > parseInt(field.maxDigits)) return false
+
+  return true
+}
+
 function LeadFormAppPage() {
   const getToken = Cookies.get('_token')
   const organization_id = Cookies.get('organization_id')
@@ -94,6 +118,14 @@ function LeadFormAppPage() {
       return ''
     }
 
+    if (field.type === 'Currency') {
+      if (field.required && !value) return `${field.label} is required`
+      if (value && !isValidCurrency(value, field)) {
+        return `Invalid ${field.label} (max ${field.maxDigits || '∞'} digits, ${field.decimalPlaces || 0} decimals)`
+      }
+      return ''
+    }
+
     if (field.required && (value === undefined || value === '' || value === null)) {
       return `${field.label} is required`
     }
@@ -116,17 +148,14 @@ function LeadFormAppPage() {
 
   // Handle change
   const handleChange = (id, value, type) => {
-
     console.log(id, '<<< IDDDDDD')
-
-
     if (type === 'Phone') {
-      console.log("1")
+      console.log('1')
       const fieldKey = id.replace('_number', '')
       setValues(prev => ({ ...prev, [id]: value }))
       setErrors(prev => ({ ...prev, [fieldKey]: '' }))
     } else {
-      console.log("2")
+      console.log('2')
       setValues(prev => ({ ...prev, [id]: value }))
       setErrors(prev => ({ ...prev, [id]: '' }))
     }
@@ -135,37 +164,36 @@ function LeadFormAppPage() {
   }
 
   // Handle blur
-  const handleBlur = field => {
-    
+  const handleBlur = (e, field) => {
+    console.log(field, '<<< FILED TYPEEEEE')
 
-    const valueForValidation = field.type === 'Phone' ? values[`${field.id}_number`] : values[field.id]
-    const error = validateField(field, valueForValidation)
+    if (field.type === 'Phone') {
+      const valueForValidation = values[`${field.id}_number`]
+      const error = validateField(field, valueForValidation)
+      if (error) {
+        setErrors(prev => ({ ...prev, [field.id]: error }))
+      } else {
+        setErrors(prev => ({ ...prev, [field.id]: '' }))
+      }
+    } else if (field.type === 'Currency') {
 
-    // if (error) setErrors(prev => ({ ...prev, [field.id]: error }))
-
-    if (error) {
-      setErrors(prev => ({ ...prev, [field.id]: error }))
+      const valueForValidation = values[field.id]
+      const error = validateField(field, valueForValidation)
+      if (error) {
+        setErrors(prev => ({ ...prev, [field.id]: error }))
+      } else {
+        setErrors(prev => ({ ...prev, [field.id]: '' }))
+      }
     } else {
-      setErrors(prev => ({ ...prev, [field.id]: '' }))
+      const valueForValidation = values[field.id]
+      const error = validateField(field, valueForValidation)
+      if (error) {
+        setErrors(prev => ({ ...prev, [field.id]: error }))
+      } else {
+        setErrors(prev => ({ ...prev, [field.id]: '' }))
+      }
     }
   }
-
-  // Handle blur
-  // const handleBlur = field => {
-
-  //   const valueForValidation =
-  //     field.type === 'Phone'
-  //       ? values[field.id]   // FIX: no `_number`
-  //       : values[field.id]
-
-  //   const error = validateField(field, valueForValidation)
-
-  //   if (error) {
-  //     setErrors(prev => ({ ...prev, [field.id]: error }))
-  //   } else {
-  //     setErrors(prev => ({ ...prev, [field.id]: '' }))
-  //   }
-  // }
 
   // ---- handleSubmit ----
   const handleSubmit = async () => {
@@ -284,7 +312,7 @@ function LeadFormAppPage() {
       ),
       value: values[field.id] || '',
       onChange: e => handleChange(field.id, e.target.value, field.type),
-      onBlur: () => handleBlur(field),
+      onBlur: e => handleBlur(e, field),
       error: !!errors[field.id],
       helperText: errors[field.id],
       placeholder: field.placeholder || ''
