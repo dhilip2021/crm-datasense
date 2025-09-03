@@ -368,16 +368,15 @@ const LeadTable = () => {
       const res = await fetch('/api/v1/admin/lead-form/import', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           Authorization: `Bearer ${getToken}` // ✅ only auth header
         },
         body: formData
       })
 
       const data = await res.json()
-
-      toast.success(data.message, {
-        autoClose: 500, // 1 second la close
+      if(data?.success){
+        toast.success(data.message, {
+        autoClose: 1000, // 1 second la close
         position: 'bottom-center',
         hideProgressBar: true, // progress bar venam na
         closeOnClick: true,
@@ -385,11 +384,24 @@ const LeadTable = () => {
         draggable: false,
         progress: undefined
       })
-
-      fetchData()
+       fetchData()
       setFileName('')
       setSelectedFile(null)
       document.querySelector('input[name="file"]').value = ''
+      }else{
+         toast.error("File not uploaded !!!", {
+        autoClose: 1000, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
+       fetchData()
+      setFileName('')
+      setSelectedFile(null)
+      }
     } catch (err) {
       console.error(err)
       setFileName('')

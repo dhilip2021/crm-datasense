@@ -9,8 +9,6 @@ export async function GET(req) {
 
   const verified = verifyAccessToken()
 
-  console.log(verified.data.user_id, '<<< VERRIIIII')
-
   if (!verified.success) {
     return NextResponse.json({ success: false, error: 'token expired!' }, { status: 400 })
   }
@@ -79,7 +77,6 @@ export async function GET(req) {
         ]
       }
     }
-    console.log(query, '<<< query')
     // 🔍 Search
     if (search) {
       const searchFilter = {
