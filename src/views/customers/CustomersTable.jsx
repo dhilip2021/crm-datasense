@@ -252,7 +252,7 @@ const CustomersTable = () => {
                       <input
                         type='file'
                         name='file'
-                        accept=".csv, .xlsx"
+                        accept='.csv, .xlsx'
                         hidden
                         onChange={e => {
                           const file = e.target.files[0]
@@ -488,7 +488,25 @@ const CustomersTable = () => {
                                         ? 'warning'
                                         : row.values['Status'] === 'Closed Won'
                                           ? 'success'
-                                          : 'default'
+                                          : row.values['Lead Status'] === 'Attempted to Contact'
+                                            ? 'warning'
+                                            : row.values['Lead Status'] === 'Lost Lead - No Requirements'
+                                              ? 'warning'
+                                              : row.values['Lead Status'] === 'No Response/Busy'
+                                                ? 'warning'
+                                                : row.values['Lead Status'] === 'Lost Lead - Already Using'
+                                                  ? 'warning'
+                                                  : row.values['Lead Status'] === 'Interested'
+                                                    ? 'warning'
+                                                    : row.values['Lead Status'] === 'Demo Scheduled'
+                                                      ? 'warning'
+                                                      : row.values['Lead Status'] === 'Need to Schedule Demo'
+                                                        ? 'warning'
+                                                        : row.values['Lead Status'] === 'Demo Completed'
+                                                          ? 'warning'
+                                                          : row.values['Lead Status'] === 'Call Back'
+                                                            ? 'warning'
+                                                            : 'default'
                             }
                             size='small'
                           />

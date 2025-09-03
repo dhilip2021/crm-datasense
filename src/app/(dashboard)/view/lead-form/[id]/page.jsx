@@ -66,6 +66,7 @@ const LeadDetailView = () => {
           })
         })
       })
+      console.log(config,"<<< Config")
       setFieldConfig(config)
     }
     setLoader(false)

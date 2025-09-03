@@ -201,7 +201,16 @@ const staticFiledForm = [
             'Negatiation',
             'Ready to close',
             'Closed Won',
-            'Closed Lost'
+            'Closed Lost',
+            'Attempted to Contact',
+            'Lost Lead - No Requirements',
+            'No Response/Busy',
+            'Lost Lead - Already Using',
+            'Interested',
+            'Demo Scheduled',
+            'Need to Schedule Demo',
+            'Demo Completed',
+            'Call Back'
           ],
           defaultValue: 'New',
           sortOrder: 'entered',
@@ -535,20 +544,18 @@ const Login = ({ mode }) => {
     }
 
     let results = await LoginApi(dataValue)
-    
-    
+
     if (results?.appStatusCode === 4) {
       setLoader(false)
-       toast.error(results?.error, {
-            autoClose: 500,
-            position: 'bottom-center',
-            hideProgressBar: true, // progress bar venam na
-            closeOnClick: true,
-            pauseOnHover: false,
-            draggable: false,
-            progress: undefined
-          })
-
+      toast.error(results?.error, {
+        autoClose: 500,
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
 
       if (results.error !== 'Invalid credential') {
         setEmail('')
@@ -557,15 +564,14 @@ const Login = ({ mode }) => {
       }
     } else if (results?.appStatusCode === 0) {
       const resultsPayloadJson = decrypCryptoRequest(results.payloadJson)
-       const dispatchLogin = {
-      appStatusCode: results?.appStatusCode,
-      message: results?.message,
-      payloadJson: resultsPayloadJson,
-      error: results?.error
-    }
+      const dispatchLogin = {
+        appStatusCode: results?.appStatusCode,
+        message: results?.message,
+        payloadJson: resultsPayloadJson,
+        error: results?.error
+      }
 
-    dispatch(loginData(dispatchLogin))
-
+      dispatch(loginData(dispatchLogin))
 
       const header = {
         'Content-Type': 'application/json',
@@ -610,8 +616,6 @@ const Login = ({ mode }) => {
           let dummyArray = []
 
           resultsPayloadJson?.privileges.map(data => dummyArray.push(data?.role_privileage))
-
-
 
           Cookies.set('_token', resultsPayloadJson?.tokenAccess)
           Cookies.set('_token_expiry', resultsPayloadJson?.tokenExpiry)
@@ -676,7 +680,6 @@ const Login = ({ mode }) => {
         Cookies.set('user_name', resultsPayloadJson?.user_name)
         Cookies.set('privileges', JSON.stringify(dummyArray))
 
-
         if (resultsPayloadJson?.c_role_id === '27f01165688z') {
           router.push('/')
           router.refresh()
@@ -706,16 +709,16 @@ const Login = ({ mode }) => {
       setLoader(false)
     } else {
       setLoader(false)
-     
-       toast.error('Something Went wrong, Please try after some time', {
-            autoClose: 500,
-            position: 'bottom-center',
-            hideProgressBar: true, // progress bar venam na
-            closeOnClick: true,
-            pauseOnHover: false,
-            draggable: false,
-            progress: undefined
-          })
+
+      toast.error('Something Went wrong, Please try after some time', {
+        autoClose: 500,
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
     }
   }
 
@@ -816,7 +819,7 @@ const Login = ({ mode }) => {
                   <Typography>New on our platform?</Typography>
                   <Typography component={Link} href='/register' color='primary'>
                     Create your Organization
-                  </Typography> 
+                  </Typography>
                 </div>
                 {/* <Divider sx={{ my: 5 }}>or</Divider> */}
                 {/* <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
