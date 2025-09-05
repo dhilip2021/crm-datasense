@@ -21,6 +21,7 @@ import AccordionDetails from '@mui/material/AccordionDetails'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import CloseIcon from '@mui/icons-material/Close'
 import Cookies from 'js-cookie'
+import { toast, ToastContainer } from 'react-toastify'
 
 function getIntial(name = '') {
   const reIntial = (name.match(/\p{L}+/gu) || []).map(w => w[0].toUpperCase()).join('')
@@ -103,8 +104,32 @@ const NotesSection = ({ leadId, leadData }) => {
       })
 
       const result = await res.json()
+
+
+      console.log(result,"<<< NOTES CREATEDDDDDDDD")
       if (result.success) {
+
+        toast.success("Note added successfully", {
+                autoClose: 500, // 1 second la close
+                position: 'bottom-center',
+                hideProgressBar: true, // progress bar venam na
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: false,
+                progress: undefined
+              })
+
         setNotes(prev => [newNote, ...prev])
+      }else{
+        toast.error(result.error, {
+                autoClose: 500, // 1 second la close
+                position: 'bottom-center',
+                hideProgressBar: true, // progress bar venam na
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: false,
+                progress: undefined
+              })
       }
 
       handleClear()
@@ -289,6 +314,7 @@ const NotesSection = ({ leadId, leadData }) => {
           </Button>
         </DialogActions>
       </Dialog>
+      <ToastContainer position='bottom-center' />
     </>
   )
 }
