@@ -374,33 +374,33 @@ const LeadTable = () => {
       })
 
       const data = await res.json()
-      if(data?.success){
+      if (data?.success) {
         toast.success(data.message, {
-        autoClose: 1000, // 1 second la close
-        position: 'bottom-center',
-        hideProgressBar: true, // progress bar venam na
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: false,
-        progress: undefined
-      })
-       fetchData()
-      setFileName('')
-      setSelectedFile(null)
-      document.querySelector('input[name="file"]').value = ''
-      }else{
-         toast.error("File not uploaded !!!", {
-        autoClose: 1000, // 1 second la close
-        position: 'bottom-center',
-        hideProgressBar: true, // progress bar venam na
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: false,
-        progress: undefined
-      })
-       fetchData()
-      setFileName('')
-      setSelectedFile(null)
+          autoClose: 1000, // 1 second la close
+          position: 'bottom-center',
+          hideProgressBar: true, // progress bar venam na
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined
+        })
+        fetchData()
+        setFileName('')
+        setSelectedFile(null)
+        document.querySelector('input[name="file"]').value = ''
+      } else {
+        toast.error('File not uploaded !!!', {
+          autoClose: 1000, // 1 second la close
+          position: 'bottom-center',
+          hideProgressBar: true, // progress bar venam na
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined
+        })
+        fetchData()
+        setFileName('')
+        setSelectedFile(null)
       }
     } catch (err) {
       console.error(err)
@@ -782,8 +782,18 @@ const LeadTable = () => {
                             <strong>{row.lead_id}</strong>
                           </Link>
                         </TableCell>
-                        <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
-                          {row.values['First Name']}
+                        <TableCell
+                          sx={{
+                            minWidth: 180,
+                            maxWidth: 200,
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                          }}
+                        >
+                          <Tooltip title={row.values['Company'] || ''} arrow>
+                            {row.values['First Name']}
+                          </Tooltip>
                         </TableCell>
                         <TableCell
                           sx={{

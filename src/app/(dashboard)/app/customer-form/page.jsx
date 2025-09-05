@@ -260,9 +260,23 @@ function CustomerFormAppPage() {
       </Typography>
 
       {loader ? (
-        <Box textAlign='center' py={6}>
-          <Image src={LoaderGif} alt='loading' width={100} height={100} />
-        </Box>
+         <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "100vh", // full screen center
+                width: "100vw",
+                bgcolor: "rgba(255, 255, 255, 0.7)", // semi-transparent overlay
+                position: "fixed",
+                top: 0,
+                left: 0,
+                zIndex: 1300, // above all dialogs
+              }}
+            >
+                <Image src={LoaderGif} alt="loading" width={200} height={200} />
+               
+            </Box>
       ) : !loader && sections.length === 0 ? (
         <></>
       ) : (

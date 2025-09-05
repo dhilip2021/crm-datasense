@@ -23,6 +23,8 @@ import 'react-toastify/dist/ReactToastify.css'
 import { useRouter, useParams } from 'next/navigation'
 import { decrypCryptoReq } from '@/helper/frontendHelper'
 import { getAllUserListApi } from '@/apiFunctions/ApiAction'
+import LoaderGif from '@assets/gif/loader.gif'
+import Image from 'next/image'
 // import { getAllUserListApi } from '@/api/user' // ✅ make sure this exists
 
 // ✅ Short name generator for org name
@@ -98,27 +100,36 @@ function LeadFormAppIdPage() {
     }
   }
 
-  // ✅ Fetch country list for phone fields
-  useEffect(() => {
-    fetch('/json/country.json')
-      .then(res => res.json())
-      .then(data => setCountryCodes(data))
-    getUserListFn()
-  }, [])
-
-  // ✅ Validation logic
+  // ---- validation function ----
   const validateField = (field, value) => {
+    if (typeof value === 'string') {
+      // ❌ leading space block
+      if (/^\s/.test(value)) {
+        return `${field.label} cannot start with space`
+      }
+      // 🔥 trim all spaces for validation
+      value = value.trim()
+    }
+
     if (field.type === 'Phone') {
-      const number = values[`${field.id}_number`] || ''
-      const regex = /^[0-9]{6,15}$/
-      if (field.required && number.trim() === '') return `${field.label} is required`
-      if (number && !regex.test(number)) return 'Invalid phone number'
+      const phoneRegex = /^[0-9]{6,15}$/
+      if (field.required && !value) return `${field.label} is required`
+      if (value && !phoneRegex.test(value)) return 'Invalid phone number format'
       return ''
     }
 
     if (field.type === 'Email') {
+      if (typeof value === 'string') {
+        // ❌ block leading space
+        if (/^\s/.test(value)) {
+          return `${field.label} cannot start with space`
+        }
+        // 🔥 remove trailing/extra spaces for validation
+        value = value.trim()
+      }
+
       if (field.required && !value) return `${field.label} is required`
-      if (value && !isValidEmail(value)) return 'Invalid email address'
+      if (value && !isValidEmailPragmatic(value)) return 'Invalid email address'
       return ''
     }
 
@@ -130,31 +141,70 @@ function LeadFormAppIdPage() {
       return ''
     }
 
-    if (field.required && !value) return `${field.label} is required`
-
-    if (field.type === 'Single Line') {
-      if (value && field.minChars && value.length < field.minChars) return `Minimum ${field.minChars} characters`
-      if (value && field.maxChars && value.length > field.maxChars) return `Maximum ${field.maxChars} characters`
+    if (field.required && (!value || value === '')) {
+      return `${field.label} is required`
     }
 
-    if (field.type === 'URL' && value && !/^(http|https):\/\/.+/.test(value)) return 'Invalid URL'
-
-    if (field.type === 'Date' && value && new Date(value) < new Date().setHours(0, 0, 0, 0))
-      return 'Date cannot be in the past'
+    if (value) {
+      if (field.type === 'Single Line') {
+        const min = parseInt(field.minChars || 0, 10)
+        const max = parseInt(field.maxChars || 0, 10)
+        if (min && value.length < min) return `Minimum ${min} characters required`
+        if (max && value.length > max) return `Maximum ${max} characters allowed`
+      }
+      if (field.type === 'URL' && !/^(http|https):\/\/.+/.test(value)) return 'Invalid URL'
+      if (field.type === 'Date' && new Date(value) < new Date().setHours(0, 0, 0, 0)) {
+        return 'Date cannot be in the past'
+      }
+    }
 
     return ''
   }
 
-  const handleChange = (fieldId, value) => {
-    setValues(prev => ({ ...prev, [fieldId]: value }))
-    setErrors(prev => ({ ...prev, [fieldId]: '' }))
+  // Handle change
+  const handleChange = (id, value, type) => {
+    if (typeof value === 'string') {
+      if (/^\s/.test(value)) {
+        value = value.replace(/^\s+/, '') // remove only leading spaces
+      }
+    }
+    if (type === 'Email') {
+      // ❌ remove all spaces while typing
+      value = value.replace(/\s+/g, '')
+    }
+
+    if (type === 'Phone') {
+      const fieldKey = id.replace('_number', '')
+      setValues(prev => ({ ...prev, [id]: value }))
+      setErrors(prev => ({ ...prev, [fieldKey]: '' }))
+    } else {
+      setValues(prev => ({ ...prev, [id]: value }))
+      setErrors(prev => ({ ...prev, [id]: '' }))
+    }
+
+    //
   }
 
- // Handle blur
+  // Handle blur
   const handleBlur = (e, field) => {
-    
+    if (field.type === 'Email') {
+      if (typeof value === 'string') {
+        // ❌ block leading space
+        if (/^\s/.test(value)) {
+          return `${field.label} cannot start with space`
+        }
+        // ❌ block ANY space in email
+        if (/\s/.test(value)) {
+          return 'Email cannot contain spaces'
+        }
 
-    if (field.type === 'Phone') {
+        value = value.trim()
+      }
+
+      if (field.required && !value) return `${field.label} is required`
+      if (value && !isValidEmailPragmatic(value)) return 'Invalid email address'
+      return ''
+    } else if (field.type === 'Phone') {
       const valueForValidation = values[`${field.id}_number`]
       const error = validateField(field, valueForValidation)
       if (error) {
@@ -191,6 +241,8 @@ function LeadFormAppIdPage() {
       values: {},
       submittedAt: new Date().toISOString()
     }
+
+    console.log(payload,"PALOADDD")
 
     sections.forEach(section => {
       const allFields = [
@@ -300,15 +352,6 @@ function LeadFormAppIdPage() {
     setLoader(false)
   }
 
-  // ✅ Init load
-  useEffect(() => {
-    fetchFormTemplate()
-  }, [])
-
-  useEffect(() => {
-    if (sections.length > 0 && leadId) fetchLeadFromId()
-  }, [sections, leadId])
-
   // ✅ Render Form Field
   const renderField = field => {
     const commonProps = {
@@ -320,8 +363,8 @@ function LeadFormAppIdPage() {
         </>
       ),
       value: values[field.id] || '',
-      onChange: e => handleChange(field.id, e.target.value),
-      onBlur: (e) => handleBlur(e,field),
+      onChange: e => handleChange(field.id, e.target.value, field.type),
+      onBlur: e => handleBlur(e, field),
       error: !!errors[field.id],
       helperText: errors[field.id],
       placeholder: field.placeholder || ''
@@ -352,7 +395,11 @@ function LeadFormAppIdPage() {
             <Typography variant='body2' fontWeight='bold'>
               {field.label}
             </Typography>
-            <RadioGroup row value={values[field.id] || ''} onChange={e => handleChange(field.id, e.target.value)}>
+            <RadioGroup
+              row
+              value={values[field.id] || ''}
+              onChange={e => handleChange(field.id, e.target.value, field.type)}
+            >
               {field.options?.map((opt, i) => (
                 <FormControlLabel key={i} value={opt} control={<Radio />} label={opt} />
               ))}
@@ -368,7 +415,7 @@ function LeadFormAppIdPage() {
             size='small'
             placeholder='Enter phone number'
             value={values[`${field.id}_number`] || ''}
-            onChange={e => handleChange(`${field.id}_number`, e.target.value)}
+            onChange={e => handleChange(`${field.id}_number`, e.target.value, field.type)}
             error={!!errors[field.id]}
             helperText={errors[field.id]}
             InputProps={{
@@ -376,13 +423,14 @@ function LeadFormAppIdPage() {
                 <InputAdornment position='start'>
                   <Select
                     value={values[`${field.id}_countryCode`] || '+91'}
-                    onChange={e => handleChange(`${field.id}_countryCode`, e.target.value)}
+                    displayEmpty
+                    onChange={e => handleChange(`${field.id}_countryCode`, e.target.value, field.type)}
                     size='small'
                     sx={{ '.MuiOutlinedInput-notchedOutline': { border: 'none' } }}
                   >
                     {countryCodes.map(c => (
-                      <MenuItem key={c.code} value={c.dial_code}>
-                        {c.code} {c.dial_code}
+                      <MenuItem key={c.code} value={c.dial_code.startsWith('+') ? c.dial_code : `+${c.dial_code}`}>
+                        {c.code} {c.dial_code.startsWith('+') ? c.dial_code : `+${c.dial_code}`}
                       </MenuItem>
                     ))}
                   </Select>
@@ -440,6 +488,29 @@ function LeadFormAppIdPage() {
     )
   }
 
+  // ✅ Fetch country list for phone fields
+  useEffect(() => {
+    fetch('/json/country.json')
+      .then(res => res.json())
+      .then(data => setCountryCodes(data))
+    getUserListFn()
+  }, [])
+
+  useEffect(() => {
+    if (sections.length > 0 && leadId && countryCodes.length > 0) {
+      fetchLeadFromId()
+    }
+  }, [sections, leadId, countryCodes])
+
+  // ✅ Init load
+  useEffect(() => {
+    fetchFormTemplate()
+  }, [])
+
+  useEffect(() => {
+    console.log(countryCodes, '<<< COUNTY CODES')
+  }, [countryCodes])
+
   return (
     <Box px={4} py={4} sx={{ background: '#f9f9f9', minHeight: '100vh' }}>
       <Typography variant='h4' fontWeight='bold' color='primary' mb={4}>
@@ -447,18 +518,31 @@ function LeadFormAppIdPage() {
       </Typography>
 
       {loader && (
-        <Box textAlign='center' py={8}>
-          <CircularProgress color='warning' />
-        </Box>
+        <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '100vh', // full screen center
+                    width: '100vw',
+                    bgcolor: 'rgba(255, 255, 255, 0.7)', // semi-transparent overlay
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    zIndex: 1300 // above all dialogs
+                  }}
+                >
+                  <Image src={LoaderGif} alt='loading' width={200} height={200} />
+                </Box>
       )}
 
-      {!loader && sections.length === 0 && (
+      {/* {!loader && sections.length === 0 && (
         <Card>
           <CardContent>
             <Typography textAlign='center'>No Lead Form Found</Typography>
           </CardContent>
         </Card>
-      )}
+      )} */}
 
       {!loader &&
         sections.map((section, i) => (

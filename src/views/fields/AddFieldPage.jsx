@@ -238,11 +238,7 @@ const AddFieldPage = () => {
          <Card >
       <CardContent>
         <Grid container spacing={6}>
-            {/* {loader && (
-                                          <Box textAlign={'center'} width={'100%'} mt={'200px'} mb={'100px'}>
-                                            <Image src={LoaderGif} alt='My GIF' width={200} height={100} />
-                                          </Box>
-                                        )} */}
+         
           {Array.isArray(fieldArr) && fieldArr?.map((data, index) => (
             <>
               <Grid item xs={12} md={4}>

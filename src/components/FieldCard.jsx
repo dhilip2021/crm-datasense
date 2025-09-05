@@ -472,24 +472,6 @@ const FieldCard = ({ field, index, onUpdate, onDelete, removeField, handleMakeRe
                 ))}
               </Select>
             </FormControl>
-
-            {/* 👉 Phone Input Preview (sync with country code) */}
-            {/* <TextField
-              fullWidth
-              size='small'
-              label='Phone Number'
-              value={`${field.countryCode || '+91'} ${field.value || ''}`}
-              onChange={e =>
-                onUpdate(index, {
-                  ...field,
-                  value: e.target.value.replace(field.countryCode || '+91', '').trim()
-                })
-              }
-              placeholder={field.placeholder || 'Enter phone number'}
-              inputProps={{ maxLength: field.maxLength || 10 }}
-            /> */}
-
-            {/* Placeholder */}
             <TextField
               fullWidth
               size='small'

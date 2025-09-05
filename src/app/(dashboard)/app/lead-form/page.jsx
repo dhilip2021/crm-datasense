@@ -93,16 +93,6 @@ function LeadFormAppPage() {
     }
   }
 
-  // Fetch country codes + users
-  useEffect(() => {
-    fetch('/json/country.json')
-      .then(res => res.json())
-      .then(data => setCountryCodes(data))
-      .catch(() => setCountryCodes([]))
-
-    getUserListFn()
-  }, [])
-
   // ---- validation function ----
   const validateField = (field, value) => {
     if (typeof value === 'string') {
@@ -172,9 +162,8 @@ function LeadFormAppPage() {
       }
     }
     if (type === 'Email') {
-      value = value.replace(/^\s+/, '') // remove only leading spaces
-
-      console.log(value, '<<<<<<< VALUEEEEEE EMAIL')
+      // ❌ remove all spaces while typing
+      value = value.replace(/\s+/g, '')
     }
 
     if (type === 'Phone') {
@@ -191,7 +180,24 @@ function LeadFormAppPage() {
 
   // Handle blur
   const handleBlur = (e, field) => {
-    if (field.type === 'Phone') {
+    if (field.type === 'Email') {
+      if (typeof value === 'string') {
+        // ❌ block leading space
+        if (/^\s/.test(value)) {
+          return `${field.label} cannot start with space`
+        }
+        // ❌ block ANY space in email
+        if (/\s/.test(value)) {
+          return 'Email cannot contain spaces'
+        }
+
+        value = value.trim()
+      }
+
+      if (field.required && !value) return `${field.label} is required`
+      if (value && !isValidEmailPragmatic(value)) return 'Invalid email address'
+      return ''
+    } else if (field.type === 'Phone') {
       const valueForValidation = values[`${field.id}_number`]
       const error = validateField(field, valueForValidation)
       if (error) {
@@ -336,10 +342,6 @@ function LeadFormAppPage() {
       toast.error('Error fetching form', { autoClose: 1500, position: 'bottom-center' })
     }
   }
-
-  useEffect(() => {
-    fetchForm()
-  }, [])
 
   // Render field
   const renderField = field => {
@@ -494,11 +496,42 @@ function LeadFormAppPage() {
     )
   }
 
+  // Fetch country codes + users
+  useEffect(() => {
+    fetch('/json/country.json')
+      .then(res => res.json())
+      .then(data => setCountryCodes(data))
+      .catch(() => setCountryCodes([]))
+
+    getUserListFn()
+  }, [])
+  useEffect(() => {
+    fetchForm()
+  }, [])
+
+  useEffect(() => {
+    console.log(countryCodes,"<<< COUNTY CODES")
+  }, [countryCodes])
+  
+
   return (
     <Box px={4} py={4} sx={{ background: '#f9f9f9', minHeight: '100vh' }}>
       {loader ? (
-        <Box textAlign='center' py={6}>
-          <Image src={LoaderGif} alt='loading' width={100} height={100} />
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100vh', // full screen center
+            width: '100vw',
+            bgcolor: 'rgba(255, 255, 255, 0.7)', // semi-transparent overlay
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            zIndex: 1300 // above all dialogs
+          }}
+        >
+          <Image src={LoaderGif} alt='loading' width={200} height={200} />
         </Box>
       ) : sections.length === 0 ? (
         <></>

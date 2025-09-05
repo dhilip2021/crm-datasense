@@ -274,9 +274,23 @@ const CardNotes = () => {
 
       <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
         {loader && (
-          <Box textAlign={'center'} width={'100%'} mt={'100px'} mb={'100px'}>
-            <Image src={LoaderGif} alt='My GIF' width={200} height={100} />
-          </Box>
+           <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: "100vh", // full screen center
+                  width: "100vw",
+                  bgcolor: "rgba(255, 255, 255, 0.7)", // semi-transparent overlay
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  zIndex: 1300, // above all dialogs
+                }}
+              >
+                  <Image src={LoaderGif} alt="loading" width={200} height={200} />
+                 
+              </Box>
         )}
 
         {!loader && !filterStatus(notesArr) && (
