@@ -105,6 +105,15 @@ function LeadFormAppPage() {
 
   // ---- validation function ----
   const validateField = (field, value) => {
+    if (typeof value === 'string') {
+      // ❌ leading space block
+      if (/^\s/.test(value)) {
+        return `${field.label} cannot start with space`
+      }
+      // 🔥 trim all spaces for validation
+      value = value.trim()
+    }
+
     if (field.type === 'Phone') {
       const phoneRegex = /^[0-9]{6,15}$/
       if (field.required && !value) return `${field.label} is required`
@@ -113,6 +122,15 @@ function LeadFormAppPage() {
     }
 
     if (field.type === 'Email') {
+      if (typeof value === 'string') {
+        // ❌ block leading space
+        if (/^\s/.test(value)) {
+          return `${field.label} cannot start with space`
+        }
+        // 🔥 remove trailing/extra spaces for validation
+        value = value.trim()
+      }
+
       if (field.required && !value) return `${field.label} is required`
       if (value && !isValidEmailPragmatic(value)) return 'Invalid email address'
       return ''
@@ -126,7 +144,7 @@ function LeadFormAppPage() {
       return ''
     }
 
-    if (field.required && (value === undefined || value === '' || value === null)) {
+    if (field.required && (!value || value === '')) {
       return `${field.label} is required`
     }
 
@@ -148,14 +166,22 @@ function LeadFormAppPage() {
 
   // Handle change
   const handleChange = (id, value, type) => {
-    console.log(id, '<<< IDDDDDD')
+    if (typeof value === 'string') {
+      if (/^\s/.test(value)) {
+        value = value.replace(/^\s+/, '') // remove only leading spaces
+      }
+    }
+    if (type === 'Email') {
+      value = value.replace(/^\s+/, '') // remove only leading spaces
+
+      console.log(value, '<<<<<<< VALUEEEEEE EMAIL')
+    }
+
     if (type === 'Phone') {
-      console.log('1')
       const fieldKey = id.replace('_number', '')
       setValues(prev => ({ ...prev, [id]: value }))
       setErrors(prev => ({ ...prev, [fieldKey]: '' }))
     } else {
-      console.log('2')
       setValues(prev => ({ ...prev, [id]: value }))
       setErrors(prev => ({ ...prev, [id]: '' }))
     }
@@ -165,8 +191,6 @@ function LeadFormAppPage() {
 
   // Handle blur
   const handleBlur = (e, field) => {
-    console.log(field, '<<< FILED TYPEEEEE')
-
     if (field.type === 'Phone') {
       const valueForValidation = values[`${field.id}_number`]
       const error = validateField(field, valueForValidation)
@@ -176,7 +200,6 @@ function LeadFormAppPage() {
         setErrors(prev => ({ ...prev, [field.id]: '' }))
       }
     } else if (field.type === 'Currency') {
-
       const valueForValidation = values[field.id]
       const error = validateField(field, valueForValidation)
       if (error) {
@@ -229,6 +252,24 @@ function LeadFormAppPage() {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
+
+      const firstErrorFieldId = Object.keys(newErrors)[0]
+      const el = document.getElementById(firstErrorFieldId)
+
+      if (el) {
+        // scroll smooth ah pogum
+        el.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'nearest'
+        })
+
+        // focus kuduthu highlight panna
+        setTimeout(() => {
+          el.focus()
+        }, 300)
+      }
+
       return
     }
 
@@ -328,7 +369,7 @@ function LeadFormAppPage() {
           }))
         }
         return (
-          <TextField select {...commonProps}>
+          <TextField id={field.id} select {...commonProps}>
             {options.map((opt, i) => (
               <MenuItem key={i} value={opt.value || opt}>
                 {opt.label || opt}
@@ -357,11 +398,12 @@ function LeadFormAppPage() {
         )
 
       case 'Multi-Line':
-        return <TextField {...commonProps} multiline minRows={field.rows || 3} />
+        return <TextField id={field.id} {...commonProps} multiline minRows={field.rows || 3} />
 
       case 'Phone':
         return (
           <TextField
+            id={field.id}
             {...commonProps}
             value={values[`${field.id}_number`] || ''}
             onChange={e => handleChange(`${field.id}_number`, e.target.value, field.type)}
@@ -392,11 +434,11 @@ function LeadFormAppPage() {
         )
 
       case 'Email':
-        return <TextField {...commonProps} type='email' />
+        return <TextField id={field.id} {...commonProps} type='email' />
       case 'URL':
-        return <TextField {...commonProps} type='url' />
+        return <TextField id={field.id} {...commonProps} type='url' />
       case 'Date':
-        return <TextField {...commonProps} type='date' InputLabelProps={{ shrink: true }} />
+        return <TextField id={field.id} {...commonProps} type='date' InputLabelProps={{ shrink: true }} />
       case 'Switch':
         return (
           <FormControlLabel
@@ -410,7 +452,7 @@ function LeadFormAppPage() {
           />
         )
       default:
-        return <TextField {...commonProps} />
+        return <TextField id={field.id} {...commonProps} />
     }
   }
 
