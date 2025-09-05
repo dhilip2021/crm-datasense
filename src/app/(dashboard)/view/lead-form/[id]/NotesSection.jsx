@@ -42,6 +42,7 @@ const NotesSection = ({ leadId, leadData }) => {
 
   const [noteError, setNoteError] = useState(false)
   const [titleError, setTitleError] = useState(false)
+  const [loader, setLoader] = useState(false)
 
   const [open, setOpen] = useState(false)
 
@@ -91,7 +92,7 @@ const NotesSection = ({ leadId, leadData }) => {
         createdAt: new Date().toISOString(),
         createdBy: user_name
       }
-
+      setLoader(true)
       const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
         method: 'PATCH',
         headers: {
@@ -105,37 +106,45 @@ const NotesSection = ({ leadId, leadData }) => {
 
       const result = await res.json()
 
-
-      console.log(result,"<<< NOTES CREATEDDDDDDDD")
+      setLoader(false)
       if (result.success) {
-
-        toast.success("Note added successfully", {
-                autoClose: 500, // 1 second la close
-                position: 'bottom-center',
-                hideProgressBar: true, // progress bar venam na
-                closeOnClick: true,
-                pauseOnHover: false,
-                draggable: false,
-                progress: undefined
-              })
+        toast.success('Note added successfully', {
+          autoClose: 500, // 1 second la close
+          position: 'bottom-center',
+          hideProgressBar: true, // progress bar venam na
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined
+        })
 
         setNotes(prev => [newNote, ...prev])
-      }else{
+      } else {
         toast.error(result.error, {
-                autoClose: 500, // 1 second la close
-                position: 'bottom-center',
-                hideProgressBar: true, // progress bar venam na
-                closeOnClick: true,
-                pauseOnHover: false,
-                draggable: false,
-                progress: undefined
-              })
+          autoClose: 500, // 1 second la close
+          position: 'bottom-center',
+          hideProgressBar: true, // progress bar venam na
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined
+        })
       }
 
       handleClear()
       setOpen(false)
     } catch (err) {
-      console.error('Error saving note:', err)
+      setOpen(false)
+      setLoader(false)
+      toast.error(err, {
+        autoClose: 500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
     }
   }
 
@@ -154,7 +163,7 @@ const NotesSection = ({ leadId, leadData }) => {
                 e.stopPropagation()
                 setOpen(true)
               }}
-              sx={{marginRight: "20px"}}
+              sx={{ marginRight: '20px' }}
             >
               + Create Note
             </Button>
@@ -162,92 +171,67 @@ const NotesSection = ({ leadId, leadData }) => {
         </AccordionSummary>
 
         <AccordionDetails>
-          {/* {Array.isArray(notes) &&
+          {Array.isArray(notes) &&
             notes.map((n, i) => (
-              <Card key={i} sx={{ p: 2, mb: 2 }}>
+              <Card
+                key={i}
+                sx={{
+                  p: 2,
+                  mb: 2,
+                  bgcolor: '#f9f9ff',
+                  borderRadius: 2,
+                  border: '1px solid #ddd'
+                }}
+              >
                 <Box display='flex' alignItems='flex-start' gap={2}>
+                  {/* Avatar */}
                   <Avatar>{getIntial(`${leadData?.values?.['First Name']} ${leadData?.values?.['Last Name']}`)}</Avatar>
+
+                  {/* Content */}
                   <Box flex={1}>
-                    <Typography fontWeight='bold'>{n.title}</Typography>
-                    <Typography>{n.note}</Typography>
-                    <Typography variant='caption' color='text.secondary'>
-                      Lead - <b>{`${leadData?.values?.['First Name']} ${leadData?.values?.['Last Name']}`}</b> •{' '}
-                      {new Date(n.createdAt).toLocaleString()} by <b>{n.createdBy}</b>
+                    {/* Title */}
+                    <Typography fontWeight='bold' color='primary'>
+                      {n.title || 'Untitled Note'}
                     </Typography>
+
+                    {/* Note content */}
+                    <Typography sx={{ mt: 0.5 }}>{n.note}</Typography>
+
+                    {/* Metadata */}
+                    <Typography variant='caption' color='text.secondary' display='block' mt={1}>
+                      Lead - <b>👤 {`${leadData?.values?.['First Name']} ${leadData?.values?.['Last Name']}`}</b> • 📅
+                      ⏰{new Date(n.createdAt).toLocaleString()} by <b> 👤 {n.createdBy}</b>
+                    </Typography>
+
+                    {/* Optional status / priority chips for visual consistency with tasks */}
+                    {n.status && n.priority && (
+                      <Stack direction='row' spacing={1} mt={1}>
+                        <Chip
+                          label={n.status}
+                          size='small'
+                          sx={{
+                            bgcolor:
+                              n.status === 'Completed'
+                                ? 'success.light'
+                                : n.status === 'In Progress'
+                                  ? 'warning.light'
+                                  : 'grey.300'
+                          }}
+                        />
+                        <Chip
+                          label={`Priority: ${n.priority}`}
+                          size='small'
+                          sx={{
+                            bgcolor:
+                              n.priority === 'High' ? 'error.light' : n.priority === 'Low' ? 'info.light' : 'grey.200'
+                          }}
+                        />
+                      </Stack>
+                    )}
                   </Box>
                 </Box>
               </Card>
-            ))} */}
-
-            {Array.isArray(notes) &&
-  notes.map((n, i) => (
-    <Card
-      key={i}
-      sx={{
-        p: 2,
-        mb: 2,
-        bgcolor: '#f9f9ff',
-        borderRadius: 2,
-        border: '1px solid #ddd'
-      }}
-    >
-      <Box display='flex' alignItems='flex-start' gap={2}>
-        {/* Avatar */}
-        <Avatar>
-          {getIntial(
-            `${leadData?.values?.['First Name']} ${leadData?.values?.['Last Name']}`
-          )}
-        </Avatar>
-
-        {/* Content */}
-        <Box flex={1}>
-          {/* Title */}
-          <Typography fontWeight='bold' color='primary'>
-            {n.title || 'Untitled Note'}
-          </Typography>
-
-          {/* Note content */}
-          <Typography sx={{ mt: 0.5 }}>{n.note}</Typography>
-
-          {/* Metadata */}
-          <Typography variant='caption' color='text.secondary' display='block' mt={1}>
-            Lead - <b>👤 {`${leadData?.values?.['First Name']} ${leadData?.values?.['Last Name']}`}</b> •{' '} 📅 ⏰
-            {new Date(n.createdAt).toLocaleString()} by <b> 👤 {n.createdBy}</b>
-          </Typography>
-
-          {/* Optional status / priority chips for visual consistency with tasks */}
-          {n.status && n.priority && (
-            <Stack direction='row' spacing={1} mt={1}>
-              <Chip
-                label={n.status}
-                size='small'
-                sx={{
-                  bgcolor:
-                    n.status === 'Completed'
-                      ? 'success.light'
-                      : n.status === 'In Progress'
-                      ? 'warning.light'
-                      : 'grey.300'
-                }}
-              />
-              <Chip
-                label={`Priority: ${n.priority}`}
-                size='small'
-                sx={{
-                  bgcolor:
-                    n.priority === 'High'
-                      ? 'error.light'
-                      : n.priority === 'Low'
-                      ? 'info.light'
-                      : 'grey.200'
-                }}
-              />
-            </Stack>
-          )}
-        </Box>
-      </Box>
-    </Card>
-  ))}
+            ))}
         </AccordionDetails>
       </Accordion>
 
@@ -308,9 +292,17 @@ const NotesSection = ({ leadId, leadData }) => {
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={handleClear}>Clear</Button>
-          <Button variant='contained' onClick={handleSave} ref={saveRef}>
-            Save
+          <Button onClick={handleClear} disabled={loader}>
+            Clear
+          </Button>
+          <Button
+            variant='contained'
+            onClick={handleSave}
+            ref={saveRef}
+            disabled={loader} // 🔥 disable while saving
+            startIcon={loader ? <CircularProgress size={18} color='inherit' /> : null} // 🔥 spinner
+          >
+            {loader ? 'Saving...' : 'Save'}
           </Button>
         </DialogActions>
       </Dialog>
