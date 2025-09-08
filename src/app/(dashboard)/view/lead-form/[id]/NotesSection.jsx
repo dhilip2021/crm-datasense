@@ -40,6 +40,7 @@ const NotesSection = ({ leadId, leadData }) => {
   const [note, setNote] = useState('')
   const [title, setTitle] = useState('')
   const [notes, setNotes] = useState(sortedNotes || [])
+  const [editingNote, setEditingNote] = useState(null) // holds note being edited
 
   const [noteError, setNoteError] = useState(false)
   const [titleError, setTitleError] = useState(false)
@@ -53,11 +54,14 @@ const NotesSection = ({ leadId, leadData }) => {
   const saveRef = useRef(null)
 
   // Focus title when modal opens
-  useEffect(() => {
-    if (open && titleRef.current) {
-      titleRef.current.focus()
-    }
-  }, [open])
+useEffect(() => {
+  if (open) {
+    const timer = setTimeout(() => {
+      titleRef.current?.focus()
+    }, 100) // 100ms delay so Dialog content mounts
+    return () => clearTimeout(timer)
+  }
+}, [open])
 
   const handleChange = e => {
     const { name, value } = e.target
@@ -73,8 +77,12 @@ const NotesSection = ({ leadId, leadData }) => {
   const handleClear = () => {
     setNote('')
     setTitle('')
+    setEditingNote(null)
+    setTitleError(false)
+    setNoteError(false)
     if (titleRef.current) titleRef.current.focus()
   }
+
 
   const handleSave = async () => {
     if (note === '') {
@@ -87,12 +95,14 @@ const NotesSection = ({ leadId, leadData }) => {
     }
 
     try {
-      const newNote = {
+      const notePayload = {
         title,
         note,
-        createdAt: new Date().toISOString(),
-        createdBy: user_name
+        createdAt: editingNote ? editingNote.createdAt : new Date().toISOString(),
+        createdBy: editingNote ? editingNote.createdBy : user_name,
+        _id: editingNote?._id // send _id if editing
       }
+
       setLoader(true)
       const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
         method: 'PATCH',
@@ -101,51 +111,32 @@ const NotesSection = ({ leadId, leadData }) => {
           Authorization: `Bearer ${getToken}`
         },
         body: JSON.stringify({
-          values: { Notes: [newNote] }
+          values: { Notes: [notePayload] }
         })
       })
 
       const result = await res.json()
-
       setLoader(false)
-      if (result.success) {
-        toast.success('Note added successfully', {
-          autoClose: 500, // 1 second la close
-          position: 'bottom-center',
-          hideProgressBar: true, // progress bar venam na
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: false,
-          progress: undefined
-        })
 
-        setNotes(prev => [newNote, ...prev])
+      if (result.success) {
+        if (editingNote) {
+          toast.success('Note updated successfully', { autoClose: 800, position: 'bottom-center' })
+          setNotes(prev => prev.map(n => (n._id === editingNote._id ? { ...n, title, note } : n)))
+        } else {
+          toast.success('Note added successfully', { autoClose: 800, position: 'bottom-center' })
+          setNotes(prev => [notePayload, ...prev])
+        }
       } else {
-        toast.error(result.error, {
-          autoClose: 500, // 1 second la close
-          position: 'bottom-center',
-          hideProgressBar: true, // progress bar venam na
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: false,
-          progress: undefined
-        })
+        toast.error(result.error || 'Error saving note', { autoClose: 800, position: 'bottom-center' })
       }
 
       handleClear()
+      setEditingNote(null)
       setOpen(false)
     } catch (err) {
       setOpen(false)
       setLoader(false)
-      toast.error(err, {
-        autoClose: 500, // 1 second la close
-        position: 'bottom-center',
-        hideProgressBar: true, // progress bar venam na
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: false,
-        progress: undefined
-      })
+      toast.error('Error while saving note', { autoClose: 800, position: 'bottom-center' })
     }
   }
 
@@ -163,6 +154,7 @@ const NotesSection = ({ leadId, leadData }) => {
               onClick={e => {
                 e.stopPropagation()
                 setOpen(true)
+                handleClear()
               }}
               sx={{ marginRight: '20px' }}
             >
@@ -200,8 +192,16 @@ const NotesSection = ({ leadId, leadData }) => {
 
                     {/* Metadata */}
                     <Typography variant='caption' color='text.secondary' display='block' mt={1}>
-                      Lead - <b>👤 {`${leadData?.values?.['First Name']} ${leadData?.values?.['Last Name']}`}</b> • 📅
-                      ⏰{new Date(n.createdAt).toLocaleString()} by <b> 👤 {n.createdBy}</b>
+                      Lead - <b>👤 {`${leadData?.values?.['First Name']} ${leadData?.values?.['Last Name']}`}</b> • 📅{' '}
+                      {(() => {
+                        const d = new Date(n.createdAt)
+                        const day = String(d.getDate()).padStart(2, '0')
+                        const month = String(d.getMonth() + 1).padStart(2, '0')
+                        const year = d.getFullYear()
+                        return `${day}-${month}-${year}`
+                      })()}
+                      • ⏰ {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{' '}
+                      by <b>👤 {n.createdBy}</b>
                     </Typography>
 
                     {/* Optional status / priority chips for visual consistency with tasks */}
@@ -230,6 +230,19 @@ const NotesSection = ({ leadId, leadData }) => {
                       </Stack>
                     )}
                   </Box>
+                  <Box display='flex' justifyContent='flex-end' mt={1}>
+                    <Button
+                      size='small'
+                      onClick={() => {
+                        setEditingNote(n) // store current note
+                        setTitle(n.title)
+                        setNote(n.note)
+                        setOpen(true)
+                      }}
+                    >
+                      Edit
+                    </Button>
+                  </Box>
                 </Box>
               </Card>
             ))}
@@ -238,11 +251,20 @@ const NotesSection = ({ leadId, leadData }) => {
 
       {/* 🔹 Modal */}
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='sm'>
-        <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          Create New Note
-          <IconButton edge='end' color='inherit' onClick={() => setOpen(false)} aria-label='close' sx={{ ml: 2 }}>
+        <DialogTitle>
+          <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"}>
+            {editingNote ? 'Edit Note' : 'Create New Note'}
+          <IconButton
+            onClick={() => {
+              setOpen(false)
+              setEditingNote(null)
+              handleClear()
+            }}
+          >
             <CloseIcon />
           </IconButton>
+          </Box>
+          
         </DialogTitle>
 
         <DialogContent>
@@ -250,6 +272,7 @@ const NotesSection = ({ leadId, leadData }) => {
             placeholder='Title'
             variant='standard'
             fullWidth
+            autoFocus 
             inputRef={titleRef}
             value={title}
             onChange={handleChange}
@@ -296,14 +319,8 @@ const NotesSection = ({ leadId, leadData }) => {
           <Button onClick={handleClear} disabled={loader}>
             Clear
           </Button>
-          <Button
-            variant='contained'
-            onClick={handleSave}
-            ref={saveRef}
-            disabled={loader} // 🔥 disable while saving
-            startIcon={loader ? <CircularProgress size={18} color='inherit' /> : null} // 🔥 spinner
-          >
-            {loader ? 'Saving...' : 'Save'}
+          <Button variant='contained' onClick={handleSave} disabled={loader}>
+            {loader ? 'Saving...' : editingNote ? 'Update' : 'Save'}
           </Button>
         </DialogActions>
       </Dialog>

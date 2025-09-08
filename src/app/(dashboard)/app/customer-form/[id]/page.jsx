@@ -148,7 +148,7 @@ function CustomerFormAppIdPage() {
       })
       setValues(mappedValues)
     } else {
-      toast.error(data.message || 'Lead not found')
+      toast.error(data.error || 'Lead not found')
     }
     setLoader(false)
   }

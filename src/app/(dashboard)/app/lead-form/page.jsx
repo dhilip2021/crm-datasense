@@ -5,6 +5,10 @@ import {
   Button,
   Card,
   CardContent,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   FormControlLabel,
   Grid,
   InputAdornment,
@@ -77,6 +81,11 @@ function LeadFormAppPage() {
   const [loader, setLoader] = useState(false)
   const [countryCodes, setCountryCodes] = useState([])
   const [userList, setUserList] = useState([])
+
+    // 🚨 Duplicate Dialog States
+  const [duplicateDialog, setDuplicateDialog] = useState(false)
+  const [duplicateLead, setDuplicateLead] = useState(null)
+  const [pendingPayload, setPendingPayload] = useState(null)
 
   // Fetch user list
   const getUserListFn = async () => {
@@ -294,6 +303,14 @@ function LeadFormAppPage() {
       const data = await res.json()
       setLoader(false)
 
+        // 🚨 Duplicate Handling
+      if (data.duplicate) {
+        setDuplicateLead(data.existingLead)
+        setPendingPayload(payload)
+        setDuplicateDialog(true)
+        return
+      }
+
       if (data.success) {
         toast.success('Form submitted successfully', {
           autoClose: 1500,
@@ -302,11 +319,41 @@ function LeadFormAppPage() {
         })
         router.push('/app/leads')
       } else {
-        toast.error('Submission failed', { autoClose: 1500, position: 'bottom-center' })
+        toast.error(data.message, { autoClose: 1500, position: 'bottom-center' })
       }
     } catch (err) {
       setLoader(false)
-      toast.error('Submission failed', { autoClose: 1500, position: 'bottom-center' })
+      toast.error(err, { autoClose: 1500, position: 'bottom-center' })
+    }
+  }
+
+  // 🚨 Merge Action
+  const handleMerge = async () => {
+    setDuplicateDialog(false)
+    setLoader(true)
+
+    try {
+      const res = await fetch('/api/v1/admin/lead-form/form-submit?merge=true', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken}`
+        },
+        body: JSON.stringify(pendingPayload)
+      })
+
+      const data = await res.json()
+      setLoader(false)
+
+      if (data.success) {
+        toast.success('Lead merged successfully', { autoClose: 1500, position: 'bottom-center' })
+        router.push('/app/leads')
+      } else {
+        toast.error(data.message || 'Merge failed', { autoClose: 1500, position: 'bottom-center' })
+      }
+    } catch (err) {
+      setLoader(false)
+      toast.error('Error merging lead', { autoClose: 1500, position: 'bottom-center' })
     }
   }
 
@@ -557,6 +604,33 @@ function LeadFormAppPage() {
           </Box>
         </>
       )}
+
+       {/* 🚨 Duplicate Dialog */}
+      <Dialog open={duplicateDialog} onClose={() => setDuplicateDialog(false)} maxWidth='sm' fullWidth>
+        <DialogTitle>Duplicate Lead Detected</DialogTitle>
+        <DialogContent dividers>
+          <Typography>
+            A lead with the same email/phone already exists:
+          </Typography>
+          {duplicateLead && (
+            <Box mt={2} p={2} sx={{ bgcolor: '#f5f5f5', borderRadius: 2 }}>
+              <Typography variant='body2'><strong>Lead ID:</strong> {duplicateLead.lead_id}</Typography>
+              <Typography variant='body2'><strong>Name:</strong> {duplicateLead.lead_name}</Typography>
+              <Typography variant='body2'><strong>Email:</strong> {duplicateLead.values?.Email || '—'}</Typography>
+              <Typography variant='body2'><strong>Phone:</strong> {duplicateLead.values?.Phone || '—'}</Typography>
+            </Box>
+          )}
+          <Typography mt={2}>Do you want to merge this lead with your submission?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDuplicateDialog(false)} color='secondary'>
+            Cancel
+          </Button>
+          <Button onClick={handleMerge} color='primary' variant='contained'>
+            Merge & Continue
+          </Button>
+        </DialogActions>
+      </Dialog>
       <ToastContainer />
     </Box>
   )

@@ -2,6 +2,7 @@ import { create_UUID, verifyAccessToken } from '@/helper/clientHelper'
 import connectMongoDB from '@/libs/mongodb'
 import { tsid18 } from '@/libs/tsid18'
 import Leadform from '@/models/Leadform'
+import Cookies from 'js-cookie'
 import { NextResponse } from 'next/server'
 import slugify from 'slugify'
 
@@ -69,67 +70,17 @@ export async function POST(req) {
   await connectMongoDB()
   const body = await req.json()
 
-  const verified = verifyAccessToken()
-  if (!verified.success) {
-    return NextResponse.json(
-      {
-        success: false,
-        message: '',
-        error: 'token expired!'
-      },
-      { status: 400 }
-    )
-  }
+  const verified = verifyAccessToken();
+  console.log(verified,"<<< VERIFIEDDDDD")
 
-  try {
+
+    if (verified.success) {
+
+       try {
     const { organization_id, organization_name, form_name, values } = body
 
     if (!organization_id || !form_name || !values) {
       return NextResponse.json({ success: false, message: 'Missing required fields' }, { status: 400 })
-    }
-
-    // 🔍 Duplicate Detection (email/phone)
-    const email = values['Email'] || values['email']
-    const phone = values['Phone'] || values['phone']
-
-    if (email || phone) {
-      const existingLead = await Leadform.findOne({
-        $or: [
-          email ? { 'values.Email': email } : {},
-          email ? { 'values.email': email } : {},
-          phone ? { 'values.Phone': phone } : {},
-          phone ? { 'values.phone': phone } : {}
-        ]
-      })
-
-      if (existingLead) {
-        // ⚙️ Configurable Policy
-        const policy = process.env.DUPLICATE_POLICY || 'warn_merge' // 'block' | 'warn_merge'
-
-        if (policy === 'block') {
-          return NextResponse.json(
-            {
-              success: false,
-              duplicate: true,
-              message: 'Duplicate lead detected. Creation blocked.',
-              existingLead
-            },
-            { status: 409 }
-          )
-        }
-
-        if (policy === 'warn_merge') {
-          return NextResponse.json(
-            {
-              success: false,
-              duplicate: true,
-              message: 'Duplicate lead found. Do you want to merge?',
-              existingLead
-            },
-            { status: 200 }
-          )
-        }
-      }
     }
 
     // Safe prefix fallback
@@ -166,6 +117,8 @@ export async function POST(req) {
     const leadformData = new Leadform({
       organization_id,
       auto_inc_id: nextAutoId,
+      // lead_id: create_UUID(),
+      // lead_id: lead_slug_id,
       lead_id: tsid18(),
       lead_name,
       lead_slug_name,
@@ -176,7 +129,7 @@ export async function POST(req) {
         Label: lead_label
       },
       c_createdBy: verified.data.user_id,
-      c_role_id: verified.data.c_role_id,
+      c_role_id: verified.data.c_role_id,      
       submittedAt: new Date()
     })
 
@@ -198,6 +151,7 @@ export async function POST(req) {
       }
     })
   } catch (error) {
+   
     return NextResponse.json(
       {
         success: false,
@@ -207,4 +161,20 @@ export async function POST(req) {
       { status: 500 }
     )
   }
+
+
+    }else{
+       return NextResponse.json(
+      {
+        success: false,
+        message: '',
+        error: 'token expired!'
+      },
+      { status: 400 }
+    )
+    }
+
+
+
+ 
 }

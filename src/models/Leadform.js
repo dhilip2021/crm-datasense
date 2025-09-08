@@ -1,60 +1,89 @@
 import mongoose from 'mongoose'
 
+// ------------------ Sub Schemas ------------------ //
+const NoteSchema = new mongoose.Schema(
+  {
+    _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
+    title: { type: String, default: null },
+    note: { type: String, default: null },
+    createdAt: { type: Date, default: Date.now },
+    createdBy: { type: String, default: null },
+  },
+  { _id: false }
+)
+
+const TaskSchema = new mongoose.Schema(
+  {
+    subject: { type: String, default: null },
+    dueDate: { type: Date, default: null },
+    priority: { type: String, default: null },
+    owner: { type: String, default: null },
+    reminderEnabled: { type: Boolean, default: false },
+    reminderDate: { type: Date, default: null },
+    reminderTime: { type: String, default: null },
+    alertType: { type: String, default: 'Email' },
+    createdAt: { type: Date, default: Date.now },
+    createdBy: { type: String, default: null },
+  },
+  { _id: false }
+)
+
+const ActivitySchema = new mongoose.Schema(
+  {
+    task: [TaskSchema],
+  },
+  { _id: false }
+)
+
+// ------------------ Main Schema ------------------ //
 const LeadFormSchema = new mongoose.Schema(
   {
     organization_id: {
       type: String,
-      required: true
+      required: true,
     },
     auto_inc_id: {
       type: String,
       required: [true, 'auto inc id is required'],
-      trim: true
+      trim: true,
     },
     lead_name: {
       type: String,
       required: [true, 'Lead name is required'],
-      trim: true
+      trim: true,
     },
     lead_id: {
       type: String,
       required: [true, 'Lead id is required'],
-      trim: true
+      trim: true,
     },
     lead_slug_name: {
       type: String,
-      trim: true
+      trim: true,
     },
     form_name: {
       type: String,
-      required: true
+      required: true,
     },
+
+    // 👇 Structure for Notes + Activity inside values
     values: {
       type: Object,
-      required: true
+      required: true,
     },
-    submittedAt: {
-      type: Date,
-      default: Date.now
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now
-    },
-    c_role_id: {
-      type: String
-    },
-    c_createdBy: {
-      type: String
-    },
-    c_updatedBy: {
-      type: String
-    },
-    c_deletedBy: {
-      type: String
-    }
+    'values.Notes': [NoteSchema],
+    'values.Activity': [ActivitySchema],
+
+    submittedAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
+
+    c_role_id: { type: String },
+    c_createdBy: { type: String },
+    c_updatedBy: { type: String },
+    c_deletedBy: { type: String },
   },
   { strict: false, versionKey: false, timestamps: true }
 )
 
-export default mongoose.models.Leadform || mongoose.model('Leadform', LeadFormSchema)
+export default mongoose.models.Leadform ||
+  mongoose.model('Leadform', LeadFormSchema)

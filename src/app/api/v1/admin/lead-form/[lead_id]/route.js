@@ -3,6 +3,7 @@
 import { verifyAccessToken } from '@/helper/clientHelper'
 import connectMongoDB from '@/libs/mongodb'
 import Leadform from '@/models/Leadform'
+import mongoose from 'mongoose'
 import { NextResponse } from 'next/server'
 
 // 🔥 Lead Scoring Logic
@@ -273,8 +274,6 @@ export async function PUT(req, { params }) {
 //   }
 // }
 
-
-
 // export async function PATCH(req, { params }) {
 //   const verified = verifyAccessToken()
 //   await connectMongoDB()
@@ -374,10 +373,7 @@ export async function PATCH(req, { params }) {
     try {
       const lead = await Leadform.findOne({ lead_id })
       if (!lead) {
-        return NextResponse.json(
-          { success: false, message: 'Lead not found' },
-          { status: 404 }
-        )
+        return NextResponse.json({ success: false, message: 'Lead not found' }, { status: 404 })
       }
 
       // ---------------- NOTES ----------------
@@ -385,14 +381,29 @@ export async function PATCH(req, { params }) {
       console.log(noteFromBody, '<<<NOTES FROM BODY')
 
       let newNote = null
+      let updateNote = null
+      let newTask = null
+      let updateTask = null
+
       if (noteFromBody && (noteFromBody.title || noteFromBody.note)) {
-        newNote = {
-          title: noteFromBody.title || null,
-          note: noteFromBody.note || null,
-          createdAt: noteFromBody.createdAt
-            ? new Date(noteFromBody.createdAt)
-            : new Date(),
-          createdBy: noteFromBody.createdBy || null,
+        if (noteFromBody._id) {
+          console.log('coming 1')
+
+          updateNote = {
+            title: noteFromBody.title || null,
+            note: noteFromBody.note || null,
+            createdAt: noteFromBody.createdAt ? new Date(noteFromBody.createdAt) : new Date(),
+            createdBy: noteFromBody.createdBy || null
+          }
+        } else {
+          console.log('coming 2')
+          newNote = {
+            _id: new mongoose.Types.ObjectId(),
+            title: noteFromBody.title || null,
+            note: noteFromBody.note || null,
+            createdAt: noteFromBody.createdAt ? new Date(noteFromBody.createdAt) : new Date(),
+            createdBy: noteFromBody.createdBy || null
+          }
         }
       }
 
@@ -401,30 +412,65 @@ export async function PATCH(req, { params }) {
       const taskFromBody = activityFromBody.task?.[0] || {}
       console.log(taskFromBody, '<<<TASKS FROM BODY')
 
-      let newTask = null
       if (taskFromBody && (taskFromBody.subject || taskFromBody.dueDate)) {
-        newTask = {
-          subject: taskFromBody.subject || null,
-          dueDate: taskFromBody.dueDate ? new Date(taskFromBody.dueDate) : null,
-          priority: taskFromBody.priority || null,
-          owner: taskFromBody.owner || null,
-          reminderEnabled: !!taskFromBody.reminderEnabled,
-          reminderDate: taskFromBody.reminderDate
-            ? new Date(taskFromBody.reminderDate)
-            : null,
-          reminderTime: taskFromBody.reminderTime || null,
-          alertType: taskFromBody.alertType || 'Email',
-          createdAt: new Date(),
+        if (taskFromBody._id) {
+          updateTask = {
+            subject: taskFromBody.subject || null,
+            dueDate: taskFromBody.dueDate ? new Date(taskFromBody.dueDate) : null,
+            priority: taskFromBody.priority || null,
+            owner: taskFromBody.owner || null,
+            reminderEnabled: !!taskFromBody.reminderEnabled,
+            reminderDate: taskFromBody.reminderDate ? new Date(taskFromBody.reminderDate) : null,
+            reminderTime: taskFromBody.reminderTime || null,
+            alertType: taskFromBody.alertType || 'Email',
+            createdAt: new Date()
+          }
+        } else {
+          newTask = {
+            _id: new mongoose.Types.ObjectId(),
+            subject: taskFromBody.subject || null,
+            dueDate: taskFromBody.dueDate ? new Date(taskFromBody.dueDate) : null,
+            priority: taskFromBody.priority || null,
+            owner: taskFromBody.owner || null,
+            reminderEnabled: !!taskFromBody.reminderEnabled,
+            reminderDate: taskFromBody.reminderDate ? new Date(taskFromBody.reminderDate) : null,
+            reminderTime: taskFromBody.reminderTime || null,
+            alertType: taskFromBody.alertType || 'Email',
+            createdAt: new Date()
+          }
         }
       }
 
       // ---------------- UPDATE QUERY ----------------
       const updateQuery = {
-        $set: { updatedAt: new Date() },
+        $set: { updatedAt: new Date() }
       }
 
       if (newNote) {
         updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Notes': newNote }
+      }
+
+      if (updateNote) {
+        // Update an existing note by its _id
+        const updated = await Leadform.findOneAndUpdate(
+          { lead_id, 'values.Notes._id': noteFromBody._id }, // match lead + note _id
+          {
+            $set: {
+              'values.Notes.$.title': updateNote.title,
+              'values.Notes.$.note': updateNote.note,
+              'values.Notes.$.createdAt': updateNote.createdAt,
+              'values.Notes.$.createdBy': updateNote.createdBy,
+              updatedAt: new Date()
+            }
+          },
+          { new: true }
+        )
+
+        return NextResponse.json({
+          success: true,
+          message: 'Note updated successfully',
+          data: updated
+        })
       }
 
       if (newTask) {
@@ -436,42 +482,62 @@ export async function PATCH(req, { params }) {
         updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Activity.0.task': newTask }
       }
 
-      if (!updateQuery.$push) {
-        return NextResponse.json(
-          { success: false, message: 'Nothing to update' },
-          { status: 400 }
+      if (updateTask) {
+        const updated = await Leadform.findOneAndUpdate(
+          {
+            lead_id,
+            'values.Activity.0.task._id': taskFromBody._id // ensure task exists
+          },
+          {
+            $set: {
+              'values.Activity.0.task.$[t].subject': updateTask.subject,
+              'values.Activity.0.task.$[t].dueDate': updateTask.dueDate,
+              'values.Activity.0.task.$[t].priority': updateTask.priority,
+              'values.Activity.0.task.$[t].owner': updateTask.owner,
+              'values.Activity.0.task.$[t].reminderEnabled': updateTask.reminderEnabled,
+              'values.Activity.0.task.$[t].reminderDate': updateTask.reminderDate,
+              'values.Activity.0.task.$[t].reminderTime': updateTask.reminderTime,
+              'values.Activity.0.task.$[t].alertType': updateTask.alertType,
+              'values.Activity.0.task.$[t].createdAt': updateTask.createdAt,
+              updatedAt: new Date()
+            }
+          },
+          {
+            arrayFilters: [{ 't._id': new mongoose.Types.ObjectId(taskFromBody._id) }],
+            new: true
+          }
         )
+
+        return NextResponse.json({
+          success: true,
+          message: 'Task updated successfully',
+          data: updated
+        })
       }
 
-      const updated = await Leadform.findOneAndUpdate(
-        { lead_id },
-        updateQuery,
-        { new: true, upsert: true }
-      )
+      if (!updateQuery.$push) {
+        return NextResponse.json({ success: false, message: 'Nothing to update' }, { status: 400 })
+      }
+
+      const updated = await Leadform.findOneAndUpdate({ lead_id }, updateQuery, { new: true, upsert: true })
 
       return NextResponse.json({
         success: true,
         message: 'Note & Activity Task added successfully',
-        data: updated,
+        data: updated
       })
     } catch (error) {
       console.error('⨯ Add note+activity error:', error)
-      return NextResponse.json(
-        { success: false, message: 'Internal Server Error' },
-        { status: 500 }
-      )
+      return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
     }
   } else {
     return NextResponse.json(
       {
         success: false,
         message: '',
-        error: 'token expired!',
+        error: 'token expired!'
       },
       { status: 400 }
     )
   }
 }
-
-
-

@@ -287,7 +287,7 @@ function LeadFormAppIdPage() {
       toast.success(leadId ? 'Lead updated successfully' : 'Form submitted successfully', { autoClose: 1000 })
       setTimeout(() => router.push('/app/leads'), 1200)
     } else {
-      toast.error(data.message || 'Submission failed', { autoClose: 1000 })
+      toast.error(data.error || 'Submission failed', { autoClose: 1000 })
     }
   }
 
