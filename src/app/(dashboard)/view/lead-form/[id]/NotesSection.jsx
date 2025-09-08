@@ -119,6 +119,7 @@ const NotesSection = ({ leadId, leadData }) => {
 
       if (result.success) {
         if (editingNote) {
+          setNotes(prev => prev.map(n => (n._id === editingNote._id ? { ...n, title, note } : n)))
           toast.success('Note updated successfully', {
             autoClose: 500, // 1 second la close
             position: 'bottom-center',
@@ -128,7 +129,6 @@ const NotesSection = ({ leadId, leadData }) => {
             draggable: false,
             progress: undefined
           })
-          setNotes(prev => prev.map(n => (n._id === editingNote._id ? { ...n, title, note } : n)))
         } else {
           toast.success('Note added successfully', {
             autoClose: 500, // 1 second la close
@@ -162,7 +162,15 @@ const NotesSection = ({ leadId, leadData }) => {
     } catch (err) {
       setOpen(false)
       setLoader(false)
-      toast.error('Error while saving note', { autoClose: 800, position: 'bottom-center' })
+      toast.error('Error while saving note', {
+          autoClose: 500, // 1 second la close
+          position: 'bottom-center',
+          hideProgressBar: true, // progress bar venam na
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined
+        })
     }
   }
 
@@ -373,7 +381,14 @@ const NotesSection = ({ leadId, leadData }) => {
           </Button>
         </DialogActions>
       </Dialog>
-      <ToastContainer position='bottom-center' />
+      <ToastContainer
+        position='bottom-center'
+        autoClose={500} // all toasts auto close
+        hideProgressBar
+        closeOnClick
+        pauseOnHover={false}
+        draggable={false}
+      />
     </>
   )
 }

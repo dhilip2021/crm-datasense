@@ -468,7 +468,7 @@ export async function PATCH(req, { params }) {
 
         return NextResponse.json({
           success: true,
-          message: 'Note updated successfully',
+          message: 'Note updated successfully 1',
           data: updated
         })
       }
