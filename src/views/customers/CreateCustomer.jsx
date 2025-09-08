@@ -1283,8 +1283,6 @@ const CreateCustomers = () => {
        
       </Card>
 
-      <ToastContainer />
-
       <AddSalutationPopup
         open={openSalutation}
         close={handleSalutationClose}

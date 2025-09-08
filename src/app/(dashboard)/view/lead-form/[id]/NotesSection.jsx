@@ -23,6 +23,8 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import CloseIcon from '@mui/icons-material/Close'
 import Cookies from 'js-cookie'
 import { toast, ToastContainer } from 'react-toastify'
+//react-toastify
+import 'react-toastify/dist/ReactToastify.css'
 
 function getIntial(name = '') {
   const reIntial = (name.match(/\p{L}+/gu) || []).map(w => w[0].toUpperCase()).join('')
@@ -381,7 +383,7 @@ const NotesSection = ({ leadId, leadData }) => {
           </Button>
         </DialogActions>
       </Dialog>
-      <ToastContainer
+       <ToastContainer
         position='bottom-center'
         autoClose={500} // all toasts auto close
         hideProgressBar

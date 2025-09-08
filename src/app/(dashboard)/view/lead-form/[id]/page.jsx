@@ -483,7 +483,6 @@ const LeadDetailView = () => {
         </Grid>
       </Grid>
 
-      <ToastContainer position='top-right' />
     </>
   )
 }

@@ -425,7 +425,6 @@ export default function LeadFormPage() {
           <PreviewModal open={open} onClose={() => setOpen(false)} sections={sections} />
         </div>
       </div>
-      <ToastContainer />
     </DndProvider>
   )
 }

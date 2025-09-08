@@ -409,7 +409,6 @@ const AddFieldPage = () => {
         </Grid>
       </CardContent>
     </Card>
-    <ToastContainer />
     </Box>
    
   )

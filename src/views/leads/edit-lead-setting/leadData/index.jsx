@@ -522,7 +522,6 @@ const LeadData = () => {
             />
           </Grid>
 
-          <ToastContainer />
         </Grid>
       )}
     </Box>

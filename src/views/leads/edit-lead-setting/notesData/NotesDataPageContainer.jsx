@@ -362,8 +362,6 @@ const NotesDataPageContainer = () => {
           loader={loader}
         />
       </Box>
-
-      <ToastContainer />
     </Box>
   )
 }

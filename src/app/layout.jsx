@@ -13,6 +13,7 @@ import 'remixicon/fonts/remixicon.css'
 //react-toastify
 import 'react-toastify/dist/ReactToastify.css';
 import { ReduxProvider } from './providers';
+import { ToastContainer } from 'react-toastify';
 
 export const metadata = {
   title: 'CRM Admin - Datasense Technologies',
@@ -31,7 +32,19 @@ const RootLayout = ({ children }) => {
           rel="stylesheet"
         />
       <body className='flex is-full min-bs-full flex-auto flex-col'>
-        <ReduxProvider>{children}</ReduxProvider>
+        <ReduxProvider>
+          
+          {children}
+
+          <ToastContainer
+        position='bottom-center'
+        autoClose={500} // all toasts auto close
+        hideProgressBar
+        closeOnClick
+        pauseOnHover={false}
+        draggable={false}
+      />
+        </ReduxProvider>
       </body>
     </html>
   )

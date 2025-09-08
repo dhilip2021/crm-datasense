@@ -978,7 +978,6 @@ const LeadTable = () => {
           />
         </CardContent>
       </Card>
-      <ToastContainer position='top-right' />
     </Box>
   )
 }

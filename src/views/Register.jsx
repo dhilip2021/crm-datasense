@@ -649,7 +649,6 @@ const Register = ({ mode }) => {
           </CardContent>
         </Card>
         <Illustrations maskImg={{ src: authBackground }} />
-        <ToastContainer />
       </div>
     </Box>
   )

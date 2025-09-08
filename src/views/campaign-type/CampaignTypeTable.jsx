@@ -399,7 +399,6 @@ const CampaignTypeTable = () => {
           </CardContent>
         </Card>
       )}
-      <ToastContainer />
       <DeleteConformPopup open={delOpen} title={delTitle} close={delClose} deleteConfirm={deleteConfirm} />
       <AddCampaignTypePopup
         open={open}

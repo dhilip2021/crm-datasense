@@ -191,7 +191,6 @@ const ChangePassword = ({ mode }) => {
         </CardContent>
       </Card>
       <Illustrations maskImg={{ src: authBackground }} />
-      <ToastContainer />
     </div>
   )
 }

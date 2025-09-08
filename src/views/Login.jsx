@@ -852,8 +852,15 @@ const Login = ({ mode }) => {
         </Card>
         <Illustrations maskImg={{ src: authBackground }} />
       </div>
-      <ToastContainer />
       <ErrorPopup open={open} close={handlePopupClose} title={title} trailVal={trailVal} />
+       <ToastContainer
+              position='bottom-center'
+              autoClose={500} // all toasts auto close
+              hideProgressBar
+              closeOnClick
+              pauseOnHover={false}
+              draggable={false}
+            />
     </Box>
   )
 }

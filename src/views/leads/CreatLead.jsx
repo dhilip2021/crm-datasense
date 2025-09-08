@@ -651,7 +651,6 @@ const CreatLead = () => {
         </Card>
       )}
 
-      <ToastContainer />
     </Box>
   )
 }

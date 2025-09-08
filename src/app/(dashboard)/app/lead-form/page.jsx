@@ -655,7 +655,14 @@ function LeadFormAppPage() {
           </Button>
         </DialogActions>
       </Dialog>
-      <ToastContainer />
+       <ToastContainer
+              position='bottom-center'
+              autoClose={500} // all toasts auto close
+              hideProgressBar
+              closeOnClick
+              pauseOnHover={false}
+              draggable={false}
+            />
     </Box>
   )
 }

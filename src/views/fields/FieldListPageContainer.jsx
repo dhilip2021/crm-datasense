@@ -340,7 +340,6 @@ function FieldListPageContainer() {
         </Card>
       </Box>
 
-      <ToastContainer />
     </div>
   )
 }

@@ -616,7 +616,6 @@ const CustomersTable = () => {
           />
         </CardContent>
       </Card>
-      <ToastContainer position='top-right' />
     </Box>
   )
 }

@@ -286,7 +286,6 @@ const ChangePasswordView = () => {
             </Grid>
           </form>
         </CardContent>
-        <ToastContainer />
       </Card>
     </Box>
   )

@@ -478,7 +478,6 @@ const TerritoryTable = () => {
           </CardContent>
         </Card>
       )}
-      <ToastContainer />
       <DeleteConformPopup open={delOpen} title={delTitle} close={delClose} deleteConfirm={deleteConfirm} />
       <AddTerritoryPopup
         open={open}

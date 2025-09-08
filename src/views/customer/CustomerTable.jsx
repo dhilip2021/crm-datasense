@@ -326,7 +326,6 @@ const CustomerTable = () => {
           </CardContent>
         </Card>
       )}
-      <ToastContainer />
       <DeleteConformPopup open={delOpen} title={delTitle} close={delClose} deleteConfirm={deleteConfirm} />
     </Box>
   )

@@ -405,7 +405,6 @@ const GenderTable = () => {
           </CardContent>
         </Card>
       )}
-      <ToastContainer />
       <DeleteConformPopup open={delOpen} title={delTitle} close={delClose} deleteConfirm={deleteConfirm} />
       <AddGenderPopup
         open={open}

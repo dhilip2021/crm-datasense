@@ -137,9 +137,9 @@ const UserDropdown = () => {
                     <i className='ri-user-3-line' />
                     <Typography color='text.primary'>My Profile</Typography>
                   </MenuItem>
-                   <MenuItem className='gap-3' onClick={e => handleDropdownClose(e, '/change-password')}>
+                  <MenuItem className='gap-3' onClick={e => handleDropdownClose(e, '/change-password')}>
                     <i className='ri-user-3-line' />
-                    <Typography color='text.primary'>Change Password</Typography>
+                    <Typography color='text.primary'>Change Password </Typography>
                   </MenuItem>
                   <MenuItem className='gap-3' onClick={e => handleDropdownClose(e)}>
                     <i className='ri-settings-4-line' />
@@ -154,13 +154,41 @@ const UserDropdown = () => {
                     <Typography color='text.primary'>FAQ</Typography>
                   </MenuItem>
                   <div className='flex items-center plb-2 pli-4'>
-                    <Button
+                    {/* <Button
                       fullWidth
                       variant='contained'
                       color='error'
                       size='small'
                       endIcon={<i className='ri-logout-box-r-line' />}
                       onClick={e => handleDropdownClose(e, '/login')}
+                      sx={{ '& .MuiButton-endIcon': { marginInlineStart: 1.5 } }}
+                    >
+                      Logout
+                    </Button> */}
+                    <Button
+                      fullWidth
+                      variant='contained'
+                      color='error'
+                      size='small'
+                      endIcon={<i className='ri-logout-box-r-line' />}
+                      onClick={() => {
+                        // clear cookies immediately
+                        Cookies.remove('riho_token')
+                        Cookies.remove('_token')
+                        Cookies.remove('_token_expiry')
+                        Cookies.remove('privileges')
+                        Cookies.remove('role_id')
+                        Cookies.remove('role_name')
+                        Cookies.remove('user_name')
+                        Cookies.remove('organization_id')
+                        Cookies.remove('organization_name')
+                        Cookies.remove('user_id')
+                        Cookies.remove('c_version')
+                        Cookies.remove('endedAt')
+
+                        // instant redirect
+                        router.replace('/login') // 🔥 instant without history back
+                      }}
                       sx={{ '& .MuiButton-endIcon': { marginInlineStart: 1.5 } }}
                     >
                       Logout

@@ -196,7 +196,6 @@ const PermissionView = () => {
           </Grid>
         </CardContent>
       </Form>
-      <ToastContainer position='top-right' />
 
       {/* Modal for c_menu_privileges */}
       <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth='sm'>

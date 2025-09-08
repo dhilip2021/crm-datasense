@@ -347,7 +347,6 @@ const CardNotes = () => {
           loader={loader}
         />
       </Box>
-      <ToastContainer />
     </Box>
   )
 }

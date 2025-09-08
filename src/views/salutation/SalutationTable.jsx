@@ -405,7 +405,6 @@ const SalutationTable = () => {
           </CardContent>
         </Card>
       )}
-      <ToastContainer />
       <DeleteConformPopup open={delOpen} title={delTitle} close={delClose} deleteConfirm={deleteConfirm} />
       <AddSalutationPopup
         open={open}
