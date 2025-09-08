@@ -20,6 +20,7 @@ import StatusFiled from './StatusFiled'
 import OpenActivities from './OpenActivities'
 import Image from 'next/image'
 import LoaderGif from '@assets/gif/loader.gif'
+import Link from 'next/link'
 
 const LeadDetailView = () => {
   const params = useParams()
@@ -68,7 +69,7 @@ const LeadDetailView = () => {
           })
         })
       })
-      console.log(config,"<<< Config")
+      console.log(config, '<<< Config')
       setFieldConfig(config)
     }
     setLoader(false)
@@ -222,31 +223,52 @@ const LeadDetailView = () => {
     }
   }
 
- if (loader) {
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100vh", // full screen center
-        width: "100vw",
-        bgcolor: "rgba(255, 255, 255, 0.7)", // semi-transparent overlay
-        position: "fixed",
-        top: 0,
-        left: 0,
-        zIndex: 1300, // above all dialogs
-      }}
-    >
-        <Image src={LoaderGif} alt="loading" width={200} height={200} />
-       
-    </Box>
-  );
-}
-
+  if (loader) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh', // full screen center
+          width: '100vw',
+          bgcolor: 'rgba(255, 255, 255, 0.7)', // semi-transparent overlay
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          zIndex: 1300 // above all dialogs
+        }}
+      >
+        <Image src={LoaderGif} alt='loading' width={200} height={200} />
+      </Box>
+    )
+  }
 
   if (!leadData) {
-    return <Typography>No lead found</Typography>
+    return (
+      <Card
+        sx={{
+          p: 4,
+          textAlign: 'center',
+          bgcolor: '#fafafa',
+          border: '1px dashed #ccc',
+          borderRadius: 3,
+          mt: 3
+        }}
+      >
+        <Typography variant='h6' color='text.secondary' gutterBottom>
+          📝 No lead found
+        </Typography>
+        <Typography variant='body2' color='text.disabled' mb={2}>
+          Start by adding your lead
+        </Typography>
+        <Link underline='hover' color='inherit' href='/app/lead-form'>
+          <Button variant='contained' size='small'>
+            + Create New Lead
+          </Button>
+        </Link>
+      </Card>
+    )
   }
 
   const fields = leadData.values
