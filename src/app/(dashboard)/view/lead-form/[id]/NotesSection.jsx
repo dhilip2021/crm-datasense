@@ -54,14 +54,14 @@ const NotesSection = ({ leadId, leadData }) => {
   const saveRef = useRef(null)
 
   // Focus title when modal opens
-useEffect(() => {
-  if (open) {
-    const timer = setTimeout(() => {
-      titleRef.current?.focus()
-    }, 100) // 100ms delay so Dialog content mounts
-    return () => clearTimeout(timer)
-  }
-}, [open])
+  useEffect(() => {
+    if (open) {
+      const timer = setTimeout(() => {
+        titleRef.current?.focus()
+      }, 100) // 100ms delay so Dialog content mounts
+      return () => clearTimeout(timer)
+    }
+  }, [open])
 
   const handleChange = e => {
     const { name, value } = e.target
@@ -82,7 +82,6 @@ useEffect(() => {
     setNoteError(false)
     if (titleRef.current) titleRef.current.focus()
   }
-
 
   const handleSave = async () => {
     if (note === '') {
@@ -120,14 +119,41 @@ useEffect(() => {
 
       if (result.success) {
         if (editingNote) {
-          toast.success('Note updated successfully', { autoClose: 800, position: 'bottom-center' })
+          toast.success('Note updated successfully', {
+            autoClose: 500, // 1 second la close
+            position: 'bottom-center',
+            hideProgressBar: true, // progress bar venam na
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: false,
+            progress: undefined
+          })
           setNotes(prev => prev.map(n => (n._id === editingNote._id ? { ...n, title, note } : n)))
         } else {
-          toast.success('Note added successfully', { autoClose: 800, position: 'bottom-center' })
-          setNotes(prev => [notePayload, ...prev])
+          toast.success('Note added successfully', {
+            autoClose: 500, // 1 second la close
+            position: 'bottom-center',
+            hideProgressBar: true, // progress bar venam na
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: false,
+            progress: undefined
+          })
+          const notes = result?.data?.values?.Notes
+          const lastNote = notes?.[notes.length - 1]
+
+          setNotes(prev => [lastNote, ...prev])
         }
       } else {
-        toast.error(result.error || 'Error saving note', { autoClose: 800, position: 'bottom-center' })
+        toast.error(result.error || 'Error saving note', {
+          autoClose: 500, // 1 second la close
+          position: 'bottom-center',
+          hideProgressBar: true, // progress bar venam na
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined
+        })
       }
 
       handleClear()
@@ -148,23 +174,25 @@ useEffect(() => {
             <Typography variant='h6' fontWeight='bold'>
               Notes
             </Typography>
-            <Button
-              variant='contained'
-              size='small'
-              onClick={e => {
-                e.stopPropagation()
-                setOpen(true)
-                handleClear()
-              }}
-              sx={{ marginRight: '20px' }}
-            >
-              + Create Note
-            </Button>
+            {Array.isArray(notes) && notes?.length > 0 && (
+              <Button
+                variant='contained'
+                size='small'
+                onClick={e => {
+                  e.stopPropagation()
+                  setOpen(true)
+                  handleClear()
+                }}
+                sx={{ marginRight: '20px' }}
+              >
+                + Create Note
+              </Button>
+            )}
           </Box>
         </AccordionSummary>
 
         <AccordionDetails>
-          {Array.isArray(notes) &&
+          {Array.isArray(notes) && notes?.length > 0 ? (
             notes.map((n, i) => (
               <Card
                 key={i}
@@ -200,8 +228,8 @@ useEffect(() => {
                         const year = d.getFullYear()
                         return `${day}-${month}-${year}`
                       })()}
-                      • ⏰ {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{' '}
-                      by <b>👤 {n.createdBy}</b>
+                      • ⏰ {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} by{' '}
+                      <b>👤 {n.createdBy}</b>
                     </Typography>
 
                     {/* Optional status / priority chips for visual consistency with tasks */}
@@ -245,26 +273,47 @@ useEffect(() => {
                   </Box>
                 </Box>
               </Card>
-            ))}
+            ))
+          ) : (
+            <Card
+              sx={{
+                p: 4,
+                textAlign: 'center',
+                bgcolor: '#fafafa',
+                border: '1px dashed #ccc',
+                borderRadius: 3,
+                mt: 3
+              }}
+            >
+              <Typography variant='h6' color='text.secondary' gutterBottom>
+                📝 No Notes Found
+              </Typography>
+              <Typography variant='body2' color='text.disabled' mb={2}>
+                Start by adding your first note for this lead.
+              </Typography>
+              <Button variant='contained' size='small' onClick={() => setOpen(true)}>
+                + Create Note
+              </Button>
+            </Card>
+          )}
         </AccordionDetails>
       </Accordion>
 
       {/* 🔹 Modal */}
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='sm'>
         <DialogTitle>
-          <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"}>
+          <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
             {editingNote ? 'Edit Note' : 'Create New Note'}
-          <IconButton
-            onClick={() => {
-              setOpen(false)
-              setEditingNote(null)
-              handleClear()
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
+            <IconButton
+              onClick={() => {
+                setOpen(false)
+                setEditingNote(null)
+                handleClear()
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
           </Box>
-          
         </DialogTitle>
 
         <DialogContent>
@@ -272,7 +321,7 @@ useEffect(() => {
             placeholder='Title'
             variant='standard'
             fullWidth
-            autoFocus 
+            autoFocus
             inputRef={titleRef}
             value={title}
             onChange={handleChange}

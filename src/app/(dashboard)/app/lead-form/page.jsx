@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  Autocomplete,
   Box,
   Button,
   Card,
@@ -449,38 +450,61 @@ function LeadFormAppPage() {
       case 'Multi-Line':
         return <TextField id={field.id} {...commonProps} multiline minRows={field.rows || 3} />
 
-      case 'Phone':
-        return (
-          <TextField
-            id={field.id}
-            {...commonProps}
-            value={values[`${field.id}_number`] || ''}
-            onChange={e => handleChange(`${field.id}_number`, e.target.value, field.type)}
-            type='tel'
-            inputProps={{ maxLength: field.maxLength }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <Select
-                    value={values[`${field.id}_countryCode`] || field.countryCode || '+91'}
-                    onChange={e => handleChange(`${field.id}_countryCode`, e.target.value, field.type)}
-                    size='small'
-                    sx={{
-                      '.MuiOutlinedInput-notchedOutline': { border: 'none' },
-                      '.MuiSelect-select': { padding: '4px 8px', minWidth: '60px' }
-                    }}
-                  >
-                    {countryCodes.map(country => (
-                      <MenuItem key={country.code} value={country.dial_code}>
-                        {country.code} {country.dial_code}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </InputAdornment>
-              )
-            }}
-          />
+     case 'Phone':
+  return (
+    <TextField
+      id={field.id}
+      {...commonProps}
+      value={values[`${field.id}_number`] || ''}
+      onChange={e => handleChange(`${field.id}_number`, e.target.value, field.type)}
+      type="tel"
+      inputProps={{ maxLength: field.maxLength }}
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">
+            <Autocomplete
+  options={countryCodes}
+  getOptionLabel={(option) =>
+    typeof option === 'string'
+      ? option
+      : `${option.code} ${option.dial_code}`
+  }
+  freeSolo   // ✅ allows typing custom values
+  value={
+    countryCodes.find(
+      (c) =>
+        c.dial_code ===
+        (values[`${field.id}_countryCode`] || field.countryCode || '+91')
+    ) || values[`${field.id}_countryCode`] || ''
+  }
+  onChange={(_, newValue) => {
+    if (typeof newValue === 'string') {
+      handleChange(`${field.id}_countryCode`, newValue, field.type);
+    } else if (newValue && 'dial_code' in newValue) {
+      handleChange(`${field.id}_countryCode`, newValue.dial_code, field.type);
+    } else {
+      handleChange(`${field.id}_countryCode`, '', field.type);
+    }
+  }}
+  size="small"
+  sx={{ minWidth: 120 }}
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      variant="standard"
+      placeholder="+91"
+      InputProps={{
+        ...params.InputProps,
+        disableUnderline: true,
+      }}
+    />
+  )}
+/>
+          </InputAdornment>
         )
+      }}
+    />
+  )
 
       case 'Email':
         return <TextField id={field.id} {...commonProps} type='email' />
