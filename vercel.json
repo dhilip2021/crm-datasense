@@ -1,12 +1,6 @@
 {
-
   "crons": [
-    {
-      "path": "/api/reminder",
-      "schedule": "every 5 minutes"
-    }
+    { "path": "api/cron/reminder?organization_id=a420ed6cacae", "schedule": "every 1 minutes" },
+    { "path": "api/cron/reminder?organization_id=47b79a7f2d6f", "schedule": "every 1 minutes" }
   ]
-
 }
-
-
