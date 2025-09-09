@@ -92,13 +92,15 @@ const NotesSection = ({ leadId, leadData }) => {
   const handleSave = async () => {
     if (note === '' || hasInitialSpace(note) || !note.trim()) {
       setNoteError(true)
+      noteRef.current?.focus() 
       return
     }
 
-    // if (title === '' || hasInitialSpace(title)) {
-    //   setTitleError(true)
-    //   return
-    // }
+  //    if (title === '' || hasInitialSpace(title)) {
+  //   setTitleError(true)
+  //   titleRef.current?.focus()  // 🚀 error vandha title field ku focus
+  //   return
+  // }
 
     try {
       const notePayload = {
@@ -336,8 +338,7 @@ const NotesSection = ({ leadId, leadData }) => {
             placeholder='Title'
             variant='standard'
             fullWidth
-            autoFocus
-            inputRef={titleRef}
+            // inputRef={titleRef}
             value={title}
             onChange={handleChange}
             name='title'
@@ -352,7 +353,8 @@ const NotesSection = ({ leadId, leadData }) => {
             }}
           />
           <TextField
-            placeholder="What's this note about?"
+            autoFocus
+            placeholder="What's this note about? *"
             multiline
             rows={4}
             fullWidth
@@ -362,15 +364,12 @@ const NotesSection = ({ leadId, leadData }) => {
             name='note'
             error={noteError}
             helperText={noteError && 'Please enter notes'}
-            // onKeyDown={e => {
-            //   if (e.key === 'Enter' && !e.shiftKey) {
-            //     e.preventDefault()
-            //     saveRef.current?.focus()
-            //   }
-            // }}
             onKeyDown={e => {
               if (e.key === ' ' && note.length === 0) {
                 e.preventDefault() // 🚫 block first space typing
+              } else if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault()
+                saveRef.current?.focus() // ✅ correct ref
               }
             }}
           />
@@ -388,7 +387,7 @@ const NotesSection = ({ leadId, leadData }) => {
           <Button onClick={handleClear} disabled={loader}>
             Clear
           </Button>
-          <Button variant='contained' onClick={handleSave} disabled={loader}>
+          <Button ref={saveRef} variant='contained' onClick={handleSave} disabled={loader}>
             {loader ? 'Saving...' : editingNote ? 'Update' : 'Save'}
           </Button>
         </DialogActions>
