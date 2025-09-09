@@ -4,32 +4,30 @@ import { Box, Typography, Chip, Stack } from '@mui/material'
 import dayjs from 'dayjs'
 
 const TaskList = ({ tasks }) => {
-    console.log(tasks,"<<< TASKSSS")
+  console.log(tasks, '<<< TASKSSS')
   return (
     <Box display='grid' gap={2}>
       {tasks.map((t, i) => (
-        <Box
-          key={i}
-          mb={1.5}
-          p={1.5}
-          border='1px solid #ddd'
-          borderRadius={2}
-          bgcolor='#fff'
-        >
+        <Box key={i} mb={1.5} p={1.5} border='1px solid #ddd' borderRadius={2} bgcolor='#fff'>
           {/* Title */}
           <Typography fontWeight='bold' color='primary'>
-            {t.title}
+            {t.subject}
           </Typography>
 
           {/* Due Date */}
           <Typography variant='body2' color='text.secondary' mb={0.5}>
-            📅 Due Date: {t.date} {t.time && `• ⏰ ${t.time}`}
+            📅 Due Date: 📅 {dayjs(t.dueDate).format('DD MMM YYYY')}
           </Typography>
 
           {/* Reminder DateTime */}
-          {t.reminderDateTime && (
+          {t.reminderDate && (
             <Typography variant='body2' color='secondary' mb={0.5}>
-              🔔 Reminder: 📅 { dayjs(t.reminderDateTime).format('DD MMM YYYY')}
+              🔔 Reminder Date: 📅 {dayjs(t.reminderDate).format('DD MMM YYYY')}
+            </Typography>
+          )}
+          {t.reminderTime && (
+            <Typography variant='body2' color='secondary' mb={0.5}>
+              🔔 Reminder Time: {dayjs(`1970-01-01T${t.reminderTime}`).format('hh:mm A')}
             </Typography>
           )}
 
@@ -45,23 +43,14 @@ const TaskList = ({ tasks }) => {
               size='small'
               sx={{
                 bgcolor:
-                  t.status === 'Completed'
-                    ? 'success.light'
-                    : t.status === 'In Progress'
-                    ? 'warning.light'
-                    : 'grey.300'
+                  t.status === 'Completed' ? 'success.light' : t.status === 'In Progress' ? 'warning.light' : 'grey.300'
               }}
             />
             <Chip
               label={`Priority: ${t.priority}`}
               size='small'
               sx={{
-                bgcolor:
-                  t.priority === 'High'
-                    ? 'error.light'
-                    : t.priority === 'Low'
-                    ? 'info.light'
-                    : 'grey.200'
+                bgcolor: t.priority === 'High' ? 'error.light' : t.priority === 'Low' ? 'info.light' : 'grey.200'
               }}
             />
           </Stack>

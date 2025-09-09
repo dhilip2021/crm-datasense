@@ -77,30 +77,31 @@ export default function OpenActivities({ leadId, leadData }) {
   const sortedTasks = [...leadArrayTasks]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .map(t => {
-      let reminderDateTime = ''
-      let reminderDateFormatted = ''
-      let reminderTimeFormatted = ''
+      // let reminderDateTime = ''
+      // let reminderDateFormatted = ''
+      // let reminderTimeFormatted = ''
 
-      if (t.reminderDate && t.reminderTime) {
-        // Combine reminderDate + reminderTime into a full datetime
-        const reminderDateTimeObj = new Date(`${t.reminderDate.split('T')[0]}T${t.reminderTime}:00`)
-        reminderDateFormatted = reminderDateTimeObj.toLocaleDateString()
-        reminderTimeFormatted = reminderDateTimeObj.toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit'
-        })
-        reminderDateTime = reminderDateTimeObj
-      }
+      // if (t.reminderDate && t.reminderTime) {
+      //   const reminderDateTimeObj = new Date(`${t.reminderDate.split('T')[0]}T${t.reminderTime}:00`)
+      //   reminderDateFormatted = reminderDateTimeObj.toLocaleDateString()
+      //   reminderTimeFormatted = reminderDateTimeObj.toLocaleTimeString([], {
+      //     hour: '2-digit',
+      //     minute: '2-digit'
+      //   })
+      //   reminderDateTime = reminderDateTimeObj
+      // }
 
       return {
         type: 'Task',
-        title: t.subject || 'Untitled Task',
-        date: reminderDateFormatted, // ✅ Using reminderDate
-        time: reminderTimeFormatted, // ✅ Using reminderTime
-        owner: t.owner || 'Unknown',
-        status: t.status || 'Not Started',
+        subject: t.subject || 'Untitled Task',
+        dueDate: t.dueDate, // ✅ Using reminderDate
         priority: t.priority || 'Medium',
-        reminderDateTime // keep raw Date object if needed
+        status: t.status || 'Not Started',
+        owner: t.owner || 'Unknown',
+        reminderEnabled: t.reminderEnabled,
+        reminderDate: t.reminderDate,
+        reminderTime: t.reminderTime, // ✅ Using reminderTime
+        alertType: t.alertType // keep raw Date object if needed
       }
     })
 
@@ -122,6 +123,7 @@ export default function OpenActivities({ leadId, leadData }) {
 
   // inside component:
   const [taskData, setTaskData] = useState({
+    _id: '',
     subject: '',
     dueDate: '',
     priority: 'High',
@@ -243,28 +245,35 @@ export default function OpenActivities({ leadId, leadData }) {
 
         // Last task
         const lastTask = tasks.length > 0 ? tasks[tasks.length - 1] : null
+              console.log(lastTask,"<<< LAST TASKKKK")
 
-        let reminderDateFormatted = ''
-        let reminderTimeFormatted = ''
+        // let reminderDateFormatted = ''
+        // let reminderTimeFormatted = ''
 
-        if (lastTask.reminderDate && lastTask.reminderTime) {
-          const reminderDateTimeObj = new Date(`${lastTask.reminderDate.split('T')[0]}T${lastTask.reminderTime}:00`)
-          reminderDateFormatted = reminderDateTimeObj.toLocaleDateString()
-          reminderTimeFormatted = reminderDateTimeObj.toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit'
-          })
-        }
+        // if (lastTask.reminderDate && lastTask.reminderTime) {
+        //   const reminderDateTimeObj = new Date(`${lastTask.reminderDate.split('T')[0]}T${lastTask.reminderTime}:00`)
+        //   reminderDateFormatted = reminderDateTimeObj.toLocaleDateString()
+        //   reminderTimeFormatted = reminderDateTimeObj.toLocaleTimeString([], {
+        //     hour: '2-digit',
+        //     minute: '2-digit'
+        //   })
+        // }
 
         const formattedTask = {
           type: 'Task',
-          title: lastTask.subject || 'Untitled Task',
-          date: reminderDateFormatted, // ✅ reminderDate use pannom
-          time: reminderTimeFormatted, // ✅ reminderTime use pannom
-          owner: lastTask.owner || 'Unknown',
+          subject: lastTask.subject || 'Untitled Task',
+          dueDate: lastTask.dueDate, // ✅ Using reminderDate
+          priority: lastTask.priority || 'Medium',
           status: lastTask.status || 'Not Started',
-          priority: lastTask.priority || 'Medium'
+          owner: lastTask.owner || 'Unknown',
+          reminderEnabled: lastTask.reminderEnabled,
+          reminderDate: lastTask.reminderDate,
+          reminderTime: lastTask.reminderTime, // ✅ Using reminderTime
+          alertType: lastTask.alertType // keep raw Date object if needed
         }
+
+
+  
 
         setTasks(prev => [formattedTask, ...prev])
 
@@ -648,11 +657,11 @@ export default function OpenActivities({ leadId, leadData }) {
                   <Typography fontWeight='bold'>Open Calls ({calls.length})</Typography>
                   <Divider sx={{ my: 1 }} />
 
-                  {calls.map((c, i) => (
+                  {Array.isArray(calls) && calls.map((c, i) => (
                     <Box key={i} mb={1.5} p={1.5} border='1px solid #ddd' borderRadius={2} bgcolor='#fff'>
                       {/* Title */}
                       <Typography fontWeight='bold' color='primary'>
-                        {c.title}
+                        {c.subject}
                       </Typography>
 
                       {/* Date + Time */}
@@ -683,11 +692,11 @@ export default function OpenActivities({ leadId, leadData }) {
                   <Typography fontWeight='bold'>Open Meetings ({meetings.length})</Typography>
                   <Divider sx={{ my: 1 }} />
 
-                  {meetings.map((m, i) => (
+                  {Array.isArray(meetings) && meetings.map((m, i) => (
                     <Box key={i} mb={1.5} p={1.5} border='1px solid #ddd' borderRadius={2} bgcolor='#fff'>
                       {/* Title */}
                       <Typography fontWeight='bold' color='primary'>
-                        {m.title}
+                        {m.subject}
                       </Typography>
 
                       {/* Date + Time */}
@@ -736,10 +745,10 @@ export default function OpenActivities({ leadId, leadData }) {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {tasks.map((t, i) => (
+                      {Array.isArray(tasks) && tasks.map((t, i) => (
                         <TableRow key={i}>
                           <TableCell>
-                            <Typography color='primary'>{t.title}</Typography>
+                            <Typography color='primary'>{t.subject}</Typography>
                           </TableCell>
                           <TableCell>{t.date}</TableCell>
                           <TableCell>{t.owner}</TableCell>
@@ -761,10 +770,10 @@ export default function OpenActivities({ leadId, leadData }) {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {meetings.map((m, i) => (
+                      { Array.isArray(meetings) && meetings.map((m, i) => (
                         <TableRow key={i}>
                           <TableCell>
-                            <Typography color='primary'>{m.title}</Typography>
+                            <Typography color='primary'>{m.subject}</Typography>
                           </TableCell>
                           <TableCell>
                             {m.date} {m.time}
@@ -788,10 +797,10 @@ export default function OpenActivities({ leadId, leadData }) {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {calls.map((c, i) => (
+                      {Array.isArray(calls) && calls.map((c, i) => (
                         <TableRow key={i}>
                           <TableCell>
-                            <Typography color='primary'>{c.title}</Typography>
+                            <Typography color='primary'>{c.subject}</Typography>
                           </TableCell>
                           <TableCell>
                             {c.date} {c.time}
@@ -821,7 +830,7 @@ export default function OpenActivities({ leadId, leadData }) {
                   {allActivities.map((a, i) => (
                     <TableRow key={i}>
                       <TableCell>
-                        <Typography color='primary'>{a.title}</Typography>
+                        <Typography color='primary'>{a.subject}</Typography>
                         {a.type === 'Call' && (
                           <Typography variant='body2'>
                             Call Purpose : {a.purpose} | Call Agenda : {a.agenda}

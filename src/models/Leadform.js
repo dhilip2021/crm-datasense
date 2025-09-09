@@ -17,6 +17,7 @@ const TaskSchema = new mongoose.Schema(
     subject: { type: String, default: null },
     dueDate: { type: Date, default: null },
     priority: { type: String, default: null },
+    status: { type: String, default: null },
     owner: { type: String, default: null },
     reminderEnabled: { type: Boolean, default: false },
     reminderDate: { type: Date, default: null },
