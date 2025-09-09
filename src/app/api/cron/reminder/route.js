@@ -29,6 +29,7 @@ export async function GET(req) {
   }).lean()
 
   let dueReminders = []
+  let checkDateTime = {}
 
   leads.forEach(lead => {
     const tasks = lead.values?.Activity?.[0]?.task || []
@@ -49,7 +50,7 @@ export async function GET(req) {
         console.log(reminderTimeStr, '<<< reminderTimeStr')
         console.log(nowTime, '<<< nowTime')
 
-        const checkDateTime = {
+        checkDateTime = {
             reminderDateStr:reminderDateStr,
             nowDate:nowDate,
             reminderTimeStr:reminderTimeStr,
