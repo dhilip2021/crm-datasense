@@ -49,6 +49,13 @@ export async function GET(req) {
         console.log(reminderTimeStr, '<<< reminderTimeStr')
         console.log(nowTime, '<<< nowTime')
 
+        checkDateTime = {
+            reminderDateStr:reminderDateStr,
+            nowDate:nowDate,
+            reminderTimeStr:reminderTimeStr,
+            nowTime:nowTime,
+        }
+
         if (reminderDateStr === nowDate && reminderTimeStr === nowTime) {
           dueReminders.push({
             lead_id: lead.lead_id,
@@ -68,6 +75,7 @@ export async function GET(req) {
   return NextResponse.json({
     success: true,
     dueReminders,
+    checkDateTime,
     checkedAt: nowIST.toISO() // ISO string in IST
   })
 }
