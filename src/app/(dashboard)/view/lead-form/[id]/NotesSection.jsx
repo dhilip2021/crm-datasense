@@ -85,15 +85,20 @@ const NotesSection = ({ leadId, leadData }) => {
     if (titleRef.current) titleRef.current.focus()
   }
 
+  function hasInitialSpace(str = '') {
+    return str.length > 0 && str[0] === ' '
+  }
+
   const handleSave = async () => {
-    if (note === '') {
+    if (note === '' || hasInitialSpace(note) || !note.trim()) {
       setNoteError(true)
       return
     }
-    if (title === '') {
-      setTitleError(true)
-      return
-    }
+
+    // if (title === '' || hasInitialSpace(title)) {
+    //   setTitleError(true)
+    //   return
+    // }
 
     try {
       const notePayload = {
@@ -165,14 +170,14 @@ const NotesSection = ({ leadId, leadData }) => {
       setOpen(false)
       setLoader(false)
       toast.error('Error while saving note', {
-          autoClose: 500, // 1 second la close
-          position: 'bottom-center',
-          hideProgressBar: true, // progress bar venam na
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: false,
-          progress: undefined
-        })
+        autoClose: 500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
     }
   }
 
@@ -222,7 +227,7 @@ const NotesSection = ({ leadId, leadData }) => {
                   <Box flex={1}>
                     {/* Title */}
                     <Typography fontWeight='bold' color='primary'>
-                      {n.title || 'Untitled Note'}
+                      {n.title || ''}
                     </Typography>
 
                     {/* Note content */}
@@ -357,10 +362,15 @@ const NotesSection = ({ leadId, leadData }) => {
             name='note'
             error={noteError}
             helperText={noteError && 'Please enter notes'}
+            // onKeyDown={e => {
+            //   if (e.key === 'Enter' && !e.shiftKey) {
+            //     e.preventDefault()
+            //     saveRef.current?.focus()
+            //   }
+            // }}
             onKeyDown={e => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault()
-                saveRef.current?.focus()
+              if (e.key === ' ' && note.length === 0) {
+                e.preventDefault() // 🚫 block first space typing
               }
             }}
           />
@@ -383,7 +393,7 @@ const NotesSection = ({ leadId, leadData }) => {
           </Button>
         </DialogActions>
       </Dialog>
-       <ToastContainer
+      <ToastContainer
         position='bottom-center'
         autoClose={500} // all toasts auto close
         hideProgressBar
