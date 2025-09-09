@@ -18,6 +18,7 @@ export default function ReminderAlert() {
     typeof Audio !== 'undefined' ? new Audio('/sounds/reminder.mp3') : null
   )
 
+  
   useEffect(() => {
     const fetchReminders = async () => {
       try {
