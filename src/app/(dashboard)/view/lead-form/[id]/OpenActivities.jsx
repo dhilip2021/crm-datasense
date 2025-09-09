@@ -245,7 +245,6 @@ export default function OpenActivities({ leadId, leadData }) {
 
         // Last task
         const lastTask = tasks.length > 0 ? tasks[tasks.length - 1] : null
-              console.log(lastTask,"<<< LAST TASKKKK")
 
         // let reminderDateFormatted = ''
         // let reminderTimeFormatted = ''
@@ -293,7 +292,6 @@ export default function OpenActivities({ leadId, leadData }) {
         })
       }
 
-      console.log(result, '<<< result DATAAAA')
     } catch (err) {
       console.error('Error saving task:', err)
       alert('❌ Failed to create task')
@@ -859,6 +857,8 @@ export default function OpenActivities({ leadId, leadData }) {
           </Card>
         </Box>
       </Card>
+      
+
     </LocalizationProvider>
   )
 }

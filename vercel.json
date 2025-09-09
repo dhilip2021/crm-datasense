@@ -1,0 +1,12 @@
+{
+
+  "crons": [
+    {
+      "path": "/api/reminder",
+      "schedule": "every 5 minutes"
+    }
+  ]
+
+}
+
+

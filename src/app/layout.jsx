@@ -14,6 +14,7 @@ import 'remixicon/fonts/remixicon.css'
 import 'react-toastify/dist/ReactToastify.css';
 import { ReduxProvider } from './providers';
 import { ToastContainer } from 'react-toastify';
+import ReminderAlert from './(dashboard)/view/lead-form/[id]/ReminderAlert';
 
 export const metadata = {
   title: 'CRM Admin - Datasense Technologies',
@@ -44,6 +45,7 @@ const RootLayout = ({ children }) => {
         pauseOnHover={false}
         draggable={false}
       />
+      <ReminderAlert />
         </ReduxProvider>
       </body>
     </html>

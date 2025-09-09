@@ -45,7 +45,6 @@ const getLeadStatusColor = status => {
 
 const StatusFiled = ({ label, value, options = [], onSave }) => {
 
-  console.log(options,"<<< OPTIONDSDSSSSSS")
 
   const handleChange = e => {
     if (onSave) onSave(e.target.value)
