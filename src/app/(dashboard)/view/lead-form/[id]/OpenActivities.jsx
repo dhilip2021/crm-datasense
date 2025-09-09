@@ -501,14 +501,19 @@ export default function OpenActivities({ leadId, leadData }) {
                             />
                           </Grid>
                           <Grid item xs={12} sm={6}>
-                            <TimePicker
-                              label='Reminder Time'
-                              value={taskData.reminderTime ? dayjs(taskData.reminderTime, 'HH:mm') : null}
-                              onChange={newValue =>
-                                handleChange('reminderTime', newValue ? newValue.format('HH:mm') : '')
-                              }
-                              minTime={dayjs()} // 🚀 disallow past times (only works if date = today)
-                            />
+                           <TimePicker
+  label='Reminder Time'
+  value={
+    taskData.reminderTime
+      ? dayjs(taskData.reminderTime, 'HH:mm')
+      : dayjs().hour(16).minute(0) // 🟢 default 04:00 PM
+  }
+  onChange={newValue =>
+    handleChange('reminderTime', newValue ? newValue.format('HH:mm') : '')
+  }
+  minTime={taskData.reminderDate && dayjs(taskData.reminderDate).isSame(dayjs(), 'day') ? dayjs() : null}
+/>
+                           
                           </Grid>
 
                           <Grid item xs={12}>
