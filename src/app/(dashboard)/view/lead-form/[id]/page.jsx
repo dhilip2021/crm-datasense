@@ -17,10 +17,10 @@ import TaskSection from './TaskSection'
 import LeadCard from './LeadCard'
 import EventIcon from '@mui/icons-material/Event'
 import StatusFiled from './StatusFiled'
-import OpenActivities from './OpenActivities'
 import Image from 'next/image'
 import LoaderGif from '@assets/gif/loader.gif'
 import Link from 'next/link'
+import OpenActivities from './OpenActivities'
 
 const LeadDetailView = () => {
   const params = useParams()
