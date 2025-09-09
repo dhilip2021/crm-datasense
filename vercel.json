@@ -1,5 +1,0 @@
-{
-  "crons": [
-    { "path": "/api/cron/reminder?organization_id=a420ed6cacae", "schedule": "every 1 minutes" }
-  ]
-}
