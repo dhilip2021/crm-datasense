@@ -49,7 +49,7 @@ export async function GET(req) {
         console.log(reminderTimeStr, '<<< reminderTimeStr')
         console.log(nowTime, '<<< nowTime')
 
-        checkDateTime = {
+        const checkDateTime = {
             reminderDateStr:reminderDateStr,
             nowDate:nowDate,
             reminderTimeStr:reminderTimeStr,
