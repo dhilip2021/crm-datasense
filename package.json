@@ -45,6 +45,7 @@
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",
     "libphonenumber-js": "^1.12.13",
+    "luxon": "^3.7.2",
     "mdi-material-ui": "^7.9.4",
     "mongoose": "^8.14.1",
     "next": "^14.2.3",
