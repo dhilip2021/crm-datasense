@@ -92,15 +92,15 @@ const NotesSection = ({ leadId, leadData }) => {
   const handleSave = async () => {
     if (note === '' || hasInitialSpace(note) || !note.trim()) {
       setNoteError(true)
-      noteRef.current?.focus() 
+      noteRef.current?.focus()
       return
     }
 
-  //    if (title === '' || hasInitialSpace(title)) {
-  //   setTitleError(true)
-  //   titleRef.current?.focus()  // 🚀 error vandha title field ku focus
-  //   return
-  // }
+    //    if (title === '' || hasInitialSpace(title)) {
+    //   setTitleError(true)
+    //   titleRef.current?.focus()  // 🚀 error vandha title field ku focus
+    //   return
+    // }
 
     try {
       const notePayload = {
@@ -233,7 +233,7 @@ const NotesSection = ({ leadId, leadData }) => {
                     </Typography>
 
                     {/* Note content */}
-                    <Typography sx={{ mt: 0.5 }}>{n.note}</Typography>
+                    <Typography sx={{ mt: 0.5, whiteSpace: 'pre-line' }}>{n.note}</Typography>
 
                     {/* Metadata */}
                     <Typography variant='caption' color='text.secondary' display='block' mt={1}>
