@@ -58,13 +58,19 @@ const LeadTable = () => {
 
   const [anchorPdfEl, setAnchorPdfEl] = useState(null)
   const [selectedPdfFields, setSelectedPdfFields] = useState([])
-  const dynamicPdfFields = data.length > 0 ? Object.keys(data[0].values) : []
-  const fieldsPdf = [...new Set([...dynamicPdfFields])]
+  // const dynamicPdfFields = data.length > 0 ? Object.keys(data[0].values) : []
+  // const fieldsPdf = [...new Set([...dynamicPdfFields])]
 
   const [anchorExcelEl, setAnchorExcelEl] = useState(null)
   const [selectedExcelFields, setSelectedExcelFields] = useState([])
-  const dynamicExcelFields = data.length > 0 ? Object.keys(data[0].values) : []
-  const fieldsExcel = [...new Set([...dynamicPdfFields])]
+  // const dynamicExcelFields = data.length > 0 ? Object.keys(data[0].values) : []
+  // const fieldsExcel = [...new Set([...dynamicPdfFields])]
+
+  const dynamicPdfFields = data.length > 0 && data[0].values ? Object.keys(data[0].values) : []
+  const fieldsPdf = [...new Set([...dynamicPdfFields])]
+
+  const dynamicExcelFields = data.length > 0 && data[0].values ? Object.keys(data[0].values) : []
+  const fieldsExcel = [...new Set([...dynamicExcelFields])]
 
   const [filters, setFilters] = useState({
     status: '',
@@ -342,75 +348,117 @@ const LeadTable = () => {
     return [...new Set(dataFilter.map(item => item.values['Lead Status']))].filter(Boolean)
   }, [dataFilter])
 
-  async function handleUpload(e) {
-    e.preventDefault()
+  // async function handleUpload(e) {
+  //   e.preventDefault()
 
-    if (!selectedFile) {
-      toast.error('Please select a file', {
-        autoClose: 500, // 1 second la close
-        position: 'bottom-center',
-        hideProgressBar: true, // progress bar venam na
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: false,
-        progress: undefined
-      })
-      return
-    }
+  //   if (!selectedFile) {
+  //     toast.error('Please select a file', {
+  //       autoClose: 500, // 1 second la close
+  //       position: 'bottom-center',
+  //       hideProgressBar: true, // progress bar venam na
+  //       closeOnClick: true,
+  //       pauseOnHover: false,
+  //       draggable: false,
+  //       progress: undefined
+  //     })
+  //     return
+  //   }
 
-    const formData = new FormData()
-    formData.append('file', selectedFile)
-    formData.append('organization_id', organization_id)
+  //   const formData = new FormData()
+  //   formData.append('file', selectedFile)
+  //   formData.append('organization_id', organization_id)
 
-    setLoader(true)
+  //   setLoader(true)
 
-    try {
-      const res = await fetch('/api/v1/admin/lead-form/import', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${getToken}` // ✅ only auth header
-        },
-        body: formData
-      })
+  //   try {
+  //     const res = await fetch('/api/v1/admin/lead-form/import', {
+  //       method: 'POST',
+  //       headers: {
+  //         Authorization: `Bearer ${getToken}` // ✅ only auth header
+  //       },
+  //       body: formData
+  //     })
 
-      const data = await res.json()
-      if (data?.success) {
-        toast.success(data.message, {
-          autoClose: 1000, // 1 second la close
-          position: 'bottom-center',
-          hideProgressBar: true, // progress bar venam na
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: false,
-          progress: undefined
-        })
-        fetchData()
-        setFileName('')
-        setSelectedFile(null)
-        document.querySelector('input[name="file"]').value = ''
-      } else {
-        toast.error('File not uploaded !!!', {
-          autoClose: 1000, // 1 second la close
-          position: 'bottom-center',
-          hideProgressBar: true, // progress bar venam na
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: false,
-          progress: undefined
-        })
-        fetchData()
-        setFileName('')
-        setSelectedFile(null)
-      }
-    } catch (err) {
-      console.error(err)
-      setFileName('')
-      setSelectedFile(null)
-      document.querySelector('input[name="file"]').value = ''
-    } finally {
-      setLoader(false)
-    }
+  //     const data = await res.json()
+  //     if (data?.success) {
+  //       toast.success(data.message, {
+  //         autoClose: 1000, // 1 second la close
+  //         position: 'bottom-center',
+  //         hideProgressBar: true, // progress bar venam na
+  //         closeOnClick: true,
+  //         pauseOnHover: false,
+  //         draggable: false,
+  //         progress: undefined
+  //       })
+  //       fetchData()
+  //       setFileName('')
+  //       setSelectedFile(null)
+  //       document.querySelector('input[name="file"]').value = ''
+  //     } else {
+  //       toast.error('File not uploaded !!!', {
+  //         autoClose: 1000, // 1 second la close
+  //         position: 'bottom-center',
+  //         hideProgressBar: true, // progress bar venam na
+  //         closeOnClick: true,
+  //         pauseOnHover: false,
+  //         draggable: false,
+  //         progress: undefined
+  //       })
+  //       fetchData()
+  //       setFileName('')
+  //       setSelectedFile(null)
+  //     }
+  //   } catch (err) {
+  //     console.error(err)
+  //     setFileName('')
+  //     setSelectedFile(null)
+  //     document.querySelector('input[name="file"]').value = ''
+  //   } finally {
+  //     setLoader(false)
+  //   }
+  // }
+
+
+  async function handleUpload(file) {
+  if (!file) {
+    toast.error("Please select a file", { autoClose: 500 });
+    return;
   }
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("organization_id", organization_id);
+
+  setLoader(true);
+
+  try {
+    const res = await fetch("/api/v1/admin/lead-form/import", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${getToken}`, // ✅ only auth header
+      },
+      body: formData,
+    });
+
+    const data = await res.json();
+    if (data?.success) {
+      toast.success(data.message, { autoClose: 1000 });
+      fetchData();
+    } else {
+      toast.error("File not uploaded !!!", { autoClose: 1000 });
+      fetchData();
+    }
+  } catch (err) {
+    console.error(err);
+    toast.error("Something went wrong", { autoClose: 1000 });
+  } finally {
+    setFileName("");
+    setSelectedFile(null);
+    document.querySelector('input[name="file"]').value = "";
+    setLoader(false);
+  }
+}
+
 
   return (
     <Box px={1} py={1}>
@@ -428,7 +476,7 @@ const LeadTable = () => {
                   {/* File Upload */}
                   <Box>
                     {/* Upload Button */}
-                    <Button
+                    {/* <Button
                       component='label'
                       variant='outlined'
                       color='info'
@@ -453,6 +501,38 @@ const LeadTable = () => {
                           if (file) {
                             setSelectedFile(file)
                             setFileName(file.name)
+                          }
+                        }}
+                      />
+                    </Button> */}
+
+                    <Button
+                    type='submit'
+                      component='label'
+                      variant='outlined'
+                      color='info'
+                      fullWidth
+                      startIcon={<CloudUploadIcon />}
+                      sx={{
+                        mb: 2,
+                        py: 1.5,
+                        borderColor: 'grey.300',
+                        fontWeight: '500',
+                        '&:hover': { borderColor: 'primary.main' }
+                      }}
+                    >
+                      {loader ? 'Uploading...' : 'Import Excel/CSV File'}
+                      <input
+                        type='file'
+                        name='file'
+                        accept='.csv, .xlsx'
+                        hidden
+                        onChange={async e => {
+                          const file = e.target.files[0]
+                          if (file) {
+                            setSelectedFile(file)
+                            setFileName(file.name)
+                            handleUpload(file)
                           }
                         }}
                       />
@@ -515,7 +595,7 @@ const LeadTable = () => {
                     </Box>
                   </Box>
 
-                  <Box>
+                  {/* <Box>
                     <Button
                       type='submit'
                       variant='contained'
@@ -526,7 +606,7 @@ const LeadTable = () => {
                     >
                       {loader ? 'Uploading...' : 'Upload & Import'}
                     </Button>
-                  </Box>
+                  </Box> */}
 
                   {/* New Lead Button */}
                   <Box>
@@ -618,8 +698,12 @@ const LeadTable = () => {
               </LocalizationProvider>
             </Grid>
             <Grid item xs={12} sm={2}>
-              <Button  variant='contained' color='success' fullWidth onClick={fetchFilterData} 
-              disabled={Object.values(filters).every(v => !v || v === '')}
+              <Button
+                variant='contained'
+                color='success'
+                fullWidth
+                onClick={fetchFilterData}
+                disabled={Object.values(filters).every(v => !v || v === '')}
               >
                 Apply
               </Button>
@@ -793,8 +877,8 @@ const LeadTable = () => {
                             textOverflow: 'ellipsis'
                           }}
                         >
-                          <Tooltip title={row.values['Company'] || ''} arrow>
-                            {row.values['First Name']}
+                          <Tooltip title={row.values['First Name'] || ''} arrow>
+                            {row.values['First Name'] || ''}
                           </Tooltip>
                         </TableCell>
                         <TableCell
@@ -813,16 +897,16 @@ const LeadTable = () => {
                         <TableCell>{row.values['City']}</TableCell>
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           <Chip
-                            label={row.values['Timeline to Buy'] ? row.values['Timeline to Buy'] : "-"}
+                            label={row.values['Timeline to Buy'] ? row.values['Timeline to Buy'] : '-'}
                             sx={{
                               backgroundColor:
                                 row.values['Timeline to Buy'] == '3–6 Months'
                                   ? '#00FF48'
                                   : row.values['Timeline to Buy'] == '6+ Months'
                                     ? '#FF8800'
-                                  : row.values['Timeline to Buy'] == 'Immediately'
-                                    ? '#FF0000'
-                                    : '#ffffff',
+                                    : row.values['Timeline to Buy'] == 'Immediately'
+                                      ? '#FF0000'
+                                      : '#ffffff',
                               fontWeight: 'bold'
                             }}
                             size='small'
