@@ -12,25 +12,60 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
 
-const EditableField = ({ label, value: initialValue, type = 'text', options = [], onSave, validate }) => {
+const EditableField = ({ label, field = {}, value: initialValue, type = 'text', options = [], onSave }) => {
   const [value, setValue] = useState(initialValue)
   const [editing, setEditing] = useState(false)
   const [hover, setHover] = useState(false)
   const [error, setError] = useState(false)
   const [helperText, setHelperText] = useState('')
 
-  useEffect(() => {
-    setValue(initialValue) // Update value if initialValue changes
-  }, [initialValue])
+  useEffect(() => setValue(initialValue), [initialValue])
+
+  const validateValue = val => {
+    if (!field || !field.type) return ''
+    let v = val
+    if (typeof v === 'string') {
+      if (/^\s/.test(v)) return `${field.label || label} cannot start with space`
+      v = v.trim()
+    }
+
+    switch (field.type) {
+      case 'Phone':
+        if (field.required && !v) return `${field.label || label} is required`
+        if (v && !/^[0-9]{6,15}$/.test(v)) return 'Invalid phone number format'
+        break
+      case 'Email':
+        if (field.required && !v) return `${field.label || label} is required`
+        if (v && !/\S+@\S+\.\S+/.test(v)) return 'Invalid email address'
+        break
+      case 'Currency':
+        if (field.required && !v) return `${field.label || label} is required`
+        // add currency validation if needed
+        break
+      case 'Single Line':
+        const min = parseInt(field.minChars || 0, 10)
+        const max = parseInt(field.maxChars || 0, 10)
+        if (min && v.length < min) return `Minimum ${min} characters required`
+        if (max && v.length > max) return `Maximum ${max} characters allowed`
+        break
+      case 'URL':
+        if (v && !/^(http|https):\/\/.+/.test(v)) return 'Invalid URL'
+        break
+      case 'Date':
+        if (v && new Date(v) < new Date().setHours(0, 0, 0, 0)) return 'Date cannot be in the past'
+        break
+    }
+
+    if (field.required && (!v || v === '')) return `${field.label || label} is required`
+    return ''
+  }
 
   const handleSave = () => {
-    if (validate) {
-      const validationMessage = validate(value)
-      if (validationMessage) {
-        setError(true)
-        setHelperText(validationMessage)
-        return
-      }
+    const validationMessage = validateValue(value)
+    if (validationMessage) {
+      setError(true)
+      setHelperText(validationMessage)
+      return
     }
     setError(false)
     setHelperText('')
@@ -48,16 +83,13 @@ const EditableField = ({ label, value: initialValue, type = 'text', options = []
   const handleDateChange = newValue => {
     const formatted = newValue ? newValue.format('YYYY-MM-DD') : ''
     setValue(formatted)
-
-    if (validate) {
-      const validationMessage = validate(formatted)
-      if (validationMessage) {
-        setError(true)
-        setHelperText(validationMessage)
-      } else {
-        setError(false)
-        setHelperText('')
-      }
+    const validationMessage = validateValue(formatted)
+    if (validationMessage) {
+      setError(true)
+      setHelperText(validationMessage)
+    } else {
+      setError(false)
+      setHelperText('')
     }
   }
 
@@ -98,12 +130,12 @@ const EditableField = ({ label, value: initialValue, type = 'text', options = []
                 <DatePicker
                   value={value ? dayjs(value) : null}
                   onChange={handleDateChange}
-                  minDate={dayjs()} // prevent past dates
+                  minDate={dayjs()}
                   slotProps={{
                     textField: {
                       size: 'small',
                       error: Boolean(error),
-                      helperText: helperText,
+                      helperText,
                       sx: { flex: 1, backgroundColor: '#f9fafb' }
                     }
                   }}
@@ -132,25 +164,15 @@ const EditableField = ({ label, value: initialValue, type = 'text', options = []
             display='flex'
             alignItems='center'
             justifyContent='space-between'
-            sx={{
-              px: 1.5,
-              py: 1,
-              borderRadius: 1,
-              backgroundColor: '#f9fafb',
-              border: '1px solid #e5e7eb'
-            }}
+            sx={{ px: 1.5, py: 1, borderRadius: 1, backgroundColor: '#f9fafb', border: '1px solid #e5e7eb' }}
           >
             <Typography variant='body2' color={value ? 'text.primary' : 'text.disabled'} sx={{ flex: 1 }}>
               {value || '—'}
             </Typography>
-
             <IconButton
               size='small'
               onClick={() => setEditing(true)}
-              sx={{
-                opacity: hover ? 1 : 0,
-                transition: 'opacity 0.2s ease-in-out'
-              }}
+              sx={{ opacity: hover ? 1 : 0, transition: 'opacity 0.2s ease-in-out' }}
             >
               <EditIcon fontSize='small' />
             </IconButton>

@@ -247,8 +247,8 @@ const LeadDetailView = () => {
         <LeadCard fields={fields} />
 
         {/* 🔹 Dynamic Sections */}
-        {sections.map((section,index) => (
-          <Box mb={4} key={section.id}>
+        {sections.map((section, index) => (
+          <Box mb={4} key={section.id || section.title || index}>
             <Accordion defaultExpanded={index === 0}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography variant='subtitle1' fontWeight='bold'>
@@ -259,10 +259,12 @@ const LeadDetailView = () => {
                 <Grid container spacing={3}>
                   {Object.values(section.fields)
                     .flat()
+                    .filter(Boolean) // ⬅ remove undefined/null fields
                     .map(field => (
-                      <Grid item xs={12} sm={12} key={field.id}>
+                      <Grid item xs={12} sm={12} key={field.id || field.label}>
                         <EditableField
                           label={field.label}
+                          field={field} // pass the whole field object
                           value={fields[field.label]}
                           type={
                             field.label === 'Next Follow-up Date'
@@ -273,11 +275,11 @@ const LeadDetailView = () => {
                           }
                           options={fieldConfig[field.label] || []}
                           onSave={newValue => {
-                            const validator = fieldValidators[field.label]
-                            if (validator) {
-                              const error = validator(newValue)
-                              if (error) {
-                                toast.error(error)
+                            // 🔹 optional: validation before save
+                            if (fieldValidators[field.label]) {
+                              const err = fieldValidators[field.label](newValue)
+                              if (err) {
+                                toast.error(err)
                                 return
                               }
                             }
