@@ -6,14 +6,13 @@ import EditableField from './EditableField'
 import NotesSection from './NotesSection'
 import Cookies from 'js-cookie'
 import { useParams, useRouter } from 'next/navigation'
-import { toast, ToastContainer } from 'react-toastify'
+import { toast } from 'react-toastify'
 import { decrypCryptoReq } from '@/helper/frontendHelper'
 
 import Accordion from '@mui/material/Accordion'
 import AccordionSummary from '@mui/material/AccordionSummary'
 import AccordionDetails from '@mui/material/AccordionDetails'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import TaskSection from './TaskSection'
 import LeadCard from './LeadCard'
 import EventIcon from '@mui/icons-material/Event'
 import StatusFiled from './StatusFiled'
@@ -21,6 +20,73 @@ import Image from 'next/image'
 import LoaderGif from '@assets/gif/loader.gif'
 import Link from 'next/link'
 import OpenActivities from './OpenActivities'
+
+// Validation rules
+const fieldValidators = {
+  Email: val => {
+    if (!val) return 'Email is required'
+    if (!/\S+@\S+\.\S+/.test(val)) return 'Invalid email format'
+    return null
+  },
+  Phone: val => {
+    if (!val) return 'Phone is required'
+    if (!/^\d{10}$/.test(val)) return 'Phone must be 10 digits'
+    return null
+  },
+  'First Name': val => (!val ? 'First Name is required' : null),
+  'Last Name': val => (!val ? 'Last Name is required' : null),
+  Pincode: val => {
+    if (!val) return 'Pincode is required'
+    if (!/^\d{6}$/.test(val)) return 'Pincode must be 6 digits'
+    return null
+  },
+  Company: val => (!val ? 'Company name is required' : null),
+
+  'Company Size': val => {
+    if (!val) return 'Company Size is required'
+    if (isNaN(val)) return 'Company Size must be a number'
+    if (val <= 0) return 'Company Size must be greater than 0'
+    return null
+  },
+
+  'Potential Deal Size': val => {
+    if (!val) return 'Potential Deal Size is required'
+    if (isNaN(val)) return 'Deal Size must be a number'
+    if (Number(val) < 1000) return 'Deal Size must be at least 1000'
+    return null
+  },
+
+  'Job Title': val => (!val ? 'Job Title is required' : null),
+
+  Industry: val => (!val ? 'Industry is required' : null),
+
+  'Lead Source': val => (!val ? 'Lead Source is required' : null),
+  Country: value => {
+    if (!value || value.trim() === '') return 'Country is required'
+    if (!/^[A-Za-z\s]+$/.test(value)) return 'Country must contain only letters'
+    return ''
+  },
+  State: value => {
+    if (!value || value.trim() === '') return 'State is required'
+    if (!/^[A-Za-z\s]+$/.test(value)) return 'State must contain only letters'
+    return ''
+  },
+  City: value => {
+    if (!value || value.trim() === '') return 'City is required'
+    if (!/^[A-Za-z\s]+$/.test(value)) return 'City must contain only letters'
+    return ''
+  },
+  Street: value => {
+    if (!value || value.trim() === '') return 'Street is required'
+    if (value.length < 3) return 'Street name is too short'
+    return ''
+  },
+  Pincode: value => {
+    if (!value || value.trim() === '') return 'Pincode is required'
+    if (!/^\d{5,6}$/.test(value)) return 'Pincode must be 5 or 6 digits'
+    return ''
+  }
+}
 
 const LeadDetailView = () => {
   const params = useParams()
@@ -35,45 +101,69 @@ const LeadDetailView = () => {
 
   const router = useRouter()
 
-  const [loader, setLoader] = useState(false)
+  const [loader, setLoader] = useState(true)
   const [leadData, setLeadData] = useState(null)
   const [sections, setSections] = useState([])
   const [fieldConfig, setFieldConfig] = useState({}) // dynamic config
+  const [fieldFlatend, setFieldFlatend] = useState([]) // dynamic config
 
-  // 🔹 fetch template (form structure)
-  const fetchFormTemplate = async () => {
-    setLoader(true)
 
+  // 🔹 Helper: Flatten sections into simple fields array
+const flattenFields = sections => {
+  const flat = []
+  sections.forEach(section => {
+    Object.values(section.fields).forEach(fieldGroup => {
+      fieldGroup.forEach(field => {
+        flat.push({
+          sectionName: section.sectionName || '', // keep section reference
+          ...field
+        })
+      })
+    })
+  })
+  return flat
+}
+
+// 🔹 Inside your fetchFormTemplate
+const fetchFormTemplate = async () => {
+  setLoader(true)
+  try {
     const header = {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${getToken}`
     }
+
     const res = await fetch(
       `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${lead_form}`,
-      {
-        headers: header
-      }
+      { headers: header }
     )
+
     const json = await res.json()
     if (json?.success && json.data?.sections?.length > 0) {
       setSections(json.data.sections)
 
-      // 🔹 build dynamic fieldConfig from template
+      // 🔹 Flatten sections
+      const flattened = flattenFields(json.data.sections)
+
+      // 🔹 Build config (for Dropdown etc.)
       const config = {}
-      json.data.sections.forEach(section => {
-        Object.values(section.fields).forEach(fieldGroup => {
-          fieldGroup.forEach(field => {
-            if (field.type === 'Dropdown' && field.options?.length > 0) {
-              config[field.label] = field.options
-            }
-          })
-        })
+      flattened.forEach(field => {
+        if (field.type === 'Dropdown' && field.options?.length > 0) {
+          config[field.label] = field.options
+        }
       })
-      console.log(config, '<<< Config')
+
+      console.log(flattened, '<<< FLATTENED FIELDS')
+      console.log(config, '<<< CONFIG FILE')
+      setFieldFlatend(flattened)
       setFieldConfig(config)
     }
+  } catch (err) {
+    console.error('fetchFormTemplate error:', err)
+  } finally {
     setLoader(false)
   }
+}
 
   // 🔹 fetch lead by ID
   const fetchLeadFromId = async () => {
@@ -87,6 +177,7 @@ const LeadDetailView = () => {
         headers: header
       })
       const data = await res.json()
+       setLoader(false)
 
       if (data.success) {
         setLeadData(data.data) // full response with .values
@@ -95,6 +186,7 @@ const LeadDetailView = () => {
       }
     } catch (err) {
       console.error(err)
+      setLoader(false)
     } finally {
       setLoader(false)
     }
@@ -107,6 +199,7 @@ const LeadDetailView = () => {
   }, [sections, leadId])
 
   useEffect(() => {
+    setLoader(true)
     fetchFormTemplate()
   }, [])
 
@@ -185,6 +278,7 @@ const LeadDetailView = () => {
           [label]: newValue
         }
       }))
+
       const header = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${getToken}`
@@ -194,27 +288,21 @@ const LeadDetailView = () => {
         headers: header,
         body: JSON.stringify({
           values: {
-            ...leadData.values,
+            ...leadData?.values, // fallback
             [label]: newValue
           }
         })
       })
 
       const result = await res.json()
-      console.log('PUT response:', result)
-
       if (!result.success) {
         toast.error('Failed to update field')
-        fetchLeadFromId() // rollback if failed
+        fetchLeadFromId() // rollback
       } else {
-        toast.success(result?.message, {
-          autoClose: 500, // 1 second la close
+        toast.success(result?.message || 'Updated successfully', {
+          autoClose: 800,
           position: 'bottom-center',
-          hideProgressBar: true, // progress bar venam na
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: false,
-          progress: undefined
+          hideProgressBar: true
         })
       }
     } catch (err) {
@@ -244,7 +332,7 @@ const LeadDetailView = () => {
     )
   }
 
-  if (!leadData) {
+  if (!leadData && !loader) {
     return (
       <Card
         sx={{
@@ -328,6 +416,7 @@ const LeadDetailView = () => {
                         type={fieldConfig[label] ? 'select' : 'text'}
                         options={fieldConfig[label] || []}
                         onSave={newValue => handleFieldSave(label, newValue)}
+                        validate={fieldValidators[label]} // ✅ field-wise validation
                       />
                     </Grid>
                   ))}
@@ -335,37 +424,9 @@ const LeadDetailView = () => {
               </AccordionDetails>
             </Accordion>
           </Box>
-
-          {/* Section: Details */}
-          {/* <Box mb={4}>
-            <Typography variant='subtitle1' fontWeight='bold' sx={{ mb: 2 }}>
-              testing Details
-            </Typography>
-            <Grid container spacing={3}>
-              {Object.entries(fields).map(([label, value]) =>
-                Array.isArray(value) ? null : (
-                  <Grid item xs={12} sm={6} key={label}>
-                    <EditableField
-                      label={label}
-                      value={value}
-                      type={fieldConfig[label] ? 'select' : 'text'}
-                      options={fieldConfig[label] || []}
-                      onSave={newValue => handleFieldSave(label, newValue)}
-                    />
-                  </Grid>
-                )
-              )}
-            </Grid>
-          </Box> */}
-
           <Box mb={4}>
             <NotesSection leadId={leadId} leadData={leadData} />
           </Box>
-
-          {/* <Box>
-            <TaskSection leadId={leadId} leadData={leadData} />
-          </Box> */}
-
           <Box>
             <OpenActivities leadId={leadId} leadData={leadData} />
           </Box>
@@ -422,6 +483,7 @@ const LeadDetailView = () => {
                           type={fieldConfig[label] ? 'select' : 'text'}
                           options={fieldConfig[label] || []}
                           onSave={newValue => handleFieldSave(label, newValue)}
+                          validate={fieldValidators[label]} // 👈 add validator
                         />
                       </Grid>
                     )
@@ -447,7 +509,14 @@ const LeadDetailView = () => {
                         value={fields[label]}
                         type={fieldConfig[label] ? 'select' : 'text'}
                         options={fieldConfig[label] || []}
-                        onSave={newValue => handleFieldSave(label, newValue)}
+                        onSave={newValue => {
+                          const error = fieldValidators[label] ? fieldValidators[label](newValue) : ''
+                          if (error) {
+                            alert(error) // or toast(error)
+                            return
+                          }
+                          handleFieldSave(label, newValue)
+                        }}
                       />
                     </Grid>
                   ))}
@@ -482,7 +551,6 @@ const LeadDetailView = () => {
           </Box>
         </Grid>
       </Grid>
-
     </>
   )
 }

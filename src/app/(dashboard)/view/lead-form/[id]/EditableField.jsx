@@ -6,12 +6,31 @@ import EditIcon from '@mui/icons-material/Edit'
 import CheckIcon from '@mui/icons-material/Check'
 import CloseIcon from '@mui/icons-material/Close'
 
-const EditableField = ({ label, value: initialValue, type = 'text', options = [], onSave }) => {
+const EditableField = ({
+  label,
+  value: initialValue,
+  type = 'text',
+  options = [],
+  onSave,
+  validate // 👈 optional validation function (value) => string | null
+}) => {
   const [value, setValue] = useState(initialValue)
   const [editing, setEditing] = useState(false)
   const [hover, setHover] = useState(false)
+  const [error, setError] = useState('')
+  const [helperText, setHelperText] = useState('')
 
   const handleSave = () => {
+    if (validate) {
+      const validationMessage = validate(value)
+      if (validationMessage) {
+        setError(true)
+        setHelperText(validationMessage)
+        return
+      }
+    }
+    setError(false)
+    setHelperText('')
     setEditing(false)
     if (onSave) onSave(value)
   }
@@ -19,6 +38,8 @@ const EditableField = ({ label, value: initialValue, type = 'text', options = []
   const handleCancel = () => {
     setEditing(false)
     setValue(initialValue)
+    setError(false)
+    setHelperText('')
   }
 
   return (
@@ -37,35 +58,41 @@ const EditableField = ({ label, value: initialValue, type = 'text', options = []
 
       {/* Value / Editor */}
       {editing ? (
-        <Box display='flex' alignItems='center' gap={1}>
-          {type === 'select' ? (
-            <TextField
-              select
-              size='small'
-              value={value}
-              onChange={e => setValue(e.target.value)}
-              sx={{ flex: 1, backgroundColor: '#f9fafb' }}
-            >
-              {options.map(opt => (
-                <MenuItem key={opt} value={opt}>
-                  {opt}
-                </MenuItem>
-              ))}
-            </TextField>
-          ) : (
-            <TextField
-              size='small'
-              value={value}
-              onChange={e => setValue(e.target.value)}
-              sx={{ flex: 1, backgroundColor: '#f9fafb' }}
-            />
-          )}
-          <IconButton color='success' size='small' onClick={handleSave}>
-            <CheckIcon fontSize='small' />
-          </IconButton>
-          <IconButton color='error' size='small' onClick={handleCancel}>
-            <CloseIcon fontSize='small' />
-          </IconButton>
+        <Box display='flex' flexDirection='column' gap={0.5}>
+          <Box display='flex' alignItems='center' gap={1}>
+            {type === 'select' ? (
+              <TextField
+                select
+                size='small'
+                value={value}
+                onChange={e => setValue(e.target.value)}
+                error={Boolean(error)}
+                helperText={helperText}
+                sx={{ flex: 1, backgroundColor: '#f9fafb' }}
+              >
+                {options.map(opt => (
+                  <MenuItem key={opt} value={opt}>
+                    {opt}
+                  </MenuItem>
+                ))}
+              </TextField>
+            ) : (
+              <TextField
+                size='small'
+                value={value}
+                onChange={e => setValue(e.target.value)}
+                error={Boolean(error)}
+                helperText={helperText}
+                sx={{ flex: 1, backgroundColor: '#f9fafb' }}
+              />
+            )}
+            <IconButton color='success' size='small' onClick={handleSave}>
+              <CheckIcon fontSize='small' />
+            </IconButton>
+            <IconButton color='error' size='small' onClick={handleCancel}>
+              <CloseIcon fontSize='small' />
+            </IconButton>
+          </Box>
         </Box>
       ) : (
         <Box

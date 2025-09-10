@@ -80,31 +80,24 @@ const Navigation = () => {
   }
 
 
-    useEffect(() => {
-      const loadData = async () => {
-        try {
-          if (!getToken) {
-            console.error('Token missing in cookies')
-            return
-          }
+    // useEffect(() => {
+    //   const loadData = async () => {
+    //     try {
+    //       if (!getToken) {
+    //         console.error('Token missing in cookies')
+    //         return
+    //       }
+    //       const data = await fetchPrivilegesById(getToken, rollId)
+    //       console.log(data,"<<< ROLESSS DATAAA")
+    //       setRoles(data)
+    //     } catch (err) {
+    //       console.error('Error fetching privileges:', err)
+    //     }
+    //   }
+    //   loadData()
+    // }, [getToken])
+
   
-          const data = await fetchPrivilegesById(getToken, rollId)
-
-          console.log(data,"<<< ROLES DATAAA")
-
-          // const sorted = [...data].sort((a, b) => a.c_role_priority - b.c_role_priority)
-        
-          setRoles(data)
-        } catch (err) {
-          console.error('Error fetching privileges:', err)
-        }
-      }
-      loadData()
-    }, [getToken])
-
-    useEffect(() => {
-      console.log(roles,"<<< ROLSSSSSSS")
-    }, [roles])
     
 
 

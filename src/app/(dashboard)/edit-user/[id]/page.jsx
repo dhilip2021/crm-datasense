@@ -21,7 +21,7 @@ const EditUser = () => {
             Home
           </Link>
           
-          <Typography sx={{ color: 'text.primary' }}>Edit User </Typography>
+          <Typography sx={{ color: 'text.primary' }}>Edit User</Typography>
         </Breadcrumbs>
       </Grid>
 
