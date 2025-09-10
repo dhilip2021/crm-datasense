@@ -618,7 +618,9 @@ const LeadTable = () => {
               </LocalizationProvider>
             </Grid>
             <Grid item xs={12} sm={2}>
-              <Button variant='contained' color='success' fullWidth onClick={fetchFilterData}>
+              <Button  variant='contained' color='success' fullWidth onClick={fetchFilterData} 
+              disabled={Object.values(filters).every(v => !v || v === '')}
+              >
                 Apply
               </Button>
             </Grid>
@@ -811,14 +813,16 @@ const LeadTable = () => {
                         <TableCell>{row.values['City']}</TableCell>
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           <Chip
-                            label={row.values['Timeline to Buy']}
+                            label={row.values['Timeline to Buy'] ? row.values['Timeline to Buy'] : "-"}
                             sx={{
                               backgroundColor:
                                 row.values['Timeline to Buy'] == '3–6 Months'
                                   ? '#00FF48'
                                   : row.values['Timeline to Buy'] == '6+ Months'
                                     ? '#FF8800'
-                                    : '#FF0000',
+                                  : row.values['Timeline to Buy'] == 'Immediately'
+                                    ? '#FF0000'
+                                    : '#ffffff',
                               fontWeight: 'bold'
                             }}
                             size='small'
@@ -873,9 +877,9 @@ const LeadTable = () => {
                           <Box
                             sx={{
                               backgroundColor:
-                                (row.values['lead_score'] || 0) >= 75
+                                (row.values['Score'] || 0) >= 75
                                   ? '#d32f2f'
-                                  : (row.values['lead_score'] || 0) >= 50
+                                  : (row.values['Score'] || 0) >= 40
                                     ? '#ff9800'
                                     : '#1976d2',
                               color: '#fff',
@@ -888,7 +892,7 @@ const LeadTable = () => {
                               textAlign: 'center'
                             }}
                           >
-                            {row.values['lead_score'] || 0}
+                            {row.values['Score'] || 0}
                           </Box>
                         </TableCell>
 
