@@ -32,7 +32,9 @@ const EditableField = ({ label, field = {}, value: initialValue, type = 'text', 
     switch (field.type) {
       case 'Phone':
         if (field.required && !v) return `${field.label || label} is required`
-        if (v && !/^[0-9]{6,15}$/.test(v)) return 'Invalid phone number format'
+        // ✅ Allow +countrycode + digits OR 0-prefixed STD numbers OR plain 6–15 digits
+        const phoneRegex = /^(\+?\d{1,3})?\d{6,15}$/
+        if (v && !phoneRegex.test(v)) return 'Invalid phone number format'
         break
       case 'Email':
         if (field.required && !v) return `${field.label || label} is required`
@@ -40,8 +42,13 @@ const EditableField = ({ label, field = {}, value: initialValue, type = 'text', 
         break
       case 'Currency':
         if (field.required && !v) return `${field.label || label} is required`
-        // add currency validation if needed
+        // ✅ Allow only numbers with optional decimals (e.g., 100, 100.50)
+        const currencyRegex = /^\d+(\.\d{1,2})?$/
+        if (v && !currencyRegex.test(v)) {
+          return `${field.label || label} must be a valid number (max 2 decimal places)`
+        }
         break
+
       case 'Single Line':
         const min = parseInt(field.minChars || 0, 10)
         const max = parseInt(field.maxChars || 0, 10)

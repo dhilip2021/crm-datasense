@@ -749,7 +749,7 @@ const LeadTable = () => {
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Last Contact Date</TableCell>
                   <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Next Follow-up</TableCell>
                   <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Created By</TableCell>
-                  <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Action</TableCell>
+                  {/* <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Action</TableCell> */}
                 </TableRow>
               </TableHead>
 
@@ -757,7 +757,7 @@ const LeadTable = () => {
                 {loading
                   ? [...Array(limit)].map((_, i) => (
                       <TableRow key={i}>
-                        {Array.from({ length: 12 }).map((_, j) => (
+                        {Array.from({ length: 13 }).map((_, j) => (
                           <TableCell key={j}>
                             <Skeleton variant='text' width='100%' />
                           </TableCell>
@@ -923,7 +923,7 @@ const LeadTable = () => {
                           {row.createdByName}
                         </TableCell>
 
-                        <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                        {/* <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           <Box display={'flex'}>
                             <Tooltip title={`Edit ${row.values['First Name']} Lead`} arrow>
                               <Link
@@ -934,7 +934,7 @@ const LeadTable = () => {
                               </Link>
                             </Tooltip>
                           </Box>
-                        </TableCell>
+                        </TableCell> */}
                       </TableRow>
                     ))}
                 {!loading && data?.length === 0 && (
