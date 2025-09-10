@@ -1,7 +1,5 @@
 import Link from 'next/link'
 
-// Next Imports
-import dynamic from 'next/dynamic'
 
 // MUI Imports
 import Grid from '@mui/material/Grid'
@@ -13,6 +11,7 @@ import { Breadcrumbs } from '@mui/material'
 import UserTable from '@/views/users/UserTable'
 
 const EditUser = () => {
+
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>

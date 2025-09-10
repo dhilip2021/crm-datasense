@@ -191,11 +191,6 @@ const UsersListTable = () => {
             startIcon={<i className='ri-add-line'></i>}
             variant='contained'
             className='mis-4'
-            //  sx={{
-            //   fontSize: { xs: '1.25rem', sm: '0.875rem' },
-            //   padding: { xs: '4px 8px', sm: '6px 16px' },
-            //   minWidth: { xs: 'unset', sm: 'auto' }
-            // }}
           >
             Add user
           </Button>

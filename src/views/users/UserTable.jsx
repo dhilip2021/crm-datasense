@@ -125,22 +125,27 @@ const UserTable = () => {
       setLoader(true)
       const checkEmail = await checkMailApi(body)
       setLoader(false)
+      console.log(userId, '<<< user IDDDD')
 
       if (checkEmail?.appStatusCode === 4) {
         // user exists
-        setErrors(prev => ({ ...prev, email: true }))
+        if (userId === '') {
+          setErrors(prev => ({ ...prev, email: true }))
+          toast.error('Email already exists!', {
+            autoClose: 500, // 1 second la close
+            position: 'bottom-center',
+            hideProgressBar: true, // progress bar venam na
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: false,
+            progress: undefined
+          })
 
-        toast.error('Email already exists!', {
-          autoClose: 500, // 1 second la close
-          position: 'bottom-center',
-          hideProgressBar: true, // progress bar venam na
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: false,
-          progress: undefined
-        })
-
-        return false
+          return false
+        } else {
+          setErrors(prev => ({ ...prev, email: false }))
+          return true
+        }
       } else {
         setErrors(prev => ({ ...prev, email: false }))
         return true
@@ -312,29 +317,35 @@ const UserTable = () => {
   }
 
   const getUserListFn = async userId => {
-    const header = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getToken}`
-    }
-    try {
-      setLoader(true)
-      const results = await getUserListApi(userId, header)
-      setLoader(false)
-      if (results?.appStatusCode === 0) {
-        setInputs({
-          id: results?.payloadJson[0]?._id,
-          first_name: results?.payloadJson[0]?.first_name,
-          last_name: results?.payloadJson[0]?.last_name,
-          email: decrypCryptoRequest(results?.payloadJson[0]?.email),
-          password: results?.payloadJson[0]?.password,
-          c_role_id: results?.payloadJson[0]?.c_role_id,
-          c_about_user: results?.payloadJson[0]?.c_about_user,
-          n_status: results?.payloadJson[0]?.n_status
-        })
-      } else {
+    if (userId) {
+      const header = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getToken}`
       }
-    } catch (err) {
-      console.log(err)
+      try {
+        setLoader(true)
+        const results = await getUserListApi(userId, header)
+        setLoader(false)
+        if (results?.appStatusCode === 0) {
+          console.log(results?.payloadJson[0]?.first_name, '<<< resultssss')
+
+          setInputs({
+            id: results?.payloadJson[0]?._id,
+            first_name: results?.payloadJson[0]?.first_name,
+            last_name: results?.payloadJson[0]?.last_name,
+            // email: decrypCryptoRequest(results?.payloadJson[0]?.email),
+            email: results?.payloadJson[0]?.email,
+            password: results?.payloadJson[0]?.password,
+            c_role_id: results?.payloadJson[0]?.c_role_id,
+            c_about_user: results?.payloadJson[0]?.c_about_user,
+            n_status: results?.payloadJson[0]?.n_status
+          })
+        } else {
+          console.log('error')
+        }
+      } catch (err) {
+        console.log(err)
+      }
     }
   }
 
@@ -371,6 +382,8 @@ const UserTable = () => {
     const fullUrl = window.location.href
     const segments = fullUrl.split('/')
     const id = segments.at(4) // or segments[segments.length - 1]
+
+    console.log(id, '<<< IDDDDDD')
     if (id !== undefined) {
       setUserId(id)
       setEdit(true)
