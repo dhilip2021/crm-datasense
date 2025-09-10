@@ -293,7 +293,7 @@ export default function OpenActivities({ leadId, leadData }) {
             <Button
               variant='contained'
               size='small'
-              sx={{ marginRight: '20px' }}
+              sx={{ marginRight: '37px' }}
               onClick={e => {
                 e.stopPropagation() // ✅ prevent accordion toggle
                 setAddAnchor(e.currentTarget)
