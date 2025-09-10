@@ -77,20 +77,6 @@ export default function OpenActivities({ leadId, leadData }) {
   const sortedTasks = [...leadArrayTasks]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .map(t => {
-      // let reminderDateTime = ''
-      // let reminderDateFormatted = ''
-      // let reminderTimeFormatted = ''
-
-      // if (t.reminderDate && t.reminderTime) {
-      //   const reminderDateTimeObj = new Date(`${t.reminderDate.split('T')[0]}T${t.reminderTime}:00`)
-      //   reminderDateFormatted = reminderDateTimeObj.toLocaleDateString()
-      //   reminderTimeFormatted = reminderDateTimeObj.toLocaleTimeString([], {
-      //     hour: '2-digit',
-      //     minute: '2-digit'
-      //   })
-      //   reminderDateTime = reminderDateTimeObj
-      // }
-
       return {
         type: 'Task',
         subject: t.subject || 'Untitled Task',
@@ -107,6 +93,7 @@ export default function OpenActivities({ leadId, leadData }) {
 
   const getToken = Cookies.get('_token')
   const user_name = Cookies.get('user_name')
+  const user_id = Cookies.get('user_id')
 
   const [addAnchor, setAddAnchor] = useState(null)
   const [viewAnchor, setViewAnchor] = useState(null)
@@ -128,7 +115,7 @@ export default function OpenActivities({ leadId, leadData }) {
     dueDate: '',
     priority: 'High',
     status: 'Not Started',
-    owner: 'Dhilip',
+    owner: user_name,
     reminderEnabled: false,
     reminderDate: '',
     reminderTime: '',
@@ -165,7 +152,7 @@ export default function OpenActivities({ leadId, leadData }) {
       dueDate: '',
       priority: 'High',
       status: 'Not Started',
-      owner: 'Dhilip',
+      owner: user_name,
       reminderEnabled: false,
       reminderDate: '',
       reminderTime: '',
@@ -200,7 +187,7 @@ export default function OpenActivities({ leadId, leadData }) {
       reminderTime: taskData.reminderTime,
       alertType: taskData.alertType,
       createdAt: new Date().toISOString(),
-      createdBy: user_name
+      createdBy: user_id
     }
 
     try {
@@ -271,9 +258,6 @@ export default function OpenActivities({ leadId, leadData }) {
           alertType: lastTask.alertType // keep raw Date object if needed
         }
 
-
-  
-
         setTasks(prev => [formattedTask, ...prev])
 
         // reset form + close
@@ -284,14 +268,13 @@ export default function OpenActivities({ leadId, leadData }) {
           dueDate: '',
           priority: 'High',
           status: 'Not Started',
-          owner: 'Dhilip',
+          owner: user_name,
           reminderEnabled: false,
           reminderDate: '',
           reminderTime: '',
           alertType: 'Email'
         })
       }
-
     } catch (err) {
       console.error('Error saving task:', err)
       alert('❌ Failed to create task')
@@ -446,8 +429,9 @@ export default function OpenActivities({ leadId, leadData }) {
                   {/* Owner */}
                   <Grid item xs={12}>
                     <TextField
-                      label='Owner'
-                      defaultValue='Dhilip'
+                      disabled
+                      label='Created By'
+                      defaultValue={user_name}
                       fullWidth
                       variant='outlined'
                       sx={{ bgcolor: '#fafafa', borderRadius: 2 }}
@@ -499,19 +483,22 @@ export default function OpenActivities({ leadId, leadData }) {
                             />
                           </Grid>
                           <Grid item xs={12} sm={6}>
-                           <TimePicker
-  label='Reminder Time'
-  value={
-    taskData.reminderTime
-      ? dayjs(taskData.reminderTime, 'HH:mm')
-      : dayjs().hour(16).minute(0) // 🟢 default 04:00 PM
-  }
-  onChange={newValue =>
-    handleChange('reminderTime', newValue ? newValue.format('HH:mm') : '')
-  }
-  minTime={taskData.reminderDate && dayjs(taskData.reminderDate).isSame(dayjs(), 'day') ? dayjs() : null}
-/>
-                           
+                            <TimePicker
+                              label='Reminder Time'
+                              value={
+                                taskData.reminderTime
+                                  ? dayjs(taskData.reminderTime, 'HH:mm')
+                                  : dayjs().hour(16).minute(0) // 🟢 default 04:00 PM
+                              }
+                              onChange={newValue =>
+                                handleChange('reminderTime', newValue ? newValue.format('HH:mm') : '')
+                              }
+                              minTime={
+                                taskData.reminderDate && dayjs(taskData.reminderDate).isSame(dayjs(), 'day')
+                                  ? dayjs()
+                                  : null
+                              }
+                            />
                           </Grid>
 
                           <Grid item xs={12}>
@@ -660,34 +647,35 @@ export default function OpenActivities({ leadId, leadData }) {
                   <Typography fontWeight='bold'>Open Calls ({calls.length})</Typography>
                   <Divider sx={{ my: 1 }} />
 
-                  {Array.isArray(calls) && calls.map((c, i) => (
-                    <Box key={i} mb={1.5} p={1.5} border='1px solid #ddd' borderRadius={2} bgcolor='#fff'>
-                      {/* Title */}
-                      <Typography fontWeight='bold' color='primary'>
-                        {c.subject}
-                      </Typography>
+                  {Array.isArray(calls) &&
+                    calls.map((c, i) => (
+                      <Box key={i} mb={1.5} p={1.5} border='1px solid #ddd' borderRadius={2} bgcolor='#fff'>
+                        {/* Title */}
+                        <Typography fontWeight='bold' color='primary'>
+                          {c.subject}
+                        </Typography>
 
-                      {/* Date + Time */}
-                      <Typography variant='body2' color='text.secondary'>
-                        📅 {c.date} {c.time && `• ⏰ ${c.time}`}
-                      </Typography>
+                        {/* Date + Time */}
+                        <Typography variant='body2' color='text.secondary'>
+                          📅 {c.date} {c.time && `• ⏰ ${c.time}`}
+                        </Typography>
 
-                      {/* Owner */}
-                      <Typography variant='caption' display='block'>
-                        👤 {c.owner}
-                      </Typography>
+                        {/* Owner */}
+                        <Typography variant='caption' display='block'>
+                          👤 {c.owner}
+                        </Typography>
 
-                      {/* Purpose + Agenda → Chips */}
-                      <Stack direction='column' spacing={1} mt={1}>
-                        {c.purpose && (
-                          <Chip label={`Purpose: ${c.purpose}`} size='small' sx={{ bgcolor: 'info.light' }} />
-                        )}
-                        {c.agenda && (
-                          <Chip label={`Agenda: ${c.agenda}`} size='small' sx={{ bgcolor: 'secondary.light' }} />
-                        )}
-                      </Stack>
-                    </Box>
-                  ))}
+                        {/* Purpose + Agenda → Chips */}
+                        <Stack direction='column' spacing={1} mt={1}>
+                          {c.purpose && (
+                            <Chip label={`Purpose: ${c.purpose}`} size='small' sx={{ bgcolor: 'info.light' }} />
+                          )}
+                          {c.agenda && (
+                            <Chip label={`Agenda: ${c.agenda}`} size='small' sx={{ bgcolor: 'secondary.light' }} />
+                          )}
+                        </Stack>
+                      </Box>
+                    ))}
                 </Card>
 
                 {/* Meetings */}
@@ -695,34 +683,35 @@ export default function OpenActivities({ leadId, leadData }) {
                   <Typography fontWeight='bold'>Open Meetings ({meetings.length})</Typography>
                   <Divider sx={{ my: 1 }} />
 
-                  {Array.isArray(meetings) && meetings.map((m, i) => (
-                    <Box key={i} mb={1.5} p={1.5} border='1px solid #ddd' borderRadius={2} bgcolor='#fff'>
-                      {/* Title */}
-                      <Typography fontWeight='bold' color='primary'>
-                        {m.subject}
-                      </Typography>
+                  {Array.isArray(meetings) &&
+                    meetings.map((m, i) => (
+                      <Box key={i} mb={1.5} p={1.5} border='1px solid #ddd' borderRadius={2} bgcolor='#fff'>
+                        {/* Title */}
+                        <Typography fontWeight='bold' color='primary'>
+                          {m.subject}
+                        </Typography>
 
-                      {/* Date + Time */}
-                      <Typography variant='body2' color='text.secondary'>
-                        📅 {m.date} {m.time && `• ⏰ ${m.time}`}
-                      </Typography>
+                        {/* Date + Time */}
+                        <Typography variant='body2' color='text.secondary'>
+                          📅 {m.date} {m.time && `• ⏰ ${m.time}`}
+                        </Typography>
 
-                      {/* Owner */}
-                      <Typography variant='caption' display='block'>
-                        👤 {m.owner}
-                      </Typography>
+                        {/* Owner */}
+                        <Typography variant='caption' display='block'>
+                          👤 {m.owner}
+                        </Typography>
 
-                      {/* Extra Info → Optional chips */}
-                      <Stack direction='row' spacing={1} mt={1}>
-                        {m.location && (
-                          <Chip label={`Location: ${m.location}`} size='small' sx={{ bgcolor: 'success.light' }} />
-                        )}
-                        {m.agenda && (
-                          <Chip label={`Agenda: ${m.agenda}`} size='small' sx={{ bgcolor: 'warning.light' }} />
-                        )}
-                      </Stack>
-                    </Box>
-                  ))}
+                        {/* Extra Info → Optional chips */}
+                        <Stack direction='row' spacing={1} mt={1}>
+                          {m.location && (
+                            <Chip label={`Location: ${m.location}`} size='small' sx={{ bgcolor: 'success.light' }} />
+                          )}
+                          {m.agenda && (
+                            <Chip label={`Agenda: ${m.agenda}`} size='small' sx={{ bgcolor: 'warning.light' }} />
+                          )}
+                        </Stack>
+                      </Box>
+                    ))}
                 </Card>
               </Box>
             )}
@@ -742,23 +731,60 @@ export default function OpenActivities({ leadId, leadData }) {
                       <TableRow>
                         <TableCell>Subject</TableCell>
                         <TableCell>Due Date</TableCell>
-                        <TableCell>Task Owner</TableCell>
+                        <TableCell>Created By</TableCell>
                         <TableCell>Status</TableCell>
                         <TableCell>Priority</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {Array.isArray(tasks) && tasks.map((t, i) => (
-                        <TableRow key={i}>
-                          <TableCell>
-                            <Typography color='primary'>{t.subject}</Typography>
-                          </TableCell>
-                          <TableCell>{t.date}</TableCell>
-                          <TableCell>{t.owner}</TableCell>
-                          <TableCell>{t.status}</TableCell>
-                          <TableCell>{t.priority}</TableCell>
-                        </TableRow>
-                      ))}
+                      {Array.isArray(tasks) &&
+                        tasks.map((t, i) => (
+                          <TableRow key={i}>
+                            <TableCell>
+                              <Typography color='primary'>{t.subject}</Typography>
+                            </TableCell>
+                            <TableCell>{t.dueDate ? dayjs(t.dueDate).format('DD MMM YYYY') : '-'}</TableCell>
+                            <TableCell>{t.owner}</TableCell>
+                            <TableCell>
+                              {' '}
+                              <Box>
+                                <Chip
+                                  label={t.status || 'Unknown'}
+                                  size='small'
+                                  sx={{
+                                    borderRadius: 2,
+                                    fontWeight: 'bold',
+                                    bgcolor:
+                                      t.status === 'Completed'
+                                        ? 'success.light'
+                                        : t.status === 'In Progress'
+                                          ? 'warning.light'
+                                          : 'grey.300',
+                                    color: 'text.primary'
+                                  }}
+                                />
+                              </Box>
+                            </TableCell>
+                            <TableCell>
+                              {' '}
+                              <Chip
+                                label={`Priority: ${t.priority || 'Medium'}`}
+                                size='small'
+                                sx={{
+                                  borderRadius: 2,
+                                  fontWeight: 'bold',
+                                  bgcolor:
+                                    t.priority === 'High'
+                                      ? 'error.light'
+                                      : t.priority === 'Low'
+                                        ? 'info.light'
+                                        : 'grey.200',
+                                  color: 'text.primary'
+                                }}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        ))}
                     </TableBody>
                   </Table>
                 )}
@@ -773,17 +799,18 @@ export default function OpenActivities({ leadId, leadData }) {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      { Array.isArray(meetings) && meetings.map((m, i) => (
-                        <TableRow key={i}>
-                          <TableCell>
-                            <Typography color='primary'>{m.subject}</Typography>
-                          </TableCell>
-                          <TableCell>
-                            {m.date} {m.time}
-                          </TableCell>
-                          <TableCell>{m.owner}</TableCell>
-                        </TableRow>
-                      ))}
+                      {Array.isArray(meetings) &&
+                        meetings.map((m, i) => (
+                          <TableRow key={i}>
+                            <TableCell>
+                              <Typography color='primary'>{m.subject}</Typography>
+                            </TableCell>
+                            <TableCell>
+                              {m.date} {m.time}
+                            </TableCell>
+                            <TableCell>{m.owner}</TableCell>
+                          </TableRow>
+                        ))}
                     </TableBody>
                   </Table>
                 )}
@@ -800,19 +827,20 @@ export default function OpenActivities({ leadId, leadData }) {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {Array.isArray(calls) && calls.map((c, i) => (
-                        <TableRow key={i}>
-                          <TableCell>
-                            <Typography color='primary'>{c.subject}</Typography>
-                          </TableCell>
-                          <TableCell>
-                            {c.date} {c.time}
-                          </TableCell>
-                          <TableCell>{c.owner}</TableCell>
-                          <TableCell>{c.purpose}</TableCell>
-                          <TableCell>{c.agenda}</TableCell>
-                        </TableRow>
-                      ))}
+                      {Array.isArray(calls) &&
+                        calls.map((c, i) => (
+                          <TableRow key={i}>
+                            <TableCell>
+                              <Typography color='primary'>{c.subject}</Typography>
+                            </TableCell>
+                            <TableCell>
+                              {c.date} {c.time}
+                            </TableCell>
+                            <TableCell>{c.owner}</TableCell>
+                            <TableCell>{c.purpose}</TableCell>
+                            <TableCell>{c.agenda}</TableCell>
+                          </TableRow>
+                        ))}
                     </TableBody>
                   </Table>
                 )}
@@ -825,8 +853,8 @@ export default function OpenActivities({ leadId, leadData }) {
                 <TableHead>
                   <TableRow>
                     <TableCell>Activity Info ({allActivities.length})</TableCell>
-                    <TableCell>Owner/Host</TableCell>
-                    <TableCell>Date And Time</TableCell>
+                    <TableCell>Created By</TableCell>
+                    <TableCell>Due Date</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -840,15 +868,41 @@ export default function OpenActivities({ leadId, leadData }) {
                           </Typography>
                         )}
                         {a.type === 'Task' && (
-                          <Typography variant='body2'>
-                            Status : {a.status} | Priority : {a.priority}
+                          <Typography variant='body2' sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            Status:
+                            <span>
+                              <Chip
+                                label={a.status}
+                                size='small'
+                                sx={{
+                                  bgcolor: a.status === 'Completed' ? 'success.main' : 'warning.main',
+                                  color: '#fff',
+                                  fontWeight: 500
+                                }}
+                              />
+                            </span>
+                            | Priority:
+                            <span>
+                              <Chip
+                                label={a.priority}
+                                size='small'
+                                sx={{
+                                  bgcolor:
+                                    a.priority === 'High'
+                                      ? 'error.main'
+                                      : a.priority === 'Medium'
+                                        ? 'info.main'
+                                        : 'default',
+                                  color: '#fff',
+                                  fontWeight: 500
+                                }}
+                              />
+                            </span>
                           </Typography>
                         )}
                       </TableCell>
                       <TableCell>{a.owner}</TableCell>
-                      <TableCell>
-                        {a.date} {a.time ? a.time : ''}
-                      </TableCell>
+                      <TableCell>{a.dueDate ? dayjs(a.dueDate).format('DD MMM YYYY') : '-'}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -857,8 +911,6 @@ export default function OpenActivities({ leadId, leadData }) {
           </Card>
         </Box>
       </Card>
-      
-
     </LocalizationProvider>
   )
 }

@@ -10,10 +10,18 @@ export async function GET(req) {
 
   const { searchParams } = new URL(req.url)
   const organization_id = searchParams.get('organization_id')
+  const user_id = searchParams.get('user_id')
 
   if (!organization_id) {
     return NextResponse.json(
       { success: false, message: 'organization_id missing' },
+      { status: 400 }
+    )
+  }
+
+   if (!user_id) {
+    return NextResponse.json(
+      { success: false, message: 'user_id missing' },
       { status: 400 }
     )
   }
@@ -25,6 +33,7 @@ export async function GET(req) {
 
   const leads = await Leadform.find({
     organization_id,
+    c_createdBy:user_id,
     'values.Activity.task.reminderEnabled': true
   }).lean()
 
@@ -44,11 +53,6 @@ export async function GET(req) {
 
         const reminderDateStr = reminderDateTime.toFormat('yyyy-MM-dd')
         const reminderTimeStr = reminderDateTime.toFormat('HH:mm')
-
-        console.log(reminderDateStr, '<<< reminderDateStr')
-        console.log(nowDate, '<<< nowDate')
-        console.log(reminderTimeStr, '<<< reminderTimeStr')
-        console.log(nowTime, '<<< nowTime')
 
         checkDateTime = {
             reminderDateStr:reminderDateStr,

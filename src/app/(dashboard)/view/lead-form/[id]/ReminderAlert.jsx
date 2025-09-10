@@ -1,42 +1,34 @@
 'use client'
 import { useEffect, useState } from 'react'
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography
-} from '@mui/material'
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography } from '@mui/material'
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive'
 import Cookies from 'js-cookie'
 
 export default function ReminderAlert() {
   const [open, setOpen] = useState(false)
   const [reminder, setReminder] = useState(null)
-  const [audio] = useState(
-    typeof Audio !== 'undefined' ? new Audio('/sounds/reminder.mp3') : null
-  )
+  const [audio] = useState(typeof Audio !== 'undefined' ? new Audio('/sounds/reminder.mp3') : null)
 
-  
   useEffect(() => {
     const fetchReminders = async () => {
       try {
-        const orgId = Cookies.get("organization_id")  // client side la js-cookie use panna ok
-        const res = await fetch(`/api/cron/reminder?organization_id=${orgId}`)
+        const orgId = Cookies.get('organization_id') // client side la js-cookie use panna ok
+        const userId = Cookies.get('user_id') // client side la js-cookie use panna ok
 
-        const data = await res.json()
-
-        console.log(data,"<<< fetchReminders")
-
-        if (data?.dueReminders?.length > 0) {
-          setReminder(data.dueReminders[0])
-          setOpen(true)
-
-          if (audio) {
-            audio.loop = true
-            audio.play().catch(() => console.log('🔇 Autoplay blocked'))
+        if (orgId && userId) {
+          const res = await fetch(`/api/cron/reminder?organization_id=${orgId}&user_id=${userId}`)
+          const data = await res.json()
+          console.log(data, '<<< fetchReminders')
+          if (data?.dueReminders?.length > 0) {
+            setReminder(data.dueReminders[0])
+            setOpen(true)
+            if (audio) {
+              audio.loop = true
+              audio.play().catch(() => console.log('🔇 Autoplay blocked'))
+            }
           }
+        } else {
+          console.error('organization id or user id missing')
         }
       } catch (err) {
         console.error('Error fetching reminders', err)
@@ -74,8 +66,7 @@ export default function ReminderAlert() {
         </Typography>
         <Typography variant='body2'>Priority: {reminder?.priority}</Typography>
         <Typography variant='caption' color='error'>
-          📅 {new Date(reminder?.reminderDate).toLocaleDateString()} ⏰{' '}
-          {reminder?.reminderTime}
+          📅 {new Date(reminder?.reminderDate).toLocaleDateString()} ⏰ {reminder?.reminderTime}
         </Typography>
       </DialogContent>
       <DialogActions>
