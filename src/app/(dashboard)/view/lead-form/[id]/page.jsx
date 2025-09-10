@@ -249,7 +249,7 @@ const LeadDetailView = () => {
         {/* 🔹 Dynamic Sections */}
         {sections.map((section,index) => (
           <Box mb={4} key={section.id}>
-            <Accordion defaultExpanded={index === 0 || index === 1}>
+            <Accordion defaultExpanded={index === 0}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography variant='subtitle1' fontWeight='bold'>
                   {section.title}

@@ -1,12 +1,12 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Box, Typography, TextField, IconButton, MenuItem } from '@mui/material'
 import EditIcon from '@mui/icons-material/Edit'
 import CheckIcon from '@mui/icons-material/Check'
 import CloseIcon from '@mui/icons-material/Close'
 
-// 🔥 Import MUI Date Picker
+// 🔥 MUI Date Picker
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
@@ -18,6 +18,10 @@ const EditableField = ({ label, value: initialValue, type = 'text', options = []
   const [hover, setHover] = useState(false)
   const [error, setError] = useState(false)
   const [helperText, setHelperText] = useState('')
+
+  useEffect(() => {
+    setValue(initialValue) // Update value if initialValue changes
+  }, [initialValue])
 
   const handleSave = () => {
     if (validate) {
@@ -41,6 +45,22 @@ const EditableField = ({ label, value: initialValue, type = 'text', options = []
     setHelperText('')
   }
 
+  const handleDateChange = newValue => {
+    const formatted = newValue ? newValue.format('YYYY-MM-DD') : ''
+    setValue(formatted)
+
+    if (validate) {
+      const validationMessage = validate(formatted)
+      if (validationMessage) {
+        setError(true)
+        setHelperText(validationMessage)
+      } else {
+        setError(false)
+        setHelperText('')
+      }
+    }
+  }
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box
@@ -51,12 +71,10 @@ const EditableField = ({ label, value: initialValue, type = 'text', options = []
         onMouseLeave={() => setHover(false)}
         sx={{ mb: 2 }}
       >
-        {/* Label */}
         <Typography variant='caption' sx={{ color: 'text.secondary' }}>
           {label}
         </Typography>
 
-        {/* Value / Editor */}
         {editing ? (
           <Box display='flex' flexDirection='column' gap={0.5}>
             <Box display='flex' alignItems='center' gap={1}>
@@ -79,8 +97,8 @@ const EditableField = ({ label, value: initialValue, type = 'text', options = []
               ) : type === 'date' ? (
                 <DatePicker
                   value={value ? dayjs(value) : null}
-                  onChange={newValue => setValue(newValue ? newValue.format('YYYY-MM-DD') : '')}
-                  minDate={dayjs()} // ⬅ Prevent past dates
+                  onChange={handleDateChange}
+                  minDate={dayjs()} // prevent past dates
                   slotProps={{
                     textField: {
                       size: 'small',
