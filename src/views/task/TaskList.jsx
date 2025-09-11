@@ -99,6 +99,9 @@ export default function TaskList() {
 
       const data = await res.json()
       if (data.success) {
+
+        console.log(data.data,"<<<< DATAAAAAAA TASKKKK")
+
         setTasks(data.data)
       } else {
         setTasks([])
@@ -259,81 +262,86 @@ export default function TaskList() {
 // </Box>
             ) : (
               <Grid container spacing={2}>
-                {tasks.map((task, idx) => (
-                  <Grid item xs={12} key={idx} md={4}>
-                    <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
-                      <CardContent>
-                        <Typography
-                          variant='subtitle1'
-                          sx={{ fontWeight: 'bold', color: 'purple', display: 'flex', alignItems: 'center', gap: 1 }}
-                        >
-                          <PushPinIcon fontSize='small' /> {task.subject || 'Untitled Task'}
-                        </Typography>
+  {tasks.map((task, idx) => (
+    <Grid item xs={12} key={idx} md={4}>
+      <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
+        <CardContent>
+          {/* Task Subject */}
+          <Typography
+            variant='subtitle1'
+            sx={{ fontWeight: 'bold', color: 'purple', display: 'flex', alignItems: 'center', gap: 1 }}
+          >
+            <PushPinIcon fontSize='small' /> {task.subject || 'Untitled Task'}
+          </Typography>
 
-                        <Typography variant='body2' sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <EventIcon fontSize='small' /> <b>Due:</b>{' '}
-                          {task.dueDate ? dayjs(task.dueDate).format('DD MMM YYYY') : '-'}
-                        </Typography>
+          {/* Due Date */}
+          <Typography variant='body2' sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <EventIcon fontSize='small' /> <b>Due Date:</b> {task.dueDate ? dayjs(task.dueDate).format('DD MMM YYYY') : '-'}
+          </Typography>
 
-                        {/* Reminder Date */}
-                        {task.reminderDate && (
-                          <Typography variant='body2' sx={{ mt: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-                            {React.createElement(IconEnum.REMINDER, { fontSize: 'small' })}
-                            <b>Reminder Date:</b>
-                            {React.createElement(IconEnum.DATE, { fontSize: 'small' })}
-                            {dayjs(task.reminderDate).format('DD MMM YYYY')}
-                          </Typography>
-                        )}
+          {/* Reminder Date */}
+          {task.reminderDate && task.reminderTime && (
+            <Typography variant='body2' sx={{ mt: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+              {React.createElement(IconEnum.REMINDER, { fontSize: 'small' })}
+              <b>Reminder:</b>
+             
+              {React.createElement(IconEnum.DATE, { fontSize: 'small' })}
+              {dayjs(task.reminderDate).format('DD MMM YYYY')}
+               {React.createElement(IconEnum.TIME, { fontSize: 'small' })}
+              {dayjs(task.reminderTime, 'HH:mm').format('hh:mm A')}
+            </Typography>
+          )}
 
-                        {/* Reminder Time */}
-                        {task.reminderTime && (
-                          <Typography variant='body2' sx={{ mt: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-                            {React.createElement(IconEnum.REMINDER, { fontSize: 'small' })}
-                            <b>Reminder Time:</b>
-                            {React.createElement(IconEnum.TIME, { fontSize: 'small' })}
-                            {dayjs(task.reminderTime, 'HH:mm').format('hh:mm A')}
-                          </Typography>
-                        )}
+         
 
-                        <Typography variant='body2' sx={{ mt: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <PersonIcon fontSize='small' /> {task.owner || loggedInUserName}
-                        </Typography>
+          {/* Owner */}
+          <Typography variant='body2' sx={{ mt: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <PersonIcon fontSize='small' /> {task.owner || loggedInUserName}
+          </Typography>
 
-                        <Box mt={2} display='flex' gap={1} flexWrap='wrap'>
-                          <Chip
-                            label={task.status || 'Unknown'}
-                            sx={{
-                              backgroundColor:
-                                task.status === 'Completed'
-                                  ? '#4caf50'
-                                  : task.status === 'In Progress'
-                                    ? '#ff9800'
-                                    : task.status === 'Deferred'
-                                      ? '#9e9e9e'
-                                      : '#03a9f4',
-                              color: 'white',
-                              fontWeight: 'bold'
-                            }}
-                          />
-                          <Chip
-                            label={`Priority: ${task.priority || '-'}`}
-                            sx={{
-                              backgroundColor:
-                                task.priority === 'High'
-                                  ? '#f44336'
-                                  : task.priority === 'Medium'
-                                    ? '#ff9800'
-                                    : '#4caf50',
-                              color: 'white',
-                              fontWeight: 'bold'
-                            }}
-                          />
-                        </Box>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
+          {/* 🔹 Lead Info */}
+          <Typography variant='body2' sx={{ mt: 0.5 }}>
+            <b>User Name:</b> {task['First Name'] }{" "}{task['Last Name']}
+          </Typography> <Typography variant='body2' sx={{ mt: 0.5 }}>
+            <b>Phone:</b> {task['Phone'] || '-'}
+          </Typography>
+
+          {/* Status & Priority Chips */}
+          <Box mt={2} display='flex' gap={1} flexWrap='wrap'>
+            <Chip
+              label={task.status || 'Unknown'}
+              sx={{
+                backgroundColor:
+                  task.status === 'Completed'
+                    ? '#4caf50'
+                    : task.status === 'In Progress'
+                    ? '#ff9800'
+                    : task.status === 'Deferred'
+                    ? '#9e9e9e'
+                    : '#03a9f4',
+                color: 'white',
+                fontWeight: 'bold'
+              }}
+            />
+            <Chip
+              label={`Priority: ${task.priority || '-'}`}
+              sx={{
+                backgroundColor:
+                  task.priority === 'High'
+                    ? '#f44336'
+                    : task.priority === 'Medium'
+                    ? '#ff9800'
+                    : '#4caf50',
+                color: 'white',
+                fontWeight: 'bold'
+              }}
+            />
+          </Box>
+        </CardContent>
+      </Card>
+    </Grid>
+  ))}
+</Grid>
             )}
           </Grid>
         </Grid>

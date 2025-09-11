@@ -208,7 +208,6 @@ export default function OpenActivities({ leadId, leadData }) {
       createdBy: user_id
     }
 
-    console.log(newTask, '<<< NEW TASKKKKK')
 
     try {
       setLoader(true)

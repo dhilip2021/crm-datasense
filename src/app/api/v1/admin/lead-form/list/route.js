@@ -228,7 +228,10 @@ export async function POST(req) {
                 lead_id: '$lead_id',
                 lead_name: '$lead_name',
                 form_name: '$form_name',
-                c_createdBy: '$c_createdBy'
+                c_createdBy: '$c_createdBy',
+                'First Name': '$values.First Name',
+                'Last Name': '$values.Last Name',
+                Phone: '$values.Phone'
               }
             ]
           }
