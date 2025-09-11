@@ -176,3 +176,113 @@ export async function GET(req) {
     return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
   }
 }
+export async function POST(req) {
+  await connectMongoDB()
+
+  const verified = verifyAccessToken()
+  if (!verified.success) {
+    return NextResponse.json({ success: false, error: 'token expired!' }, { status: 400 })
+  }
+
+  try {
+    const body = await req.json()
+    const { organization_id, c_createdBy, from, to, priority, status, page = 1, limit = 10 } = body
+
+    // 🟢 STEP 1: Base query
+    const matchQuery = {}
+    if (organization_id) matchQuery.organization_id = organization_id
+
+    if (Array.isArray(c_createdBy) && c_createdBy.length > 0) {
+      matchQuery.c_createdBy = { $in: c_createdBy }
+    } else if (c_createdBy) {
+      matchQuery.c_createdBy = c_createdBy
+    }
+
+    // 🟢 STEP 2: Aggregation
+    const pipeline = [
+      { $match: matchQuery },
+      { $unwind: '$values.Activity' },
+      { $unwind: '$values.Activity.task' },
+
+      // 🔥 Ensure dueDate is always a Date
+      {
+        $addFields: {
+          'values.Activity.task.dueDate': {
+            $cond: {
+              if: { $eq: [{ $type: '$values.Activity.task.dueDate' }, 'date'] },
+              then: '$values.Activity.task.dueDate',
+              else: { $toDate: '$values.Activity.task.dueDate' }
+            }
+          }
+        }
+      },
+
+      // Flatten structure
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: [
+              '$values.Activity.task',
+              {
+                organization_id: '$organization_id',
+                lead_id: '$lead_id',
+                lead_name: '$lead_name',
+                form_name: '$form_name',
+                c_createdBy: '$c_createdBy'
+              }
+            ]
+          }
+        }
+      }
+    ]
+
+    // 🟢 STEP 3: Filters
+    const taskFilters = []
+    if (priority) taskFilters.push({ priority })
+    if (status) taskFilters.push({ status })
+    if (from || to) {
+      const dateFilter = {}
+      if (from) {
+        const start = new Date(from)
+        start.setUTCHours(0, 0, 0, 0)
+        dateFilter.$gte = start
+      }
+      if (to) {
+        const end = new Date(to)
+        end.setUTCHours(23, 59, 59, 999)
+        dateFilter.$lte = end
+      }
+      taskFilters.push({ dueDate: dateFilter })
+    }
+
+    if (taskFilters.length > 0) {
+      pipeline.push({ $match: { $and: taskFilters } })
+    }
+
+    // 🟢 STEP 4: Pagination + Sorting
+    pipeline.push({ $sort: { dueDate: 1 } })
+    pipeline.push({ $skip: (page - 1) * limit })
+    pipeline.push({ $limit: limit })
+
+    // 🟢 STEP 5: Execute main query
+    const tasks = await Leadform.aggregate(pipeline)
+
+    // 🟢 STEP 6: Count total (without skip/limit/sort)
+    const countPipeline = pipeline.filter(stage => !('$skip' in stage || '$limit' in stage || '$sort' in stage))
+    countPipeline.push({ $count: 'total' })
+    const countResult = await Leadform.aggregate(countPipeline)
+    const total = countResult[0]?.total || 0
+
+    return NextResponse.json({
+      success: true,
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      data: tasks
+    })
+  } catch (error) {
+    console.error('⨯ Task list error:', error)
+    return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
+  }
+}

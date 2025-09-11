@@ -103,6 +103,8 @@ export default function OpenActivities({ leadId, leadData }) {
   const [tasks, setTasks] = useState(sortedTasks || [])
   const [editingTask, setEditingTask] = useState(null) // holds note being edited
   const [loader, setLoader] = useState(false)
+  const [reminderTimeError, setReminderTimeError] = useState(false);
+
 
   // 🟢 Calls + Meetings (still dummy, later API integrate pannalaam)
   const meetings = []
@@ -164,6 +166,22 @@ export default function OpenActivities({ leadId, leadData }) {
     return str.length > 0 && str[0] === ' '
   }
 
+  const validateReminderTime = () => {
+    if (!taskData.reminderEnabled || !taskData.reminderTime || !taskData.reminderDate) return true
+
+    const reminderDateTime = dayjs(
+      `${dayjs(taskData.reminderDate).format('YYYY-MM-DD')} ${taskData.reminderTime}`,
+      'YYYY-MM-DD HH:mm'
+    )
+    const now = dayjs()
+
+    // If reminder is set for today, time must be >= current time
+    if (dayjs(taskData.reminderDate).isSame(now, 'day') && reminderDateTime.isBefore(now)) {
+      return false
+    }
+    return true
+  }
+
   // API call
   const saveTask = async () => {
     if (!taskData.subject || hasInitialSpace(taskData.subject)) {
@@ -189,6 +207,8 @@ export default function OpenActivities({ leadId, leadData }) {
       createdAt: new Date().toISOString(),
       createdBy: user_id
     }
+
+    console.log(newTask, '<<< NEW TASKKKKK')
 
     try {
       setLoader(true)
@@ -218,32 +238,11 @@ export default function OpenActivities({ leadId, leadData }) {
       }
 
       if (result.success) {
-        // console.log(result,"<<<  RESULTSSS")
-        // 👉 UI display format ku convert
-
-        // Format reminderDate + reminderTime
-
-        // 🟢 Local state update → new task on top
 
         const response = result.data
-
-        // Get tasks safely
         const tasks = response.values?.Activity?.[0]?.task || []
 
-        // Last task
         const lastTask = tasks.length > 0 ? tasks[tasks.length - 1] : null
-
-        // let reminderDateFormatted = ''
-        // let reminderTimeFormatted = ''
-
-        // if (lastTask.reminderDate && lastTask.reminderTime) {
-        //   const reminderDateTimeObj = new Date(`${lastTask.reminderDate.split('T')[0]}T${lastTask.reminderTime}:00`)
-        //   reminderDateFormatted = reminderDateTimeObj.toLocaleDateString()
-        //   reminderTimeFormatted = reminderDateTimeObj.toLocaleTimeString([], {
-        //     hour: '2-digit',
-        //     minute: '2-digit'
-        //   })
-        // }
 
         const formattedTask = {
           type: 'Task',
@@ -387,7 +386,10 @@ export default function OpenActivities({ leadId, leadData }) {
                       disablePast // 🚀 past date select panna mudiyadhu
                       value={taskData.dueDate ? dayjs(taskData.dueDate) : null}
                       onChange={newValue => {
-                        handleChange('dueDate', newValue ? newValue.toISOString() : '')
+                        // handleChange('dueDate', newValue ? newValue.toISOString() : '')
+                        // When saving dueDate or reminderDate
+                        handleChange('dueDate', newValue ? dayjs(newValue).format('YYYY-MM-DD') : '')
+
                         setErrorTaskData(prev => ({ ...prev, dueDate: false }))
                       }}
                       slotProps={{
@@ -470,7 +472,8 @@ export default function OpenActivities({ leadId, leadData }) {
                               disablePast // 🚀 past date select panna mudiyadhu
                               value={taskData.reminderDate ? dayjs(taskData.reminderDate) : null}
                               onChange={newValue => {
-                                handleChange('reminderDate', newValue ? newValue.toISOString() : '')
+                                // handleChange('reminderDate', newValue ? newValue.toISOString() : '')
+                                handleChange('reminderDate', newValue ? dayjs(newValue).format('YYYY-MM-DD') : '')
                                 setErrorTaskData(prev => ({ ...prev, reminderDate: false }))
                               }}
                               slotProps={{
@@ -483,12 +486,12 @@ export default function OpenActivities({ leadId, leadData }) {
                             />
                           </Grid>
                           <Grid item xs={12} sm={6}>
-                            <TimePicker
+                            {/* <TimePicker
                               label='Reminder Time'
                               value={
                                 taskData.reminderTime
                                   ? dayjs(taskData.reminderTime, 'HH:mm')
-                                  : dayjs().hour(16).minute(0) // 🟢 default 04:00 PM
+                                  : dayjs().add(5, 'minute') // 🟢 default current time + 5 mins
                               }
                               onChange={newValue =>
                                 handleChange('reminderTime', newValue ? newValue.format('HH:mm') : '')
@@ -498,6 +501,37 @@ export default function OpenActivities({ leadId, leadData }) {
                                   ? dayjs()
                                   : null
                               }
+                            /> */}
+
+                            <TimePicker
+                              label='Reminder Time'
+                              value={
+                                taskData.reminderTime ? dayjs(taskData.reminderTime, 'HH:mm') : dayjs().add(5, 'minute')
+                              }
+                              onChange={newValue => {
+                                const time = newValue ? newValue.format('HH:mm') : ''
+                                handleChange('reminderTime', time)
+
+                                // validate on change
+                                const isValid =
+                                  dayjs(
+                                    `${dayjs(taskData.reminderDate).format('YYYY-MM-DD')} ${time}`,
+                                    'YYYY-MM-DD HH:mm'
+                                  ).isAfter(dayjs()) || !dayjs(taskData.reminderDate).isSame(dayjs(), 'day')
+                                setReminderTimeError(!isValid)
+                              }}
+                              minTime={
+                                taskData.reminderDate && dayjs(taskData.reminderDate).isSame(dayjs(), 'day')
+                                  ? dayjs()
+                                  : null
+                              }
+                              slotProps={{
+                                textField: {
+                                  fullWidth: true,
+                                  error: reminderTimeError,
+                                  helperText: reminderTimeError ? 'Reminder time cannot be in the past' : ''
+                                }
+                              }}
                             />
                           </Grid>
 
@@ -544,6 +578,7 @@ export default function OpenActivities({ leadId, leadData }) {
                 </Button>
                 <Button
                   variant='contained'
+                  disabled={loader || reminderTimeError}
                   onClick={saveTask}
                   sx={{
                     borderRadius: 2,
@@ -552,7 +587,6 @@ export default function OpenActivities({ leadId, leadData }) {
                     bgcolor: '#1976d2',
                     '&:hover': { bgcolor: '#1565c0' }
                   }}
-                  disabled={loader}
                 >
                   {loader ? 'Saving...' : editingTask ? 'Update' : 'Save'}
                 </Button>
