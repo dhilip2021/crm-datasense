@@ -1,9 +1,9 @@
 'use client'
 
-import { Box, Typography, Chip, Stack, Paper } from '@mui/material'
+import { Box, Typography, Chip, Stack, Paper, Button } from '@mui/material'
 import dayjs from 'dayjs'
 
-const TaskList = ({ tasks }) => {
+const TaskList = ({ tasks, onEdit }) => {
   return (
     <Box display='grid' gap={2}>
       {tasks.map((t, i) => (
@@ -15,13 +15,22 @@ const TaskList = ({ tasks }) => {
             borderRadius: 3,
             transition: '0.3s',
             '&:hover': { boxShadow: 6, transform: 'translateY(-2px)' },
-            bgcolor: '#fff'
+            bgcolor: '#fff',
+            position: 'relative' // 🟢 position relative venum
           }}
         >
-          {/* Title */}
-          <Typography variant='h6' fontWeight='bold' color='primary' mb={1}>
-            {t.subject}
-          </Typography>
+          <Box display='flex' justifyContent='space-between' alignItems='center' mb={1}>
+            <Typography variant='h6' fontWeight='bold' color='primary' mb={1}>
+              {t.subject}
+            </Typography>
+
+            {/* ✏️ Edit Button */}
+            {onEdit && (
+              <Button size='small' variant='outlined' onClick={() => onEdit(t)}>
+                ✏️
+              </Button>
+            )}
+          </Box>
 
           {/* Dates */}
           <Box display='flex' flexWrap='wrap' gap={1} mb={1}>
@@ -33,7 +42,7 @@ const TaskList = ({ tasks }) => {
                 🔔 Reminder:
                 <Box>
                   <span>📅 {dayjs(t.reminderDate).format('DD MMM YYYY')}</span>
-                  <span> ⏰ {t.reminderTime && ` ${dayjs(`1970-01-01T${t.reminderTime}`).format('hh:mm A')}`}</span>
+                  <span>⏰ {t.reminderTime && ` ${dayjs(`1970-01-01T${t.reminderTime}`).format('hh:mm A')}`}</span>
                 </Box>
               </Typography>
             )}
@@ -45,10 +54,8 @@ const TaskList = ({ tasks }) => {
           </Typography>
 
           {/* Status + Priority Chips */}
-          <Stack direction='row' spacing={1}  mt={4} flexWrap='wrap'>
-            <Box gap={4}>
-            <Box >
-                 <Chip
+          <Stack direction='row' spacing={1} mt={2} flexWrap='wrap'>
+            <Chip
               label={t.status || 'Unknown'}
               size='small'
               sx={{
@@ -63,9 +70,7 @@ const TaskList = ({ tasks }) => {
                 color: 'text.primary'
               }}
             />
-            </Box>
-            <Box>
-                <Chip
+            <Chip
               label={`Priority: ${t.priority || 'Medium'}`}
               size='small'
               sx={{
@@ -75,11 +80,6 @@ const TaskList = ({ tasks }) => {
                 color: 'text.primary'
               }}
             />
-            </Box>
-            </Box>
-            
-           
-          
           </Stack>
         </Paper>
       ))}

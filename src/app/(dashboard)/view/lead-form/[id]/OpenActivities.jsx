@@ -42,6 +42,7 @@ import { DatePicker, TimePicker } from '@mui/x-date-pickers'
 
 import Cookies from 'js-cookie'
 import TaskList from './TaskList'
+import { toast } from 'react-toastify'
 
 // helper function for parsing date+time
 function parseDateTime(date, time) {
@@ -79,6 +80,7 @@ export default function OpenActivities({ leadId, leadData }) {
     .map(t => {
       return {
         type: 'Task',
+        _id: t._id || '',
         subject: t.subject || 'Untitled Task',
         dueDate: t.dueDate, // ✅ Using reminderDate
         priority: t.priority || 'Medium',
@@ -103,8 +105,7 @@ export default function OpenActivities({ leadId, leadData }) {
   const [tasks, setTasks] = useState(sortedTasks || [])
   const [editingTask, setEditingTask] = useState(null) // holds note being edited
   const [loader, setLoader] = useState(false)
-  const [reminderTimeError, setReminderTimeError] = useState(false);
-
+  const [reminderTimeError, setReminderTimeError] = useState(false)
 
   // 🟢 Calls + Meetings (still dummy, later API integrate pannalaam)
   const meetings = []
@@ -137,9 +138,18 @@ export default function OpenActivities({ leadId, leadData }) {
   })
 
   // Merge + sort activities
-  const allActivities = [...tasks, ...calls, ...meetings].sort(
-    (a, b) => parseDateTime(a.date, a.time) - parseDateTime(b.date, b.time)
-  )
+  // const allActivities = [...tasks, ...calls, ...meetings].sort(
+  //   (a, b) => parseDateTime(a.date, a.time) - parseDateTime(b.date, b.time)
+  // )
+
+  const allActivities = [...tasks, ...calls, ...meetings].sort((a, b) => {
+    const dateA = a.dueDate || a.date || ''
+    const timeA = a.reminderTime || a.time || ''
+    const dateB = b.dueDate || b.date || ''
+    const timeB = b.reminderTime || b.time || ''
+
+    return parseDateTime(dateA, timeA) - parseDateTime(dateB, timeB)
+  })
 
   // handle input changes
   const handleChange = (field, value) => {
@@ -147,9 +157,11 @@ export default function OpenActivities({ leadId, leadData }) {
   }
 
   const handleCancel = () => {
-    setOpenTaskDialog(false) // ✅ Open the popup
+    setOpenTaskDialog(false)
     setAddAnchor(null)
+    setEditingTask(null) // 🟢 reset
     setTaskData({
+      _id:"",
       subject: '',
       dueDate: '',
       priority: 'High',
@@ -194,88 +206,178 @@ export default function OpenActivities({ leadId, leadData }) {
       return
     }
 
-    const newTask = {
-      subject: taskData.subject,
-      dueDate: taskData.dueDate,
-      priority: taskData.priority,
-      status: taskData.status,
-      owner: taskData.owner,
-      reminderEnabled: taskData.reminderEnabled,
-      reminderDate: taskData.reminderDate,
-      reminderTime: taskData.reminderTime,
-      alertType: taskData.alertType,
-      createdAt: new Date().toISOString(),
-      createdBy: user_id
-    }
-
-
-    try {
-      setLoader(true)
-      const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken}`
-        },
-        body: JSON.stringify({
-          values: {
-            Activity: [
-              {
-                task: [newTask] // backend push pannum
-              }
-            ]
-          }
-        })
-      })
-
-      const result = await res.json()
-
-      setLoader(false)
-
-      if (!res.ok || !result.success) {
-        throw new Error(result.message || 'Server Error')
+    if (editingTask) {
+      
+      const updateTask = {
+        _id: taskData._id,
+        subject: taskData.subject,
+        dueDate: taskData.dueDate,
+        priority: taskData.priority,
+        status: taskData.status,
+        owner: taskData.owner,
+        reminderEnabled: taskData.reminderEnabled,
+        reminderDate: taskData.reminderDate,
+        reminderTime: taskData.reminderTime,
+        alertType: taskData.alertType,
+        createdAt: new Date().toISOString(),
+        createdBy: user_id
       }
 
-      if (result.success) {
+      try {
+        setLoader(true)
+        const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${getToken}`
+          },
+          body: JSON.stringify({
+            values: {
+              Activity: [
+                {
+                  task: [updateTask] // backend push pannum
+                }
+              ]
+            }
+          })
+        })
 
-        const response = result.data
-        const tasks = response.values?.Activity?.[0]?.task || []
+        const result = await res.json()
 
-        const lastTask = tasks.length > 0 ? tasks[tasks.length - 1] : null
+        setLoader(false)
 
-        const formattedTask = {
-          type: 'Task',
-          subject: lastTask.subject || 'Untitled Task',
-          dueDate: lastTask.dueDate, // ✅ Using reminderDate
-          priority: lastTask.priority || 'Medium',
-          status: lastTask.status || 'Not Started',
-          owner: lastTask.owner || 'Unknown',
-          reminderEnabled: lastTask.reminderEnabled,
-          reminderDate: lastTask.reminderDate,
-          reminderTime: lastTask.reminderTime, // ✅ Using reminderTime
-          alertType: lastTask.alertType // keep raw Date object if needed
+        if (!res.ok || !result.success) {
+          throw new Error(result.message || 'Server Error')
         }
 
-        setTasks(prev => [formattedTask, ...prev])
+        if (result.success) {
+          const response = result.data
+          const tasks = response.values?.Activity?.[0]?.task || []
+          setTasks(tasks)
 
-        // reset form + close
-        setOpenTaskDialog(false)
-        setAddAnchor(null)
-        setTaskData({
-          subject: '',
-          dueDate: '',
-          priority: 'High',
-          status: 'Not Started',
-          owner: user_name,
-          reminderEnabled: false,
-          reminderDate: '',
-          reminderTime: '',
-          alertType: 'Email'
-        })
+          toast.success("Task Updated Successfully!", {
+                  autoClose: 500, // 1 second la close
+                  position: 'bottom-center',
+                  hideProgressBar: true, // progress bar venam na
+                  closeOnClick: true,
+                  pauseOnHover: false,
+                  draggable: false,
+                  progress: undefined
+                })
+
+          setOpenTaskDialog(false)
+          setAddAnchor(null)
+          setTaskData({
+            _id: "",
+            subject: '',
+            dueDate: '',
+            priority: 'High',
+            status: 'Not Started',
+            owner: user_name,
+            reminderEnabled: false,
+            reminderDate: '',
+            reminderTime: '',
+            alertType: 'Email'
+          })
+        }
+      } catch (err) {
+        console.error('Error saving task:', err)
+        alert('❌ Failed to create task')
       }
-    } catch (err) {
-      console.error('Error saving task:', err)
-      alert('❌ Failed to create task')
+    } else {
+      const newTask = {
+        subject: taskData.subject,
+        dueDate: taskData.dueDate,
+        priority: taskData.priority,
+        status: taskData.status,
+        owner: taskData.owner,
+        reminderEnabled: taskData.reminderEnabled,
+        reminderDate: taskData.reminderDate,
+        reminderTime: taskData.reminderTime,
+        alertType: taskData.alertType,
+        createdAt: new Date().toISOString(),
+        createdBy: user_id
+      }
+
+      try {
+        setLoader(true)
+        const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${getToken}`
+          },
+          body: JSON.stringify({
+            values: {
+              Activity: [
+                {
+                  task: [newTask] // backend push pannum
+                }
+              ]
+            }
+          })
+        })
+
+        const result = await res.json()
+
+        setLoader(false)
+
+        if (!res.ok || !result.success) {
+          throw new Error(result.message || 'Server Error')
+        }
+
+        if (result.success) {
+          const response = result.data
+          const tasks = response.values?.Activity?.[0]?.task || []
+
+          const lastTask = tasks.length > 0 ? tasks[tasks.length - 1] : null
+
+          const formattedTask = {
+            type: 'Task',
+            _id: lastTask._id || '',
+            subject: lastTask.subject || 'Untitled Task',
+            dueDate: lastTask.dueDate, // ✅ Using reminderDate
+            priority: lastTask.priority || 'Medium',
+            status: lastTask.status || 'Not Started',
+            owner: lastTask.owner || 'Unknown',
+            reminderEnabled: lastTask.reminderEnabled,
+            reminderDate: lastTask.reminderDate,
+            reminderTime: lastTask.reminderTime, // ✅ Using reminderTime
+            alertType: lastTask.alertType // keep raw Date object if needed
+          }
+
+          setTasks(prev => [formattedTask, ...prev])
+
+          toast.success("Task Added Successfully!", {
+                  autoClose: 500, // 1 second la close
+                  position: 'bottom-center',
+                  hideProgressBar: true, // progress bar venam na
+                  closeOnClick: true,
+                  pauseOnHover: false,
+                  draggable: false,
+                  progress: undefined
+                })
+
+          // reset form + close
+          setOpenTaskDialog(false)
+          setAddAnchor(null)
+          setTaskData({
+            _id: "",
+            subject: '',
+            dueDate: '',
+            priority: 'High',
+            status: 'Not Started',
+            owner: user_name,
+            reminderEnabled: false,
+            reminderDate: '',
+            reminderTime: '',
+            alertType: 'Email'
+          })
+        }
+      } catch (err) {
+        console.error('Error saving task:', err)
+        alert('❌ Failed to create task')
+      }
     }
   }
 
@@ -671,7 +773,15 @@ export default function OpenActivities({ leadId, leadData }) {
                       </Button>
                     </Card>
                   ) : (
-                    <TaskList tasks={tasks} />
+                    // <TaskList tasks={tasks} />
+                    <TaskList
+                      tasks={tasks}
+                      onEdit={task => {
+                        setEditingTask(task) // 🟢 edit mode set pannidum
+                        setTaskData(task) // 🟢 form la data prefill pannidum
+                        setOpenTaskDialog(true) // 🟢 dialog open
+                      }}
+                    />
                   )}
                 </Card>
 

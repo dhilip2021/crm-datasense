@@ -171,7 +171,6 @@ export async function PUT(req, { params }) {
   }
 }
 
-
 export async function PATCH(req, { params }) {
   const verified = verifyAccessToken()
   await connectMongoDB()
@@ -294,10 +293,9 @@ export async function PATCH(req, { params }) {
       }
 
       if (updateTask) {
-        const updated = await Leadform.findOneAndUpdate(
+        const updatedTask = await Leadform.findOneAndUpdate(
           {
             lead_id,
-            'values.Activity.0.task._id': taskFromBody._id // ensure task exists
           },
           {
             $set: {
@@ -320,10 +318,12 @@ export async function PATCH(req, { params }) {
           }
         )
 
+        console.log(updatedTask, '<<< updatedTask')
+
         return NextResponse.json({
           success: true,
           message: 'Task updated successfully',
-          data: updated
+          data: updatedTask
         })
       }
 
