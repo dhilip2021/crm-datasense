@@ -42,6 +42,7 @@ export async function GET(req) {
 
   leads.forEach(lead => {
     const tasks = lead.values?.Activity?.[0]?.task || []
+    const values = lead.values || []
 
     tasks.forEach(task => {
       if (task.reminderEnabled && task.reminderDate && task.reminderTime) {
@@ -70,7 +71,11 @@ export async function GET(req) {
             owner: task.owner,
             priority: task.priority,
             reminderDate: task.reminderDate,
-            reminderTime: task.reminderTime
+            reminderTime: task.reminderTime,
+            'First Name': values['First Name'],
+            'Last Name': values['Last Name'],
+            'Company': values['Company'],
+            'Phone': values['Phone'],
           })
         }
       }
