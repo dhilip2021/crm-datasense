@@ -55,9 +55,15 @@ const EditableField = ({ label, field = {}, value: initialValue, type = 'text', 
         if (min && v.length < min) return `Minimum ${min} characters required`
         if (max && v.length > max) return `Maximum ${max} characters allowed`
         break
+      // case 'URL':
+      //   if (v && !/^(http|https):\/\/.+/.test(v)) return 'Invalid URL'
+      //   break
       case 'URL':
-        if (v && !/^(http|https):\/\/.+/.test(v)) return 'Invalid URL'
+        if (v && !/^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})(\/[^\s]*)?$/.test(v)) {
+          return 'Invalid URL'
+        }
         break
+
       case 'Date':
         if (v && new Date(v) < new Date().setHours(0, 0, 0, 0)) return 'Date cannot be in the past'
         break

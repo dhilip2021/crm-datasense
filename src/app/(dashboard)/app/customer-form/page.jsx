@@ -21,18 +21,15 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import LoaderGif from '@assets/gif/loader.gif'
 
-const shortName=(fullName)=>{
-const shortForm = fullName
-  .split(' ')
-  .map(word => word[0])
-  .join('')
-  .toUpperCase();
+const shortName = fullName => {
+  const shortForm = fullName
+    .split(' ')
+    .map(word => word[0])
+    .join('')
+    .toUpperCase()
 
-  return shortForm;
+  return shortForm
 }
-
-
-
 
 function CustomerFormAppPage() {
   const organization_id = Cookies.get('organization_id')
@@ -56,8 +53,12 @@ function CustomerFormAppPage() {
         if (!/^[6-9]\d{9}$/.test(value)) return 'Invalid phone number'
       }
       if (field.type === 'Email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Invalid email address'
-      if (field.type === 'URL' && !/^(http|https):\/\/.+/.test(value)) return 'Invalid URL'
-      if (field.type === 'Date' && new Date(value) < new Date().setHours(0, 0, 0, 0)) return 'Date cannot be in the past'
+      // if (field.type === 'URL' && !/^(http|https):\/\/.+/.test(value)) return 'Invalid URL'
+      if (field.type === 'URL' && !/^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})(\/[^\s]*)?$/.test(value)) {
+        return 'Invalid URL'
+      }
+      if (field.type === 'Date' && new Date(value) < new Date().setHours(0, 0, 0, 0))
+        return 'Date cannot be in the past'
     }
     return ''
   }
@@ -75,7 +76,7 @@ function CustomerFormAppPage() {
   const handleSubmit = async () => {
     const payload = {
       organization_id,
-      organization_name : shortName(organization_name),
+      organization_name: shortName(organization_name),
       form_name: customer_form,
       values: {},
       submittedAt: new Date().toISOString()
@@ -83,11 +84,7 @@ function CustomerFormAppPage() {
 
     const newErrors = {}
     sections.forEach(section => {
-      const fields = [
-        ...(section.fields.left || []),
-        ...(section.fields.center || []),
-        ...(section.fields.right || [])
-      ]
+      const fields = [...(section.fields.left || []), ...(section.fields.center || []), ...(section.fields.right || [])]
       fields.forEach(field => {
         const value = values[field.id]
         const error = validateField(field, value)
@@ -103,7 +100,6 @@ function CustomerFormAppPage() {
 
     setLoader(true)
 
-
     const res = await fetch('/api/v1/admin/customer-form/form-submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -114,26 +110,25 @@ function CustomerFormAppPage() {
     setLoader(false)
     if (data.success) {
       toast.success('Form submitted successfully', {
-                      autoClose: 500, // 1 second la close
-                      position: 'bottom-center',
-                      hideProgressBar: true, // progress bar venam na
-                      closeOnClick: true,
-                      pauseOnHover: false,
-                      draggable: false,
-                      progress: undefined
-                    })
+        autoClose: 500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
       router.push('/app/customer')
     } else {
       toast.error('Submission failed')
     }
-
-
-
   }
 
   const fetchForm = async () => {
     setLoader(true)
-    const res = await fetch(`/api/v1/admin/customer-form-template/single?organization_id=${organization_id}&form_name=${customer_form}`)
+    const res = await fetch(
+      `/api/v1/admin/customer-form-template/single?organization_id=${organization_id}&form_name=${customer_form}`
+    )
     const data = await res.json()
     setLoader(false)
     if (data?.success && data.data?.sections?.length > 0) {
@@ -181,19 +176,19 @@ function CustomerFormAppPage() {
         return (
           <TextField select {...commonProps}>
             {field.options?.map((opt, i) => (
-              <MenuItem key={i} value={opt}>{opt}</MenuItem>
+              <MenuItem key={i} value={opt}>
+                {opt}
+              </MenuItem>
             ))}
           </TextField>
         )
       case 'RadioButton':
         return (
           <Box>
-            <Typography variant='body2' fontWeight='bold'>{field.label}</Typography>
-            <RadioGroup
-              row
-              value={values[field.id] || ''}
-              onChange={e => handleChange(field.id, e.target.value)}
-            >
+            <Typography variant='body2' fontWeight='bold'>
+              {field.label}
+            </Typography>
+            <RadioGroup row value={values[field.id] || ''} onChange={e => handleChange(field.id, e.target.value)}>
               {field.options?.map((opt, i) => (
                 <FormControlLabel key={i} value={opt} control={<Radio />} label={opt} />
               ))}
@@ -260,23 +255,22 @@ function CustomerFormAppPage() {
       </Typography>
 
       {loader ? (
-         <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                height: "100vh", // full screen center
-                width: "100vw",
-                bgcolor: "rgba(255, 255, 255, 0.7)", // semi-transparent overlay
-                position: "fixed",
-                top: 0,
-                left: 0,
-                zIndex: 1300, // above all dialogs
-              }}
-            >
-                <Image src={LoaderGif} alt="loading" width={200} height={200} />
-               
-            </Box>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100vh', // full screen center
+            width: '100vw',
+            bgcolor: 'rgba(255, 255, 255, 0.7)', // semi-transparent overlay
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            zIndex: 1300 // above all dialogs
+          }}
+        >
+          <Image src={LoaderGif} alt='loading' width={200} height={200} />
+        </Box>
       ) : !loader && sections.length === 0 ? (
         <></>
       ) : (
@@ -284,18 +278,24 @@ function CustomerFormAppPage() {
           {sections.map((section, sIndex) => (
             <Card key={sIndex} sx={{ mb: 4, borderLeft: '8px solid #8c57ff' }}>
               <CardContent>
-                <Typography variant='h6' fontWeight='bold' mb={2}>{section.title || `Section ${sIndex + 1}`}</Typography>
+                <Typography variant='h6' fontWeight='bold' mb={2}>
+                  {section.title || `Section ${sIndex + 1}`}
+                </Typography>
                 {renderLayoutGrid(section)}
               </CardContent>
             </Card>
           ))}
           <Box display='flex' justifyContent='flex-end' gap={2}>
-            <Button variant='outlined' color='secondary' onClick={() => router.push('/app/customer')}>Cancel</Button>
-            <Button variant='contained' color='primary' onClick={handleSubmit}>Submit</Button>
+            <Button variant='outlined' color='secondary' onClick={() => router.push('/app/customer')}>
+              Cancel
+            </Button>
+            <Button variant='contained' color='primary' onClick={handleSubmit}>
+              Submit
+            </Button>
           </Box>
         </>
       )}
-   <ToastContainer
+      <ToastContainer
         position='bottom-center'
         autoClose={500} // all toasts auto close
         hideProgressBar

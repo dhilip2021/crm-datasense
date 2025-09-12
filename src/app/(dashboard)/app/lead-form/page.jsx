@@ -83,7 +83,7 @@ function LeadFormAppPage() {
   const [countryCodes, setCountryCodes] = useState([])
   const [userList, setUserList] = useState([])
 
-    // 🚨 Duplicate Dialog States
+  // 🚨 Duplicate Dialog States
   const [duplicateDialog, setDuplicateDialog] = useState(false)
   const [duplicateLead, setDuplicateLead] = useState(null)
   const [pendingPayload, setPendingPayload] = useState(null)
@@ -155,7 +155,10 @@ function LeadFormAppPage() {
         if (min && value.length < min) return `Minimum ${min} characters required`
         if (max && value.length > max) return `Maximum ${max} characters allowed`
       }
-      if (field.type === 'URL' && !/^(http|https):\/\/.+/.test(value)) return 'Invalid URL'
+      // if (field.type === 'URL' && !/^(http|https):\/\/.+/.test(value)) return 'Invalid URL'
+      if (field.type === 'URL' && !/^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})(\/[^\s]*)?$/.test(value)) {
+        return 'Invalid URL'
+      }
       if (field.type === 'Date' && new Date(value) < new Date().setHours(0, 0, 0, 0)) {
         return 'Date cannot be in the past'
       }
@@ -304,7 +307,7 @@ function LeadFormAppPage() {
       const data = await res.json()
       setLoader(false)
 
-        // 🚨 Duplicate Handling
+      // 🚨 Duplicate Handling
       if (data.duplicate) {
         setDuplicateLead(data.existingLead)
         setPendingPayload(payload)
@@ -450,61 +453,59 @@ function LeadFormAppPage() {
       case 'Multi-Line':
         return <TextField id={field.id} {...commonProps} multiline minRows={field.rows || 3} />
 
-     case 'Phone':
-  return (
-    <TextField
-      id={field.id}
-      {...commonProps}
-      value={values[`${field.id}_number`] || ''}
-      onChange={e => handleChange(`${field.id}_number`, e.target.value, field.type)}
-      type="tel"
-      inputProps={{ maxLength: field.maxLength }}
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">
-            <Autocomplete
-  options={countryCodes}
-  getOptionLabel={(option) =>
-    typeof option === 'string'
-      ? option
-      : `${option.code} ${option.dial_code}`
-  }
-  freeSolo   // ✅ allows typing custom values
-  value={
-    countryCodes.find(
-      (c) =>
-        c.dial_code ===
-        (values[`${field.id}_countryCode`] || field.countryCode || '+91')
-    ) || values[`${field.id}_countryCode`] || ''
-  }
-  onChange={(_, newValue) => {
-    if (typeof newValue === 'string') {
-      handleChange(`${field.id}_countryCode`, newValue, field.type);
-    } else if (newValue && 'dial_code' in newValue) {
-      handleChange(`${field.id}_countryCode`, newValue.dial_code, field.type);
-    } else {
-      handleChange(`${field.id}_countryCode`, '', field.type);
-    }
-  }}
-  size="small"
-  sx={{ minWidth: 120 }}
-  renderInput={(params) => (
-    <TextField
-      {...params}
-      variant="standard"
-      placeholder="+91"
-      InputProps={{
-        ...params.InputProps,
-        disableUnderline: true,
-      }}
-    />
-  )}
-/>
-          </InputAdornment>
+      case 'Phone':
+        return (
+          <TextField
+            id={field.id}
+            {...commonProps}
+            value={values[`${field.id}_number`] || ''}
+            onChange={e => handleChange(`${field.id}_number`, e.target.value, field.type)}
+            type='tel'
+            inputProps={{ maxLength: field.maxLength }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position='start'>
+                  <Autocomplete
+                    options={countryCodes}
+                    getOptionLabel={option =>
+                      typeof option === 'string' ? option : `${option.code} ${option.dial_code}`
+                    }
+                    freeSolo // ✅ allows typing custom values
+                    value={
+                      countryCodes.find(
+                        c => c.dial_code === (values[`${field.id}_countryCode`] || field.countryCode || '+91')
+                      ) ||
+                      values[`${field.id}_countryCode`] ||
+                      ''
+                    }
+                    onChange={(_, newValue) => {
+                      if (typeof newValue === 'string') {
+                        handleChange(`${field.id}_countryCode`, newValue, field.type)
+                      } else if (newValue && 'dial_code' in newValue) {
+                        handleChange(`${field.id}_countryCode`, newValue.dial_code, field.type)
+                      } else {
+                        handleChange(`${field.id}_countryCode`, '', field.type)
+                      }
+                    }}
+                    size='small'
+                    sx={{ minWidth: 120 }}
+                    renderInput={params => (
+                      <TextField
+                        {...params}
+                        variant='standard'
+                        placeholder='+91'
+                        InputProps={{
+                          ...params.InputProps,
+                          disableUnderline: true
+                        }}
+                      />
+                    )}
+                  />
+                </InputAdornment>
+              )
+            }}
+          />
         )
-      }}
-    />
-  )
 
       case 'Email':
         return <TextField id={field.id} {...commonProps} type='email' />
@@ -581,9 +582,8 @@ function LeadFormAppPage() {
   }, [])
 
   useEffect(() => {
-    console.log(countryCodes,"<<< COUNTY CODES")
+    console.log(countryCodes, '<<< COUNTY CODES')
   }, [countryCodes])
-  
 
   return (
     <Box px={4} py={4} sx={{ background: '#f9f9f9', minHeight: '100vh' }}>
@@ -629,19 +629,25 @@ function LeadFormAppPage() {
         </>
       )}
 
-       {/* 🚨 Duplicate Dialog */}
+      {/* 🚨 Duplicate Dialog */}
       <Dialog open={duplicateDialog} onClose={() => setDuplicateDialog(false)} maxWidth='sm' fullWidth>
         <DialogTitle>Duplicate Lead Detected</DialogTitle>
         <DialogContent dividers>
-          <Typography>
-            A lead with the same email/phone already exists:
-          </Typography>
+          <Typography>A lead with the same email/phone already exists:</Typography>
           {duplicateLead && (
             <Box mt={2} p={2} sx={{ bgcolor: '#f5f5f5', borderRadius: 2 }}>
-              <Typography variant='body2'><strong>Lead ID:</strong> {duplicateLead.lead_id}</Typography>
-              <Typography variant='body2'><strong>Name:</strong> {duplicateLead.lead_name}</Typography>
-              <Typography variant='body2'><strong>Email:</strong> {duplicateLead.values?.Email || '—'}</Typography>
-              <Typography variant='body2'><strong>Phone:</strong> {duplicateLead.values?.Phone || '—'}</Typography>
+              <Typography variant='body2'>
+                <strong>Lead ID:</strong> {duplicateLead.lead_id}
+              </Typography>
+              <Typography variant='body2'>
+                <strong>Name:</strong> {duplicateLead.lead_name}
+              </Typography>
+              <Typography variant='body2'>
+                <strong>Email:</strong> {duplicateLead.values?.Email || '—'}
+              </Typography>
+              <Typography variant='body2'>
+                <strong>Phone:</strong> {duplicateLead.values?.Phone || '—'}
+              </Typography>
             </Box>
           )}
           <Typography mt={2}>Do you want to merge this lead with your submission?</Typography>
@@ -655,14 +661,14 @@ function LeadFormAppPage() {
           </Button>
         </DialogActions>
       </Dialog>
-       <ToastContainer
-              position='bottom-center'
-              autoClose={500} // all toasts auto close
-              hideProgressBar
-              closeOnClick
-              pauseOnHover={false}
-              draggable={false}
-            />
+      <ToastContainer
+        position='bottom-center'
+        autoClose={500} // all toasts auto close
+        hideProgressBar
+        closeOnClick
+        pauseOnHover={false}
+        draggable={false}
+      />
     </Box>
   )
 }

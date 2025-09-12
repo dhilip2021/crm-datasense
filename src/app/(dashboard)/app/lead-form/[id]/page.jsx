@@ -152,7 +152,10 @@ function LeadFormAppIdPage() {
         if (min && value.length < min) return `Minimum ${min} characters required`
         if (max && value.length > max) return `Maximum ${max} characters allowed`
       }
-      if (field.type === 'URL' && !/^(http|https):\/\/.+/.test(value)) return 'Invalid URL'
+      // if (field.type === 'URL' && !/^(http|https):\/\/.+/.test(value)) return 'Invalid URL'
+      if (field.type === 'URL' && !/^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})(\/[^\s]*)?$/.test(value)) {
+        return 'Invalid URL'
+      }
       if (field.type === 'Date' && new Date(value) < new Date().setHours(0, 0, 0, 0)) {
         return 'Date cannot be in the past'
       }
@@ -242,7 +245,7 @@ function LeadFormAppIdPage() {
       submittedAt: new Date().toISOString()
     }
 
-    console.log(payload,"PALOADDD")
+    console.log(payload, 'PALOADDD')
 
     sections.forEach(section => {
       const allFields = [
@@ -519,21 +522,21 @@ function LeadFormAppIdPage() {
 
       {loader && (
         <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    height: '100vh', // full screen center
-                    width: '100vw',
-                    bgcolor: 'rgba(255, 255, 255, 0.7)', // semi-transparent overlay
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    zIndex: 1300 // above all dialogs
-                  }}
-                >
-                  <Image src={LoaderGif} alt='loading' width={200} height={200} />
-                </Box>
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100vh', // full screen center
+            width: '100vw',
+            bgcolor: 'rgba(255, 255, 255, 0.7)', // semi-transparent overlay
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            zIndex: 1300 // above all dialogs
+          }}
+        >
+          <Image src={LoaderGif} alt='loading' width={200} height={200} />
+        </Box>
       )}
 
       {/* {!loader && sections.length === 0 && (
@@ -566,14 +569,14 @@ function LeadFormAppIdPage() {
           </Button>
         </Box>
       )}
-       <ToastContainer
-              position='bottom-center'
-              autoClose={500} // all toasts auto close
-              hideProgressBar
-              closeOnClick
-              pauseOnHover={false}
-              draggable={false}
-            />
+      <ToastContainer
+        position='bottom-center'
+        autoClose={500} // all toasts auto close
+        hideProgressBar
+        closeOnClick
+        pauseOnHover={false}
+        draggable={false}
+      />
     </Box>
   )
 }
