@@ -103,73 +103,149 @@ export async function GET(req, { params }) {
   }
 }
 
+
+
+
+
 // 🔁 PUT – Update lead by lead_id
+// export async function PUT(req, { params }) {
+//   const verified = verifyAccessToken()
+
+//   await connectMongoDB()
+//   const { lead_id } = params
+//   const body = await req.json()
+
+//   if (verified.success) {
+//     try {
+//       const lead = await Leadform.findOne({ lead_id })
+
+//       if (!lead) {
+//         return NextResponse.json({ success: false, message: 'Lead not found' }, { status: 404 })
+//       }
+
+//       // 🔁 Recalculate lead score before update
+//       const { lead_score, lead_label } = calculateLeadScore(body.values || {})
+
+//       const updatedValues = {
+//         ...body.values,
+//         Score: lead_score,
+//         Label: lead_label
+//       }
+
+//       // 📝 Fields to update
+//       const updateFields = {
+//         values: updatedValues,
+//         updatedAt: new Date()
+//       }
+
+//       // 🚀 Include lead_name if provided
+//       if (body.lead_name) {
+//         updateFields.lead_name = body.lead_name
+//       }
+
+//       if (body.lead_slug_name) {
+//         updateFields.lead_slug_name = body.lead_slug_name
+//       }
+
+//       // 🚀 Include form_name if provided
+//       if (body.form_name) {
+//         updateFields.form_name = body.form_name
+//       }
+
+//       const updated = await Leadform.findOneAndUpdate({ lead_id }, { $set: updateFields }, { new: true })
+
+//       return NextResponse.json({
+//         success: true,
+//         message: 'Lead updated successfully !!!',
+//         data: updated
+//       })
+//     } catch (error) {
+//       console.error('⨯ Lead update error:', error)
+//       return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
+//     }
+//   } else {
+//     return NextResponse.json(
+//       {
+//         success: false,
+//         message: '',
+//         error: 'token expired!'
+//       },
+//       { status: 400 }
+//     )
+//   }
+// }
+
+function normalizeIds(values) {
+  const normalized = { ...values }
+
+  // 🔁 Notes
+  if (Array.isArray(normalized.Notes)) {
+    normalized.Notes = normalized.Notes.map(note => ({
+      ...note,
+      _id: note._id ? new mongoose.Types.ObjectId(note._id) : new mongoose.Types.ObjectId()
+    }))
+  }
+
+  // 🔁 Activity + Tasks
+  if (Array.isArray(normalized.Activity)) {
+    normalized.Activity = normalized.Activity.map(act => ({
+      ...act,
+      task: Array.isArray(act.task)
+        ? act.task.map(t => ({
+            ...t,
+            _id: t._id ? new mongoose.Types.ObjectId(t._id) : new mongoose.Types.ObjectId()
+          }))
+        : []
+    }))
+  }
+
+  return normalized
+}
+
 export async function PUT(req, { params }) {
   const verified = verifyAccessToken()
-
   await connectMongoDB()
   const { lead_id } = params
   const body = await req.json()
 
-  if (verified.success) {
-    try {
-      const lead = await Leadform.findOne({ lead_id })
+  if (!verified.success) {
+    return NextResponse.json({ success: false, error: 'token expired!' }, { status: 400 })
+  }
 
-      if (!lead) {
-        return NextResponse.json({ success: false, message: 'Lead not found' }, { status: 404 })
-      }
-
-      // 🔁 Recalculate lead score before update
-      const { lead_score, lead_label } = calculateLeadScore(body.values || {})
-
-      const updatedValues = {
-        ...body.values,
-        Score: lead_score,
-        Label: lead_label
-      }
-
-      // 📝 Fields to update
-      const updateFields = {
-        values: updatedValues,
-        updatedAt: new Date()
-      }
-
-      // 🚀 Include lead_name if provided
-      if (body.lead_name) {
-        updateFields.lead_name = body.lead_name
-      }
-
-      if (body.lead_slug_name) {
-        updateFields.lead_slug_name = body.lead_slug_name
-      }
-
-      // 🚀 Include form_name if provided
-      if (body.form_name) {
-        updateFields.form_name = body.form_name
-      }
-
-      const updated = await Leadform.findOneAndUpdate({ lead_id }, { $set: updateFields }, { new: true })
-
-      return NextResponse.json({
-        success: true,
-        message: 'Lead updated successfully !!!',
-        data: updated
-      })
-    } catch (error) {
-      console.error('⨯ Lead update error:', error)
-      return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
+  try {
+    const lead = await Leadform.findOne({ lead_id })
+    if (!lead) {
+      return NextResponse.json({ success: false, message: 'Lead not found' }, { status: 404 })
     }
-  } else {
-    return NextResponse.json(
-      {
-        success: false,
-        message: '',
-        error: 'token expired!'
-      },
-      { status: 400 }
-    )
+
+    // 🔁 Normalize ObjectIds
+    const normalizedValues = normalizeIds(body.values || {})
+
+    // 🔁 Recalculate score
+    const { lead_score, lead_label } = calculateLeadScore(normalizedValues)
+
+    const updateFields = {
+      values: { ...normalizedValues, Score: lead_score, Label: lead_label },
+      updatedAt: new Date()
+    }
+
+    if (body.lead_name) updateFields.lead_name = body.lead_name
+    if (body.lead_slug_name) updateFields.lead_slug_name = body.lead_slug_name
+    if (body.form_name) updateFields.form_name = body.form_name
+
+    const updated = await Leadform.findOneAndUpdate({ lead_id }, { $set: updateFields }, { new: true })
+
+    return NextResponse.json({
+      success: true,
+      message: 'Lead updated successfully !!!',
+      data: updated
+    })
+  } catch (error) {
+    console.error('⨯ Lead update error:', error)
+    return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
   }
 }
+
 
 export async function PATCH(req, { params }) {
   const verified = verifyAccessToken()
@@ -261,27 +337,35 @@ export async function PATCH(req, { params }) {
       }
 
       if (updateNote) {
+        const noteId = new mongoose.Types.ObjectId(noteFromBody._id)
         // Update an existing note by its _id
         const updated = await Leadform.findOneAndUpdate(
-          { lead_id, 'values.Notes._id': noteFromBody._id }, // match lead + note _id
+          { lead_id },
           {
             $set: {
-              'values.Notes.$.title': updateNote.title,
-              'values.Notes.$.note': updateNote.note,
-              'values.Notes.$.createdAt': updateNote.createdAt,
-              'values.Notes.$.createdBy': updateNote.createdBy,
+              'values.Notes.$[n].title': updateNote.title,
+              'values.Notes.$[n].note': updateNote.note,
+              'values.Notes.$[n].createdAt': updateNote.createdAt,
+              'values.Notes.$[n].createdBy': updateNote.createdBy,
               updatedAt: new Date()
             }
           },
-          { new: true }
+          {
+            arrayFilters: [{ 'n._id': noteId }],
+            new: true
+          }
         )
 
         return NextResponse.json({
           success: true,
-          message: 'Note updated successfully 1',
+          message: 'Note updated successfully',
           data: updated
         })
       }
+
+
+
+      // TASK CODE
 
       if (newTask) {
         // If no Activity array exist → create one
@@ -293,9 +377,10 @@ export async function PATCH(req, { params }) {
       }
 
       if (updateTask) {
+         const taskId = new mongoose.Types.ObjectId(taskFromBody._id)
         const updatedTask = await Leadform.findOneAndUpdate(
           {
-            lead_id,
+            lead_id
           },
           {
             $set: {
@@ -313,7 +398,7 @@ export async function PATCH(req, { params }) {
             }
           },
           {
-            arrayFilters: [{ 't._id': new mongoose.Types.ObjectId(taskFromBody._id) }],
+            arrayFilters: [{ 't._id': taskId }],
             new: true
           }
         )
@@ -353,8 +438,6 @@ export async function PATCH(req, { params }) {
     )
   }
 }
-
-
 
 // export async function PATCH(req, { params }) {
 //   const verified = verifyAccessToken()
@@ -507,4 +590,3 @@ export async function PATCH(req, { params }) {
 //     return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
 //   }
 // }
-
