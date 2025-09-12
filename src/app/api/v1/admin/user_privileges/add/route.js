@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
 import { UserPrivileges } from "../../../../../../models/userPrivilegesModel";
 import connectMongoDB from "../../../../../../libs/mongodb";
-import {
-  create_UUID,
-  verifyAccessToken,
-} from "../../../../../../helper/helper";
+import { create_UUID, verifyAccessToken } from "@/helper/clientHelper";
+
 
 let sendResponse = {
   appStatusCode: "",

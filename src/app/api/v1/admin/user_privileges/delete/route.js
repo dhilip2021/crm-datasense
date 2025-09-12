@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { UserPrivileges } from "../../../../../../models/userPrivilegesModel";
 import connectMongoDB from "../../../../../../libs/mongodb";
-import { verifyAccessToken } from "@/helper/helper";
+import { verifyAccessToken } from "@/helper/clientHelper";
 
 let sendResponse = {
   appStatusCode: "",

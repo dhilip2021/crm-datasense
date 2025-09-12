@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-// import { verifyAccessToken } from "@/helper/helper";
 import connectMongoDB from '@/libs/mongodb'
 import { UserPrivileges } from '@/models/userPrivilegesModel'
 import { verifyAccessToken } from '@/helper/clientHelper'

@@ -564,6 +564,11 @@ const Login = ({ mode }) => {
       }
     } else if (results?.appStatusCode === 0) {
       const resultsPayloadJson = decrypCryptoRequest(results.payloadJson)
+
+      console.log(resultsPayloadJson,"<<< LOGIN RESULTSSS")
+
+
+
       const dispatchLogin = {
         appStatusCode: results?.appStatusCode,
         message: results?.message,
@@ -620,6 +625,7 @@ const Login = ({ mode }) => {
           Cookies.set('_token', resultsPayloadJson?.tokenAccess)
           Cookies.set('_token_expiry', resultsPayloadJson?.tokenExpiry)
           Cookies.set('role_id', resultsPayloadJson?.c_role_id)
+          Cookies.set('email', resultsPayloadJson?.email)
           Cookies.set('user_id', resultsPayloadJson?.user_id)
           Cookies.set('organization_id', resultsPayloadJson?.organization_id)
           Cookies.set('organization_name', resultsPayloadJson?.organization_name)
@@ -671,6 +677,7 @@ const Login = ({ mode }) => {
         Cookies.set('_token', resultsPayloadJson?.tokenAccess)
         Cookies.set('_token_expiry', resultsPayloadJson?.tokenExpiry)
         Cookies.set('role_id', resultsPayloadJson?.c_role_id)
+         Cookies.set('email', resultsPayloadJson?.email)
         Cookies.set('user_id', resultsPayloadJson?.user_id)
         Cookies.set('organization_id', resultsPayloadJson?.organization_id)
         Cookies.set('organization_name', resultsPayloadJson?.organization_name)
