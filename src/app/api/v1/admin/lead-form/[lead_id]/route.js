@@ -353,3 +353,158 @@ export async function PATCH(req, { params }) {
     )
   }
 }
+
+
+
+// export async function PATCH(req, { params }) {
+//   const verified = verifyAccessToken()
+//   await connectMongoDB()
+//   const { lead_id } = params
+//   const body = await req.json()
+
+//   if (!verified.success) {
+//     return NextResponse.json({ success: false, error: 'token expired!' }, { status: 400 })
+//   }
+
+//   try {
+//     let lead = await Leadform.findOne({ lead_id })
+//     if (!lead) {
+//       return NextResponse.json({ success: false, message: 'Lead not found' }, { status: 404 })
+//     }
+
+//     // ✅ normalize Activity to array if object
+//     if (lead.values?.Activity && !Array.isArray(lead.values.Activity)) {
+//       lead.values.Activity = Object.values(lead.values.Activity)
+//       await lead.save()
+//     }
+
+//     let newNote = null
+//     let updateNote = null
+//     let newTask = null
+//     let updateTask = null
+
+//     // ---------------- NOTES ----------------
+//     const noteFromBody = body.values?.Notes?.[0] || {}
+//     if (noteFromBody && (noteFromBody.title || noteFromBody.note)) {
+//       if (noteFromBody._id) {
+//         updateNote = {
+//           title: noteFromBody.title || null,
+//           note: noteFromBody.note || null,
+//           createdAt: noteFromBody.createdAt ? new Date(noteFromBody.createdAt) : new Date(),
+//           createdBy: noteFromBody.createdBy || null
+//         }
+//       } else {
+//         newNote = {
+//           _id: new mongoose.Types.ObjectId(),
+//           title: noteFromBody.title || null,
+//           note: noteFromBody.note || null,
+//           createdAt: noteFromBody.createdAt ? new Date(noteFromBody.createdAt) : new Date(),
+//           createdBy: noteFromBody.createdBy || null
+//         }
+//       }
+//     }
+
+//     // ---------------- TASK ----------------
+//     const activityFromBody = body.values?.Activity?.[0] || {}
+//     const taskFromBody = activityFromBody.task?.[0] || {}
+//     if (taskFromBody && (taskFromBody.subject || taskFromBody.dueDate)) {
+//       if (taskFromBody._id) {
+//         updateTask = {
+//           subject: taskFromBody.subject || null,
+//           dueDate: taskFromBody.dueDate ? new Date(taskFromBody.dueDate) : null,
+//           priority: taskFromBody.priority || null,
+//           status: taskFromBody.status || null,
+//           owner: taskFromBody.owner || null,
+//           reminderEnabled: !!taskFromBody.reminderEnabled,
+//           reminderDate: taskFromBody.reminderDate ? new Date(taskFromBody.reminderDate) : null,
+//           reminderTime: taskFromBody.reminderTime || null,
+//           alertType: taskFromBody.alertType || 'Email',
+//           createdAt: new Date()
+//         }
+//       } else {
+//         newTask = {
+//           _id: new mongoose.Types.ObjectId(),
+//           subject: taskFromBody.subject || null,
+//           dueDate: taskFromBody.dueDate ? new Date(taskFromBody.dueDate) : null,
+//           priority: taskFromBody.priority || null,
+//           status: taskFromBody.status || null,
+//           owner: taskFromBody.owner || null,
+//           reminderEnabled: !!taskFromBody.reminderEnabled,
+//           reminderDate: taskFromBody.reminderDate ? new Date(taskFromBody.reminderDate) : null,
+//           reminderTime: taskFromBody.reminderTime || null,
+//           alertType: taskFromBody.alertType || 'Email',
+//           createdAt: new Date()
+//         }
+//       }
+//     }
+
+//     // ---------------- UPDATE QUERY ----------------
+//     const updateQuery = { $set: { updatedAt: new Date() } }
+
+//     if (newNote) {
+//       updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Notes': newNote }
+//     }
+
+//     if (updateNote) {
+//       const updated = await Leadform.findOneAndUpdate(
+//         { lead_id, 'values.Notes._id': new mongoose.Types.ObjectId(noteFromBody._id) },
+//         {
+//           $set: {
+//             'values.Notes.$.title': updateNote.title,
+//             'values.Notes.$.note': updateNote.note,
+//             'values.Notes.$.createdAt': updateNote.createdAt,
+//             'values.Notes.$.createdBy': updateNote.createdBy,
+//             updatedAt: new Date()
+//           }
+//         },
+//         { new: true }
+//       )
+//       return NextResponse.json({ success: true, message: 'Note updated successfully', data: updated })
+//     }
+
+//     if (newTask) {
+//       if (!lead.values?.Activity || lead.values.Activity.length === 0) {
+//         lead.values.Activity = [{ task: [] }]
+//         await lead.save()
+//       }
+//       updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Activity.0.task': newTask }
+//     }
+
+//     if (updateTask) {
+//       const updatedTask = await Leadform.findOneAndUpdate(
+//         { lead_id },
+//         {
+//           $set: {
+//             'values.Activity.0.task.$[t].subject': updateTask.subject,
+//             'values.Activity.0.task.$[t].dueDate': updateTask.dueDate,
+//             'values.Activity.0.task.$[t].priority': updateTask.priority,
+//             'values.Activity.0.task.$[t].status': updateTask.status,
+//             'values.Activity.0.task.$[t].owner': updateTask.owner,
+//             'values.Activity.0.task.$[t].reminderEnabled': updateTask.reminderEnabled,
+//             'values.Activity.0.task.$[t].reminderDate': updateTask.reminderDate,
+//             'values.Activity.0.task.$[t].reminderTime': updateTask.reminderTime,
+//             'values.Activity.0.task.$[t].alertType': updateTask.alertType,
+//             'values.Activity.0.task.$[t].createdAt': updateTask.createdAt,
+//             updatedAt: new Date()
+//           }
+//         },
+//         {
+//           arrayFilters: [{ 't._id': new mongoose.Types.ObjectId(taskFromBody._id) }],
+//           new: true
+//         }
+//       )
+//       return NextResponse.json({ success: true, message: 'Task updated successfully', data: updatedTask })
+//     }
+
+//     if (!updateQuery.$push) {
+//       return NextResponse.json({ success: false, message: 'Nothing to update' }, { status: 400 })
+//     }
+
+//     const updated = await Leadform.findOneAndUpdate({ lead_id }, updateQuery, { new: true, upsert: true })
+//     return NextResponse.json({ success: true, message: 'Note & Activity Task added successfully', data: updated })
+//   } catch (error) {
+//     console.error('⨯ Add note+activity error:', error)
+//     return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
+//   }
+// }
+

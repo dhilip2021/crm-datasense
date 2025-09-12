@@ -26,6 +26,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
+import Link from 'next/link'
+import { encryptCryptoRes } from '@/helper/frontendHelper'
 dayjs.extend(customParseFormat)
 
 const IconEnum = {
@@ -264,7 +266,11 @@ export default function TaskList() {
               <Grid container spacing={2}>
   {tasks.map((task, idx) => (
     <Grid item xs={12} key={idx} md={4}>
-      <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
+       <Link
+                                  href={`/view/lead-form/${encodeURIComponent(encryptCryptoRes(task['lead_id']))}`}
+                                  style={{ textDecoration: 'none' }}
+                                >
+                                  <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
         <CardContent>
           {/* Task Subject */}
           <Typography
@@ -301,8 +307,13 @@ export default function TaskList() {
 
           {/* 🔹 Lead Info */}
           <Typography variant='body2' sx={{ mt: 0.5 }}>
+             <b>Company:</b> {task['Company'] }{" "}
+          </Typography>
+          <Typography variant='body2' sx={{ mt: 0.5 }}>
+           
             <b>User Name:</b> {task['First Name'] }{" "}{task['Last Name']}
-          </Typography> <Typography variant='body2' sx={{ mt: 0.5 }}>
+          </Typography> 
+          <Typography variant='body2' sx={{ mt: 0.5 }}>
             <b>Phone:</b> {task['Phone'] || '-'}
           </Typography>
 
@@ -339,6 +350,9 @@ export default function TaskList() {
           </Box>
         </CardContent>
       </Card>
+
+                                </Link>
+      
     </Grid>
   ))}
 </Grid>

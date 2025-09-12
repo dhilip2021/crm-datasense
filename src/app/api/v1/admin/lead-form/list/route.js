@@ -231,6 +231,7 @@ export async function POST(req) {
                 c_createdBy: '$c_createdBy',
                 'First Name': '$values.First Name',
                 'Last Name': '$values.Last Name',
+                'Company': '$values.Company',
                 Phone: '$values.Phone'
               }
             ]
