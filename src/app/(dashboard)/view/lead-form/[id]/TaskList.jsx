@@ -4,6 +4,10 @@ import { Box, Typography, Chip, Stack, Paper, Button } from '@mui/material'
 import dayjs from 'dayjs'
 
 const TaskList = ({ tasks, onEdit }) => {
+
+  console.log(tasks,"<<< Tasksss List")
+
+
   return (
     <Box display='grid' gap={2}>
       {tasks.map((t, i) => (
@@ -39,7 +43,7 @@ const TaskList = ({ tasks, onEdit }) => {
             </Typography>
             {t.reminderDate && (
               <Typography variant='body2' color='secondary'>
-                🔔 Reminder:
+                🔔 Reminder: {t.alertType}
                 <Box>
                   <span>📅 {dayjs(t.reminderDate).format('DD MMM YYYY')}</span>
                   <span>⏰ {t.reminderTime && ` ${dayjs(`1970-01-01T${t.reminderTime}`).format('hh:mm A')}`}</span>
