@@ -16,6 +16,8 @@ import {
   TablePagination
 } from '@mui/material'
 import dayjs from 'dayjs'
+import Link from 'next/link'
+import { encryptCryptoRes } from '@/helper/frontendHelper'
 
 function TableTaskList({ loading, tasks }) {
   const [page, setPage] = useState(0)
@@ -61,9 +63,15 @@ function TableTaskList({ loading, tasks }) {
             .map((task, idx) => (
               <TableRow key={task._id || idx}>
                 <TableCell>
-                  <Typography fontWeight="bold" color="primary">
+                  <Link
+                                  href={`/view/lead-form/${encodeURIComponent(encryptCryptoRes(task['lead_id']))}`}
+                                  style={{ textDecoration: 'none' }}
+                                >
+                                  <Typography fontWeight="bold" color="primary">
                     {task.subject || 'Untitled Task'}
                   </Typography>
+                                </Link>
+                  
                 </TableCell>
                 <TableCell>{task.owner}</TableCell>
                 <TableCell>{task.Company || '-'}</TableCell>

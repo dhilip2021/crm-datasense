@@ -19,8 +19,12 @@ import {
   Box,
   Chip
 } from '@mui/material'
+import Link from 'next/link'
+import { encryptCryptoRes } from '@/helper/frontendHelper'
 
 export default function GoogleCalandarList({ tasks }) {
+  console.log(tasks, '<<<<TASSSSSSS')
+
   const [open, setOpen] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState(null)
 
@@ -34,14 +38,10 @@ export default function GoogleCalandarList({ tasks }) {
       owner: task.owner,
       company: task.Company,
       phone: task.Phone,
-      priority: task.priority
+      priority: task.priority,
+      lead_id: task.lead_id
     },
-    color:
-      task.priority === 'High'
-        ? '#e53935'
-        : task.priority === 'Medium'
-        ? '#fb8c00'
-        : '#43a047'
+    color: task.priority === 'High' ? '#e53935' : task.priority === 'Medium' ? '#fb8c00' : '#43a047'
   }))
 
   // 🔹 Custom renderer so text won’t cut off
@@ -69,10 +69,7 @@ export default function GoogleCalandarList({ tasks }) {
       }}
     >
       <CardContent>
-        <Typography
-          variant='h6'
-          sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}
-        >
+        <Typography variant='h6' sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
           📅 Task Calendar
         </Typography>
 
@@ -110,19 +107,12 @@ export default function GoogleCalandarList({ tasks }) {
 
       {/* 🔹 Popup Dialog */}
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth='sm' fullWidth>
-        <DialogTitle sx={{ fontWeight: 600, color: 'primary.main' }}>
-          📌 Task Details
-        </DialogTitle>
+        <DialogTitle sx={{ fontWeight: 600, color: 'primary.main' }}>📌 Task Details</DialogTitle>
         <DialogContent dividers>
           {selectedEvent && (
             <Grid container spacing={2}>
               <Grid item xs={12}>
-                <Typography
-                  variant='subtitle1'
-                  fontWeight={600}
-                  gutterBottom
-                  sx={{ color: 'text.primary' }}
-                >
+                <Typography variant='subtitle1' fontWeight={600} gutterBottom sx={{ color: 'text.primary' }}>
                   {selectedEvent.title}
                 </Typography>
               </Grid>
@@ -145,8 +135,8 @@ export default function GoogleCalandarList({ tasks }) {
                     selectedEvent.status === 'Completed'
                       ? 'success'
                       : selectedEvent.status === 'In Progress'
-                      ? 'warning'
-                      : 'default'
+                        ? 'warning'
+                        : 'default'
                   }
                   sx={{ mt: 0.5 }}
                 />
@@ -165,8 +155,8 @@ export default function GoogleCalandarList({ tasks }) {
                       selectedEvent.priority === 'High'
                         ? '#e53935'
                         : selectedEvent.priority === 'Medium'
-                        ? '#fb8c00'
-                        : '#43a047',
+                          ? '#fb8c00'
+                          : '#43a047',
                     color: '#fff'
                   }}
                 />
@@ -176,18 +166,14 @@ export default function GoogleCalandarList({ tasks }) {
                 <Typography variant='body2' fontWeight={500}>
                   Company:
                 </Typography>
-                <Typography variant='body2'>
-                  {selectedEvent.company || '-'}
-                </Typography>
+                <Typography variant='body2'>{selectedEvent.company || '-'}</Typography>
               </Grid>
 
               <Grid item xs={6}>
                 <Typography variant='body2' fontWeight={500}>
                   Phone:
                 </Typography>
-                <Typography variant='body2'>
-                  {selectedEvent.phone || '-'}
-                </Typography>
+                <Typography variant='body2'>{selectedEvent.phone || '-'}</Typography>
               </Grid>
 
               <Grid item xs={6}>
@@ -195,22 +181,29 @@ export default function GoogleCalandarList({ tasks }) {
                   Due Date:
                 </Typography>
                 <Typography variant='body2'>
-                  {selectedEvent.date
-                    ? new Date(selectedEvent.date).toLocaleDateString()
-                    : '-'}
+                  {selectedEvent.date ? new Date(selectedEvent.date).toLocaleDateString() : '-'}
                 </Typography>
               </Grid>
             </Grid>
           )}
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={() => setOpen(false)}
-            variant='contained'
-            color='primary'
-          >
-            Close
-          </Button>
+          <Box display='flex' justifyContent='space-between' width='100%' mt={5}>
+            <Button onClick={() => setOpen(false)} variant='contained' color='primary'>
+              Close
+            </Button>
+
+            {selectedEvent && (
+              <Link
+                href={`/view/lead-form/${encodeURIComponent(encryptCryptoRes(selectedEvent.lead_id))}`}
+                style={{ textDecoration: 'none' }}
+              >
+                <Button onClick={() => setOpen(false)} variant='contained' color='success'>
+                  Open
+                </Button>
+              </Link>
+            )}
+          </Box>
         </DialogActions>
       </Dialog>
     </Card>
