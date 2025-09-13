@@ -124,7 +124,7 @@ export default function TaskList() {
                 ? 'Normal View'
                 : view === 'table'
                 ? 'Table View'
-                : 'Google Calendar View'}
+                : 'Calendar View'}
             </Button>
             <Menu anchorEl={viewAnchor} open={Boolean(viewAnchor)} onClose={() => setViewAnchor(null)}>
               <MenuItem
