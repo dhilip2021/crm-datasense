@@ -10,12 +10,7 @@ import TaskList from '@/views/task/TaskList'
 
 const Tasks = () => {
   return (
-    <Grid container spacing={6}>
-      <Grid item xs={12}>
-        <Typography variant='h5' gutterBottom>📋 Task List</Typography>
-        <Divider />
-      </Grid>
-      
+    <Grid container spacing={2}>
       <Grid item xs={12}>
         <TaskList />
       </Grid>
