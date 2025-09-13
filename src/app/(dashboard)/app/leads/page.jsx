@@ -67,7 +67,6 @@ const LeadTable = () => {
   const [sections, setSections] = useState([])
   const [fieldConfig, setFieldConfig] = useState({})
 
-
   // const dynamicExcelFields = data.length > 0 ? Object.keys(data[0].values) : []
   // const fieldsExcel = [...new Set([...dynamicPdfFields])]
 
@@ -88,7 +87,6 @@ const LeadTable = () => {
     search: ''
   })
 
-
   //  🔹 Flatten helper
   const flattenFields = sections => {
     const flat = []
@@ -105,7 +103,7 @@ const LeadTable = () => {
     return flat
   }
 
-    // 🔹 Fetch template
+  // 🔹 Fetch template
   const fetchFormTemplate = async () => {
     const lead_form = 'lead-form'
     // setLoader(true)
@@ -138,7 +136,6 @@ const LeadTable = () => {
       setLoader(false)
     }
   }
-
 
   const fetchData = async () => {
     setLoading(true)
@@ -264,8 +261,6 @@ const LeadTable = () => {
   useEffect(() => {
     fetchFormTemplate()
   }, [page, limit])
-
-  
 
   const exportToExcel = () => {
     if (selectedExcelFields.length === 0) {
@@ -405,21 +400,19 @@ const LeadTable = () => {
   //   return [...new Set(dataFilter.map(item => item.values['Lead Source']))].filter(Boolean)
   // }, [dataFilter])
 
+  const uniqueSources = useMemo(() => {
+    if (fieldConfig && Array.isArray(fieldConfig['Lead Source'])) {
+      return [...fieldConfig['Lead Source']]
+    }
+    return [] // fallback empty array
+  }, [fieldConfig])
 
-
-const uniqueSources = useMemo(() => {
-  if (fieldConfig && Array.isArray(fieldConfig['Lead Source'])) {
-    return [...fieldConfig['Lead Source']];
-  }
-  return []; // fallback empty array
-}, [fieldConfig]);
-
-const uniqueStatus = useMemo(() => {
-  if (fieldConfig && Array.isArray(fieldConfig['Lead Status'])) {
-    return [...fieldConfig['Lead Status']];
-  }
-  return []; // fallback empty array
-}, [fieldConfig]);
+  const uniqueStatus = useMemo(() => {
+    if (fieldConfig && Array.isArray(fieldConfig['Lead Status'])) {
+      return [...fieldConfig['Lead Status']]
+    }
+    return [] // fallback empty array
+  }, [fieldConfig])
 
   // const uniqueStatus = useMemo(() => {
   //   return [...new Set(dataFilter.map(item => item.values['Lead Status']))].filter(Boolean)
@@ -495,51 +488,45 @@ const uniqueStatus = useMemo(() => {
   //   }
   // }
 
-
-
-  
-
-
   async function handleUpload(file) {
-  if (!file) {
-    toast.error("Please select a file", { autoClose: 500 });
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("organization_id", organization_id);
-
-  setLoader(true);
-
-  try {
-    const res = await fetch("/api/v1/admin/lead-form/import", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${getToken}`, // ✅ only auth header
-      },
-      body: formData,
-    });
-
-    const data = await res.json();
-    if (data?.success) {
-      toast.success(data.message, { autoClose: 1000 });
-      fetchData();
-    } else {
-      toast.error("File not uploaded !!!", { autoClose: 1000 });
-      fetchData();
+    if (!file) {
+      toast.error('Please select a file', { autoClose: 500 })
+      return
     }
-  } catch (err) {
-    console.error(err);
-    toast.error("Something went wrong", { autoClose: 1000 });
-  } finally {
-    setFileName("");
-    setSelectedFile(null);
-    document.querySelector('input[name="file"]').value = "";
-    setLoader(false);
-  }
-}
 
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('organization_id', organization_id)
+
+    setLoader(true)
+
+    try {
+      const res = await fetch('/api/v1/admin/lead-form/import', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${getToken}` // ✅ only auth header
+        },
+        body: formData
+      })
+
+      const data = await res.json()
+      if (data?.success) {
+        toast.success(data.message, { autoClose: 1000 })
+        fetchData()
+      } else {
+        toast.error('File not uploaded !!!', { autoClose: 1000 })
+        fetchData()
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error('Something went wrong', { autoClose: 1000 })
+    } finally {
+      setFileName('')
+      setSelectedFile(null)
+      document.querySelector('input[name="file"]').value = ''
+      setLoader(false)
+    }
+  }
 
   return (
     <Box px={1} py={1}>
@@ -588,7 +575,7 @@ const uniqueStatus = useMemo(() => {
                     </Button> */}
 
                     <Button
-                    type='submit'
+                      type='submit'
                       component='label'
                       variant='outlined'
                       color='info'
@@ -732,6 +719,16 @@ const uniqueStatus = useMemo(() => {
                 label='Status'
                 value={filters.status}
                 onChange={e => setFilters({ ...filters, status: e.target.value })}
+                SelectProps={{
+                  MenuProps: {
+                    PaperProps: {
+                      style: {
+                        maxHeight: 250, // menu height limit, scroll auto varum
+                        width: 200 // optional width
+                      }
+                    }
+                  }
+                }}
               >
                 <MenuItem value=''>All</MenuItem>
                 {uniqueStatus.map(status => (
@@ -749,6 +746,16 @@ const uniqueStatus = useMemo(() => {
                 label='Source'
                 value={filters.source}
                 onChange={e => setFilters({ ...filters, source: e.target.value })}
+                SelectProps={{
+                  MenuProps: {
+                    PaperProps: {
+                      style: {
+                        maxHeight: 250, // menu height limit, scroll auto varum
+                        width: 200 // optional width
+                      }
+                    }
+                  }
+                }}
               >
                 <MenuItem value=''>All</MenuItem>
                 {uniqueSources.map(source => (
