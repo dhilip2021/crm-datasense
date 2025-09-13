@@ -367,7 +367,7 @@ const NotesSection = ({ leadId, leadData }) => {
             onKeyDown={e => {
               if (e.key === ' ' && note.length === 0) {
                 e.preventDefault() // 🚫 block first space typing
-              } else if (e.key === 'Enter' && !e.shiftKey) {
+              } else if (e.key === 'Enter' && e.shiftKey) {
                 e.preventDefault()
                 saveRef.current?.focus() // ✅ correct ref
               }
