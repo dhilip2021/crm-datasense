@@ -103,10 +103,6 @@ export async function GET(req, { params }) {
   }
 }
 
-
-
-
-
 // 🔁 PUT – Update lead by lead_id
 // export async function PUT(req, { params }) {
 //   const verified = verifyAccessToken()
@@ -246,6 +242,13 @@ export async function PUT(req, { params }) {
   }
 }
 
+const toObjectId = id => {
+  try {
+    return new mongoose.Types.ObjectId(id)
+  } catch {
+    return new mongoose.Types.ObjectId()
+  }
+}
 
 export async function PATCH(req, { params }) {
   const verified = verifyAccessToken()
@@ -262,7 +265,6 @@ export async function PATCH(req, { params }) {
 
       // ---------------- NOTES ----------------
       const noteFromBody = body.values?.Notes?.[0] || {}
-      console.log(noteFromBody, '<<<NOTES FROM BODY')
 
       let newNote = null
       let updateNote = null
@@ -332,13 +334,18 @@ export async function PATCH(req, { params }) {
         $set: { updatedAt: new Date() }
       }
 
+      // if (newNote) {
+      //   updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Notes': newNote }
+      // }
+
       if (newNote) {
+        newNote._id = toObjectId(newNote._id)
         updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Notes': newNote }
       }
 
       if (updateNote) {
-        const noteId = new mongoose.Types.ObjectId(noteFromBody._id)
-        // Update an existing note by its _id
+        const noteId = toObjectId(noteFromBody._id)
+        // const noteId = new mongoose.Types.ObjectId(noteFromBody._id)
         const updated = await Leadform.findOneAndUpdate(
           { lead_id },
           {
@@ -356,6 +363,20 @@ export async function PATCH(req, { params }) {
           }
         )
 
+        // const updated = await Leadform.findOneAndUpdate(
+        //   { lead_id, 'values.Notes.$[n]._id': new mongoose.Types.ObjectId(noteFromBody._id) },
+        //   {
+        //     $set: {
+        //       'values.Notes.$[n].title': updateNote.title,
+        //       'values.Notes.$[n].note': updateNote.note,
+        //       'values.Notes.$[n].createdAt': updateNote.createdAt,
+        //       'values.Notes.$[n].createdBy': updateNote.createdBy,
+        //       updatedAt: new Date()
+        //     }
+        //   },
+        //   { new: true }
+        // )
+
         return NextResponse.json({
           success: true,
           message: 'Note updated successfully',
@@ -363,25 +384,53 @@ export async function PATCH(req, { params }) {
         })
       }
 
-
-
       // TASK CODE
 
+      // if (newTask) {
+      //   // If no Activity array exist → create one
+      //   if (!lead.values?.Activity || lead.values.Activity.length === 0) {
+      //     lead.values.Activity = [{ task: [] }]
+      //     await lead.save()
+      //   }
+      //   updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Activity.0.task': newTask }
+      // }
+
       if (newTask) {
-        // If no Activity array exist → create one
-        if (!lead.values?.Activity || lead.values.Activity.length === 0) {
-          lead.values.Activity = [{ task: [] }]
-          await lead.save()
-        }
+        newTask._id = toObjectId(newTask._id)
         updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Activity.0.task': newTask }
       }
 
       if (updateTask) {
-         const taskId = new mongoose.Types.ObjectId(taskFromBody._id)
+        // const taskId = new mongoose.Types.ObjectId(taskFromBody._id)
+        // const updatedTask = await Leadform.findOneAndUpdate(
+        //   {
+        //     lead_id
+        //   },
+        //   {
+        //     $set: {
+        //       'values.Activity.0.task.$[t].subject': updateTask.subject,
+        //       'values.Activity.0.task.$[t].dueDate': updateTask.dueDate,
+        //       'values.Activity.0.task.$[t].priority': updateTask.priority,
+        //       'values.Activity.0.task.$[t].status': updateTask.status,
+        //       'values.Activity.0.task.$[t].owner': updateTask.owner,
+        //       'values.Activity.0.task.$[t].reminderEnabled': updateTask.reminderEnabled,
+        //       'values.Activity.0.task.$[t].reminderDate': updateTask.reminderDate,
+        //       'values.Activity.0.task.$[t].reminderTime': updateTask.reminderTime,
+        //       'values.Activity.0.task.$[t].alertType': updateTask.alertType,
+        //       'values.Activity.0.task.$[t].createdAt': updateTask.createdAt,
+        //       updatedAt: new Date()
+        //     }
+        //   },
+        //   {
+        //     arrayFilters: [{ 't._id': taskId }],
+        //     new: true
+        //   }
+        // )
+
+        const taskId = toObjectId(taskFromBody._id)
+
         const updatedTask = await Leadform.findOneAndUpdate(
-          {
-            lead_id
-          },
+          { lead_id },
           {
             $set: {
               'values.Activity.0.task.$[t].subject': updateTask.subject,

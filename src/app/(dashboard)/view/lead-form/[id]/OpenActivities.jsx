@@ -122,7 +122,7 @@ export default function OpenActivities({ leadId, leadData }) {
     reminderEnabled: false,
     reminderDate: '',
     reminderTime: '',
-    alertType: 'Email'
+    alertType: 'Both'
   })
 
   const [ErrorTaskData, setErrorTaskData] = useState({
@@ -170,7 +170,7 @@ export default function OpenActivities({ leadId, leadData }) {
       reminderEnabled: false,
       reminderDate: '',
       reminderTime: '',
-      alertType: 'Email'
+      alertType: 'Both'
     })
   }
 
@@ -277,7 +277,7 @@ export default function OpenActivities({ leadId, leadData }) {
             reminderEnabled: false,
             reminderDate: '',
             reminderTime: '',
-            alertType: 'Email'
+            alertType: 'Both'
           })
         }
       } catch (err) {
@@ -371,7 +371,7 @@ export default function OpenActivities({ leadId, leadData }) {
             reminderEnabled: false,
             reminderDate: '',
             reminderTime: '',
-            alertType: 'Email'
+            alertType: 'Both'
           })
         }
       } catch (err) {
@@ -552,7 +552,7 @@ export default function OpenActivities({ leadId, leadData }) {
                       }}
                     >
                       <Typography fontWeight='bold' mb={2} color='text.primary'>
-                        ⏰ Reminder
+                        ⏰ Reminder 
                       </Typography>
 
                       <FormControlLabel
@@ -640,7 +640,7 @@ export default function OpenActivities({ leadId, leadData }) {
                             <FormControl fullWidth>
                               <InputLabel>Alert Type</InputLabel>
                               <Select
-                                value={taskData.alertType || 'Email'}
+                                value={taskData.alertType || 'Both'}
                                 onChange={e => handleChange('alertType', e.target.value)}
                               >
                                 <MuiMenuItem value='Email'>Email</MuiMenuItem>
@@ -773,7 +773,8 @@ export default function OpenActivities({ leadId, leadData }) {
                       </Button>
                     </Card>
                   ) : (
-                    // <TaskList tasks={tasks} />
+
+                   
                     <TaskList
                       tasks={tasks}
                       onEdit={task => {
