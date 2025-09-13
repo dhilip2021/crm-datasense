@@ -63,6 +63,11 @@ const LeadTable = () => {
 
   const [anchorExcelEl, setAnchorExcelEl] = useState(null)
   const [selectedExcelFields, setSelectedExcelFields] = useState([])
+
+  const [sections, setSections] = useState([])
+  const [fieldConfig, setFieldConfig] = useState({})
+
+
   // const dynamicExcelFields = data.length > 0 ? Object.keys(data[0].values) : []
   // const fieldsExcel = [...new Set([...dynamicPdfFields])]
 
@@ -83,7 +88,57 @@ const LeadTable = () => {
     search: ''
   })
 
-  const handleDownloadSample = () => {}
+
+  //  🔹 Flatten helper
+  const flattenFields = sections => {
+    const flat = []
+    sections.forEach(section => {
+      Object.values(section.fields).forEach(fieldGroup => {
+        fieldGroup.forEach(field => {
+          flat.push({
+            sectionName: section.title || section.sectionName || '',
+            ...field
+          })
+        })
+      })
+    })
+    return flat
+  }
+
+    // 🔹 Fetch template
+  const fetchFormTemplate = async () => {
+    const lead_form = 'lead-form'
+    // setLoader(true)
+    try {
+      const res = await fetch(
+        `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${lead_form}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${getToken}`
+          }
+        }
+      )
+      const json = await res.json()
+      if (json?.success && json.data?.sections?.length > 0) {
+        setSections(json.data.sections)
+
+        const flattened = flattenFields(json.data.sections)
+        const config = {}
+        flattened.forEach(field => {
+          if (field.type === 'Dropdown' && field.options?.length > 0) {
+            config[field.label] = field.options
+          }
+        })
+        setFieldConfig(config)
+      }
+    } catch (err) {
+      console.error('fetchFormTemplate error:', err)
+    } finally {
+      setLoader(false)
+    }
+  }
+
 
   const fetchData = async () => {
     setLoading(true)
@@ -204,7 +259,13 @@ const LeadTable = () => {
 
   useEffect(() => {
     fetchData()
+  }, [sections])
+
+  useEffect(() => {
+    fetchFormTemplate()
   }, [page, limit])
+
+  
 
   const exportToExcel = () => {
     if (selectedExcelFields.length === 0) {
@@ -340,13 +401,29 @@ const LeadTable = () => {
     handlePdfClose()
   }
 
-  const uniqueSources = useMemo(() => {
-    return [...new Set(dataFilter.map(item => item.values['Lead Source']))].filter(Boolean)
-  }, [dataFilter])
+  // const uniqueSources = useMemo(() => {
+  //   return [...new Set(dataFilter.map(item => item.values['Lead Source']))].filter(Boolean)
+  // }, [dataFilter])
 
-  const uniqueStatus = useMemo(() => {
-    return [...new Set(dataFilter.map(item => item.values['Lead Status']))].filter(Boolean)
-  }, [dataFilter])
+
+
+const uniqueSources = useMemo(() => {
+  if (fieldConfig && Array.isArray(fieldConfig['Lead Source'])) {
+    return [...fieldConfig['Lead Source']];
+  }
+  return []; // fallback empty array
+}, [fieldConfig]);
+
+const uniqueStatus = useMemo(() => {
+  if (fieldConfig && Array.isArray(fieldConfig['Lead Status'])) {
+    return [...fieldConfig['Lead Status']];
+  }
+  return []; // fallback empty array
+}, [fieldConfig]);
+
+  // const uniqueStatus = useMemo(() => {
+  //   return [...new Set(dataFilter.map(item => item.values['Lead Status']))].filter(Boolean)
+  // }, [dataFilter])
 
   // async function handleUpload(e) {
   //   e.preventDefault()
@@ -417,6 +494,10 @@ const LeadTable = () => {
   //     setLoader(false)
   //   }
   // }
+
+
+
+  
 
 
   async function handleUpload(file) {
