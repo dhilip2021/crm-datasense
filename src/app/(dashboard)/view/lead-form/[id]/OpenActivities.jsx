@@ -41,8 +41,10 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { DatePicker, TimePicker } from '@mui/x-date-pickers'
 
 import Cookies from 'js-cookie'
-import TaskList from './TaskList'
 import { toast } from 'react-toastify'
+import ColumnViewTaskList from './ColumnViewTaskList'
+import TabViewTaskList from './TabViewTaskList'
+import ChronologicalTaskList from './ChronologicalTaskList'
 
 // helper function for parsing date+time
 function parseDateTime(date, time) {
@@ -137,10 +139,7 @@ export default function OpenActivities({ leadId, leadData }) {
     alertType: false
   })
 
-  // Merge + sort activities
-  // const allActivities = [...tasks, ...calls, ...meetings].sort(
-  //   (a, b) => parseDateTime(a.date, a.time) - parseDateTime(b.date, b.time)
-  // )
+
 
   const allActivities = [...tasks, ...calls, ...meetings].sort((a, b) => {
     const dateA = a.dueDate || a.date || ''
@@ -773,9 +772,7 @@ export default function OpenActivities({ leadId, leadData }) {
                       </Button>
                     </Card>
                   ) : (
-
-                   
-                    <TaskList
+                    <ColumnViewTaskList
                       tasks={tasks}
                       onEdit={task => {
                         setEditingTask(task) // 🟢 edit mode set pannidum
@@ -870,67 +867,14 @@ export default function OpenActivities({ leadId, leadData }) {
                 </Tabs>
 
                 {tab === 0 && (
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Subject</TableCell>
-                        <TableCell>Due Date</TableCell>
-                        <TableCell>Created By</TableCell>
-                        <TableCell>Status</TableCell>
-                        <TableCell>Priority</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {Array.isArray(tasks) &&
-                        tasks.map((t, i) => (
-                          <TableRow key={i}>
-                            <TableCell>
-                              <Typography color='primary'>{t.subject}</Typography>
-                            </TableCell>
-                            <TableCell>{t.dueDate ? dayjs(t.dueDate).format('DD MMM YYYY') : '-'}</TableCell>
-                            <TableCell>{t.owner}</TableCell>
-                            <TableCell>
-                              {' '}
-                              <Box>
-                                <Chip
-                                  label={t.status || 'Unknown'}
-                                  size='small'
-                                  sx={{
-                                    borderRadius: 2,
-                                    fontWeight: 'bold',
-                                    bgcolor:
-                                      t.status === 'Completed'
-                                        ? 'success.light'
-                                        : t.status === 'In Progress'
-                                          ? 'warning.light'
-                                          : 'grey.300',
-                                    color: 'text.primary'
-                                  }}
-                                />
-                              </Box>
-                            </TableCell>
-                            <TableCell>
-                              {' '}
-                              <Chip
-                                label={`Priority: ${t.priority || 'Medium'}`}
-                                size='small'
-                                sx={{
-                                  borderRadius: 2,
-                                  fontWeight: 'bold',
-                                  bgcolor:
-                                    t.priority === 'High'
-                                      ? 'error.light'
-                                      : t.priority === 'Low'
-                                        ? 'info.light'
-                                        : 'grey.200',
-                                  color: 'text.primary'
-                                }}
-                              />
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                    </TableBody>
-                  </Table>
+                 <TabViewTaskList 
+                      tasks={tasks}
+                      onEdit={task => {
+                        setEditingTask(task) // 🟢 edit mode set pannidum
+                        setTaskData(task) // 🟢 form la data prefill pannidum
+                        setOpenTaskDialog(true) // 🟢 dialog open
+                      }}
+                 />
                 )}
 
                 {tab === 1 && (
@@ -993,64 +937,84 @@ export default function OpenActivities({ leadId, leadData }) {
 
             {/* Chronological View */}
             {view === 'chronological' && (
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Activity Info ({allActivities.length})</TableCell>
-                    <TableCell>Created By</TableCell>
-                    <TableCell>Due Date</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {allActivities.map((a, i) => (
-                    <TableRow key={i}>
-                      <TableCell>
-                        <Typography color='primary'>{a.subject}</Typography>
-                        {a.type === 'Call' && (
-                          <Typography variant='body2'>
-                            Call Purpose : {a.purpose} | Call Agenda : {a.agenda}
-                          </Typography>
-                        )}
-                        {a.type === 'Task' && (
-                          <Typography variant='body2' sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            Status:
-                            <span>
-                              <Chip
-                                label={a.status}
-                                size='small'
-                                sx={{
-                                  bgcolor: a.status === 'Completed' ? 'success.main' : 'warning.main',
-                                  color: '#fff',
-                                  fontWeight: 500
-                                }}
-                              />
-                            </span>
-                            | Priority:
-                            <span>
-                              <Chip
-                                label={a.priority}
-                                size='small'
-                                sx={{
-                                  bgcolor:
-                                    a.priority === 'High'
-                                      ? 'error.main'
-                                      : a.priority === 'Medium'
-                                        ? 'info.main'
-                                        : 'default',
-                                  color: '#fff',
-                                  fontWeight: 500
-                                }}
-                              />
-                            </span>
-                          </Typography>
-                        )}
-                      </TableCell>
-                      <TableCell>{a.owner}</TableCell>
-                      <TableCell>{a.dueDate ? dayjs(a.dueDate).format('DD MMM YYYY') : '-'}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+
+               <>
+                <Tabs value={tab} onChange={(e, v) => setTab(v)}>
+                  <Tab label={`Tasks (${tasks.length})`} />
+                  <Tab label={`Meetings (${meetings.length})`} />
+                  <Tab label={`Calls (${calls.length})`} />
+                </Tabs>
+
+                {tab === 0 && (
+                   
+                 <ChronologicalTaskList 
+                      tasks={tasks}
+                      onEdit={task => {
+                        setEditingTask(task) // 🟢 edit mode set pannidum
+                        setTaskData(task) // 🟢 form la data prefill pannidum
+                        setOpenTaskDialog(true) // 🟢 dialog open
+                      }}
+                 />
+                )}
+
+                {tab === 1 && (
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Subject</TableCell>
+                        <TableCell>Date</TableCell>
+                        <TableCell>Owner</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {Array.isArray(meetings) &&
+                        meetings.map((m, i) => (
+                          <TableRow key={i}>
+                            <TableCell>
+                              <Typography color='primary'>{m.subject}</Typography>
+                            </TableCell>
+                            <TableCell>
+                              {m.date} {m.time}
+                            </TableCell>
+                            <TableCell>{m.owner}</TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                )}
+
+                {tab === 2 && (
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Subject</TableCell>
+                        <TableCell>Date</TableCell>
+                        <TableCell>Owner</TableCell>
+                        <TableCell>Purpose</TableCell>
+                        <TableCell>Agenda</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {Array.isArray(calls) &&
+                        calls.map((c, i) => (
+                          <TableRow key={i}>
+                            <TableCell>
+                              <Typography color='primary'>{c.subject}</Typography>
+                            </TableCell>
+                            <TableCell>
+                              {c.date} {c.time}
+                            </TableCell>
+                            <TableCell>{c.owner}</TableCell>
+                            <TableCell>{c.purpose}</TableCell>
+                            <TableCell>{c.agenda}</TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </>
+             
+             
             )}
           </Card>
         </Box>
