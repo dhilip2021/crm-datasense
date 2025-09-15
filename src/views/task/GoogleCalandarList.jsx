@@ -22,8 +22,8 @@ import {
 import Link from 'next/link'
 import { encryptCryptoRes } from '@/helper/frontendHelper'
 
-export default function GoogleCalandarList({ tasks }) {
-  console.log(tasks, '<<<<TASSSSSSS')
+export default function GoogleCalandarList({ tasks, fetchTasks }) {
+
 
   const [open, setOpen] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState(null)
@@ -57,6 +57,35 @@ export default function GoogleCalandarList({ tasks }) {
       <span>{eventInfo.event.title}</span>
     </div>
   )
+
+  // 🔹 API call function when date range changes
+// 🔹 API call function when date range changes
+const fetchTasksForRange = async (dateInfo) => {
+  const formatDate = (date) => {
+    const d = new Date(date)
+    const year = d.getFullYear()
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
+  // ✅ Correct month range from FullCalendar view
+  const firstDay = dateInfo.view.currentStart   // always 1st of visible month
+  const lastDay = dateInfo.view.currentEnd      // always last of visible month + 1 day
+
+  // ⚠️ currentEnd points to next month's 1st date, so adjust back one day
+  const adjustedLastDay = new Date(lastDay)
+  adjustedLastDay.setDate(adjustedLastDay.getDate() - 1)
+
+  const startDate = formatDate(firstDay)
+  const endDate = formatDate(adjustedLastDay)
+
+  console.log("<<< START", startDate)
+  console.log("<<< END", endDate)
+
+  fetchTasks({ from: startDate, to: endDate })
+}
+
 
   return (
     <Card
@@ -101,6 +130,7 @@ export default function GoogleCalandarList({ tasks }) {
             contentHeight='auto'
             aspectRatio={1.5}
             expandRows={true}
+            datesSet={(dateInfo) => fetchTasksForRange(dateInfo)}  // ✅ FIX
           />
         </Box>
       </CardContent>

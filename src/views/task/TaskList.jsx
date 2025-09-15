@@ -1,16 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import {
-  Box,
-  Typography,
-  Button,
-  Menu,
-  Divider,
-  MenuItem,
-  TextField,
-  Grid
-} from '@mui/material'
+import { Box, Typography, Button, Menu, Divider, MenuItem, TextField, Grid } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -33,7 +24,7 @@ export default function TaskList() {
   const loggedInUserId = Cookies.get('user_id')
   const loggedInUserName = Cookies.get('user_name')
 
-  const [view, setView] = useState('normal')
+  const [view, setView] = useState('google')
   const [viewAnchor, setViewAnchor] = useState(null)
 
   const [tasks, setTasks] = useState([])
@@ -41,8 +32,8 @@ export default function TaskList() {
 
   const [priority, setPriority] = useState('')
   const [status, setStatus] = useState('')
-  const [from, setFrom] = useState(dayjs().startOf('day'))
-  const [to, setTo] = useState(dayjs().endOf('day'))
+  const [from, setFrom] = useState(dayjs().startOf('month'))
+  const [to, setTo] = useState(dayjs().endOf('month'))
 
   const [userList, setUserList] = useState([])
   const [selectedUsers, setSelectedUsers] = useState([])
@@ -115,16 +106,8 @@ export default function TaskList() {
             </Typography>
           </Grid>
           <Grid item>
-            <Button
-              variant='outlined'
-              endIcon={<ArrowDropDownIcon />}
-              onClick={e => setViewAnchor(e.currentTarget)}
-            >
-              {view === 'normal'
-                ? 'Normal View'
-                : view === 'table'
-                ? 'Table View'
-                : 'Calendar View'}
+            <Button variant='outlined' endIcon={<ArrowDropDownIcon />} onClick={e => setViewAnchor(e.currentTarget)}>
+              {view === 'normal' ? 'Normal View' : view === 'table' ? 'Table View' : 'Calendar View'}
             </Button>
             <Menu anchorEl={viewAnchor} open={Boolean(viewAnchor)} onClose={() => setViewAnchor(null)}>
               <MenuItem
@@ -256,7 +239,7 @@ export default function TaskList() {
               fetchTasks={fetchTasks}
             />
           )}
-          {view === 'google' && <GoogleCalandarList tasks={tasks} />}
+          {view === 'google' && <GoogleCalandarList tasks={tasks} fetchTasks={fetchTasks} />}
         </Grid>
       </Box>
     </LocalizationProvider>

@@ -54,6 +54,7 @@ const LeadDetailView = () => {
   const params = useParams()
   const encryptedId = decodeURIComponent(params.id)
   const leadId = decrypCryptoReq(encryptedId)
+  const [expanded, setExpanded] = useState(0) // 0 = first open by default
 
   const organization_id = Cookies.get('organization_id')
   const lead_form = 'lead-form'
@@ -228,7 +229,7 @@ const LeadDetailView = () => {
         {/* Header */}
         <Box display='flex' justifyContent='space-between'>
           <Typography variant='h4' fontWeight='bold'>
-            {leadData?.lead_name || 'Unnamed Lead'}
+            {leadData?.lead_id || 'Unnamed Lead'}
           </Typography>
           <Chip icon={<EventIcon />} label={fields['Next Follow-up Date'] || 'Not Scheduled'} sx={{ ml: 1 }} />
         </Box>
@@ -249,7 +250,11 @@ const LeadDetailView = () => {
         {/* 🔹 Dynamic Sections */}
         {sections.map((section, index) => (
           <Box mb={4} key={section.id || section.title || index}>
-            <Accordion defaultExpanded={index === 0}>
+            <Accordion
+              // defaultExpanded={index === 0}
+              expanded={expanded === index} // ✅ only one open at a time
+              onChange={() => setExpanded(expanded === index ? false : index)} // toggle logic
+            >
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography variant='subtitle1' fontWeight='bold'>
                   {section.title}
