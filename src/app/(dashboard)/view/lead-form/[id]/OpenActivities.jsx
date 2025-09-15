@@ -386,6 +386,20 @@ export default function OpenActivities({ leadId, leadData }) {
               Open Activities
             </Typography>
 
+             <Box display='flex' justifyContent='flex-end'>
+            <Button
+              sx={{ marginRight: '25px' }}
+              variant='outlined'
+              endIcon={<ArrowDropDownIcon />}
+              onClick={e => {
+                e.stopPropagation() // ✅ prevent accordion toggle
+                setViewAnchor(e.currentTarget)
+              }}
+            >
+              {view === 'column' ? 'Column View' : view === 'tab' ? 'Tab View' : 'Chronological View'}
+            </Button>
+          </Box>
+
             <Button
               variant='contained'
               size='small'
@@ -714,19 +728,7 @@ export default function OpenActivities({ leadId, leadData }) {
             </Dialog>
           </Box>
 
-          <Box display='flex' justifyContent='flex-end'>
-            <Button
-              sx={{ marginRight: '25px' }}
-              variant='outlined'
-              endIcon={<ArrowDropDownIcon />}
-              onClick={e => {
-                e.stopPropagation() // ✅ prevent accordion toggle
-                setViewAnchor(e.currentTarget)
-              }}
-            >
-              {view === 'column' ? 'Column View' : view === 'tab' ? 'Tab View' : 'Chronological View'}
-            </Button>
-          </Box>
+         
           <Menu anchorEl={viewAnchor} open={Boolean(viewAnchor)} onClose={() => setViewAnchor(null)}>
             <MenuItem
               onClick={() => {
