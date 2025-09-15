@@ -203,6 +203,16 @@ export default function OpenActivities({ leadId, leadData }) {
       return
     }
 
+    // 🔹 Check if dueDate is in the past
+    const today = new Date()
+    today.setHours(0, 0, 0, 0) // compare only date (not time)
+    const selectedDate = new Date(taskData.dueDate)
+
+    if (selectedDate < today) {
+      setErrorTaskData(prev => ({ ...prev, dueDate: true }))
+      return
+    }
+
     if (editingTask) {
       const updateTask = {
         _id: taskData._id,
@@ -386,19 +396,19 @@ export default function OpenActivities({ leadId, leadData }) {
               Open Activities
             </Typography>
 
-             <Box display='flex' justifyContent='flex-end'>
-            <Button
-              sx={{ marginRight: '25px' }}
-              variant='outlined'
-              endIcon={<ArrowDropDownIcon />}
-              onClick={e => {
-                e.stopPropagation() // ✅ prevent accordion toggle
-                setViewAnchor(e.currentTarget)
-              }}
-            >
-              {view === 'column' ? 'Column View' : view === 'tab' ? 'Tab View' : 'Chronological View'}
-            </Button>
-          </Box>
+            <Box display='flex' justifyContent='flex-end'>
+              <Button
+                sx={{ marginRight: '25px' }}
+                variant='outlined'
+                endIcon={<ArrowDropDownIcon />}
+                onClick={e => {
+                  e.stopPropagation() // ✅ prevent accordion toggle
+                  setViewAnchor(e.currentTarget)
+                }}
+              >
+                {view === 'column' ? 'Column View' : view === 'tab' ? 'Tab View' : 'Chronological View'}
+              </Button>
+            </Box>
 
             <Button
               variant='contained'
@@ -512,7 +522,7 @@ export default function OpenActivities({ leadId, leadData }) {
                   <Grid item xs={12} sm={6}>
                     <DatePicker
                       // label='Due Date *'
-                       label={
+                      label={
                         <span>
                           Due Date <span style={{ color: 'red' }}>*</span>
                         </span>
@@ -530,7 +540,7 @@ export default function OpenActivities({ leadId, leadData }) {
                         textField: {
                           fullWidth: true,
                           error: ErrorTaskData.dueDate,
-                          helperText: ErrorTaskData.dueDate ? 'Due Date is required' : ''
+                          helperText: (ErrorTaskData.dueDate && taskData.dueDate === null) ? 'Due Date is required' : (ErrorTaskData.dueDate && taskData.dueDate !== null) ? "Due date cannot be in the past":''
                         }
                       }}
                     />
@@ -712,7 +722,9 @@ export default function OpenActivities({ leadId, leadData }) {
                 </Button>
                 <Button
                   variant='contained'
-                  disabled={loader || reminderTimeError}
+                  disabled={
+                    loader || reminderTimeError || taskData.subject?.length === 0 || taskData.dueDate?.length === 0
+                  }
                   onClick={saveTask}
                   sx={{
                     borderRadius: 2,
@@ -728,7 +740,6 @@ export default function OpenActivities({ leadId, leadData }) {
             </Dialog>
           </Box>
 
-         
           <Menu anchorEl={viewAnchor} open={Boolean(viewAnchor)} onClose={() => setViewAnchor(null)}>
             <MenuItem
               onClick={() => {
