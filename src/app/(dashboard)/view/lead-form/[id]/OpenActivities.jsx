@@ -101,7 +101,7 @@ export default function OpenActivities({ leadId, leadData }) {
 
   const [addAnchor, setAddAnchor] = useState(null)
   const [viewAnchor, setViewAnchor] = useState(null)
-  const [view, setView] = useState('column') // column | tab | chronological
+  const [view, setView] = useState('tab') // column | tab | chronological
   const [tab, setTab] = useState(0)
   const [openTaskDialog, setOpenTaskDialog] = useState(false)
   const [tasks, setTasks] = useState(sortedTasks || [])
