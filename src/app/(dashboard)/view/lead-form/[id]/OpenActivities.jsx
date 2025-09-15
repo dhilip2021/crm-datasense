@@ -139,8 +139,6 @@ export default function OpenActivities({ leadId, leadData }) {
     alertType: false
   })
 
-
-
   const allActivities = [...tasks, ...calls, ...meetings].sort((a, b) => {
     const dateA = a.dueDate || a.date || ''
     const timeA = a.reminderTime || a.time || ''
@@ -160,7 +158,7 @@ export default function OpenActivities({ leadId, leadData }) {
     setAddAnchor(null)
     setEditingTask(null) // 🟢 reset
     setTaskData({
-      _id:"",
+      _id: '',
       subject: '',
       dueDate: '',
       priority: 'High',
@@ -206,7 +204,6 @@ export default function OpenActivities({ leadId, leadData }) {
     }
 
     if (editingTask) {
-      
       const updateTask = {
         _id: taskData._id,
         subject: taskData.subject,
@@ -254,20 +251,20 @@ export default function OpenActivities({ leadId, leadData }) {
           const tasks = response.values?.Activity?.[0]?.task || []
           setTasks(tasks)
 
-          toast.success("Task Updated Successfully!", {
-                  autoClose: 500, // 1 second la close
-                  position: 'bottom-center',
-                  hideProgressBar: true, // progress bar venam na
-                  closeOnClick: true,
-                  pauseOnHover: false,
-                  draggable: false,
-                  progress: undefined
-                })
+          toast.success('Task Updated Successfully!', {
+            autoClose: 500, // 1 second la close
+            position: 'bottom-center',
+            hideProgressBar: true, // progress bar venam na
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: false,
+            progress: undefined
+          })
 
           setOpenTaskDialog(false)
           setAddAnchor(null)
           setTaskData({
-            _id: "",
+            _id: '',
             subject: '',
             dueDate: '',
             priority: 'High',
@@ -347,21 +344,21 @@ export default function OpenActivities({ leadId, leadData }) {
 
           setTasks(prev => [formattedTask, ...prev])
 
-          toast.success("Task Added Successfully!", {
-                  autoClose: 500, // 1 second la close
-                  position: 'bottom-center',
-                  hideProgressBar: true, // progress bar venam na
-                  closeOnClick: true,
-                  pauseOnHover: false,
-                  draggable: false,
-                  progress: undefined
-                })
+          toast.success('Task Added Successfully!', {
+            autoClose: 500, // 1 second la close
+            position: 'bottom-center',
+            hideProgressBar: true, // progress bar venam na
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: false,
+            progress: undefined
+          })
 
           // reset form + close
           setOpenTaskDialog(false)
           setAddAnchor(null)
           setTaskData({
-            _id: "",
+            _id: '',
             subject: '',
             dueDate: '',
             priority: 'High',
@@ -464,7 +461,7 @@ export default function OpenActivities({ leadId, leadData }) {
                 <Grid container spacing={3}>
                   {/* Subject */}
                   <Grid item xs={12}>
-                    <TextField
+                    {/* <TextField
                       autoFocus
                       label='Subject'
                       fullWidth
@@ -476,13 +473,36 @@ export default function OpenActivities({ leadId, leadData }) {
                       placeholder='Enter Task *'
                       error={ErrorTaskData.subject}
                       helperText={ErrorTaskData.subject ? 'Subject is required' : ''}
+                    /> */}
+
+                    <TextField
+                      autoFocus
+                      fullWidth
+                      label={
+                        <span>
+                          Subject <span style={{ color: 'red' }}>*</span>
+                        </span>
+                      }
+                      value={taskData.subject}
+                      onChange={e => {
+                        handleChange('subject', e.target.value)
+                        setErrorTaskData(prev => ({ ...prev, subject: false }))
+                      }}
+                      placeholder='Enter Task'
+                      error={ErrorTaskData.subject}
+                      helperText={ErrorTaskData.subject ? 'Subject is required' : ''}
                     />
                   </Grid>
 
                   {/* Due Date */}
                   <Grid item xs={12} sm={6}>
                     <DatePicker
-                      label='Due Date'
+                      // label='Due Date *'
+                       label={
+                        <span>
+                          Due Date <span style={{ color: 'red' }}>*</span>
+                        </span>
+                      }
                       disablePast // 🚀 past date select panna mudiyadhu
                       value={taskData.dueDate ? dayjs(taskData.dueDate) : null}
                       onChange={newValue => {
@@ -551,7 +571,7 @@ export default function OpenActivities({ leadId, leadData }) {
                       }}
                     >
                       <Typography fontWeight='bold' mb={2} color='text.primary'>
-                        ⏰ Reminder 
+                        ⏰ Reminder
                       </Typography>
 
                       <FormControlLabel
@@ -867,14 +887,14 @@ export default function OpenActivities({ leadId, leadData }) {
                 </Tabs>
 
                 {tab === 0 && (
-                 <TabViewTaskList 
-                      tasks={tasks}
-                      onEdit={task => {
-                        setEditingTask(task) // 🟢 edit mode set pannidum
-                        setTaskData(task) // 🟢 form la data prefill pannidum
-                        setOpenTaskDialog(true) // 🟢 dialog open
-                      }}
-                 />
+                  <TabViewTaskList
+                    tasks={tasks}
+                    onEdit={task => {
+                      setEditingTask(task) // 🟢 edit mode set pannidum
+                      setTaskData(task) // 🟢 form la data prefill pannidum
+                      setOpenTaskDialog(true) // 🟢 dialog open
+                    }}
+                  />
                 )}
 
                 {tab === 1 && (
@@ -937,8 +957,7 @@ export default function OpenActivities({ leadId, leadData }) {
 
             {/* Chronological View */}
             {view === 'chronological' && (
-
-               <>
+              <>
                 <Tabs value={tab} onChange={(e, v) => setTab(v)}>
                   <Tab label={`Tasks (${tasks.length})`} />
                   <Tab label={`Meetings (${meetings.length})`} />
@@ -946,15 +965,14 @@ export default function OpenActivities({ leadId, leadData }) {
                 </Tabs>
 
                 {tab === 0 && (
-                   
-                 <ChronologicalTaskList 
-                      tasks={tasks}
-                      onEdit={task => {
-                        setEditingTask(task) // 🟢 edit mode set pannidum
-                        setTaskData(task) // 🟢 form la data prefill pannidum
-                        setOpenTaskDialog(true) // 🟢 dialog open
-                      }}
-                 />
+                  <ChronologicalTaskList
+                    tasks={tasks}
+                    onEdit={task => {
+                      setEditingTask(task) // 🟢 edit mode set pannidum
+                      setTaskData(task) // 🟢 form la data prefill pannidum
+                      setOpenTaskDialog(true) // 🟢 dialog open
+                    }}
+                  />
                 )}
 
                 {tab === 1 && (
@@ -1013,8 +1031,6 @@ export default function OpenActivities({ leadId, leadData }) {
                   </Table>
                 )}
               </>
-             
-             
             )}
           </Card>
         </Box>

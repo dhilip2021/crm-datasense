@@ -373,21 +373,21 @@ const NotesSection = ({ leadId, leadData }) => {
               }
             }}
           />
-          <Box mt={2} display='flex' gap={1}>
+          {/* <Box mt={2} display='flex' gap={1}>
             <IconButton>
               <FormatBold />
             </IconButton>
             <IconButton>
               <AttachFile />
             </IconButton>
-          </Box>
+          </Box> */}
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={handleClear} disabled={loader}>
+          <Button onClick={handleClear} disabled={loader || note?.length === 0}>
             Clear
           </Button>
-          <Button ref={saveRef} variant='contained' onClick={handleSave} disabled={loader}>
+          <Button ref={saveRef} variant='contained' onClick={handleSave} disabled={loader || note?.length === 0}>
             {loader ? 'Saving...' : editingNote ? 'Update' : 'Save'}
           </Button>
         </DialogActions>
@@ -399,6 +399,7 @@ const NotesSection = ({ leadId, leadData }) => {
         closeOnClick
         pauseOnHover={false}
         draggable={false}
+        
       />
     </>
   )
