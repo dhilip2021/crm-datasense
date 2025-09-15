@@ -233,7 +233,29 @@ const NotesSection = ({ leadId, leadData }) => {
                     </Typography>
 
                     {/* Note content */}
-                    <Typography sx={{ mt: 0.5, whiteSpace: 'pre-line' }}>{n.note}</Typography>
+                    {/* <Typography sx={{ mt: 0.5, whiteSpace: 'pre-line' }}>{n.note}</Typography> */}
+
+                    <Typography sx={{ mt: 0.5, whiteSpace: 'pre-line' }}>
+                      {(() => {
+                        const urlRegex = /(https?:\/\/[^\s]+)/g
+                        const parts = n.note.split(urlRegex)
+                        return parts.map((part, index) =>
+                          urlRegex.test(part) ? (
+                            <a
+                              key={index}
+                              href={part}
+                              target='_blank'
+                              rel='noopener noreferrer'
+                              style={{ color: '#1976d2', textDecoration: 'underline', wordBreak: 'break-word' }}
+                            >
+                              {part}
+                            </a>
+                          ) : (
+                           part
+                          )
+                        )
+                      })()}
+                    </Typography>
 
                     {/* Metadata */}
                     <Typography variant='caption' color='text.secondary' display='block' mt={1}>
@@ -399,7 +421,6 @@ const NotesSection = ({ leadId, leadData }) => {
         closeOnClick
         pauseOnHover={false}
         draggable={false}
-        
       />
     </>
   )
