@@ -13,7 +13,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  CircularProgress
+  CircularProgress,
+  Tooltip
 } from '@mui/material'
 import { FormatBold, AttachFile } from '@mui/icons-material'
 import Accordion from '@mui/material/Accordion'
@@ -25,6 +26,7 @@ import Cookies from 'js-cookie'
 import { toast, ToastContainer } from 'react-toastify'
 //react-toastify
 import 'react-toastify/dist/ReactToastify.css'
+import EditIcon from '@mui/icons-material/Edit'
 
 function getIntial(name = '') {
   const reIntial = (name.match(/\p{L}+/gu) || []).map(w => w[0].toUpperCase()).join('')
@@ -251,7 +253,7 @@ const NotesSection = ({ leadId, leadData }) => {
                               {part}
                             </a>
                           ) : (
-                           part
+                            part
                           )
                         )
                       })()}
@@ -298,8 +300,9 @@ const NotesSection = ({ leadId, leadData }) => {
                     )}
                   </Box>
                   <Box display='flex' justifyContent='flex-end' mt={1}>
-                    <Button
+                    {/* <Button
                       size='small'
+                      variant='outlined'
                       onClick={() => {
                         setEditingNote(n) // store current note
                         setTitle(n.title)
@@ -307,8 +310,22 @@ const NotesSection = ({ leadId, leadData }) => {
                         setOpen(true)
                       }}
                     >
-                      Edit
-                    </Button>
+                      ✏️
+                    </Button> */}
+                    <Tooltip title={'Edit'} arrow>
+                      <IconButton
+                        size='small'
+                        onClick={() => {
+                          setEditingNote(n) // store current note
+                          setTitle(n.title)
+                          setNote(n.note)
+                          setOpen(true)
+                        }}
+                        sx={{ opacity: 1, transition: 'opacity 0.2s ease-in-out' }}
+                      >
+                        <EditIcon fontSize='small' />
+                      </IconButton>
+                    </Tooltip>
                   </Box>
                 </Box>
               </Card>
@@ -406,12 +423,23 @@ const NotesSection = ({ leadId, leadData }) => {
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={handleClear} disabled={loader || note?.length === 0}>
-            Clear
-          </Button>
-          <Button ref={saveRef} variant='contained' onClick={handleSave} disabled={loader || note?.length === 0}>
-            {loader ? 'Saving...' : editingNote ? 'Update' : 'Save'}
-          </Button>
+          <Box display={'flex'} justifyContent={'space-between'} width={'100%'}>
+            <Button
+              variant='outlined'
+              //  onClick={handleClear}
+              onClick={() => {
+                setOpen(false)
+                setEditingNote(null)
+                handleClear()
+              }}
+              disabled={loader || note?.length === 0}
+            >
+              Close
+            </Button>
+            <Button ref={saveRef} variant='contained' onClick={handleSave} disabled={loader || note?.length === 0}>
+              {loader ? 'Saving...' : editingNote ? 'Update' : 'Save'}
+            </Button>
+          </Box>
         </DialogActions>
       </Dialog>
       <ToastContainer

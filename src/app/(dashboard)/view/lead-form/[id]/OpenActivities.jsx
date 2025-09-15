@@ -29,7 +29,9 @@ import {
   FormControlLabel,
   Chip,
   Stack,
-  Grid
+  Grid,
+  IconButton,
+  Tooltip
 } from '@mui/material'
 
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
@@ -45,6 +47,7 @@ import { toast } from 'react-toastify'
 import ColumnViewTaskList from './ColumnViewTaskList'
 import TabViewTaskList from './TabViewTaskList'
 import ChronologicalTaskList from './ChronologicalTaskList'
+import CloseIcon from '@mui/icons-material/Close'
 
 // helper function for parsing date+time
 function parseDateTime(date, time) {
@@ -153,7 +156,7 @@ export default function OpenActivities({ leadId, leadData }) {
     setTaskData(prev => ({ ...prev, [field]: value }))
   }
 
-  const handleCancel = () => {
+  const handleClose = () => {
     setOpenTaskDialog(false)
     setAddAnchor(null)
     setEditingTask(null) // 🟢 reset
@@ -477,7 +480,14 @@ export default function OpenActivities({ leadId, leadData }) {
                   pb: 2
                 }}
               >
-                ✨ {editingTask ? 'Update Task' : 'Create Task'}
+                <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+                  ✨ {editingTask ? 'Update Task' : 'Create Task'}
+                  <Tooltip title={'Close'} arrow>
+                    <IconButton onClick={handleClose}>
+                      <CloseIcon />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
               </DialogTitle>
 
               {/* Form Content */}
@@ -540,7 +550,12 @@ export default function OpenActivities({ leadId, leadData }) {
                         textField: {
                           fullWidth: true,
                           error: ErrorTaskData.dueDate,
-                          helperText: (ErrorTaskData.dueDate && taskData.dueDate === null) ? 'Due Date is required' : (ErrorTaskData.dueDate && taskData.dueDate !== null) ? "Due date cannot be in the past":''
+                          helperText:
+                            ErrorTaskData.dueDate && taskData.dueDate === null
+                              ? 'Due Date is required'
+                              : ErrorTaskData.dueDate && taskData.dueDate !== null
+                                ? 'Due date cannot be in the past'
+                                : ''
                         }
                       }}
                     />
@@ -708,34 +723,36 @@ export default function OpenActivities({ leadId, leadData }) {
                   mt: 2
                 }}
               >
-                <Button
-                  onClick={handleCancel}
-                  variant='outlined'
-                  sx={{
-                    borderRadius: 2,
-                    textTransform: 'none',
-                    color: 'text.secondary',
-                    borderColor: '#ccc'
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant='contained'
-                  disabled={
-                    loader || reminderTimeError || taskData.subject?.length === 0 || taskData.dueDate?.length === 0
-                  }
-                  onClick={saveTask}
-                  sx={{
-                    borderRadius: 2,
-                    textTransform: 'none',
-                    px: 3,
-                    bgcolor: '#1976d2',
-                    '&:hover': { bgcolor: '#1565c0' }
-                  }}
-                >
-                  {loader ? 'Saving...' : editingTask ? 'Update' : 'Save'}
-                </Button>
+                <Box display={'flex'} justifyContent={'space-between'} width={'100%'}>
+                  <Button
+                    onClick={handleClose}
+                    variant='outlined'
+                    sx={{
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      color: 'text.secondary',
+                      borderColor: '#ccc'
+                    }}
+                  >
+                    Close
+                  </Button>
+                  <Button
+                    variant='contained'
+                    disabled={
+                      loader || reminderTimeError || taskData.subject?.length === 0 || taskData.dueDate?.length === 0
+                    }
+                    onClick={saveTask}
+                    sx={{
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      px: 3,
+                      bgcolor: '#1976d2',
+                      '&:hover': { bgcolor: '#1565c0' }
+                    }}
+                  >
+                    {loader ? 'Saving...' : editingTask ? 'Update' : 'Save'}
+                  </Button>
+                </Box>
               </DialogActions>
             </Dialog>
           </Box>
