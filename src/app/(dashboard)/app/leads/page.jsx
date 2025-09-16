@@ -40,11 +40,13 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import GridOnIcon from '@mui/icons-material/GridOn'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import { toast, ToastContainer } from 'react-toastify'
+import { getAllUserListApi } from '@/apiFunctions/ApiAction'
 
 const LeadTable = () => {
   const organization_id = Cookies.get('organization_id')
   const getToken = Cookies.get('_token')
-
+  const loggedInUserId = Cookies.get('user_id')
+  const loggedInUserName = Cookies.get('user_name')
   const [data, setData] = useState([])
   const [dataFilter, setDataFilter] = useState([])
   const [page, setPage] = useState(0)
@@ -55,7 +57,7 @@ const LeadTable = () => {
   const [response, setResponse] = useState(null)
   const [fileName, setFileName] = useState('')
   const [selectedFile, setSelectedFile] = React.useState(null)
-
+  const [selectedUsers, setSelectedUsers] = useState([])
   const [anchorPdfEl, setAnchorPdfEl] = useState(null)
   const [selectedPdfFields, setSelectedPdfFields] = useState([])
   // const dynamicPdfFields = data.length > 0 ? Object.keys(data[0].values) : []
@@ -66,7 +68,7 @@ const LeadTable = () => {
 
   const [sections, setSections] = useState([])
   const [fieldConfig, setFieldConfig] = useState({})
-
+  const [userList, setUserList] = useState([])
   // const dynamicExcelFields = data.length > 0 ? Object.keys(data[0].values) : []
   // const fieldsExcel = [...new Set([...dynamicPdfFields])]
 
@@ -254,14 +256,6 @@ const LeadTable = () => {
     }
   }
 
-  useEffect(() => {
-    fetchData()
-  }, [sections])
-
-  useEffect(() => {
-    fetchFormTemplate()
-  }, [page, limit])
-
   const exportToExcel = () => {
     if (selectedExcelFields.length === 0) {
       toast.error('Please select at least one field to export', {
@@ -396,9 +390,20 @@ const LeadTable = () => {
     handlePdfClose()
   }
 
-  // const uniqueSources = useMemo(() => {
-  //   return [...new Set(dataFilter.map(item => item.values['Lead Source']))].filter(Boolean)
-  // }, [dataFilter])
+  const getUserListFn = async () => {
+    try {
+      const results = await getAllUserListApi()
+      if (results?.appStatusCode === 0 && Array.isArray(results.payloadJson)) {
+        console.log(results.payloadJson, '<<< USER LISTTT')
+
+        setUserList(results.payloadJson)
+      } else {
+        setUserList([])
+      }
+    } catch {
+      setUserList([])
+    }
+  }
 
   const uniqueSources = useMemo(() => {
     if (fieldConfig && Array.isArray(fieldConfig['Lead Source'])) {
@@ -413,80 +418,6 @@ const LeadTable = () => {
     }
     return [] // fallback empty array
   }, [fieldConfig])
-
-  // const uniqueStatus = useMemo(() => {
-  //   return [...new Set(dataFilter.map(item => item.values['Lead Status']))].filter(Boolean)
-  // }, [dataFilter])
-
-  // async function handleUpload(e) {
-  //   e.preventDefault()
-
-  //   if (!selectedFile) {
-  //     toast.error('Please select a file', {
-  //       autoClose: 500, // 1 second la close
-  //       position: 'bottom-center',
-  //       hideProgressBar: true, // progress bar venam na
-  //       closeOnClick: true,
-  //       pauseOnHover: false,
-  //       draggable: false,
-  //       progress: undefined
-  //     })
-  //     return
-  //   }
-
-  //   const formData = new FormData()
-  //   formData.append('file', selectedFile)
-  //   formData.append('organization_id', organization_id)
-
-  //   setLoader(true)
-
-  //   try {
-  //     const res = await fetch('/api/v1/admin/lead-form/import', {
-  //       method: 'POST',
-  //       headers: {
-  //         Authorization: `Bearer ${getToken}` // ✅ only auth header
-  //       },
-  //       body: formData
-  //     })
-
-  //     const data = await res.json()
-  //     if (data?.success) {
-  //       toast.success(data.message, {
-  //         autoClose: 1000, // 1 second la close
-  //         position: 'bottom-center',
-  //         hideProgressBar: true, // progress bar venam na
-  //         closeOnClick: true,
-  //         pauseOnHover: false,
-  //         draggable: false,
-  //         progress: undefined
-  //       })
-  //       fetchData()
-  //       setFileName('')
-  //       setSelectedFile(null)
-  //       document.querySelector('input[name="file"]').value = ''
-  //     } else {
-  //       toast.error('File not uploaded !!!', {
-  //         autoClose: 1000, // 1 second la close
-  //         position: 'bottom-center',
-  //         hideProgressBar: true, // progress bar venam na
-  //         closeOnClick: true,
-  //         pauseOnHover: false,
-  //         draggable: false,
-  //         progress: undefined
-  //       })
-  //       fetchData()
-  //       setFileName('')
-  //       setSelectedFile(null)
-  //     }
-  //   } catch (err) {
-  //     console.error(err)
-  //     setFileName('')
-  //     setSelectedFile(null)
-  //     document.querySelector('input[name="file"]').value = ''
-  //   } finally {
-  //     setLoader(false)
-  //   }
-  // }
 
   async function handleUpload(file) {
     if (!file) {
@@ -527,6 +458,15 @@ const LeadTable = () => {
       setLoader(false)
     }
   }
+
+  useEffect(() => {
+    fetchData()
+  }, [sections])
+
+  useEffect(() => {
+    fetchFormTemplate()
+    getUserListFn()
+  }, [page, limit])
 
   return (
     <Box px={1} py={1}>
@@ -741,6 +681,30 @@ const LeadTable = () => {
             <Grid item xs={12} sm={2}>
               <TextField
                 select
+                label='Created By'
+                value={selectedUsers.length > 0 ? selectedUsers : [loggedInUserId]}
+                onChange={e =>
+                  setSelectedUsers(typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value)
+                }
+                // SelectProps={{ multiple: true }}
+                size='small'
+                sx={{ minWidth: 200 }}
+              >
+                <MenuItem value={loggedInUserId}>{loggedInUserName || 'Me'}</MenuItem>
+                {userList
+                  .filter(u => u.user_id !== loggedInUserId)
+                  .map(u => (
+                    <MenuItem key={u.user_id} value={u.user_id}>
+                      {u.user_name || `${u.first_name} ${u.last_name}`}
+                    </MenuItem>
+                  ))}
+              </TextField>
+            </Grid>
+
+
+            <Grid item xs={12} sm={2}>
+              <TextField
+                select
                 size='small'
                 fullWidth
                 label='Source'
@@ -785,17 +749,8 @@ const LeadTable = () => {
                 />
               </LocalizationProvider>
             </Grid>
-            <Grid item xs={12} sm={2}>
-              <Button
-                variant='contained'
-                color='success'
-                fullWidth
-                onClick={fetchFilterData}
-                disabled={Object.values(filters).every(v => !v || v === '')}
-              >
-                Apply
-              </Button>
-            </Grid>
+
+            
           </Grid>
 
           <Box mt={2} display='flex' justifyContent={'flex-end'} gap={1}>
@@ -891,6 +846,20 @@ const LeadTable = () => {
                 Confirm Export
               </MenuItem>
             </Menu>
+
+
+
+            <Grid item xs={12} sm={2}>
+              <Button
+                variant='contained'
+                color='success'
+                fullWidth
+                onClick={fetchFilterData}
+                disabled={Object.values(filters).every(v => !v || v === '')}
+              >
+                Apply
+              </Button>
+            </Grid>
           </Box>
 
           <Divider sx={{ my: 2 }} />

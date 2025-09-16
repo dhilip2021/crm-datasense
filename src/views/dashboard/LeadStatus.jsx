@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useLayoutEffect } from 'react'
 import {
   Card,
   CardContent,
@@ -11,7 +11,8 @@ import {
   FormControl,
   InputLabel,
   Box,
-  CardHeader
+  CardHeader,
+  TextField
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
@@ -69,6 +70,63 @@ export default function LeadStatus() {
     next_followup_date: ''
   })
 
+    const [sections, setSections] = useState([])
+    const [fieldConfig, setFieldConfig] = useState({})
+
+
+  //  🔹 Flatten helper
+  const flattenFields = sections => {
+    const flat = []
+    sections.forEach(section => {
+      Object.values(section.fields).forEach(fieldGroup => {
+        fieldGroup.forEach(field => {
+          flat.push({
+            sectionName: section.title || section.sectionName || '',
+            ...field
+          })
+        })
+      })
+    })
+    return flat
+  }
+
+  // 🔹 Fetch template
+  const fetchFormTemplate = async () => {
+    const lead_form = 'lead-form'
+    // setLoader(true)
+    try {
+      const res = await fetch(
+        `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${lead_form}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${getToken}`
+          }
+        }
+      )
+      const json = await res.json()
+      if (json?.success && json.data?.sections?.length > 0) {
+        setSections(json.data.sections)
+
+        const flattened = flattenFields(json.data.sections)
+        const config = {}
+        flattened.forEach(field => {
+          if (field.type === 'Dropdown' && field.options?.length > 0) {
+            config[field.label] = field.options
+          }
+        })
+        setFieldConfig(config)
+      }
+    } catch (err) {
+      console.error('fetchFormTemplate error:', err)
+    } finally {
+      // setLoader(false)
+    }
+  }
+
+
+
+
   const cardConfig = [
     { title: 'Total Leads', count: stats.totalLeads || 0, color: 'primary', icon: 'ri-calendar-todo-line' },
     { title: 'Hot Leads', count: stats.hotLeads || 0, color: 'error', icon: 'ri-fire-line' },
@@ -83,9 +141,16 @@ export default function LeadStatus() {
     { title: 'Closed Lost', count: stats.closedLostLeads || 0, color: 'error', icon: 'ri-close-circle-line' }
   ]
 
-  const uniqueSources = useMemo(() => {
-    return [...new Set(dataFilter.map(item => item.values['Lead Source']))].filter(Boolean)
-  }, [dataFilter])
+
+
+      const uniqueSources = useMemo(() => {
+        if (fieldConfig && Array.isArray(fieldConfig['Lead Source'])) {
+          return [...fieldConfig['Lead Source']]
+        }
+        return [] // fallback empty array
+      }, [fieldConfig])
+
+
 
   const uniqueCities = useMemo(() => {
     return [...new Set(dataFilter.map(item => item.values['City']))].filter(Boolean)
@@ -181,6 +246,11 @@ export default function LeadStatus() {
     }))
   }, [followUpDate])
 
+  useEffect(() => {
+   console.log(uniqueSources,"<<< uniqueSources")
+  }, [uniqueSources])
+  
+
   // Quick Range
   useEffect(() => {
     if (quickRange) {
@@ -222,6 +292,11 @@ export default function LeadStatus() {
     }
   }, [filters])
 
+  useEffect(() => {
+    fetchFormTemplate()
+  }, [])
+  
+
 
   return (
     <>
@@ -240,7 +315,7 @@ export default function LeadStatus() {
           mb: 3
         }}
       >
-        <FormControl size='small' sx={{ minWidth: 180 }}>
+        {/* <FormControl size='small' sx={{ minWidth: 180 }}>
           <InputLabel>Lead Source</InputLabel>
           <Select value={leadSource} onChange={e => setLeadSource(e.target.value)}>
             <MenuItem value=''>All</MenuItem>
@@ -250,7 +325,27 @@ export default function LeadStatus() {
               </MenuItem>
             ))}
           </Select>
-        </FormControl>
+        </FormControl> */}
+
+
+         <Grid item xs={12} sm={2}>
+                      <TextField
+                        select
+                        size='small'
+                        fullWidth
+                        label='Source'
+                         value={filters.source}
+                        onChange={e => setFilters({ ...filters, source: e.target.value })}
+                        // onChange={e => setLeadSource(e.target.value)}
+                      >
+                        <MenuItem value=''>All</MenuItem>
+                        {uniqueSources.map(source => (
+                          <MenuItem key={source} value={source}>
+                            {source}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </Grid>
 
         <FormControl size='small' sx={{ minWidth: 180 }}>
           <InputLabel>City</InputLabel>

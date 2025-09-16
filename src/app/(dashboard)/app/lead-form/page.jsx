@@ -28,7 +28,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import LoaderGif from '@assets/gif/loader.gif'
-import { getAllUserListApi } from '@/apiFunctions/ApiAction'
+import { getAllUserListApi, getUserAllListApi } from '@/apiFunctions/ApiAction'
 
 // Short name (ORG)
 const shortName = fullName =>
@@ -72,6 +72,7 @@ function isValidCurrency(value, field) {
 function LeadFormAppPage() {
   const getToken = Cookies.get('_token')
   const organization_id = Cookies.get('organization_id')
+  const user_id = Cookies.get('user_id')
   const organization_name = Cookies.get('organization_name')
   const lead_form = 'lead-form'
   const router = useRouter()
@@ -91,7 +92,7 @@ function LeadFormAppPage() {
   // Fetch user list
   const getUserListFn = async () => {
     try {
-      const results = await getAllUserListApi()
+      const results = await getUserAllListApi()
       if (results?.appStatusCode === 0 && Array.isArray(results.payloadJson)) {
         setUserList(results.payloadJson)
       } else {
@@ -380,10 +381,23 @@ function LeadFormAppPage() {
             ...(section.fields.center || []),
             ...(section.fields.right || [])
           ]
-          fields.forEach(field => {
-            if (field.defaultValue) defaultValues[field.id] = field.defaultValue
-          })
+          // fields.forEach(field => {
+          //   if (field.defaultValue) defaultValues[field.id] = field.defaultValue
+          // })
+
+             fields.forEach(field => {
+          if (field.defaultValue) {
+            defaultValues[field.id] = field.defaultValue
+          }
+
+          // 🚨 Default user assign
+          if ((field.label === 'Assigned To' || field.label === 'Sales Executive') && user_id) {
+            defaultValues[field.id] = user_id
+          }
         })
+        })
+
+
         setValues(defaultValues)
       } else {
         toast.error('Form not found', { autoClose: 1500, position: 'bottom-center' })
@@ -583,6 +597,9 @@ function LeadFormAppPage() {
 
   useEffect(() => {
     console.log(countryCodes, '<<< COUNTY CODES')
+    console.log(user_id, '<<< USER_IDDD')
+    console.log(userList, '<<< USER_LISTTT')
+    
   }, [countryCodes])
 
   return (

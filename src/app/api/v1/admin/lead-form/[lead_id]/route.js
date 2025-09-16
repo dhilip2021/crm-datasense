@@ -171,20 +171,93 @@ export async function GET(req, { params }) {
 //   }
 // }
 
+// function normalizeIds(values) {
+//   const normalized = { ...values }
+
+//   // 🔁 Notes
+//   if (Array.isArray(normalized.Notes)) {
+//     normalized.Notes = normalized.Notes.map(note => ({
+//       ...note,
+//       _id: note._id ? new mongoose.Types.ObjectId(note._id) : new mongoose.Types.ObjectId()
+//     }))
+//   }
+
+//   // 🔁 Activity + Tasks
+//   if (Array.isArray(normalized.Activity)) {
+//     normalized.Activity = normalized.Activity.map(act => ({
+//       ...act,
+//       task: Array.isArray(act.task)
+//         ? act.task.map(t => ({
+//             ...t,
+//             _id: t._id ? new mongoose.Types.ObjectId(t._id) : new mongoose.Types.ObjectId()
+//           }))
+//         : []
+//     }))
+//   }
+
+//   return normalized
+// }
+
+// export async function PUT(req, { params }) {
+//   const verified = verifyAccessToken()
+//   await connectMongoDB()
+//   const { lead_id } = params
+//   const body = await req.json()
+
+//   if (!verified.success) {
+//     return NextResponse.json({ success: false, error: 'token expired!' }, { status: 400 })
+//   }
+
+//   try {
+//     const lead = await Leadform.findOne({ lead_id })
+//     if (!lead) {
+//       return NextResponse.json({ success: false, message: 'Lead not found' }, { status: 404 })
+//     }
+
+//     // 🔁 Normalize ObjectIds
+//     const normalizedValues = normalizeIds(body.values || {})
+
+//     // 🔁 Recalculate score
+//     const { lead_score, lead_label } = calculateLeadScore(normalizedValues)
+
+//     const updateFields = {
+//       values: { ...normalizedValues, Score: lead_score, Label: lead_label },
+//       updatedAt: new Date()
+//     }
+
+//     if (body.lead_name) updateFields.lead_name = body.lead_name
+//     if (body.lead_slug_name) updateFields.lead_slug_name = body.lead_slug_name
+//     if (body.form_name) updateFields.form_name = body.form_name
+
+//     const updated = await Leadform.findOneAndUpdate({ lead_id }, { $set: updateFields }, { new: true })
+
+//     return NextResponse.json({
+//       success: true,
+//       message: 'Lead updated successfully !!!',
+//       data: updated
+//     })
+//   } catch (error) {
+//     console.error('⨯ Lead update error:', error)
+//     return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
+//   }
+// }
+
+
+
 function normalizeIds(values) {
   const normalized = { ...values }
 
   // 🔁 Notes
-  if (Array.isArray(normalized.Notes)) {
-    normalized.Notes = normalized.Notes.map(note => ({
+  if (values.Notes && Array.isArray(values.Notes)) {
+    normalized.Notes = values.Notes.map(note => ({
       ...note,
       _id: note._id ? new mongoose.Types.ObjectId(note._id) : new mongoose.Types.ObjectId()
     }))
   }
 
   // 🔁 Activity + Tasks
-  if (Array.isArray(normalized.Activity)) {
-    normalized.Activity = normalized.Activity.map(act => ({
+  if (values.Activity && Array.isArray(values.Activity)) {
+    normalized.Activity = values.Activity.map(act => ({
       ...act,
       task: Array.isArray(act.task)
         ? act.task.map(t => ({
@@ -214,14 +287,22 @@ export async function PUT(req, { params }) {
       return NextResponse.json({ success: false, message: 'Lead not found' }, { status: 404 })
     }
 
-    // 🔁 Normalize ObjectIds
+    // 🔁 Normalize only provided values
     const normalizedValues = normalizeIds(body.values || {})
 
+    // 🔁 Start with existing values
+    const mergedValues = { ...lead.values }
+
+    // Only update keys present in payload
+    Object.keys(normalizedValues).forEach(key => {
+      mergedValues[key] = normalizedValues[key]
+    })
+
     // 🔁 Recalculate score
-    const { lead_score, lead_label } = calculateLeadScore(normalizedValues)
+    const { lead_score, lead_label } = calculateLeadScore(mergedValues)
 
     const updateFields = {
-      values: { ...normalizedValues, Score: lead_score, Label: lead_label },
+      values: { ...mergedValues, Score: lead_score, Label: lead_label },
       updatedAt: new Date()
     }
 
@@ -241,6 +322,7 @@ export async function PUT(req, { params }) {
     return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
   }
 }
+
 
 const toObjectId = id => {
   try {

@@ -127,6 +127,9 @@ const LeadDetailView = () => {
         }
       })
       const data = await res.json()
+
+      console.log(data.data, '<<< DATAAAAAAAA')
+
       if (data.success) setLeadData(data.data)
     } catch (err) {
       console.error(err)
@@ -134,6 +137,37 @@ const LeadDetailView = () => {
       setLoader(false)
     }
   }
+
+  //   const fetchLeadFromId = async () => {
+  //   try {
+  //     setLoader(true)
+  //     const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         Authorization: `Bearer ${getToken}`
+  //       }
+  //     })
+  //     const data = await res.json()
+
+  //     if (data.success) {
+  //       // 🔹 destructure values & remove Notes, Activity
+  //       const { values, ...rest } = data.data
+  //       const { Notes, Activity, ...filteredValues } = values
+
+  //       const filteredData = {
+  //         ...rest,
+  //         values: filteredValues
+  //       }
+
+  //       console.log(filteredData, '<<< FILTERED DATA')
+  //       setLeadData(filteredData) // ✅ only clean data store
+  //     }
+  //   } catch (err) {
+  //     console.error(err)
+  //   } finally {
+  //     setLoader(false)
+  //   }
+  // }
 
   useEffect(() => {
     if (sections.length > 0 && leadId) {
@@ -148,32 +182,42 @@ const LeadDetailView = () => {
   // 🔹 Save handler
   const handleFieldSave = async (label, newValue) => {
     try {
-      setLeadData(prev => ({
-        ...prev,
+      const updatedValues= {
+        _id: leadData?._id,
+        organization_id: leadData?.organization_id,
+        auto_inc_id: leadData?.auto_inc_id,
+        lead_name: leadData?.lead_name,
+        lead_id: leadData?.lead_id,
+        lead_slug_name: leadData?.lead_slug_name,
+        form_name: leadData?.form_name,
         values: {
-          ...prev.values,
-          [label]: newValue
-        }
-      }))
+          [label]: newValue // update particular field
+        },
+        submittedAt: new Date().toISOString(),
+        c_role_id: leadData?.c_role_id,
+        c_createdBy: leadData?.c_createdBy,
+        updatedAt: leadData?.updatedAt,
+        createdAt: leadData?.createdAt
+      }
 
+    
+
+ 
+
+      // 🔹 Persist to API
       const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${getToken}`
         },
-        body: JSON.stringify({
-          values: {
-            ...leadData?.values,
-            [label]: newValue
-          }
-        })
-      })
+       body: JSON.stringify(updatedValues)})
 
       const result = await res.json()
+
       if (!result.success) {
         toast.error('Failed to update field')
-        fetchLeadFromId()
+        fetchLeadFromId() // rollback to latest DB values
       } else {
         toast.success(result?.message || 'Updated successfully', {
           autoClose: 800,
@@ -186,6 +230,55 @@ const LeadDetailView = () => {
       console.error(err)
     }
   }
+
+  // 🔹 Save handler
+  const handleFieldSave1 = async (label, newValue) => {
+    try {
+      console.log(label, '<<< LABELLLL')
+      console.log(newValue, '<<< newValue')
+
+      setLeadData(prev => ({
+        ...prev,
+        values: {
+          ...prev.values,
+          [label]: newValue
+        }
+      }))
+
+      // const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
+      //   method: 'PUT',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     Authorization: `Bearer ${getToken}`
+      //   },
+      //   body: JSON.stringify({
+      //     values: {
+      //       ...leadData?.values,
+      //       [label]: newValue
+      //     }
+      //   })
+      // })
+
+      // const result = await res.json()
+      // if (!result.success) {
+      //   toast.error('Failed to update field')
+      //   fetchLeadFromId()
+      // } else {
+      //   toast.success(result?.message || 'Updated successfully', {
+      //     autoClose: 800,
+      //     position: 'bottom-center',
+      //     hideProgressBar: true
+      //   })
+      // }
+    } catch (err) {
+      toast.error('Error saving field')
+      console.error(err)
+    }
+  }
+
+  useEffect(() => {
+    console.log(leadData, '<<<LEADDDDDD DATAAAAA')
+  }, [leadData])
 
   if (loader) {
     return (
@@ -245,59 +338,64 @@ const LeadDetailView = () => {
 
       {/* Right side */}
       <Grid item xs={12} md={4}>
-        <LeadCard fields={fields} />
+        <Box
+          sx={{
+            position: 'sticky',
+            top: 10, // navbar height adjust panni set pannu
+            maxHeight: 'calc(100vh - 100px)', // viewport ku match panna
+            overflowY: 'auto',
+            pr: 1 // scrollbar overlap avoid
+          }}
+        >
+          <LeadCard fields={fields} />
 
-        {/* 🔹 Dynamic Sections */}
-        {sections.map((section, index) => (
-          <Box mb={4} key={section.id || section.title || index}>
-            <Accordion
-              // defaultExpanded={index === 0}
-              expanded={expanded === index} // ✅ only one open at a time
-              onChange={() => setExpanded(expanded === index ? false : index)} // toggle logic
-            >
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography variant='subtitle1' fontWeight='bold'>
-                  {section.title}
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Grid container spacing={3}>
-                  {Object.values(section.fields)
-                    .flat()
-                    .filter(Boolean) // ⬅ remove undefined/null fields
-                    .map(field => (
-                      <Grid item xs={12} sm={12} key={field.id || field.label}>
-                        <EditableField
-                          label={field.label}
-                          field={field} // pass the whole field object
-                          value={fields[field.label]}
-                          type={
-                            field.label === 'Next Follow-up Date'
-                              ? 'date'
-                              : field.type === 'Dropdown'
-                                ? 'select'
-                                : 'text'
-                          }
-                          options={fieldConfig[field.label] || []}
-                          onSave={newValue => {
-                            // 🔹 optional: validation before save
-                            if (fieldValidators[field.label]) {
-                              const err = fieldValidators[field.label](newValue)
-                              if (err) {
-                                toast.error(err)
-                                return
-                              }
+          {/* 🔹 Dynamic Sections */}
+          {sections.map((section, index) => (
+            <Box mb={2} key={section.id || section.title || index}>
+              <Accordion expanded={expanded === index} onChange={() => setExpanded(expanded === index ? false : index)}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography variant='subtitle1' fontWeight='bold'>
+                    {section.title}
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Grid container spacing={2}>
+                    {Object.values(section.fields)
+                      .flat()
+                      .filter(Boolean)
+                      .map(field => (
+                        <Grid item xs={12} sm={12} key={field.id || field.label}>
+                          <EditableField
+                            label={field.label}
+                            field={field}
+                            value={fields[field.label]}
+                            type={
+                              field.label === 'Next Follow-up Date'
+                                ? 'date'
+                                : field.type === 'Dropdown'
+                                  ? 'select'
+                                  : 'text'
                             }
-                            handleFieldSave(field.label, newValue)
-                          }}
-                        />
-                      </Grid>
-                    ))}
-                </Grid>
-              </AccordionDetails>
-            </Accordion>
-          </Box>
-        ))}
+                            options={fieldConfig[field.label] || []}
+                            onSave={newValue => {
+                              if (fieldValidators[field.label]) {
+                                const err = fieldValidators[field.label](newValue)
+                                if (err) {
+                                  toast.error(err)
+                                  return
+                                }
+                              }
+                              handleFieldSave(field.label, newValue)
+                            }}
+                          />
+                        </Grid>
+                      ))}
+                  </Grid>
+                </AccordionDetails>
+              </Accordion>
+            </Box>
+          ))}
+        </Box>
       </Grid>
     </Grid>
   )

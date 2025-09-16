@@ -11,15 +11,37 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
+import { getUserAllListApi } from '@/apiFunctions/ApiAction'
 
 const EditableField = ({ label, field = {}, value: initialValue, type = 'text', options = [], onSave }) => {
+
+const [userList, setUserList] = useState([])
+
+
+    // Fetch user list
+    const getUserListFn = async () => {
+      try {
+        const results = await getUserAllListApi()
+        if (results?.appStatusCode === 0 && Array.isArray(results.payloadJson)) {
+          setUserList(results.payloadJson)
+        } else {
+          setUserList([])
+        }
+      } catch (err) {
+        console.error('User list error:', err)
+        setUserList([])
+      }
+    }
+
+  
+
   const [value, setValue] = useState(initialValue)
   const [editing, setEditing] = useState(false)
   const [hover, setHover] = useState(false)
   const [error, setError] = useState(false)
   const [helperText, setHelperText] = useState('')
 
-  useEffect(() => setValue(initialValue), [initialValue])
+  
 
   const validateValue = val => {
     if (!field || !field.type) return ''
@@ -105,6 +127,16 @@ const EditableField = ({ label, field = {}, value: initialValue, type = 'text', 
       setHelperText('')
     }
   }
+
+// useEffect(() => setValue(initialValue), [initialValue])
+
+
+
+  useEffect(() => {
+    setValue(initialValue)
+    getUserListFn()
+  }, [initialValue])
+  
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
