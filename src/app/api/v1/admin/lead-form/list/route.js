@@ -20,6 +20,7 @@ export async function GET(req) {
     const form_name = searchParams.get('form_name')
     const search = searchParams.get('search') || ''
     const status = searchParams.get('status') || ''
+    const assign = searchParams.get('assign') || ''
     const source = searchParams.get('source') || ''
     const page = parseInt(searchParams.get('page') || '1', 10)
     const limit = parseInt(searchParams.get('limit') || '10', 10)
@@ -73,7 +74,7 @@ export async function GET(req) {
         query.$or = [
           { c_createdBy: verified.data.user_id }, // ✅ own leads always
           { c_role_id: { $in: lowerRoleIds } }, // ✅ lower roles
-          { 'values.Assigned To': String(verified.data.user_id) } // ✅ assigned to me
+          { 'values.Assigned To': String(verified.data.user_id) } 
         ]
       }
     }
@@ -106,6 +107,10 @@ export async function GET(req) {
     if (source) {
       query.$and = query.$and || []
       query.$and.push({ 'values.Lead Source': { $regex: source, $options: 'i' } })
+    }
+    if (assign) {
+      query.$and = query.$and || []
+      query.$and.push({ 'values.Assigned To': { $regex: assign, $options: 'i' } })
     }
 
     // 🔍 Date Range

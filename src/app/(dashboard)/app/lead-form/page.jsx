@@ -590,10 +590,9 @@ function LeadFormAppPage() {
       .catch(() => setCountryCodes([]))
 
     getUserListFn()
+     fetchForm()
   }, [])
-  useEffect(() => {
-    fetchForm()
-  }, [])
+ 
 
   useEffect(() => {
     console.log(countryCodes, '<<< COUNTY CODES')

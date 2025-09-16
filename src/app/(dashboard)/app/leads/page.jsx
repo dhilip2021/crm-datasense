@@ -40,12 +40,13 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import GridOnIcon from '@mui/icons-material/GridOn'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import { toast, ToastContainer } from 'react-toastify'
-import { getAllUserListApi } from '@/apiFunctions/ApiAction'
+import { getAllUserListApi, getUserAllListApi } from '@/apiFunctions/ApiAction'
 
 const LeadTable = () => {
   const organization_id = Cookies.get('organization_id')
   const getToken = Cookies.get('_token')
   const loggedInUserId = Cookies.get('user_id')
+ 
   const loggedInUserName = Cookies.get('user_name')
   const [data, setData] = useState([])
   const [dataFilter, setDataFilter] = useState([])
@@ -82,12 +83,14 @@ const LeadTable = () => {
     status: '',
     source: '',
     region: '',
+    assign: '',
     rep: '',
     value: '',
     fromDate: null,
     toDate: null,
     search: ''
   })
+
 
   //  🔹 Flatten helper
   const flattenFields = sections => {
@@ -142,6 +145,8 @@ const LeadTable = () => {
   const fetchData = async () => {
     setLoading(true)
 
+   
+
     const form_name = 'lead-form'
 
     const query = new URLSearchParams({
@@ -153,6 +158,7 @@ const LeadTable = () => {
       ...(filters.status && { status: filters.status }),
       ...(filters.source && { source: filters.source }),
       ...(filters.region && { region: filters.region }),
+      ...(filters.assign && { assign: filters.assign }),
       ...(filters.rep && { rep: filters.rep }),
       ...(filters.value && { value: filters.value }),
       ...(filters.fromDate && { from: dayjs(filters.fromDate).format('YYYY-MM-DD') }),
@@ -215,6 +221,8 @@ const LeadTable = () => {
   }
 
   const fetchFilterData = async () => {
+
+     console.log(selectedUsers,"<<< SELECTED USERSSSS")
     setLoading(true)
     const organization_id = Cookies.get('organization_id')
     const form_name = 'lead-form'
@@ -227,6 +235,7 @@ const LeadTable = () => {
       ...(filters.search && { search: filters.search }),
       ...(filters.status && { status: filters.status }),
       ...(filters.source && { source: filters.source }),
+      ...(filters.assign && { assign: filters.assign }),
       ...(filters.region && { region: filters.region }),
       ...(filters.rep && { rep: filters.rep }),
       ...(filters.value && { value: filters.value }),
@@ -392,9 +401,9 @@ const LeadTable = () => {
 
   const getUserListFn = async () => {
     try {
-      const results = await getAllUserListApi()
+      const results = await getUserAllListApi()
       if (results?.appStatusCode === 0 && Array.isArray(results.payloadJson)) {
-        console.log(results.payloadJson, '<<< USER LISTTT')
+        console.log(results.payloadJson, '<<< USER LISTTTGGG')
 
         setUserList(results.payloadJson)
       } else {
@@ -681,21 +690,23 @@ const LeadTable = () => {
             <Grid item xs={12} sm={2}>
               <TextField
                 select
-                label='Created By'
-                value={selectedUsers.length > 0 ? selectedUsers : [loggedInUserId]}
-                onChange={e =>
-                  setSelectedUsers(typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value)
-                }
+                label='Assigned To'
+                // value={selectedUsers.length > 0 ? selectedUsers : [loggedInUserId]}
+
+                // value={filters.assign ?  filters.assign : loggedInUserId}
+                value={filters.assign}
+                // onChange={e =>
+                //   setSelectedUsers(typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value)
+                // }
+                 onChange={e => setFilters({ ...filters, assign: e.target.value })}
                 // SelectProps={{ multiple: true }}
                 size='small'
                 sx={{ minWidth: 200 }}
               >
-                <MenuItem value={loggedInUserId}>{loggedInUserName || 'Me'}</MenuItem>
-                {userList
-                  .filter(u => u.user_id !== loggedInUserId)
-                  .map(u => (
+                <MenuItem value="">{'All'}</MenuItem>
+                {userList.map(u => (
                     <MenuItem key={u.user_id} value={u.user_id}>
-                      {u.user_name || `${u.first_name} ${u.last_name}`}
+                      {u.user_name}
                     </MenuItem>
                   ))}
               </TextField>
