@@ -127,9 +127,6 @@ const LeadDetailView = () => {
         }
       })
       const data = await res.json()
-
-      console.log(data.data, '<<< DATAAAAAAAA')
-
       if (data.success) setLeadData(data.data)
     } catch (err) {
       console.error(err)
@@ -138,36 +135,6 @@ const LeadDetailView = () => {
     }
   }
 
-  //   const fetchLeadFromId = async () => {
-  //   try {
-  //     setLoader(true)
-  //     const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         Authorization: `Bearer ${getToken}`
-  //       }
-  //     })
-  //     const data = await res.json()
-
-  //     if (data.success) {
-  //       // 🔹 destructure values & remove Notes, Activity
-  //       const { values, ...rest } = data.data
-  //       const { Notes, Activity, ...filteredValues } = values
-
-  //       const filteredData = {
-  //         ...rest,
-  //         values: filteredValues
-  //       }
-
-  //       console.log(filteredData, '<<< FILTERED DATA')
-  //       setLeadData(filteredData) // ✅ only clean data store
-  //     }
-  //   } catch (err) {
-  //     console.error(err)
-  //   } finally {
-  //     setLoader(false)
-  //   }
-  // }
 
   useEffect(() => {
     if (sections.length > 0 && leadId) {
@@ -231,54 +198,8 @@ const LeadDetailView = () => {
     }
   }
 
-  // 🔹 Save handler
-  const handleFieldSave1 = async (label, newValue) => {
-    try {
-      console.log(label, '<<< LABELLLL')
-      console.log(newValue, '<<< newValue')
 
-      setLeadData(prev => ({
-        ...prev,
-        values: {
-          ...prev.values,
-          [label]: newValue
-        }
-      }))
 
-      // const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
-      //   method: 'PUT',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     Authorization: `Bearer ${getToken}`
-      //   },
-      //   body: JSON.stringify({
-      //     values: {
-      //       ...leadData?.values,
-      //       [label]: newValue
-      //     }
-      //   })
-      // })
-
-      // const result = await res.json()
-      // if (!result.success) {
-      //   toast.error('Failed to update field')
-      //   fetchLeadFromId()
-      // } else {
-      //   toast.success(result?.message || 'Updated successfully', {
-      //     autoClose: 800,
-      //     position: 'bottom-center',
-      //     hideProgressBar: true
-      //   })
-      // }
-    } catch (err) {
-      toast.error('Error saving field')
-      console.error(err)
-    }
-  }
-
-  useEffect(() => {
-    console.log(leadData, '<<<LEADDDDDD DATAAAAA')
-  }, [leadData])
 
   if (loader) {
     return (
@@ -387,6 +308,7 @@ const LeadDetailView = () => {
                               }
                               handleFieldSave(field.label, newValue)
                             }}
+
                           />
                         </Grid>
                       ))}
