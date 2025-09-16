@@ -14,34 +14,30 @@ import dayjs from 'dayjs'
 import { getUserAllListApi } from '@/apiFunctions/ApiAction'
 
 const EditableField = ({ label, field = {}, value: initialValue, type = 'text', options = [], onSave }) => {
+  console.log(label, '<<< LABEELLLLL')
 
-const [userList, setUserList] = useState([])
+  const [userList, setUserList] = useState([])
 
-
-    // Fetch user list
-    const getUserListFn = async () => {
-      try {
-        const results = await getUserAllListApi()
-        if (results?.appStatusCode === 0 && Array.isArray(results.payloadJson)) {
-          setUserList(results.payloadJson)
-        } else {
-          setUserList([])
-        }
-      } catch (err) {
-        console.error('User list error:', err)
+  // Fetch user list
+  const getUserListFn = async () => {
+    try {
+      const results = await getUserAllListApi()
+      if (results?.appStatusCode === 0 && Array.isArray(results.payloadJson)) {
+        setUserList(results.payloadJson)
+      } else {
         setUserList([])
       }
+    } catch (err) {
+      console.error('User list error:', err)
+      setUserList([])
     }
-
-  
+  }
 
   const [value, setValue] = useState(initialValue)
   const [editing, setEditing] = useState(false)
   const [hover, setHover] = useState(false)
   const [error, setError] = useState(false)
   const [helperText, setHelperText] = useState('')
-
-  
 
   const validateValue = val => {
     if (!field || !field.type) return ''
@@ -128,15 +124,16 @@ const [userList, setUserList] = useState([])
     }
   }
 
-// useEffect(() => setValue(initialValue), [initialValue])
-
-
+  // useEffect(() => setValue(initialValue), [initialValue])
 
   useEffect(() => {
     setValue(initialValue)
     getUserListFn()
   }, [initialValue])
-  
+
+  useEffect(() => {
+    console.log(userList, '<<< userList')
+  }, [userList])
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -165,11 +162,17 @@ const [userList, setUserList] = useState([])
                   helperText={helperText}
                   sx={{ flex: 1, backgroundColor: '#f9fafb' }}
                 >
-                  {options.map(opt => (
-                    <MenuItem key={opt} value={opt}>
-                      {opt}
-                    </MenuItem>
-                  ))}
+                  {label === 'Assigned To'
+                    ? userList.map(user => (
+                        <MenuItem key={user._id} value={user.user_id}>
+                          {user.user_name}
+                        </MenuItem>
+                      ))
+                    : options.map(opt => (
+                        <MenuItem key={opt} value={opt}>
+                          {opt}
+                        </MenuItem>
+                      ))}
                 </TextField>
               ) : type === 'date' ? (
                 <DatePicker
@@ -209,11 +212,18 @@ const [userList, setUserList] = useState([])
             display='flex'
             alignItems='center'
             justifyContent='space-between'
-            sx={{ px: 1.5, py: 1, borderRadius: 1, backgroundColor: '#f9fafb', border: '1px solid #e5e7eb' }}
+            sx={{
+              px: 1.5,
+              py: 1,
+              borderRadius: 1,
+              backgroundColor: '#f9fafb',
+              border: '1px solid #e5e7eb'
+            }}
           >
             <Typography variant='body2' color={value ? 'text.primary' : 'text.disabled'} sx={{ flex: 1 }}>
-              {value || '—'}
+              {label === 'Assigned To' ? userList.find(u => u.user_id === value)?.user_name || '—' : value || '—'}
             </Typography>
+
             <IconButton
               size='small'
               onClick={() => setEditing(true)}
