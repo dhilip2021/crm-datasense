@@ -131,9 +131,7 @@ const EditableField = ({ label, field = {}, value: initialValue, type = 'text', 
     getUserListFn()
   }, [initialValue])
 
-  useEffect(() => {
-    console.log(userList, '<<< userList')
-  }, [userList])
+
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -163,11 +161,11 @@ const EditableField = ({ label, field = {}, value: initialValue, type = 'text', 
                   sx={{ flex: 1, backgroundColor: '#f9fafb' }}
                 >
                   {label === 'Assigned To'
-                    ? userList.map(user => (
-                        <MenuItem key={user._id} value={user.user_id}>
-                          {user.user_name}
-                        </MenuItem>
-                      ))
+                    ? userList.filter(u => u.user_id !== "41ea614a8ccc").map(u => (
+                                          <MenuItem key={u.user_id} value={u.user_id}>
+                                            {u.user_name}
+                                          </MenuItem>
+                                        ))
                     : options.map(opt => (
                         <MenuItem key={opt} value={opt}>
                           {opt}

@@ -40,7 +40,7 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import GridOnIcon from '@mui/icons-material/GridOn'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import { toast, ToastContainer } from 'react-toastify'
-import { getAllUserListApi, getUserAllListApi } from '@/apiFunctions/ApiAction'
+import { getUserAllListApi } from '@/apiFunctions/ApiAction'
 
 const LeadTable = () => {
   const organization_id = Cookies.get('organization_id')
@@ -704,7 +704,7 @@ const LeadTable = () => {
                 sx={{ minWidth: 200 }}
               >
                 <MenuItem value="">{'All'}</MenuItem>
-                {userList.map(u => (
+                {userList.filter(u => u.user_id !== "41ea614a8ccc").map(u => (
                     <MenuItem key={u.user_id} value={u.user_id}>
                       {u.user_name}
                     </MenuItem>

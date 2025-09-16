@@ -430,10 +430,12 @@ function LeadFormAppPage() {
       case 'Dropdown': {
         let options = field.options || []
         if ((field.label === 'Assigned To' || field.label === 'Sales Executive') && userList.length > 0) {
-          options = userList.map(user => ({
+          options = userList.filter(u => u.user_id !== "41ea614a8ccc").map(user => ({
             value: user.user_id,
             label: user.user_name
           }))
+
+
         }
         return (
           <TextField id={field.id} select {...commonProps}>
