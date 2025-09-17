@@ -54,7 +54,10 @@ function CustomerFormAppPage() {
       }
       if (field.type === 'Email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Invalid email address'
       // if (field.type === 'URL' && !/^(http|https):\/\/.+/.test(value)) return 'Invalid URL'
-      if (field.type === 'URL' && !/^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})(\/[^\s]*)?$/.test(value)) {
+      // if (field.type === 'URL' && !/^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})(\/[^\s]*)?$/.test(value)) {
+      //   return 'Invalid URL'
+      // }
+     if (field.type === 'URL' && !/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/.test(value)) {
         return 'Invalid URL'
       }
       if (field.type === 'Date' && new Date(value) < new Date().setHours(0, 0, 0, 0))

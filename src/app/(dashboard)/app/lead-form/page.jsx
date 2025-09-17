@@ -157,7 +157,10 @@ function LeadFormAppPage() {
         if (max && value.length > max) return `Maximum ${max} characters allowed`
       }
       // if (field.type === 'URL' && !/^(http|https):\/\/.+/.test(value)) return 'Invalid URL'
-      if (field.type === 'URL' && !/^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})(\/[^\s]*)?$/.test(value)) {
+      // if (field.type === 'URL' && !/^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})(\/[^\s]*)?$/.test(value)) {
+      //   return 'Invalid URL'
+      // }
+      if (field.type === 'URL' && !/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/.test(value)) {
         return 'Invalid URL'
       }
       if (field.type === 'Date' && new Date(value) < new Date().setHours(0, 0, 0, 0)) {
@@ -385,18 +388,17 @@ function LeadFormAppPage() {
           //   if (field.defaultValue) defaultValues[field.id] = field.defaultValue
           // })
 
-             fields.forEach(field => {
-          if (field.defaultValue) {
-            defaultValues[field.id] = field.defaultValue
-          }
+          fields.forEach(field => {
+            if (field.defaultValue) {
+              defaultValues[field.id] = field.defaultValue
+            }
 
-          // 🚨 Default user assign
-          if ((field.label === 'Assigned To' || field.label === 'Sales Executive') && user_id) {
-            defaultValues[field.id] = user_id
-          }
+            // 🚨 Default user assign
+            if ((field.label === 'Assigned To' || field.label === 'Sales Executive') && user_id) {
+              defaultValues[field.id] = user_id
+            }
+          })
         })
-        })
-
 
         setValues(defaultValues)
       } else {
@@ -430,12 +432,12 @@ function LeadFormAppPage() {
       case 'Dropdown': {
         let options = field.options || []
         if ((field.label === 'Assigned To' || field.label === 'Sales Executive') && userList.length > 0) {
-          options = userList.filter(u => u.user_id !== "41ea614a8ccc").map(user => ({
-            value: user.user_id,
-            label: user.user_name
-          }))
-
-
+          options = userList
+            .filter(u => u.user_id !== '41ea614a8ccc')
+            .map(user => ({
+              value: user.user_id,
+              label: user.user_name
+            }))
         }
         return (
           <TextField id={field.id} select {...commonProps}>
@@ -592,15 +594,13 @@ function LeadFormAppPage() {
       .catch(() => setCountryCodes([]))
 
     getUserListFn()
-     fetchForm()
+    fetchForm()
   }, [])
- 
 
   useEffect(() => {
     console.log(countryCodes, '<<< COUNTY CODES')
     console.log(user_id, '<<< USER_IDDD')
     console.log(userList, '<<< USER_LISTTT')
-    
   }, [countryCodes])
 
   return (

@@ -76,8 +76,13 @@ const EditableField = ({ label, field = {}, value: initialValue, type = 'text', 
       // case 'URL':
       //   if (v && !/^(http|https):\/\/.+/.test(v)) return 'Invalid URL'
       //   break
+      // case 'URL':
+      //   if (v && !/^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})(\/[^\s]*)?$/.test(v)) {
+      //     return 'Invalid URL'
+      //   }
+      //   break
       case 'URL':
-        if (v && !/^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})(\/[^\s]*)?$/.test(v)) {
+        if (v && !/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/.test(v)) {
           return 'Invalid URL'
         }
         break
@@ -131,8 +136,6 @@ const EditableField = ({ label, field = {}, value: initialValue, type = 'text', 
     getUserListFn()
   }, [initialValue])
 
-
-
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box
@@ -161,11 +164,13 @@ const EditableField = ({ label, field = {}, value: initialValue, type = 'text', 
                   sx={{ flex: 1, backgroundColor: '#f9fafb' }}
                 >
                   {label === 'Assigned To'
-                    ? userList.filter(u => u.user_id !== "41ea614a8ccc").map(u => (
-                                          <MenuItem key={u.user_id} value={u.user_id}>
-                                            {u.user_name}
-                                          </MenuItem>
-                                        ))
+                    ? userList
+                        .filter(u => u.user_id !== '41ea614a8ccc')
+                        .map(u => (
+                          <MenuItem key={u.user_id} value={u.user_id}>
+                            {u.user_name}
+                          </MenuItem>
+                        ))
                     : options.map(opt => (
                         <MenuItem key={opt} value={opt}>
                           {opt}
