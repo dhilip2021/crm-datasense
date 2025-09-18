@@ -7,7 +7,7 @@ const NoteSchema = new mongoose.Schema(
     title: { type: String, default: null },
     note: { type: String, default: null },
     createdAt: { type: Date, default: Date.now },
-    createdBy: { type: String, default: null },
+    createdBy: { type: String, default: null }
   },
   { _id: false }
 )
@@ -24,14 +24,14 @@ const TaskSchema = new mongoose.Schema(
     reminderTime: { type: String, default: null },
     alertType: { type: String, default: 'Email' },
     createdAt: { type: Date, default: Date.now },
-    createdBy: { type: String, default: null },
+    createdBy: { type: String, default: null }
   },
   { _id: false }
 )
 
 const ActivitySchema = new mongoose.Schema(
   {
-    task: [TaskSchema],
+    task: [TaskSchema]
   },
   { _id: false }
 )
@@ -41,37 +41,47 @@ const LeadFormSchema = new mongoose.Schema(
   {
     organization_id: {
       type: String,
-      required: true,
+      required: true
     },
     auto_inc_id: {
       type: String,
       required: [true, 'auto inc id is required'],
-      trim: true,
+      trim: true
     },
     lead_name: {
       type: String,
       required: [true, 'Lead name is required'],
-      trim: true,
+      trim: true
     },
     lead_id: {
       type: String,
       required: [true, 'Lead id is required'],
-      trim: true,
+      trim: true
     },
     lead_slug_name: {
       type: String,
-      trim: true,
+      trim: true
     },
     form_name: {
       type: String,
-      required: true,
+      required: true
     },
 
     // 👇 Structure for Notes + Activity inside values
     values: {
       type: Object,
-      required: true,
+      required: true
     },
+    products: [
+      {
+        productRef: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+        product_id: { type: String },
+        quantity: { type: Number, default: 1 },
+        unitPrice: { type: Number },
+        discount: { type: Number, default: 0 }, // %
+        finalPrice: { type: Number } // (qty * unitPrice) - discount
+      }
+    ],
     'values.Notes': [NoteSchema],
     'values.Activity': [ActivitySchema],
 
@@ -81,10 +91,9 @@ const LeadFormSchema = new mongoose.Schema(
     c_role_id: { type: String },
     c_createdBy: { type: String },
     c_updatedBy: { type: String },
-    c_deletedBy: { type: String },
+    c_deletedBy: { type: String }
   },
   { strict: false, versionKey: false, timestamps: true }
 )
 
-export default mongoose.models.Leadform ||
-  mongoose.model('Leadform', LeadFormSchema)
+export default mongoose.models.Leadform || mongoose.model('Leadform', LeadFormSchema)

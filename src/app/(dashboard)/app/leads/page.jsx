@@ -403,8 +403,6 @@ const LeadTable = () => {
     try {
       const results = await getUserAllListApi()
       if (results?.appStatusCode === 0 && Array.isArray(results.payloadJson)) {
-        console.log(results.payloadJson, '<<< USER LISTTTGGG')
-
         setUserList(results.payloadJson)
       } else {
         setUserList([])

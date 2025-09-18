@@ -27,6 +27,9 @@ import Image from 'next/image'
 import LoaderGif from '@assets/gif/loader.gif'
 import Link from 'next/link'
 import OpenActivities from './OpenActivities'
+import ProductSelectorDialog from './ProductSelectorDialog'
+import ProductPage from './ProductPage'
+// import CloseActivities from './closeActivities'
 
 // ✅ Validation rules
 const fieldValidators = {
@@ -56,6 +59,7 @@ const LeadDetailView = () => {
   const leadId = decrypCryptoReq(encryptedId)
   const [expanded, setExpanded] = useState(0) // 0 = first open by default
 
+  const [userList, setUserList] = useState([])
   const organization_id = Cookies.get('organization_id')
   const lead_form = 'lead-form'
   const deal_form = 'deal-form'
@@ -116,6 +120,21 @@ const LeadDetailView = () => {
     }
   }
 
+  // Fetch user list
+  const getUserListFn = async () => {
+    try {
+      const results = await getUserAllListApi()
+      if (results?.appStatusCode === 0 && Array.isArray(results.payloadJson)) {
+        setUserList(results.payloadJson)
+      } else {
+        setUserList([])
+      }
+    } catch (err) {
+      console.error('User list error:', err)
+      setUserList([])
+    }
+  }
+
   // 🔹 Fetch lead data
   const fetchLeadFromId = async () => {
     try {
@@ -135,10 +154,10 @@ const LeadDetailView = () => {
     }
   }
 
-
   useEffect(() => {
     if (sections.length > 0 && leadId) {
       fetchLeadFromId()
+      getUserListFn()
     }
   }, [sections, leadId])
 
@@ -149,7 +168,7 @@ const LeadDetailView = () => {
   // 🔹 Save handler
   const handleFieldSave = async (label, newValue) => {
     try {
-      const updatedValues= {
+      const updatedValues = {
         _id: leadData?._id,
         organization_id: leadData?.organization_id,
         auto_inc_id: leadData?.auto_inc_id,
@@ -167,10 +186,6 @@ const LeadDetailView = () => {
         createdAt: leadData?.createdAt
       }
 
-    
-
- 
-
       // 🔹 Persist to API
       const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
         method: 'PUT',
@@ -178,7 +193,8 @@ const LeadDetailView = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${getToken}`
         },
-       body: JSON.stringify(updatedValues)})
+        body: JSON.stringify(updatedValues)
+      })
 
       const result = await res.json()
 
@@ -197,9 +213,6 @@ const LeadDetailView = () => {
       console.error(err)
     }
   }
-
-
-
 
   if (loader) {
     return (
@@ -255,6 +268,14 @@ const LeadDetailView = () => {
         <Box>
           <OpenActivities leadId={leadId} leadData={leadData} />
         </Box>
+        {/* <Box>
+          <CloseActivities leadId={leadId} leadData={leadData} />
+        </Box> */}
+        {/* 🔹 Add Product Button */}
+        <Box mb={4}>
+          <ProductPage leadId={leadId} leadData={leadData} fetchLeadFromId={fetchLeadFromId} />
+          
+        </Box>
       </Grid>
 
       {/* Right side */}
@@ -308,7 +329,7 @@ const LeadDetailView = () => {
                               }
                               handleFieldSave(field.label, newValue)
                             }}
-
+                            userList={userList}
                           />
                         </Grid>
                       ))}
@@ -319,6 +340,7 @@ const LeadDetailView = () => {
           ))}
         </Box>
       </Grid>
+     
     </Grid>
   )
 }

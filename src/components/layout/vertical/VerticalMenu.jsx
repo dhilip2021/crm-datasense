@@ -96,6 +96,9 @@ const VerticalMenu = ({ scrollMenu, roles }) => {
           <MenuItem href='/campaign-type' icon={<i className='ri-map-pin-line' />}>
             Campaign Type
           </MenuItem>
+          <MenuItem href='/products' icon={<i className='ri-inbox-archive-line' />}>
+            Product Master
+          </MenuItem>
         </SubMenu>
         <MenuSection label='Apps & Pages'>
           <MenuItem href='/app/leads' icon={<i className='ri-user-star-line' />}>
@@ -105,7 +108,7 @@ const VerticalMenu = ({ scrollMenu, roles }) => {
             Opportunity
           </MenuItem>
           <MenuItem href='/app/customer' icon={<i className='ri-user-settings-line' />}>
-            Customer
+            Contacts
           </MenuItem>
           <MenuItem href='/notes' icon={<i className='ri-sticky-note-add-line'></i>}>
             Notes

@@ -28,7 +28,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import LoaderGif from '@assets/gif/loader.gif'
-import { getAllUserListApi, getUserAllListApi } from '@/apiFunctions/ApiAction'
+import { getUserAllListApi } from '@/apiFunctions/ApiAction'
 
 // Short name (ORG)
 const shortName = fullName =>
@@ -156,10 +156,6 @@ function LeadFormAppPage() {
         if (min && value.length < min) return `Minimum ${min} characters required`
         if (max && value.length > max) return `Maximum ${max} characters allowed`
       }
-      // if (field.type === 'URL' && !/^(http|https):\/\/.+/.test(value)) return 'Invalid URL'
-      // if (field.type === 'URL' && !/^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})(\/[^\s]*)?$/.test(value)) {
-      //   return 'Invalid URL'
-      // }
       if (field.type === 'URL' && !/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/.test(value)) {
         return 'Invalid URL'
       }
@@ -471,6 +467,60 @@ function LeadFormAppPage() {
       case 'Multi-Line':
         return <TextField id={field.id} {...commonProps} multiline minRows={field.rows || 3} />
 
+      // case 'Phone':
+      //   return (
+      //     <TextField
+      //       id={field.id}
+      //       {...commonProps}
+      //       value={values[`${field.id}_number`] || ''}
+      //       onChange={e => handleChange(`${field.id}_number`, e.target.value, field.type)}
+      //       type='tel'
+      //       inputProps={{ maxLength: field.maxLength }}
+      //       InputProps={{
+      //         startAdornment: (
+      //           <InputAdornment position='start'>
+      //             <Autocomplete
+      //               options={countryCodes}
+      //               getOptionLabel={option =>
+      //                 typeof option === 'string' ? option : `${option.code} ${option.dial_code}`
+      //               }
+      //               freeSolo // ✅ allows typing custom values
+      //               value={
+      //                 countryCodes.find(
+      //                   c => c.dial_code === (values[`${field.id}_countryCode`] || field.countryCode || '+91')
+      //                 ) ||
+      //                 values[`${field.id}_countryCode`] ||
+      //                 ''
+      //               }
+      //               onChange={(_, newValue) => {
+      //                 if (typeof newValue === 'string') {
+      //                   handleChange(`${field.id}_countryCode`, newValue, field.type)
+      //                 } else if (newValue && 'dial_code' in newValue) {
+      //                   handleChange(`${field.id}_countryCode`, newValue.dial_code, field.type)
+      //                 } else {
+      //                   handleChange(`${field.id}_countryCode`, '', field.type)
+      //                 }
+      //               }}
+      //               size='small'
+      //               sx={{ minWidth: 120 }}
+      //               renderInput={params => (
+      //                 <TextField
+      //                   {...params}
+      //                   variant='standard'
+      //                   placeholder='+91'
+      //                   InputProps={{
+      //                     ...params.InputProps,
+      //                     disableUnderline: true
+      //                   }}
+      //                 />
+      //               )}
+      //             />
+      //           </InputAdornment>
+      //         )
+      //       }}
+      //     />
+      //   )
+
       case 'Phone':
         return (
           <TextField
@@ -485,39 +535,66 @@ function LeadFormAppPage() {
                 <InputAdornment position='start'>
                   <Autocomplete
                     options={countryCodes}
-                    getOptionLabel={option =>
-                      typeof option === 'string' ? option : `${option.code} ${option.dial_code}`
+                    getOptionLabel={
+                      option => (typeof option === 'string' ? option : option.dial_code) // only for dropdown search
                     }
-                    freeSolo // ✅ allows typing custom values
                     value={
                       countryCodes.find(
-                        c => c.dial_code === (values[`${field.id}_countryCode`] || field.countryCode || '+91')
-                      ) ||
-                      values[`${field.id}_countryCode`] ||
-                      ''
+                        c => c.dial_code === (values[`${field.id}_countryCode`]  || '+91')
+                      ) || null
                     }
                     onChange={(_, newValue) => {
-                      if (typeof newValue === 'string') {
-                        handleChange(`${field.id}_countryCode`, newValue, field.type)
-                      } else if (newValue && 'dial_code' in newValue) {
+                      if (newValue && 'dial_code' in newValue) {
                         handleChange(`${field.id}_countryCode`, newValue.dial_code, field.type)
                       } else {
                         handleChange(`${field.id}_countryCode`, '', field.type)
                       }
                     }}
                     size='small'
-                    sx={{ minWidth: 120 }}
-                    renderInput={params => (
-                      <TextField
-                        {...params}
-                        variant='standard'
-                        placeholder='+91'
-                        InputProps={{
-                          ...params.InputProps,
-                          disableUnderline: true
-                        }}
-                      />
+                    sx={{ minWidth: 140 }}
+                    renderOption={(props, option) => (
+                      <Box component='li' {...props} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <img
+                          loading='lazy'
+                          width='20'
+                          src={option.flag}
+                          alt={option.code}
+                          style={{ borderRadius: '3px' }}
+                        />
+                        <Typography variant='body2'>
+                          {option.name} ({option.dial_code})
+                        </Typography>
+                      </Box>
                     )}
+                    renderInput={params => {
+                      const selected = params.inputProps.value
+                        ? countryCodes.find(c => c.dial_code === params.inputProps.value)
+                        : null
+
+                      return (
+                        <TextField
+                          {...params}
+                          variant='standard'
+                          placeholder='+91'
+                          InputProps={{
+                            ...params.InputProps,
+                            disableUnderline: true,
+                            startAdornment: selected ? (
+                              <Box display='flex' alignItems='center' gap={1}>
+                                <img
+                                  loading='lazy'
+                                  width='30'
+                                  src={selected.flag}
+                                  alt={selected.code}
+                                  style={{ borderRadius: '50px' }}
+                                />
+                                {/* <Typography variant='body2'>{selected.dial_code}</Typography> */}
+                              </Box>
+                            ) : null
+                          }}
+                        />
+                      )
+                    }}
                   />
                 </InputAdornment>
               )

@@ -399,38 +399,38 @@ export default function LeadStatus() {
         </FormControl>
       </Box>
 
-      <Grid container spacing={3} p={2}>
-        {loading
-          ? [...Array(11)].map((_, i) => (
-              <Grid item xs={12} sm={6} md={3} lg={2} key={i}>
-                <StatSkeleton />
-              </Grid>
-            ))
-          : cardConfig.map((item, index) => (
-              <Grid item xs={12} sm={6} md={3} lg={2} key={index}>
-                <StatCard>
-                  <CardContent className='flex items-center gap-3'>
-                    <CustomAvatar
-                      variant='rounded'
-                      color={item.color}
-                      className='shadow-md'
-                      sx={{ width: 40, height: 40, fontSize: 16 }}
-                    >
-                      <i className={item.icon}></i>
-                    </CustomAvatar>
-                    <Box>
-                      <Typography variant='body2' sx={{ color: 'text.secondary' }}>
-                        {item.title}
-                      </Typography>
-                      <Typography variant='h6' sx={{ fontWeight: 600 }}>
-                        {item.count}
-                      </Typography>
-                    </Box>
-                  </CardContent>
-                </StatCard>
-              </Grid>
-            ))}
-      </Grid>
+     <Grid container spacing={2} p={2}>
+  {loading
+    ? [...Array(11)].map((_, i) => (
+        <Grid item xs={12} sm={6} md={4} lg={2} key={i}>
+          <StatSkeleton />
+        </Grid>
+      ))
+    : cardConfig.map((item, index) => (
+        <Grid item xs={12} sm={6} md={4} lg={2} key={index}>
+          <StatCard>
+            <CardContent className='flex items-center gap-2'>
+              <CustomAvatar
+                variant='rounded'
+                color={item.color}
+                className='shadow-md'
+                sx={{ width: 40, height: 40, fontSize: 16 }}
+              >
+                <i className={item.icon}></i>
+              </CustomAvatar>
+              <Box>
+                <Typography variant='body2' sx={{ color: 'text.secondary' }}>
+                  {item.title}
+                </Typography>
+                <Typography variant='h6' sx={{ fontWeight: 600 }}>
+                  {item.count}
+                </Typography>
+              </Box>
+            </CardContent>
+          </StatCard>
+        </Grid>
+      ))}
+</Grid>
     </>
   )
 }

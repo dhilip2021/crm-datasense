@@ -77,14 +77,11 @@ function parseDateTime(date, time) {
   return fullDate
 }
 
-export default function OpenActivities({ leadId, leadData }) {
+export default function CloseActivities({ leadId, leadData }) {
+//   const leadArrayTasks = leadData?.values?.Activity?.[0]?.task || []
+    const leadArrayTasks = leadData?.values?.Activity?.[0]?.task?.filter(t => t.status === "Completed") || [];
 
- 
-
-  // const leadArrayTasks = leadData?.values?.Activity?.[0]?.task || []
-  const leadArrayTasks = leadData?.values?.Activity?.[0]?.task?.filter(t => t.status !== "Completed") || [];
-
-   console.log(leadArrayTasks,"<<< leadArrayTasks")
+    console.log(leadArrayTasks,"<<< leadArrayTasks closed")
 
   const sortedTasks = [...leadArrayTasks]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -402,7 +399,7 @@ export default function OpenActivities({ leadId, leadData }) {
         <Box>
           <Box display='flex' justifyContent='space-between' alignItems='center' width='100%' p={4}>
             <Typography variant='h6' fontWeight='bold'>
-              Open Activities
+              Close Activities
             </Typography>
 
             <Box display='flex' justifyContent='flex-end'>
