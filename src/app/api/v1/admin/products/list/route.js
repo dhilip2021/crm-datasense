@@ -1,9 +1,9 @@
 // File: app/api/v1/admin/products/list/route.js
 
 import { NextResponse } from 'next/server'
-import Product from '@/models/Product'
 import connectMongoDB from '@/libs/mongodb'
 import { verifyAccessToken } from '@/helper/clientHelper'
+import { Product } from '@/models/Product'
 
 let sendResponse = {
   success: '',
