@@ -3,6 +3,7 @@
 import { verifyAccessToken } from '@/helper/clientHelper'
 import connectMongoDB from '@/libs/mongodb'
 import Leadform from '@/models/Leadform'
+
 import mongoose from 'mongoose'
 import { NextResponse } from 'next/server'
 
@@ -73,15 +74,20 @@ export async function GET(req, { params }) {
     try {
       const { lead_id } = params
 
+      console.log(lead_id,"<<< LEAD ID")
+
       if (!lead_id) {
         return NextResponse.json({ success: false, message: 'Missing lead_id' }, { status: 400 })
       }
 
-      // const lead = await Leadform.findOne({ lead_id }).select('-__v').lean()
+      const lead = await Leadform.findOne({ lead_id }).select('-__v').lean()
+      // const lead = await Leadform.findOne({ lead_id }).populate('products.productRef', 'name category code').select('-__v').lean()
 
-      const lead = await Leadform.findOne({ lead_id }).populate('products.productRef', 'name category code').select('-__v').lean()
+      
 
+      // const lead = await Leadform.findOne({ lead_id }).populate('Product.productRef', 'name category code').select('-__v').lean()
 
+      //  const lead = await Leadform.findOne({ lead_id }).populate('Product.productRef', 'name category code').select('-__v').lean();
 
       if (!lead) {
         return NextResponse.json({ success: false, message: 'Lead not found' }, { status: 404 })
