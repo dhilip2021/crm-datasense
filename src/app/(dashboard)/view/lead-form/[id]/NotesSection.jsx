@@ -8,64 +8,73 @@ import {
   Button,
   Box,
   IconButton,
-  Avatar,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   CircularProgress,
-  Tooltip
+  InputAdornment,
+  Grid,
+  Menu,
+  MenuItem,
+  ListItemIcon
 } from '@mui/material'
-import { FormatBold, AttachFile } from '@mui/icons-material'
-import Accordion from '@mui/material/Accordion'
-import AccordionSummary from '@mui/material/AccordionSummary'
-import AccordionDetails from '@mui/material/AccordionDetails'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import SearchIcon from '@mui/icons-material/Search'
+import EditIcon from '@mui/icons-material/Edit'
 import CloseIcon from '@mui/icons-material/Close'
 import Cookies from 'js-cookie'
 import { toast, ToastContainer } from 'react-toastify'
-//react-toastify
 import 'react-toastify/dist/ReactToastify.css'
-import EditIcon from '@mui/icons-material/Edit'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
+import MoreVertIcon from '@mui/icons-material/MoreVert'
+import DeleteIcon from '@mui/icons-material/Delete'
 
-function getIntial(name = '') {
-  const reIntial = (name.match(/\p{L}+/gu) || []).map(w => w[0].toUpperCase()).join('')
-  return reIntial
-}
+import userIcon from '@assets/icons/user.svg'
 
 const NotesSection = ({ leadId, leadData }) => {
   const getToken = Cookies.get('_token')
   const user_name = Cookies.get('user_name')
 
-  const leadArrayData = leadData?.values?.Notes ? leadData.values.Notes : []
-
+  const leadArrayData = leadData?.values?.Notes || []
   const sortedNotes = [...leadArrayData].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
 
   const [note, setNote] = useState('')
   const [title, setTitle] = useState('')
-  const [notes, setNotes] = useState(sortedNotes || [])
-  const [editingNote, setEditingNote] = useState(null) // holds note being edited
-
+  const [notes, setNotes] = useState(sortedNotes)
+  const [editingNote, setEditingNote] = useState(null)
   const [noteError, setNoteError] = useState(false)
-  const [titleError, setTitleError] = useState(false)
   const [loader, setLoader] = useState(false)
-
   const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const [viewAnchor, setViewAnchor] = useState(null)
+  const [view, setView] = useState('latest')
+  const [visibleCount, setVisibleCount] = useState(5) // show first 5 initially
+  const loaderRef = useRef(null)
 
-  // 🔹 Refs for focus handling
-  const titleRef = useRef(null)
   const noteRef = useRef(null)
   const saveRef = useRef(null)
 
-  // Focus title when modal opens
-  useEffect(() => {
-    if (open) {
-      const timer = setTimeout(() => {
-        titleRef.current?.focus()
-      }, 100) // 100ms delay so Dialog content mounts
-      return () => clearTimeout(timer)
-    }
-  }, [open])
+  // menu state
+  const [anchorEl, setAnchorEl] = useState(null)
+  const [menuNote, setMenuNote] = useState(null)
+
+  // expand state
+  const [expandedNoteId, setExpandedNoteId] = useState(null)
+
+  const toggleExpand = id => {
+    setExpandedNoteId(prev => (prev === id ? null : id))
+  }
+
+  const handleMenuOpen = (event, note) => {
+    setAnchorEl(event.currentTarget)
+    setMenuNote(note)
+  }
+
+  const handleMenuClose = () => {
+    setAnchorEl(null)
+    setMenuNote(null)
+  }
 
   const handleChange = e => {
     const { name, value } = e.target
@@ -73,7 +82,6 @@ const NotesSection = ({ leadId, leadData }) => {
       setNoteError(false)
       setNote(value)
     } else if (name === 'title') {
-      setTitleError(false)
       setTitle(value)
     }
   }
@@ -82,9 +90,7 @@ const NotesSection = ({ leadId, leadData }) => {
     setNote('')
     setTitle('')
     setEditingNote(null)
-    setTitleError(false)
     setNoteError(false)
-    if (titleRef.current) titleRef.current.focus()
   }
 
   function hasInitialSpace(str = '') {
@@ -98,19 +104,13 @@ const NotesSection = ({ leadId, leadData }) => {
       return
     }
 
-    //    if (title === '' || hasInitialSpace(title)) {
-    //   setTitleError(true)
-    //   titleRef.current?.focus()  // 🚀 error vandha title field ku focus
-    //   return
-    // }
-
     try {
       const notePayload = {
         title,
         note,
         createdAt: editingNote ? editingNote.createdAt : new Date().toISOString(),
         createdBy: editingNote ? editingNote.createdBy : user_name,
-        _id: editingNote?._id // send _id if editing
+        _id: editingNote?._id
       }
 
       setLoader(true)
@@ -132,38 +132,21 @@ const NotesSection = ({ leadId, leadData }) => {
         if (editingNote) {
           setNotes(prev => prev.map(n => (n._id === editingNote._id ? { ...n, title, note } : n)))
           toast.success('Note updated successfully', {
-            autoClose: 500, // 1 second la close
+            autoClose: 500,
             position: 'bottom-center',
-            hideProgressBar: true, // progress bar venam na
-            closeOnClick: true,
-            pauseOnHover: false,
-            draggable: false,
-            progress: undefined
+            hideProgressBar: true
           })
         } else {
-          toast.success('Note added successfully', {
-            autoClose: 500, // 1 second la close
-            position: 'bottom-center',
-            hideProgressBar: true, // progress bar venam na
-            closeOnClick: true,
-            pauseOnHover: false,
-            draggable: false,
-            progress: undefined
-          })
+          toast.success('Note added successfully', { autoClose: 500, position: 'bottom-center', hideProgressBar: true })
           const notes = result?.data?.values?.Notes
           const lastNote = notes?.[notes.length - 1]
-
           setNotes(prev => [lastNote, ...prev])
         }
       } else {
         toast.error(result.error || 'Error saving note', {
-          autoClose: 500, // 1 second la close
+          autoClose: 500,
           position: 'bottom-center',
-          hideProgressBar: true, // progress bar venam na
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: false,
-          progress: undefined
+          hideProgressBar: true
         })
       }
 
@@ -173,72 +156,138 @@ const NotesSection = ({ leadId, leadData }) => {
     } catch (err) {
       setOpen(false)
       setLoader(false)
-      toast.error('Error while saving note', {
-        autoClose: 500, // 1 second la close
-        position: 'bottom-center',
-        hideProgressBar: true, // progress bar venam na
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: false,
-        progress: undefined
-      })
+      toast.error('Error while saving note', { autoClose: 500, position: 'bottom-center', hideProgressBar: true })
     }
   }
 
+  // 🔎 Filter + Sort notes
+  const filteredNotes = [...notes]
+    .filter(
+      n => n.title?.toLowerCase().includes(search.toLowerCase()) || n.note?.toLowerCase().includes(search.toLowerCase())
+    )
+    .sort((a, b) =>
+      view === 'latest' ? new Date(b.createdAt) - new Date(a.createdAt) : new Date(a.createdAt) - new Date(b.createdAt)
+    )
+
+  useEffect(() => {
+    if (!loaderRef.current) return
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount(prev => prev + 5) // load 5 more when reached
+        }
+      },
+      { threshold: 1.0 }
+    )
+
+    observer.observe(loaderRef.current)
+
+    return () => {
+      if (loaderRef.current) observer.unobserve(loaderRef.current)
+    }
+  }, [])
+
   return (
-    <>
-      <Accordion defaultExpanded>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls='panel3-content' id='panel3-header'>
-          <Box display='flex' justifyContent='space-between' alignItems='center' width='100%'>
-            <Typography variant='h6' fontWeight='bold'>
-              Notes
-            </Typography>
-            {Array.isArray(notes) && notes?.length > 0 && (
-              <Button
-                variant='contained'
-                size='small'
-                onClick={e => {
-                  e.stopPropagation()
-                  setOpen(true)
-                  handleClear()
-                }}
-                sx={{ marginRight: '20px' }}
-              >
-                + Create Note
-              </Button>
-            )}
+    <Box>
+      {/* Header */}
+      <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
+        <Typography variant='h6' fontWeight='bold'>
+          Notes
+        </Typography>
+        <Button
+          variant='contained'
+          onClick={() => {
+            setOpen(true)
+            handleClear()
+          }}
+          sx={{ bgcolor: '#9c27b0', '&:hover': { bgcolor: '#7b1fa2' }, borderRadius: '8px', textTransform: 'none' }}
+        >
+          + Create Note
+        </Button>
+      </Box>
+
+      {/* Search + Sort */}
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={10}>
+          <TextField
+            autoComplete='off'
+            placeholder='Search Notes'
+            variant='outlined'
+            fullWidth
+            value={search}
+            size='small'
+            onChange={e => setSearch(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position='start'>
+                  <SearchIcon fontSize='small' />
+                </InputAdornment>
+              )
+            }}
+            sx={{ mb: 2, bgcolor: '#f9f9f9', borderRadius: 2 }}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={2}>
+          <Box display='flex' justifyContent='flex-end'>
+            <Button
+              sx={{ marginRight: '25px', color: '#000', border: '1px solid #000' }}
+              variant='outlined'
+              endIcon={<ArrowDropDownIcon />}
+              onClick={e => {
+                e.stopPropagation()
+                setViewAnchor(e.currentTarget)
+              }}
+            >
+              {view === 'latest' ? 'Latest' : 'Oldest'}
+            </Button>
           </Box>
-        </AccordionSummary>
+          <Menu anchorEl={viewAnchor} open={Boolean(viewAnchor)} onClose={() => setViewAnchor(null)}>
+            <MenuItem
+              onClick={() => {
+                setView('latest')
+                setViewAnchor(null)
+              }}
+            >
+              Latest
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setView('oldest')
+                setViewAnchor(null)
+              }}
+            >
+              Oldest
+            </MenuItem>
+          </Menu>
+        </Grid>
+      </Grid>
 
-        <AccordionDetails>
-          {Array.isArray(notes) && notes?.length > 0 ? (
-            notes.map((n, i) => (
-              <Card
-                key={i}
-                sx={{
-                  p: 2,
-                  mb: 2,
-                  bgcolor: '#f9f9ff',
-                  borderRadius: 2,
-                  border: '1px solid #ddd'
-                }}
-              >
-                <Box display='flex' alignItems='flex-start' gap={2}>
-                  {/* Avatar */}
-                  <Avatar>{getIntial(`${leadData?.values?.['First Name']} ${leadData?.values?.['Last Name']}`)}</Avatar>
+      {/* Notes list */}
+      {filteredNotes.length > 0 ? (
+        filteredNotes.slice(0, visibleCount).map(n => (
+          <Card
+            key={n._id}
+            sx={{
+              p: 2,
+              mb: 2,
+              borderRadius: 2,
+              border: '1px solid #eee',
+              boxShadow: 'none',
+              '&:hover': { bgcolor: '#fafafa' }
+            }}
+          >
+            {/* Top Row */}
+            <Box display='flex' justifyContent='space-between' alignItems='flex-start'>
+              <Box flex={1}>
+                <Typography fontWeight='bold'>{n.title || ''}</Typography>
 
-                  {/* Content */}
-                  <Box flex={1}>
-                    {/* Title */}
-                    <Typography fontWeight='bold' color='primary'>
-                      {n.title || ''}
-                    </Typography>
-
-                    {/* Note content */}
-                    {/* <Typography sx={{ mt: 0.5, whiteSpace: 'pre-line' }}>{n.note}</Typography> */}
-
-                    <Typography sx={{ mt: 0.5, whiteSpace: 'pre-line' }}>
-                      {(() => {
+                {/* Show either preview or full note */}
+                <Typography sx={{ mt: 0.5, color: 'text.secondary', whiteSpace: 'pre-line' }}>
+                  {expandedNoteId === n._id
+                    ? // 🔹 Full Note with URL detection
+                      (() => {
                         const urlRegex = /(https?:\/\/[^\s]+)/g
                         const parts = n.note.split(urlRegex)
                         return parts.map((part, index) =>
@@ -256,109 +305,75 @@ const NotesSection = ({ leadId, leadData }) => {
                             part
                           )
                         )
+                      })()
+                    : // 🔹 Preview Mode (only first line)
+                      (() => {
+                        const firstLine = n.note.split('\n')[0] // take only first line
+                        return n.note.includes('\n') ? `${firstLine}...` : firstLine
                       })()}
-                    </Typography>
+                </Typography>
 
-                    {/* Metadata */}
-                    <Typography variant='caption' color='text.secondary' display='block' mt={1}>
-                      Lead - <b>👤 {`${leadData?.values?.['First Name']} ${leadData?.values?.['Last Name']}`}</b> • 📅{' '}
-                      {(() => {
-                        const d = new Date(n.createdAt)
-                        const day = String(d.getDate()).padStart(2, '0')
-                        const month = String(d.getMonth() + 1).padStart(2, '0')
-                        const year = d.getFullYear()
-                        return `${day}-${month}-${year}`
-                      })()}
-                      • ⏰ {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} by{' '}
-                      <b>👤 {n.createdBy}</b>
-                    </Typography>
+                {/* Meta (always show at bottom when expanded, else compact) */}
 
-                    {/* Optional status / priority chips for visual consistency with tasks */}
-                    {n.status && n.priority && (
-                      <Stack direction='row' spacing={1} mt={1}>
-                        <Chip
-                          label={n.status}
-                          size='small'
-                          sx={{
-                            bgcolor:
-                              n.status === 'Completed'
-                                ? 'success.light'
-                                : n.status === 'In Progress'
-                                  ? 'warning.light'
-                                  : 'grey.300'
-                          }}
-                        />
-                        <Chip
-                          label={`Priority: ${n.priority}`}
-                          size='small'
-                          sx={{
-                            bgcolor:
-                              n.priority === 'High' ? 'error.light' : n.priority === 'Low' ? 'info.light' : 'grey.200'
-                          }}
-                        />
-                      </Stack>
-                    )}
-                  </Box>
-                  <Box display='flex' justifyContent='flex-end' mt={1}>
-                    {/* <Button
-                      size='small'
-                      variant='outlined'
-                      onClick={() => {
-                        setEditingNote(n) // store current note
-                        setTitle(n.title)
-                        setNote(n.note)
-                        setOpen(true)
-                      }}
-                    >
-                      ✏️
-                    </Button> */}
-                    <Tooltip title={'Edit'} arrow>
-                      <IconButton
-                        size='small'
-                        onClick={() => {
-                          setEditingNote(n) // store current note
-                          setTitle(n.title)
-                          setNote(n.note)
-                          setOpen(true)
-                        }}
-                        sx={{ opacity: 1, transition: 'opacity 0.2s ease-in-out' }}
-                      >
-                        <EditIcon fontSize='small' />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
+                <Box display='flex' alignItems='center' gap={2} mt={2}>
+                  <Typography variant='body2' color='text.secondary' display={"flex"} alignItems={"center"} gap={2}>
+                    <img loading='lazy' width='20' src='/images/icons/user.svg' alt='User Icon' />
+                    {n.createdBy}
+                  </Typography>
+                  <Typography variant='body2' color='text.secondary' display={"flex"} alignItems={"center"} gap={2}>
+                    <img loading='lazy' width='20' src='/images/icons/calendar.svg' alt='calendar' />
+                    
+                    {new Date(n.createdAt).toLocaleDateString('en-GB')}  {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </Typography>
+                  <Typography variant='body2' color='text.secondary'>
+                   
+                  </Typography>
                 </Box>
-              </Card>
-            ))
-          ) : (
-            <Card
-              sx={{
-                p: 4,
-                textAlign: 'center',
-                bgcolor: '#fafafa',
-                border: '1px dashed #ccc',
-                borderRadius: 3,
-                mt: 3
-              }}
-            >
-              <Typography variant='h6' color='text.secondary' gutterBottom>
-                📝 No Notes Found
-              </Typography>
-              <Typography variant='body2' color='text.disabled' mb={2}>
-                Start by adding your first note for this lead.
-              </Typography>
-              <Button variant='contained' size='small' onClick={() => setOpen(true)}>
-                + Create Note
-              </Button>
-            </Card>
-          )}
-        </AccordionDetails>
-      </Accordion>
+              </Box>
 
-      {/* 🔹 Modal */}
+              {/* Actions */}
+              <Box display='flex' alignItems='center' gap={1}>
+                <IconButton size='small' onClick={() => toggleExpand(n._id)}>
+                  <ExpandMoreIcon
+                    fontSize='small'
+                    style={{
+                      transform: expandedNoteId === n._id ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.2s ease'
+                    }}
+                  />
+                </IconButton>
+                <IconButton size='small' onClick={e => handleMenuOpen(e, n)}>
+                  <MoreVertIcon fontSize='small' />
+                </IconButton>
+              </Box>
+            </Box>
+          </Card>
+        ))
+      ) : (
+        <Card sx={{ p: 4, textAlign: 'center', bgcolor: '#fafafa', border: '1px dashed #ccc', borderRadius: 3, mt: 3 }}>
+          <Typography variant='h6' color='text.secondary' gutterBottom>
+            📝 No Notes Found
+          </Typography>
+          <Typography variant='body2' color='text.disabled' mb={2}>
+            Start by adding your first note for this lead.
+          </Typography>
+          <Button variant='contained' onClick={() => setOpen(true)}>
+            + Create Note
+          </Button>
+        </Card>
+      )}
+
+      {/* Loader div (trigger infinite scroll) */}
+      {visibleCount < filteredNotes.length && (
+        <Box ref={loaderRef} sx={{ textAlign: 'center', py: 2 }}>
+          <CircularProgress size={24} />
+        </Box>
+      )}
+
+      {/* Modal */}
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='sm'>
         <DialogTitle>
-          <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+          <Box display='flex' alignItems='center' justifyContent='space-between'>
             {editingNote ? 'Edit Note' : 'Create New Note'}
             <IconButton
               onClick={() => {
@@ -377,19 +392,10 @@ const NotesSection = ({ leadId, leadData }) => {
             placeholder='Title'
             variant='standard'
             fullWidth
-            // inputRef={titleRef}
             value={title}
             onChange={handleChange}
             name='title'
-            error={titleError}
-            helperText={titleError && 'Please enter title'}
             sx={{ mb: 2, mt: 1 }}
-            onKeyDown={e => {
-              if (e.key === 'Enter') {
-                e.preventDefault()
-                noteRef.current?.focus()
-              }
-            }}
           />
           <TextField
             autoFocus
@@ -405,28 +411,19 @@ const NotesSection = ({ leadId, leadData }) => {
             helperText={noteError && 'Please enter notes'}
             onKeyDown={e => {
               if (e.key === ' ' && note.length === 0) {
-                e.preventDefault() // 🚫 block first space typing
+                e.preventDefault()
               } else if (e.key === 'Enter' && e.shiftKey) {
                 e.preventDefault()
-                saveRef.current?.focus() // ✅ correct ref
+                saveRef.current?.focus()
               }
             }}
           />
-          {/* <Box mt={2} display='flex' gap={1}>
-            <IconButton>
-              <FormatBold />
-            </IconButton>
-            <IconButton>
-              <AttachFile />
-            </IconButton>
-          </Box> */}
         </DialogContent>
 
         <DialogActions>
-          <Box display={'flex'} justifyContent={'space-between'} width={'100%'}>
+          <Box display='flex' justifyContent='space-between' width='100%'>
             <Button
               variant='outlined'
-              //  onClick={handleClear}
               onClick={() => {
                 setOpen(false)
                 setEditingNote(null)
@@ -437,20 +434,55 @@ const NotesSection = ({ leadId, leadData }) => {
               Close
             </Button>
             <Button ref={saveRef} variant='contained' onClick={handleSave} disabled={loader || note?.length === 0}>
-              {loader ? 'Saving...' : editingNote ? 'Update' : 'Save'}
+              {loader ? <CircularProgress size={18} /> : editingNote ? 'Update' : 'Save'}
             </Button>
           </Box>
         </DialogActions>
       </Dialog>
-      <ToastContainer
-        position='bottom-center'
-        autoClose={500} // all toasts auto close
-        hideProgressBar
-        closeOnClick
-        pauseOnHover={false}
-        draggable={false}
-      />
-    </>
+
+      {/* More Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <MenuItem
+          onClick={() => {
+            if (menuNote) {
+              setEditingNote(menuNote)
+              setTitle(menuNote.title)
+              setNote(menuNote.note)
+              setOpen(true)
+            }
+            handleMenuClose()
+          }}
+        >
+          <ListItemIcon>
+            <EditIcon fontSize='small' />
+          </ListItemIcon>
+          Edit
+        </MenuItem>
+
+        {/* <MenuItem
+          onClick={() => {
+            if (menuNote) {
+              console.log('Delete clicked for', menuNote._id)
+              // TODO: call delete API
+            }
+            handleMenuClose()
+          }}
+        >
+          <ListItemIcon>
+            <DeleteIcon fontSize='small' />
+          </ListItemIcon>
+          Delete
+        </MenuItem> */}
+      </Menu>
+
+      <ToastContainer position='bottom-center' autoClose={500} hideProgressBar />
+    </Box>
   )
 }
 

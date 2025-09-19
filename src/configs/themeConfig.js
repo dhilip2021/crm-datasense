@@ -14,6 +14,8 @@ const themeConfig = {
   settingsCookieName: 'crm-datasense-admin',
   mode: 'light', // 'light', 'dark'
   layoutPadding: 24, // Common padding for header, content, footer layout components (in px)
+  layoutLeftPadding: 24, // Common padding for header, content, footer layout components (in px)
+  layoutRightPadding: 24, // Common padding for header, content, footer layout components (in px)
   compactContentWidth: 1440, // in px
   disableRipple: false // true, false
 }

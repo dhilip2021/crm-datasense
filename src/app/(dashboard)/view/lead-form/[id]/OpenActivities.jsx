@@ -501,20 +501,6 @@ export default function OpenActivities({ leadId, leadData }) {
                 <Grid container spacing={3}>
                   {/* Subject */}
                   <Grid item xs={12}>
-                    {/* <TextField
-                      autoFocus
-                      label='Subject'
-                      fullWidth
-                      value={taskData.subject}
-                      onChange={e => {
-                        handleChange('subject', e.target.value)
-                        setErrorTaskData(prev => ({ ...prev, subject: false })) // clear error while typing
-                      }}
-                      placeholder='Enter Task *'
-                      error={ErrorTaskData.subject}
-                      helperText={ErrorTaskData.subject ? 'Subject is required' : ''}
-                    /> */}
-
                     <TextField
                       autoFocus
                       fullWidth

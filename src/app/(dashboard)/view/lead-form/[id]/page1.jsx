@@ -11,9 +11,7 @@ import {
   Typography,
   Accordion,
   AccordionSummary,
-  AccordionDetails,
-  Tabs,
-  Tab
+  AccordionDetails
 } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import EventIcon from '@mui/icons-material/Event'
@@ -60,7 +58,6 @@ const LeadDetailView = () => {
   const encryptedId = decodeURIComponent(params.id)
   const leadId = decrypCryptoReq(encryptedId)
   const [expanded, setExpanded] = useState(0) // 0 = first open by default
-  const [tabIndex, setTabIndex] = useState(0)
 
   const [userList, setUserList] = useState([])
   const organization_id = Cookies.get('organization_id')
@@ -90,7 +87,6 @@ const LeadDetailView = () => {
     return flat
   }
 
-  const handleTabChange = (e, newValue) => setTabIndex(newValue)
   // 🔹 Fetch template
   const fetchFormTemplate = async () => {
     setLoader(true)
@@ -255,66 +251,36 @@ const LeadDetailView = () => {
   const fields = leadData?.values || {}
 
   return (
-    <Grid container spacing={2}>
-      <Grid item xs={12} md={12}>
-        <Box
-          sx={{
-            width: '100%',
-          }}
-        >
-          <Tabs
-            value={tabIndex}
-            onChange={handleTabChange}
-            variant='fullWidth' // ✅ make tabs full width
-            TabIndicatorProps={{ style: { display: 'none' } }}
-            sx={{
-              bgcolor: '#f7f8fc',
-              borderRadius: '20px',
-              minHeight: '40px',
-              p: '4px',
-              '& .MuiTab-root': {
-                flex: 1, // ✅ distribute equally
-                minHeight: '32px',
-                borderRadius: '20px',
-                textTransform: 'none',
-                fontWeight: 500,
-                color: '#000',
-                '&.Mui-selected': {
-                  bgcolor: '#fff',
-                  color: '#d100f9',
-                  fontWeight: 600
-                }
-              }
-            }}
-          >
-            <Tab label='Notes' />
-            <Tab label='Tasks' />
-            <Tab label='Product' />
-          </Tabs>
-        </Box>
-      </Grid>
+    <Grid container spacing={4}>
+
+    
+
+
 
       <Grid item xs={12} md={8}>
-        {/* Tabs */}
+        {/* Header */}
+        <Box display='flex' justifyContent='space-between'>
+          <Typography variant='h4' fontWeight='bold'>
+            {leadData?.lead_id || 'Unnamed Lead'}
+          </Typography>
+          <Chip icon={<EventIcon />} label={fields['Next Follow-up Date'] || 'Not Scheduled'} sx={{ ml: 1 }} />
+        </Box>
 
-        {/* Tab Panels */}
-        {tabIndex === 0 && (
-          <Box>
-            <NotesSection leadId={leadId} leadData={leadData} />
-          </Box>
-        )}
-
-        {tabIndex === 1 && (
-          <Box>
-            <OpenActivities leadId={leadId} leadData={leadData} />
-          </Box>
-        )}
-
-        {tabIndex === 2 && (
-          <Box>
-            <ProductPage leadId={leadId} leadData={leadData} fetchLeadFromId={fetchLeadFromId} />
-          </Box>
-        )}
+        {/* Notes + Activities */}
+        <Box mb={4}>
+          <NotesSection leadId={leadId} leadData={leadData} />
+        </Box>
+        <Box>
+          <OpenActivities leadId={leadId} leadData={leadData} />
+        </Box>
+        {/* <Box>
+          <CloseActivities leadId={leadId} leadData={leadData} />
+        </Box> */}
+        {/* 🔹 Add Product Button */}
+        <Box mb={4}>
+          <ProductPage leadId={leadId} leadData={leadData} fetchLeadFromId={fetchLeadFromId} />
+          
+        </Box>
       </Grid>
 
       {/* Right side */}
@@ -379,6 +345,7 @@ const LeadDetailView = () => {
           ))}
         </Box>
       </Grid>
+     
     </Grid>
   )
 }

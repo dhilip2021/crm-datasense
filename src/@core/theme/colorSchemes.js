@@ -79,7 +79,8 @@ const colorSchemes = () => {
         divider: `rgb(var(--mui-mainColorChannels-light) / 0.12)`,
         dividerChannel: 'var(--mui-mainColorChannels-light)',
         background: {
-          default: skin === 'bordered' ? '#FFFFFF' : '#F4F5FA',
+          // default: skin === 'bordered' ? '#FFFFFF' : '#F4F5FA',
+          default: skin === 'bordered' ? '#FFFFFF' : '#FFFFFF',
           paper: '#FFFFFF'
         },
         action: {
