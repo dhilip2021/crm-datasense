@@ -6,34 +6,32 @@ export async function POST(req, { params }) {
   await connectMongoDB()
   try {
     const { lead_id } = params
-
-    console.log(lead_id, '<<< LEAD IDDDD')
-    const body = await req.json()
+    const body = await req.json() // { products: [...] }
 
     const lead = await Leadform.findOne({ lead_id })
-    if (!lead) {
-      return Response.json({ success: false, message: 'Lead not found' }, { status: 404 })
+    if (!lead) return Response.json({ success: false, message: 'Lead not found' }, { status: 404 })
+
+    for (const item of body.products) {
+      const product = await Product.findOne({ product_id: item.product_id })
+      if (!product) continue
+
+      let finalPrice = (item.unitPrice || product.basePrice) * item.quantity
+      if (product.discountType === 'Flat %') {
+        finalPrice -= finalPrice * ((item.discount || 0) / 100)
+      } else if (product.discountType === 'Flat Amount') {
+        finalPrice -= item.discount || 0
+      }
+
+      lead.products.push({
+        productRef: product._id,
+        product_id: product.product_id,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice || product.basePrice,
+        discount: item.discount || 0,
+        discountType: product.discountType,
+        finalPrice
+      })
     }
-
-
-
-    const product = await Product.findOne({ product_id: body.product_id })
-
-    if (!product) {
-      return Response.json({ success: false, message: 'Product not found' }, { status: 404 })
-    }
-
-    const finalPrice =
-      body.quantity * (body.unitPrice || product.basePrice) - ((body.discount || 0) / 100) * body.unitPrice
-
-    lead.products.push({
-      productRef: product._id, // Mongo reference
-      product_id: product.product_id, // Your custom code
-      quantity: body.quantity,
-      unitPrice: body.unitPrice || product.basePrice,
-      discount: body.discount || 0,
-      finalPrice
-    })
 
     await lead.save()
     return Response.json({ success: true, lead })
@@ -41,3 +39,4 @@ export async function POST(req, { params }) {
     return Response.json({ success: false, message: err.message }, { status: 400 })
   }
 }
+

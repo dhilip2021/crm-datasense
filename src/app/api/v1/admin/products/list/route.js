@@ -22,7 +22,7 @@ export async function GET(req) {
       await connectMongoDB()
 
       // fetch all products (only active ones if you want)
-      const products = await Product.find({ status: 'Active', organization_id: verified.data.organization_id }).select('_id product_id code name category description basePrice status')
+      const products = await Product.find({ status: 'Active', organization_id: verified.data.organization_id }).select('_id product_id code name category description basePrice discountType taxCategory status')
 
       sendResponse['success'] = true
       sendResponse['appStatusCode'] = 0

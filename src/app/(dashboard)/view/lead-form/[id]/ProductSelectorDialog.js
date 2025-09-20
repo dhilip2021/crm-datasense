@@ -16,7 +16,8 @@ import {
   IconButton,
   Box,
   Typography,
-  Autocomplete
+  Autocomplete,
+  CircularProgress
 } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import Cookies from 'js-cookie'
@@ -29,6 +30,7 @@ const ProductSelectorDialog = ({ open, onClose, leadId, fetchLeadFromId }) => {
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [quantity, setQuantity] = useState(1)
   const [discount, setDiscount] = useState(0)
+  const [loader, setLoader] = useState(false)
   const [addedProducts, setAddedProducts] = useState([])
 
   // Fetch products from API
@@ -39,9 +41,11 @@ const ProductSelectorDialog = ({ open, onClose, leadId, fetchLeadFromId }) => {
     }
 
     if (open) {
+      setLoader(true)
       fetch('/api/v1/admin/products/list', { headers: header })
         .then(res => res.json())
         .then(data => {
+          setLoader(false)
           console.log(data, '<<< product Listttt')
           if (data.success) setProducts(data.payloadJson)
         })
@@ -50,8 +54,21 @@ const ProductSelectorDialog = ({ open, onClose, leadId, fetchLeadFromId }) => {
 
   const handleAdd = () => {
     if (!selectedProduct) return
+    // const unitPrice = selectedProduct.basePrice || 0
+    // const totalPrice =  (quantity * unitPrice)
+    // const totalDiscount = totalPrice * (discount / 100)
+    // const finalPrice = totalPrice - totalDiscount
+
     const unitPrice = selectedProduct.basePrice || 0
-    const finalPrice = quantity * unitPrice - (discount / 100) * unitPrice
+    const totalPrice = quantity * unitPrice
+
+    let finalPrice = totalPrice
+    if (selectedProduct.discountType === 'Flat %') {
+      const totalDiscount = totalPrice * (discount / 100)
+      finalPrice = totalPrice - totalDiscount
+    } else if (selectedProduct.discountType === 'Flat Amount') {
+      finalPrice = totalPrice - discount
+    }
 
     const newItem = {
       product_id: selectedProduct.product_id,
@@ -59,6 +76,7 @@ const ProductSelectorDialog = ({ open, onClose, leadId, fetchLeadFromId }) => {
       quantity,
       unitPrice,
       discount,
+      discountType: selectedProduct.discountType,
       finalPrice
     }
 
@@ -71,33 +89,47 @@ const ProductSelectorDialog = ({ open, onClose, leadId, fetchLeadFromId }) => {
   const handleRemove = index => {
     setAddedProducts(prev => prev.filter((_, i) => i !== index))
   }
-
   const handleSave = async () => {
-    console.log(addedProducts, '<<<< addedProducts')
+    if (addedProducts.length === 0) return
 
     const header = {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${getToken}`
     }
 
-    for (const item of addedProducts) {
+    try {
+      // 🔹 Single API call with all products
+      setLoader(true)
       const result = await fetch(`/api/v1/admin/lead-form/${leadId}/add-product`, {
         method: 'POST',
         headers: header,
-        body: JSON.stringify(item)
+        body: JSON.stringify({ products: addedProducts })
       })
+
+      const data = await result.json()
+      setLoader(false)
+      if (data.success) {
+        toast.success('Products added successfully!', {
+          autoClose: 1000,
+          position: 'bottom-center',
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false
+        })
+        fetchLeadFromId()
+        setAddedProducts([])
+        setSelectedProduct(null)
+        setQuantity(1)
+        setDiscount(0)
+        onClose()
+      } else {
+        toast.error(data.message || 'Failed to add products')
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error('Something went wrong')
     }
-    onClose()
-    fetchLeadFromId()
-    toast.success('This product added', {
-      autoClose: 500, // 1 second la close
-      position: 'bottom-center',
-      hideProgressBar: true, // progress bar venam na
-      closeOnClick: true,
-      pauseOnHover: false,
-      draggable: false,
-      progress: undefined
-    })
   }
 
   return (
@@ -123,7 +155,8 @@ const ProductSelectorDialog = ({ open, onClose, leadId, fetchLeadFromId }) => {
             size='small'
           />
           <TextField
-            label='Discount %'
+            // label='Discount %'
+            label={selectedProduct?.discountType === 'Flat Amount' ? 'Discount Amount' : 'Discount %'}
             type='number'
             value={discount}
             onChange={e => setDiscount(Number(e.target.value))}
@@ -172,8 +205,27 @@ const ProductSelectorDialog = ({ open, onClose, leadId, fetchLeadFromId }) => {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button variant='contained' onClick={handleSave} disabled={addedProducts.length === 0}>
-          Save Products
+        <Button
+          variant='contained'
+          onClick={handleSave}
+          disabled={addedProducts.length === 0 || loader}
+          sx={{ position: 'relative' }}
+        >
+          {loader ? 'Saving Products' : 'Save Products'}
+
+          {loader && (
+            <CircularProgress
+              size={20}
+              color='inherit'
+              sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                marginTop: '-10px',
+                marginLeft: '-10px'
+              }}
+            />
+          )}
         </Button>
       </DialogActions>
     </Dialog>

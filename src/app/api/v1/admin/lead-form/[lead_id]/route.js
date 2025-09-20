@@ -80,8 +80,8 @@ export async function GET(req, { params }) {
         return NextResponse.json({ success: false, message: 'Missing lead_id' }, { status: 400 })
       }
 
-      const lead = await Leadform.findOne({ lead_id }).select('-__v').lean()
-      // const lead = await Leadform.findOne({ lead_id }).populate('products.productRef', 'name category code').select('-__v').lean()
+      // const lead = await Leadform.findOne({ lead_id }).select('-__v').lean()
+      const lead = await Leadform.findOne({ lead_id }).populate('products.productRef', 'name category code').select('-__v').lean()
 
       
 

@@ -24,12 +24,12 @@ import ProductSelectorDialog from './ProductSelectorDialog'
 import EditProductDialog from './EditProductDialog'
 
 // ✅ Utility for currency
-const formatCurrency = value =>
-  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value)
+const formatCurrency = value => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value)
 
 function ProductPage({ leadId, leadData, fetchLeadFromId }) {
   const [openDialog, setOpenDialog] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
+  const [loader, setLoader] = useState(false)
 
   // ✅ Delete confirmation modal state
   const [deleteProductId, setDeleteProductId] = useState(null)
@@ -40,19 +40,14 @@ function ProductPage({ leadId, leadData, fetchLeadFromId }) {
     if (!leadData?.products?.length) return { qty: 0, subtotal: 0, discount: 0, total: 0 }
 
     const qty = leadData.products.reduce((acc, p) => acc + (p.quantity || 0), 0)
-    const subtotal = leadData.products.reduce((acc, p) => acc + (p.unitPrice * p.quantity), 0)
-    const discount = leadData.products.reduce(
-      (acc, p) => acc + ((p.unitPrice * p.quantity * (p.discount || 0)) / 100),
-      0
-    )
+    const subtotal = leadData.products.reduce((acc, p) => acc + p.unitPrice * p.quantity, 0)
+    const discount = leadData.products.reduce((acc, p) => acc + (p.unitPrice * p.quantity * (p.discount || 0)) / 100, 0)
     const total = subtotal - discount
     return { qty, subtotal, discount, total }
   }, [leadData])
 
-
-
-// 🔹 Trigger delete confirmation
-  const confirmDeleteProduct = (productId) => {
+  // 🔹 Trigger delete confirmation
+  const confirmDeleteProduct = productId => {
     setDeleteProductId(productId)
     setOpenDeleteModal(true)
   }
@@ -61,32 +56,20 @@ function ProductPage({ leadId, leadData, fetchLeadFromId }) {
   const handleDeleteProduct = async () => {
     if (!deleteProductId) return
     try {
+      setLoader(true)
       await fetch(`/api/v1/admin/lead-form/${leadId}/products/${deleteProductId}`, { method: 'DELETE' })
+      setLoader(false)
       fetchLeadFromId()
     } catch (err) {
+      setLoader(false)
       console.error('Delete failed', err)
     } finally {
+      setLoader(false)
       setOpenDeleteModal(false)
       setDeleteProductId(null)
     }
   }
 
-
-
-  // 🔹 Delete product
-  // const handleDeleteProduct = async (productId) => {
-
-  //   console.log(productId,"<<< delete product id")
-
-  //   if (!confirm('Are you sure you want to delete this product?')) return
-  //   try {
-
-  //     await fetch(`/api/v1/admin/lead-form/${leadId}/products/${productId}`, { method: 'DELETE' })
-  //     fetchLeadFromId()
-  //   } catch (err) {
-  //     console.error('Delete failed', err)
-  //   }
-  // }
 
   return (
     <Box mt={6}>
@@ -140,22 +123,20 @@ function ProductPage({ leadId, leadData, fetchLeadFromId }) {
           <Table stickyHeader size='small'>
             <TableHead>
               <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-                {['Code', 'Name', 'Category', 'Qty', 'Unit Price', 'Discount', 'Final Price', 'Actions'].map(
-                  (head) => (
-                    <TableCell
-                      key={head}
-                      sx={{
-                        fontWeight: 700,
-                        fontSize: 13,
-                        textTransform: 'uppercase',
-                        color: '#555'
-                      }}
-                      align={['Qty', 'Unit Price', 'Discount', 'Final Price'].includes(head) ? 'right' : 'left'}
-                    >
-                      {head}
-                    </TableCell>
-                  )
-                )}
+                {['Code', 'Name', 'Category', 'Qty', 'Unit Price', 'Discount', 'Final Price', 'Actions'].map(head => (
+                  <TableCell
+                    key={head}
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: 13,
+                      textTransform: 'uppercase',
+                      color: '#555'
+                    }}
+                    align={['Qty', 'Unit Price', 'Discount', 'Final Price'].includes(head) ? 'right' : 'left'}
+                  >
+                    {head}
+                  </TableCell>
+                ))}
               </TableRow>
             </TableHead>
 
@@ -181,8 +162,8 @@ function ProductPage({ leadId, leadData, fetchLeadFromId }) {
                             p.productRef?.category === 'Service'
                               ? '#fff3e0'
                               : p.productRef?.category === 'Subscription'
-                              ? '#e3f2fd'
-                              : '#f3e5f5',
+                                ? '#e3f2fd'
+                                : '#f3e5f5',
                           color: '#333',
                           fontWeight: 500,
                           px: 1.5,
@@ -190,15 +171,37 @@ function ProductPage({ leadId, leadData, fetchLeadFromId }) {
                         }}
                       />
                     </TableCell>
-                    <TableCell align='center' sx={{ py: 2, fontSize: 13 }}>{p.quantity}</TableCell>
-                    <TableCell align='right' sx={{ py: 2, fontSize: 13 }}>{formatCurrency(p.unitPrice)}</TableCell>
+                    <TableCell align='center' sx={{ py: 2, fontSize: 13 }}>
+                      {p.quantity}
+                    </TableCell>
+                    <TableCell align='right' sx={{ py: 2, fontSize: 13 }}>
+                      {formatCurrency(p.unitPrice)}
+                    </TableCell>
                     <TableCell align='right' sx={{ py: 2, fontSize: 13 }}>
                       <Chip
-                        label={`${p.discount || 0}%`}
+                        label={p.discountType === 'Flat Amount' ? `₹${p.discount}` : `${p.discount || 0}%`}
                         size='small'
                         sx={{
-                          bgcolor: p.discount > 0 ? '#e8f5e9' : '#eeeeee',
-                          color: p.discount > 0 ? '#2e7d32' : '#616161',
+                          bgcolor:
+                            p.discountType === 'Flat %'
+                              ? p.discount > 0
+                                ? '#e8f5e9' // greenish for percentage discount
+                                : '#eeeeee'
+                              : p.discountType === 'Flat Amount'
+                                ? p.discount > 0
+                                  ? '#fff3e0' // orangish for flat amount discount
+                                  : '#eeeeee'
+                                : '#eeeeee',
+                          color:
+                            p.discountType === 'Flat %'
+                              ? p.discount > 0
+                                ? '#2e7d32'
+                                : '#616161'
+                              : p.discountType === 'Flat Amount'
+                                ? p.discount > 0
+                                  ? '#ef6c00'
+                                  : '#616161'
+                                : '#616161',
                           fontWeight: 500,
                           px: 1.2
                         }}
@@ -215,7 +218,13 @@ function ProductPage({ leadId, leadData, fetchLeadFromId }) {
                       >
                         Edit
                       </Button>
-                     <Button size='small' sx={{ textTransform: 'none', color: '#d32f2f' }} onClick={() => confirmDeleteProduct(p._id)}>Delete</Button>
+                      <Button
+                        size='small'
+                        sx={{ textTransform: 'none', color: '#d32f2f' }}
+                        onClick={() => confirmDeleteProduct(p._id)}
+                      >
+                        Delete
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
@@ -280,7 +289,7 @@ function ProductPage({ leadId, leadData, fetchLeadFromId }) {
           fetchLeadFromId={fetchLeadFromId}
         />
 
-         {/* 🔹 Delete Confirmation Modal */}
+        {/* 🔹 Delete Confirmation Modal */}
         <Dialog open={openDeleteModal} onClose={() => setOpenDeleteModal(false)}>
           <DialogTitle>Delete Product</DialogTitle>
           <DialogContent>
@@ -288,7 +297,9 @@ function ProductPage({ leadId, leadData, fetchLeadFromId }) {
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setOpenDeleteModal(false)}>Cancel</Button>
-            <Button onClick={handleDeleteProduct} color='error' variant='contained'>Delete</Button>
+            <Button disabled={loader}  onClick={handleDeleteProduct} color='error' variant='contained'>
+              {loader  ? 'Deleting...' : 'Delete'}
+            </Button>
           </DialogActions>
         </Dialog>
       </Card>
