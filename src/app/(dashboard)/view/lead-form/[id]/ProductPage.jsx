@@ -13,7 +13,11 @@ import {
   Paper,
   Card,
   Divider,
-  Chip
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material'
 import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined'
 import ProductSelectorDialog from './ProductSelectorDialog'
@@ -26,6 +30,10 @@ const formatCurrency = value =>
 function ProductPage({ leadId, leadData, fetchLeadFromId }) {
   const [openDialog, setOpenDialog] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
+
+  // ✅ Delete confirmation modal state
+  const [deleteProductId, setDeleteProductId] = useState(null)
+  const [openDeleteModal, setOpenDeleteModal] = useState(false)
 
   // ✅ Calculate summary
   const summary = useMemo(() => {
@@ -41,16 +49,44 @@ function ProductPage({ leadId, leadData, fetchLeadFromId }) {
     return { qty, subtotal, discount, total }
   }, [leadData])
 
-  // 🔹 Delete product
-  const handleDeleteProduct = async (productId) => {
-    if (!confirm('Are you sure you want to delete this product?')) return
+
+
+// 🔹 Trigger delete confirmation
+  const confirmDeleteProduct = (productId) => {
+    setDeleteProductId(productId)
+    setOpenDeleteModal(true)
+  }
+
+  // 🔹 Actual delete
+  const handleDeleteProduct = async () => {
+    if (!deleteProductId) return
     try {
-      await fetch(`/api/v1/lead/${leadId}/products/${productId}`, { method: 'DELETE' })
+      await fetch(`/api/v1/admin/lead-form/${leadId}/products/${deleteProductId}`, { method: 'DELETE' })
       fetchLeadFromId()
     } catch (err) {
       console.error('Delete failed', err)
+    } finally {
+      setOpenDeleteModal(false)
+      setDeleteProductId(null)
     }
   }
+
+
+
+  // 🔹 Delete product
+  // const handleDeleteProduct = async (productId) => {
+
+  //   console.log(productId,"<<< delete product id")
+
+  //   if (!confirm('Are you sure you want to delete this product?')) return
+  //   try {
+
+  //     await fetch(`/api/v1/admin/lead-form/${leadId}/products/${productId}`, { method: 'DELETE' })
+  //     fetchLeadFromId()
+  //   } catch (err) {
+  //     console.error('Delete failed', err)
+  //   }
+  // }
 
   return (
     <Box mt={6}>
@@ -179,13 +215,7 @@ function ProductPage({ leadId, leadData, fetchLeadFromId }) {
                       >
                         Edit
                       </Button>
-                      <Button
-                        size='small'
-                        sx={{ textTransform: 'none', color: '#d32f2f' }}
-                        onClick={() => handleDeleteProduct(p._id)}
-                      >
-                        Delete
-                      </Button>
+                     <Button size='small' sx={{ textTransform: 'none', color: '#d32f2f' }} onClick={() => confirmDeleteProduct(p._id)}>Delete</Button>
                     </TableCell>
                   </TableRow>
                 ))
@@ -249,6 +279,18 @@ function ProductPage({ leadId, leadData, fetchLeadFromId }) {
           leadId={leadId}
           fetchLeadFromId={fetchLeadFromId}
         />
+
+         {/* 🔹 Delete Confirmation Modal */}
+        <Dialog open={openDeleteModal} onClose={() => setOpenDeleteModal(false)}>
+          <DialogTitle>Delete Product</DialogTitle>
+          <DialogContent>
+            <Typography>Are you sure you want to delete this product?</Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenDeleteModal(false)}>Cancel</Button>
+            <Button onClick={handleDeleteProduct} color='error' variant='contained'>Delete</Button>
+          </DialogActions>
+        </Dialog>
       </Card>
     </Box>
   )
