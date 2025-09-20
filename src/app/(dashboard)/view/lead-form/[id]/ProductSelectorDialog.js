@@ -111,6 +111,7 @@ const ProductSelectorDialog = ({ open, onClose, leadId, fetchLeadFromId }) => {
             value={selectedProduct}
             onChange={(e, newVal) => setSelectedProduct(newVal)}
             sx={{ flex: 2 }}
+            size='small'
             renderInput={params => <TextField {...params} label='Select Product' />}
           />
           <TextField
@@ -119,6 +120,7 @@ const ProductSelectorDialog = ({ open, onClose, leadId, fetchLeadFromId }) => {
             value={quantity}
             onChange={e => setQuantity(Number(e.target.value))}
             sx={{ width: 100 }}
+            size='small'
           />
           <TextField
             label='Discount %'
@@ -126,6 +128,7 @@ const ProductSelectorDialog = ({ open, onClose, leadId, fetchLeadFromId }) => {
             value={discount}
             onChange={e => setDiscount(Number(e.target.value))}
             sx={{ width: 120 }}
+            size='small'
           />
           <Button variant='contained' onClick={handleAdd}>
             Add
@@ -163,7 +166,7 @@ const ProductSelectorDialog = ({ open, onClose, leadId, fetchLeadFromId }) => {
         </Table>
         {addedProducts.length === 0 && (
           <Typography textAlign='center' color='text.secondary' mt={2}>
-            No products added yet
+            No products added yet...
           </Typography>
         )}
       </DialogContent>

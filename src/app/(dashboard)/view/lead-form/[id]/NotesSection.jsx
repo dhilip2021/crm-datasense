@@ -21,16 +21,15 @@ import {
 } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import EditIcon from '@mui/icons-material/Edit'
-import CloseIcon from '@mui/icons-material/Close'
+
 import Cookies from 'js-cookie'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
-import DeleteIcon from '@mui/icons-material/Delete'
+import NoteDialog from './NoteDialog'
 
-import userIcon from '@assets/icons/user.svg'
 
 const NotesSection = ({ leadId, leadData }) => {
   const getToken = Cookies.get('_token')
@@ -201,7 +200,7 @@ const NotesSection = ({ leadId, leadData }) => {
             setOpen(true)
             handleClear()
           }}
-          sx={{ bgcolor: '#9c27b0', '&:hover': { bgcolor: '#7b1fa2' }, borderRadius: '8px', textTransform: 'none' }}
+          sx={{ bgcolor: '#AB09F7',size:"small", '&:hover': { bgcolor: '#AB09F7' }, borderRadius: '8px', textTransform: 'none' }}
         >
           + Create Note
         </Button>
@@ -271,9 +270,10 @@ const NotesSection = ({ leadId, leadData }) => {
             key={n._id}
             sx={{
               p: 2,
-              mb: 2,
+              mb: 4,
+              mt: 2,
               borderRadius: 2,
-              border: '1px solid #eee',
+              border: '2px solid #ebebeb',
               boxShadow: 'none',
               '&:hover': { bgcolor: '#fafafa' }
             }}
@@ -370,75 +370,25 @@ const NotesSection = ({ leadId, leadData }) => {
         </Box>
       )}
 
-      {/* Modal */}
-      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='sm'>
-        <DialogTitle>
-          <Box display='flex' alignItems='center' justifyContent='space-between'>
-            {editingNote ? 'Edit Note' : 'Create New Note'}
-            <IconButton
-              onClick={() => {
-                setOpen(false)
-                setEditingNote(null)
-                handleClear()
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-          </Box>
-        </DialogTitle>
-
-        <DialogContent>
-          <TextField
-            placeholder='Title'
-            variant='standard'
-            fullWidth
-            value={title}
-            onChange={handleChange}
-            name='title'
-            sx={{ mb: 2, mt: 1 }}
+          {/* Modal */}
+          <NoteDialog 
+          open={open}
+          setOpen={setOpen}
+          setEditingNote ={setEditingNote}
+          handleClear={handleClear}
+          editingNote={editingNote}
+          title={title}
+          note={note}
+          handleChange={handleChange}
+          noteRef={noteRef}
+          noteError={noteError}
+          loader={loader}
+          handleSave={handleSave}
+          saveRef={saveRef}
           />
-          <TextField
-            autoFocus
-            placeholder="What's this note about? *"
-            multiline
-            rows={4}
-            fullWidth
-            inputRef={noteRef}
-            value={note}
-            onChange={handleChange}
-            name='note'
-            error={noteError}
-            helperText={noteError && 'Please enter notes'}
-            onKeyDown={e => {
-              if (e.key === ' ' && note.length === 0) {
-                e.preventDefault()
-              } else if (e.key === 'Enter' && e.shiftKey) {
-                e.preventDefault()
-                saveRef.current?.focus()
-              }
-            }}
-          />
-        </DialogContent>
 
-        <DialogActions>
-          <Box display='flex' justifyContent='space-between' width='100%'>
-            <Button
-              variant='outlined'
-              onClick={() => {
-                setOpen(false)
-                setEditingNote(null)
-                handleClear()
-              }}
-              disabled={loader || note?.length === 0}
-            >
-              Close
-            </Button>
-            <Button ref={saveRef} variant='contained' onClick={handleSave} disabled={loader || note?.length === 0}>
-              {loader ? <CircularProgress size={18} /> : editingNote ? 'Update' : 'Save'}
-            </Button>
-          </Box>
-        </DialogActions>
-      </Dialog>
+
+
 
       {/* More Menu */}
       <Menu

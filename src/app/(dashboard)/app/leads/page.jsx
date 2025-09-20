@@ -965,6 +965,7 @@ const LeadTable = () => {
                           <Chip
                             label={row.values['Timeline to Buy'] ? row.values['Timeline to Buy'] : '-'}
                             sx={{
+                              color: "#ffffff",
                               backgroundColor:
                                 row.values['Timeline to Buy'] == '3–6 Months'
                                   ? '#00FF48'

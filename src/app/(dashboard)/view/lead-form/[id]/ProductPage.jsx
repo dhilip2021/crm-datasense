@@ -1,70 +1,218 @@
 'use client'
 
-import React, { useState } from 'react'
-import { Box, Button, Table, TableHead, TableRow, TableCell, TableBody, Typography, Paper, Card } from '@mui/material'
+import React, { useState, useMemo } from 'react'
+import {
+  Box,
+  Button,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Typography,
+  Paper,
+  Card,
+  Divider,
+  Chip
+} from '@mui/material'
+import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined'
 import ProductSelectorDialog from './ProductSelectorDialog'
+
+// ✅ Utility for currency
+const formatCurrency = value =>
+  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value)
 
 function ProductPage({ leadId, leadData, fetchLeadFromId }) {
   const [openDialog, setOpenDialog] = useState(false)
 
+  // ✅ Calculate summary
+  const summary = useMemo(() => {
+    if (!leadData?.products?.length) return { qty: 0, subtotal: 0, discount: 0, total: 0 }
+
+    const qty = leadData.products.reduce((acc, p) => acc + (p.quantity || 0), 0)
+    const subtotal = leadData.products.reduce((acc, p) => acc + (p.unitPrice * p.quantity), 0)
+    const discount = leadData.products.reduce(
+      (acc, p) => acc + ((p.unitPrice * p.quantity * (p.discount || 0)) / 100),
+      0
+    )
+    const total = subtotal - discount
+    return { qty, subtotal, discount, total }
+  }, [leadData])
+
   return (
-    <Box mt={8}>
-         <Card sx={{ p: 2, bgcolor: '#ffffff', mt:"5" }}>
-      
-      <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
-        <Typography variant='h6'>Products</Typography>
-        <Button variant='contained' onClick={() => setOpenDialog(true)}>
-          + Add Products
-        </Button>
-      </Box>
+    <Box mt={6}>
+      <Card
+        sx={{
+          p: 3,
+          borderRadius: 3,
+          boxShadow: '0 6px 20px rgba(0,0,0,0.08)',
+          bgcolor: '#fff'
+        }}
+      >
+        {/* 🔹 Header */}
+        <Box display='flex' justifyContent='space-between' alignItems='center' mb={3}>
+          <Box display='flex' alignItems='center' gap={1.5}>
+            <ShoppingBagOutlinedIcon sx={{ color: '#9c27b0', fontSize: 28 }} />
+            <Typography variant='h6' fontWeight={700}>
+              Products
+            </Typography>
+          </Box>
 
-      {/* ✅ Product Table */}
-      <Paper sx={{ overflow: 'auto' }}>
-        <Table size='small'>
-          <TableHead>
-            <TableRow>
-              <TableCell>Code</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Category</TableCell>
-              <TableCell align='center'>Qty</TableCell>
-              <TableCell align='right'>Unit Price</TableCell>
-              <TableCell align='right'>Discount (%)</TableCell>
-              <TableCell align='right'>Final Price</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {leadData?.products?.length > 0 ? (
-              leadData.products.map((p, idx) => (
-                <TableRow key={p._id || idx}>
-                  <TableCell>{p.productRef?.code || p.product_id}</TableCell>
-                  <TableCell>{p.productRef?.name || '—'}</TableCell>
-                  <TableCell>{p.productRef?.category || '—'}</TableCell>
-                  <TableCell align='center'>{p.quantity}</TableCell>
-                  <TableCell align='right'>₹{p.unitPrice}</TableCell>
-                  <TableCell align='right'>{p.discount}%</TableCell>
-                  <TableCell align='right'>₹{p.finalPrice}</TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={7} align='center'>
-                  <Typography variant='body2' color='text.secondary'>
-                    No products added yet
-                  </Typography>
-                </TableCell>
+          <Button
+            variant='contained'
+            onClick={() => setOpenDialog(true)}
+            sx={{
+              backgroundColor: '#9c27b0',
+              textTransform: 'none',
+              borderRadius: '8px',
+              px: 3,
+              py: 1.2,
+              fontWeight: 600,
+              fontSize: 14,
+              boxShadow: '0 3px 6px rgba(0,0,0,0.15)',
+              '&:hover': { backgroundColor: '#7b1fa2' }
+            }}
+          >
+            + Add Products
+          </Button>
+        </Box>
+
+        <Divider sx={{ mb: 3 }} />
+
+        {/* ✅ Product Table */}
+        <Paper
+          sx={{
+            overflow: 'auto',
+            borderRadius: 2,
+            border: '1px solid #e0e0e0',
+            maxHeight: 450
+          }}
+        >
+          <Table stickyHeader size='small'>
+            <TableHead>
+              <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                {['Code', 'Name', 'Category', 'Qty', 'Unit Price', 'Discount', 'Final Price'].map(
+                  (head) => (
+                    <TableCell
+                      key={head}
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: 13,
+                        textTransform: 'uppercase',
+                        color: '#555'
+                      }}
+                      align={head === 'Qty' || head.includes('Price') ? 'right' : 'left'}
+                    >
+                      {head}
+                    </TableCell>
+                  )
+                )}
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </Paper>
+            </TableHead>
 
-      {/* 🔹 Product Selector Dialog */}
-      <ProductSelectorDialog open={openDialog} onClose={() => setOpenDialog(false)} leadId={leadId} fetchLeadFromId={fetchLeadFromId} />
-    
-    </Card>
+            <TableBody>
+              {leadData?.products?.length > 0 ? (
+                leadData.products.map((p, idx) => (
+                  <TableRow
+                    key={p._id || idx}
+                    hover
+                    sx={{
+                      '&:nth-of-type(odd)': { bgcolor: '#fcfcfc' },
+                      '&:hover': { bgcolor: '#f9f5ff' }
+                    }}
+                  >
+                    <TableCell sx={{ py: 2, fontSize: 13 }}>{p.productRef?.code || p.product_id}</TableCell>
+                    <TableCell sx={{ py: 2, fontSize: 13 }}>{p.productRef?.name || '—'}</TableCell>
+                    <TableCell sx={{ py: 1.5 }}>
+                      <Chip
+                        label={p.productRef?.category || '—'}
+                        size='small'
+                        sx={{
+                          bgcolor:
+                            p.productRef?.category === 'Service'
+                              ? '#fff3e0'
+                              : p.productRef?.category === 'Subscription'
+                              ? '#e3f2fd'
+                              : '#f3e5f5',
+                          color: '#333',
+                          fontWeight: 500,
+                          px: 1.5,
+                          py: 0.5
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell align='center' sx={{ py: 2, fontSize: 13 }}>{p.quantity}</TableCell>
+                    <TableCell align='right' sx={{ py: 2, fontSize: 13 }}>{formatCurrency(p.unitPrice)}</TableCell>
+                    <TableCell align='right' sx={{ py: 2, fontSize: 13 }}>
+                      <Chip
+                        label={`${p.discount || 0}%`}
+                        size='small'
+                        sx={{
+                          bgcolor: p.discount > 0 ? '#e8f5e9' : '#eeeeee',
+                          color: p.discount > 0 ? '#2e7d32' : '#616161',
+                          fontWeight: 500,
+                          px: 1.2
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell align='right' sx={{ py: 2, fontSize: 13, fontWeight: 600, color: '#4caf50' }}>
+                      {formatCurrency(p.finalPrice)}
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={7} align='center'>
+                    <Box py={8}>
+                      <Typography variant='body1' fontWeight={500} color='text.secondary' mb={1}>
+                        🚫 No products added yet
+                      </Typography>
+                      <Button
+                        onClick={() => setOpenDialog(true)}
+                        sx={{
+                          textTransform: 'none',
+                          fontWeight: 600,
+                          color: '#9c27b0'
+                        }}
+                      >
+                        + Add your first product
+                      </Button>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </Paper>
+
+        {/* 🔹 Footer Summary */}
+        {leadData?.products?.length > 0 && (
+          <Box mt={3} textAlign='right'>
+            <Divider sx={{ mb: 2 }} />
+            <Typography variant='body2' sx={{ fontSize: 13 }}>
+              Total Qty: <strong>{summary.qty}</strong>
+            </Typography>
+            <Typography variant='body2' sx={{ fontSize: 13 }}>
+              Subtotal: <strong>{formatCurrency(summary.subtotal)}</strong>
+            </Typography>
+            <Typography variant='body2' color='error' sx={{ fontSize: 13 }}>
+              Discount: -{formatCurrency(summary.discount)}
+            </Typography>
+            <Typography variant='h6' fontWeight={700} color='#4caf50'>
+              Grand Total: {formatCurrency(summary.total)}
+            </Typography>
+          </Box>
+        )}
+
+        {/* 🔹 Product Selector Dialog */}
+        <ProductSelectorDialog
+          open={openDialog}
+          onClose={() => setOpenDialog(false)}
+          leadId={leadId}
+          fetchLeadFromId={fetchLeadFromId}
+        />
+      </Card>
     </Box>
-   
-    
   )
 }
 

@@ -31,6 +31,7 @@ import Link from 'next/link'
 import OpenActivities from './OpenActivities'
 import ProductSelectorDialog from './ProductSelectorDialog'
 import ProductPage from './ProductPage'
+import TaskTabs from './TaskTabs'
 // import CloseActivities from './closeActivities'
 
 // ✅ Validation rules
@@ -288,7 +289,7 @@ const LeadDetailView = () => {
             }}
           >
             <Tab label='Notes' />
-            <Tab label='Tasks' />
+            <Tab label='Activities' />
             <Tab label='Product' />
           </Tabs>
         </Box>
@@ -306,7 +307,9 @@ const LeadDetailView = () => {
 
         {tabIndex === 1 && (
           <Box>
-            <OpenActivities leadId={leadId} leadData={leadData} />
+            {/* <OpenActivities leadId={leadId} leadData={leadData} /> */}
+
+            <TaskTabs leadId={leadId} leadData={leadData} />
           </Box>
         )}
 
