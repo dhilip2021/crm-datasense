@@ -17,6 +17,7 @@ import {
 } from '@mui/material'
 import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined'
 import ProductSelectorDialog from './ProductSelectorDialog'
+import EditProductDialog from './EditProductDialog'
 
 // ✅ Utility for currency
 const formatCurrency = value =>
@@ -24,6 +25,7 @@ const formatCurrency = value =>
 
 function ProductPage({ leadId, leadData, fetchLeadFromId }) {
   const [openDialog, setOpenDialog] = useState(false)
+  const [editingProduct, setEditingProduct] = useState(null)
 
   // ✅ Calculate summary
   const summary = useMemo(() => {
@@ -38,6 +40,17 @@ function ProductPage({ leadId, leadData, fetchLeadFromId }) {
     const total = subtotal - discount
     return { qty, subtotal, discount, total }
   }, [leadData])
+
+  // 🔹 Delete product
+  const handleDeleteProduct = async (productId) => {
+    if (!confirm('Are you sure you want to delete this product?')) return
+    try {
+      await fetch(`/api/v1/lead/${leadId}/products/${productId}`, { method: 'DELETE' })
+      fetchLeadFromId()
+    } catch (err) {
+      console.error('Delete failed', err)
+    }
+  }
 
   return (
     <Box mt={6}>
@@ -91,7 +104,7 @@ function ProductPage({ leadId, leadData, fetchLeadFromId }) {
           <Table stickyHeader size='small'>
             <TableHead>
               <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-                {['Code', 'Name', 'Category', 'Qty', 'Unit Price', 'Discount', 'Final Price'].map(
+                {['Code', 'Name', 'Category', 'Qty', 'Unit Price', 'Discount', 'Final Price', 'Actions'].map(
                   (head) => (
                     <TableCell
                       key={head}
@@ -101,7 +114,7 @@ function ProductPage({ leadId, leadData, fetchLeadFromId }) {
                         textTransform: 'uppercase',
                         color: '#555'
                       }}
-                      align={head === 'Qty' || head.includes('Price') ? 'right' : 'left'}
+                      align={['Qty', 'Unit Price', 'Discount', 'Final Price'].includes(head) ? 'right' : 'left'}
                     >
                       {head}
                     </TableCell>
@@ -158,11 +171,27 @@ function ProductPage({ leadId, leadData, fetchLeadFromId }) {
                     <TableCell align='right' sx={{ py: 2, fontSize: 13, fontWeight: 600, color: '#4caf50' }}>
                       {formatCurrency(p.finalPrice)}
                     </TableCell>
+                    <TableCell align='right'>
+                      <Button
+                        size='small'
+                        sx={{ textTransform: 'none', color: '#1976d2', mr: 1 }}
+                        onClick={() => setEditingProduct(p)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        size='small'
+                        sx={{ textTransform: 'none', color: '#d32f2f' }}
+                        onClick={() => handleDeleteProduct(p._id)}
+                      >
+                        Delete
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} align='center'>
+                  <TableCell colSpan={8} align='center'>
                     <Box py={8}>
                       <Typography variant='body1' fontWeight={500} color='text.secondary' mb={1}>
                         🚫 No products added yet
@@ -208,6 +237,15 @@ function ProductPage({ leadId, leadData, fetchLeadFromId }) {
         <ProductSelectorDialog
           open={openDialog}
           onClose={() => setOpenDialog(false)}
+          leadId={leadId}
+          fetchLeadFromId={fetchLeadFromId}
+        />
+
+        {/* 🔹 Edit Product Dialog */}
+        <EditProductDialog
+          open={!!editingProduct}
+          product={editingProduct}
+          onClose={() => setEditingProduct(null)}
           leadId={leadId}
           fetchLeadFromId={fetchLeadFromId}
         />
