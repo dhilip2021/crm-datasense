@@ -201,7 +201,7 @@ const ProductMasterList = () => {
                   <TableCell sx={{ fontWeight: 'bold', color: '#374151' }}>Base Price</TableCell>
                   <TableCell sx={{ fontWeight: 'bold', color: '#374151' }}>Status</TableCell>
                   <TableCell sx={{ fontWeight: 'bold', color: '#374151' }}>Actions</TableCell>
-                  <TableCell />
+                  {/* <TableCell /> */}
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -254,13 +254,13 @@ const ProductMasterList = () => {
                           </>
                         )}
                       </TableCell>
-                      <TableCell>
+                      {/* <TableCell>
                         <IconButton onClick={() => handleToggleExpand(i)} sx={{ color: '#374151' }}>
                           {expandedRow === i ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                         </IconButton>
-                      </TableCell>
+                      </TableCell> */}
                     </TableRow>
-                    <TableRow>
+                    {/* <TableRow>
                       <TableCell colSpan={7} sx={{ p: 0, borderBottom: 'none' }}>
                         <Collapse in={expandedRow === i} timeout="auto" unmountOnExit>
                           <Box sx={{ p: 3, bgcolor: '#f9fafb' }}>
@@ -309,7 +309,7 @@ const ProductMasterList = () => {
                           </Box>
                         </Collapse>
                       </TableCell>
-                    </TableRow>
+                    </TableRow> */}
                   </React.Fragment>
                 ))}
                 {products.length === 0 && (

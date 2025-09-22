@@ -32,6 +32,7 @@ import OpenActivities from './OpenActivities'
 import ProductSelectorDialog from './ProductSelectorDialog'
 import ProductPage from './ProductPage'
 import TaskTabs from './TaskTabs'
+import { getUserAllListApi } from '@/apiFunctions/ApiAction'
 // import CloseActivities from './closeActivities'
 
 // ✅ Validation rules
@@ -331,7 +332,7 @@ const LeadDetailView = () => {
             pr: 1 // scrollbar overlap avoid
           }}
         >
-          <LeadCard fields={fields} />
+          <LeadCard fields={fields} leadId={leadId} />
 
           {/* 🔹 Dynamic Sections */}
           {sections.map((section, index) => (

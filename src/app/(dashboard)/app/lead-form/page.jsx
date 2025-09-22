@@ -436,7 +436,7 @@ function LeadFormAppPage() {
             }))
         }
         return (
-          <TextField id={field.id} select {...commonProps}>
+          <TextField id={field.id} select {...commonProps} autoComplete='off' InputLabelProps={{ shrink: true }}>
             {options.map((opt, i) => (
               <MenuItem key={i} value={opt.value || opt}>
                 {opt.label || opt}
@@ -465,67 +465,24 @@ function LeadFormAppPage() {
         )
 
       case 'Multi-Line':
-        return <TextField id={field.id} {...commonProps} multiline minRows={field.rows || 3} />
-
-      // case 'Phone':
-      //   return (
-      //     <TextField
-      //       id={field.id}
-      //       {...commonProps}
-      //       value={values[`${field.id}_number`] || ''}
-      //       onChange={e => handleChange(`${field.id}_number`, e.target.value, field.type)}
-      //       type='tel'
-      //       inputProps={{ maxLength: field.maxLength }}
-      //       InputProps={{
-      //         startAdornment: (
-      //           <InputAdornment position='start'>
-      //             <Autocomplete
-      //               options={countryCodes}
-      //               getOptionLabel={option =>
-      //                 typeof option === 'string' ? option : `${option.code} ${option.dial_code}`
-      //               }
-      //               freeSolo // ✅ allows typing custom values
-      //               value={
-      //                 countryCodes.find(
-      //                   c => c.dial_code === (values[`${field.id}_countryCode`] || field.countryCode || '+91')
-      //                 ) ||
-      //                 values[`${field.id}_countryCode`] ||
-      //                 ''
-      //               }
-      //               onChange={(_, newValue) => {
-      //                 if (typeof newValue === 'string') {
-      //                   handleChange(`${field.id}_countryCode`, newValue, field.type)
-      //                 } else if (newValue && 'dial_code' in newValue) {
-      //                   handleChange(`${field.id}_countryCode`, newValue.dial_code, field.type)
-      //                 } else {
-      //                   handleChange(`${field.id}_countryCode`, '', field.type)
-      //                 }
-      //               }}
-      //               size='small'
-      //               sx={{ minWidth: 120 }}
-      //               renderInput={params => (
-      //                 <TextField
-      //                   {...params}
-      //                   variant='standard'
-      //                   placeholder='+91'
-      //                   InputProps={{
-      //                     ...params.InputProps,
-      //                     disableUnderline: true
-      //                   }}
-      //                 />
-      //               )}
-      //             />
-      //           </InputAdornment>
-      //         )
-      //       }}
-      //     />
-      //   )
+        return (
+          <TextField
+            id={field.id}
+            {...commonProps}
+            autoComplete='off'
+            InputLabelProps={{ shrink: true }}
+            multiline
+            minRows={field.rows || 3}
+          />
+        )
 
       case 'Phone':
         return (
           <TextField
             id={field.id}
             {...commonProps}
+            autoComplete='off'
+            InputLabelProps={{ shrink: true }}
             value={values[`${field.id}_number`] || ''}
             onChange={e => handleChange(`${field.id}_number`, e.target.value, field.type)}
             type='tel'
@@ -538,11 +495,7 @@ function LeadFormAppPage() {
                     getOptionLabel={
                       option => (typeof option === 'string' ? option : option.dial_code) // only for dropdown search
                     }
-                    value={
-                      countryCodes.find(
-                        c => c.dial_code === (values[`${field.id}_countryCode`]  || '+91')
-                      ) || null
-                    }
+                    value={countryCodes.find(c => c.dial_code === (values[`${field.id}_countryCode`] || '+91')) || null}
                     onChange={(_, newValue) => {
                       if (newValue && 'dial_code' in newValue) {
                         handleChange(`${field.id}_countryCode`, newValue.dial_code, field.type)
@@ -603,11 +556,21 @@ function LeadFormAppPage() {
         )
 
       case 'Email':
-        return <TextField id={field.id} {...commonProps} type='email' />
+        return (
+          <TextField
+            id={field.id}
+            {...commonProps}
+            autoComplete='off'
+            InputLabelProps={{ shrink: true }}
+            type='email'
+          />
+        )
       case 'URL':
         return <TextField id={field.id} {...commonProps} type='url' />
       case 'Date':
-        return <TextField id={field.id} {...commonProps} type='date' InputLabelProps={{ shrink: true }} />
+        return (
+          <TextField id={field.id} {...commonProps} autoComplete='off' InputLabelProps={{ shrink: true }} type='date' />
+        )
       case 'Switch':
         return (
           <FormControlLabel
@@ -621,7 +584,7 @@ function LeadFormAppPage() {
           />
         )
       default:
-        return <TextField id={field.id} {...commonProps} />
+        return <TextField id={field.id} {...commonProps} autoComplete='off' InputLabelProps={{ shrink: true }} />
     }
   }
 
@@ -674,12 +637,6 @@ function LeadFormAppPage() {
     fetchForm()
   }, [])
 
-  useEffect(() => {
-    console.log(countryCodes, '<<< COUNTY CODES')
-    console.log(user_id, '<<< USER_IDDD')
-    console.log(userList, '<<< USER_LISTTT')
-  }, [countryCodes])
-
   return (
     <Box px={4} py={4} sx={{ background: '#f9f9f9', minHeight: '100vh' }}>
       {loader ? (
@@ -704,7 +661,8 @@ function LeadFormAppPage() {
       ) : (
         <>
           {sections.map((section, sIndex) => (
-            <Card key={sIndex} sx={{ mb: 4, borderLeft: '8px solid #8c57ff' }}>
+            // <Card key={sIndex} sx={{ mb: 4, borderLeft: '8px solid #8c57ff' }}>
+            <Card key={sIndex} sx={{ mb: 4 }}>
               <CardContent>
                 <Typography variant='h6' fontWeight='bold' mb={2}>
                   {section.title || `Section ${sIndex + 1}`}

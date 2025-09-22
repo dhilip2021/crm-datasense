@@ -367,7 +367,7 @@ const ProductMasterDialog = ({ open, onClose, fetchProducts }) => {
           </Grid>
         </Box>
 
-        <Box sx={{ mt: 4, bgcolor: 'white', borderRadius: '8px', p: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+        {/* <Box sx={{ mt: 4, bgcolor: 'white', borderRadius: '8px', p: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
           <Typography variant="h6" sx={{ mb: 2, fontWeight: 'medium', color: '#374151' }}>
             Price Books
           </Typography>
@@ -419,7 +419,7 @@ const ProductMasterDialog = ({ open, onClose, fetchProducts }) => {
               </TableRow>
             </TableBody>
           </Table>
-        </Box>
+        </Box> */}
       </DialogContent>
 
       <DialogActions sx={{ p: 3, bgcolor: '#f9fafb', borderTop: '1px solid #e5e7eb' }}>

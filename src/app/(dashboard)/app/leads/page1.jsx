@@ -46,7 +46,7 @@ const LeadTable = () => {
   const organization_id = Cookies.get('organization_id')
   const getToken = Cookies.get('_token')
   const loggedInUserId = Cookies.get('user_id')
-
+ 
   const loggedInUserName = Cookies.get('user_name')
   const [data, setData] = useState([])
   const [dataFilter, setDataFilter] = useState([])
@@ -90,6 +90,7 @@ const LeadTable = () => {
     toDate: null,
     search: ''
   })
+
 
   //  🔹 Flatten helper
   const flattenFields = sections => {
@@ -143,6 +144,8 @@ const LeadTable = () => {
 
   const fetchData = async () => {
     setLoading(true)
+
+   
 
     const form_name = 'lead-form'
 
@@ -218,7 +221,8 @@ const LeadTable = () => {
   }
 
   const fetchFilterData = async () => {
-    console.log(selectedUsers, '<<< SELECTED USERSSSS')
+
+     console.log(selectedUsers,"<<< SELECTED USERSSSS")
     setLoading(true)
     const organization_id = Cookies.get('organization_id')
     const form_name = 'lead-form'
@@ -472,88 +476,206 @@ const LeadTable = () => {
   }, [page, limit])
 
   return (
-    <Box px={2} py={2}>
-      {/* 🔹 Header */}
-      <Grid container justifyContent='space-between' alignItems='center' mb={3}>
-        {/* Left: Import/Upload */}
-        <Grid item xs={12} sm={6}>
-          <form onSubmit={handleUpload}>
-            <Box display='flex' gap={2}>
-              <Button type='submit' component='label' variant='outlined' color='info' startIcon={<CloudUploadIcon />}>
-                {loader ? 'Uploading...' : 'Import Excel/CSV File'}
-                <input
-                  type='file'
-                  name='file'
-                  accept='.csv, .xlsx'
-                  hidden
-                  onChange={e => {
-                    const file = e.target.files[0]
-                    if (file) handleUpload(file)
-                  }}
-                />
-              </Button>
-              {fileName && <Typography sx={{ lineHeight: 2 }}>{fileName}</Typography>}
+    <Box px={1} py={1}>
+      <Box sx={{ p: 4, backgroundColor: '#f9fafb' }}>
+        <Grid container direction='column' spacing={4}>
+          {/* Header Section */}
+          <Grid item>
+            <Grid container justifyContent='space-between' alignItems='center'>
+              <Typography variant='h5' fontWeight='bold'>
+                Leads
+              </Typography>
 
-            </Box>
-             <Box>
-                                  <Typography
-                                    component='a'
-                                    href='/sample/sample_lead_data.xlsx'
-                                    download
-                                    variant='body2'
-                                    sx={{
-                                      cursor: 'pointer',
-                                      color: '#1976d2',
-                                      fontWeight: 500,
-                                      textDecoration: 'underline',
-                                      '&:hover': { color: 'primary.dark' }
-                                    }}
-                                  >
-                                    Download sample excel
-                                  </Typography>
-                                </Box>
-          </form>
+              <form onSubmit={handleUpload}>
+                <Box display='flex' flexDirection='row' gap={2}>
+                  {/* File Upload */}
+                  <Box>
+                    {/* Upload Button */}
+                    {/* <Button
+                      component='label'
+                      variant='outlined'
+                      color='info'
+                      fullWidth
+                      startIcon={<CloudUploadIcon />}
+                      sx={{
+                        mb: 2,
+                        py: 1.5,
+                        borderColor: 'grey.300',
+                        fontWeight: '500',
+                        '&:hover': { borderColor: 'primary.main' }
+                      }}
+                    >
+                      Select Excel/CSV File
+                      <input
+                        type='file'
+                        name='file'
+                        accept='.csv, .xlsx'
+                        hidden
+                        onChange={e => {
+                          const file = e.target.files[0]
+                          if (file) {
+                            setSelectedFile(file)
+                            setFileName(file.name)
+                          }
+                        }}
+                      />
+                    </Button> */}
+
+                    <Button
+                      type='submit'
+                      component='label'
+                      variant='outlined'
+                      color='info'
+                      fullWidth
+                      startIcon={<CloudUploadIcon />}
+                      sx={{
+                        mb: 2,
+                        py: 1.5,
+                        borderColor: 'grey.300',
+                        fontWeight: '500',
+                        '&:hover': { borderColor: 'primary.main' }
+                      }}
+                    >
+                      {loader ? 'Uploading...' : 'Import Excel/CSV File'}
+                      <input
+                        type='file'
+                        name='file'
+                        accept='.csv, .xlsx'
+                        hidden
+                        onChange={async e => {
+                          const file = e.target.files[0]
+                          if (file) {
+                            setSelectedFile(file)
+                            setFileName(file.name)
+                            handleUpload(file)
+                          }
+                        }}
+                      />
+                    </Button>
+
+                    {/* Loader */}
+                    {loader && <LinearProgress sx={{ mb: 2 }} color='info' />}
+
+                    {/* File name + Remove button */}
+                    {fileName && (
+                      <Stack
+                        direction='row'
+                        alignItems='center'
+                        justifyContent='space-between'
+                        sx={{
+                          p: 1,
+                          border: '1px solid',
+                          borderColor: 'grey.300',
+                          borderRadius: 1,
+                          mb: 1,
+                          backgroundColor: '#fafafa'
+                        }}
+                      >
+                        <Typography variant='body2' sx={{ color: '#4CAF50', fontWeight: 500 }} noWrap>
+                          {fileName}
+                        </Typography>
+                        <Button
+                          variant='outlined'
+                          color='error'
+                          size='small'
+                          onClick={() => {
+                            setFileName('')
+                            setSelectedFile(null)
+                            document.querySelector('input[name="file"]').value = ''
+                          }}
+                          sx={{ textTransform: 'none', fontSize: '12px', py: 0.3, px: 1.2 }}
+                        >
+                          Remove
+                        </Button>
+                      </Stack>
+                    )}
+
+                    {/* Download link */}
+                    <Box display='flex' justifyContent='flex-end'>
+                      <Typography
+                        component='a'
+                        href='/sample/sample_lead_data.xlsx'
+                        download
+                        variant='body2'
+                        sx={{
+                          cursor: 'pointer',
+                          color: '#1976d2',
+                          fontWeight: 500,
+                          textDecoration: 'underline',
+                          '&:hover': { color: 'primary.dark' }
+                        }}
+                      >
+                        Download sample excel
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  {/* <Box>
+                    <Button
+                      type='submit'
+                      variant='contained'
+                      color='info'
+                      fullWidth
+                      disabled={loader}
+                      sx={{ py: 1.5, fontWeight: 'bold' }}
+                    >
+                      {loader ? 'Uploading...' : 'Upload & Import'}
+                    </Button>
+                  </Box> */}
+
+                  {/* New Lead Button */}
+                  <Box>
+                    <Button
+                      href='/app/lead-form'
+                      variant='contained'
+                      color='primary'
+                      fullWidth
+                      disabled={loader}
+                      sx={{ py: 1.5, fontWeight: 'bold' }}
+                    >
+                      + New Lead
+                    </Button>
+                  </Box>
+                </Box>
+              </form>
+            </Grid>
+          </Grid>
+
+          {/* Upload Section */}
         </Grid>
+      </Box>
 
-        <Grid item xs={12} sm={3} textAlign='right'>
-          <Box mb={2} display='flex' justifyContent='flex-end' gap={1}>
-            <Button variant='outlined' onClick={handleExcelClick} startIcon={<GridOnIcon />}>
-              Export Excel
-            </Button>
-            <Button variant='outlined' onClick={handlePDFClick} startIcon={<PictureAsPdfIcon />}>
-              Export PDF
-            </Button>
-          </Box>
-        </Grid>
-
-        {/* Right: New Lead Button */}
-        <Grid item xs={12} sm={3} textAlign='right'>
-          <Button href='/app/lead-form' variant='contained' color='primary' disabled={loader}>
-            + New Lead
-          </Button>
-        </Grid>
-      </Grid>
-
-      <Grid container spacing={2}>
-        {/* 🔹 Left Column: Filters */}
-        <Grid item xs={12} sm={2}>
-          <Card sx={{ p: 2, mb: 2 }}>
-            <Stack spacing={2}>
+      <Card>
+        <CardContent>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={2}>
               <TextField
-                autoComplete='off'
                 size='small'
+                fullWidth
                 label='Search'
                 value={filters.search}
                 onChange={e => setFilters({ ...filters, search: e.target.value })}
                 onKeyDown={e => e.key === 'Enter' && fetchFilterData()}
               />
+            </Grid>
+            <Grid item xs={12} sm={2}>
               <TextField
-                autoComplete='off'
-                size='small'
                 select
+                size='small'
+                fullWidth
                 label='Status'
                 value={filters.status}
                 onChange={e => setFilters({ ...filters, status: e.target.value })}
+                SelectProps={{
+                  MenuProps: {
+                    PaperProps: {
+                      style: {
+                        maxHeight: 250, // menu height limit, scroll auto varum
+                        width: 200 // optional width
+                      }
+                    }
+                  }
+                }}
               >
                 <MenuItem value=''>All</MenuItem>
                 {uniqueStatus.map(status => (
@@ -562,28 +684,51 @@ const LeadTable = () => {
                   </MenuItem>
                 ))}
               </TextField>
+            </Grid>
+            <Grid item xs={12} sm={2}>
               <TextField
-                autoComplete='off'
-                size='small'
                 select
                 label='Assigned To'
+                // value={selectedUsers.length > 0 ? selectedUsers : [loggedInUserId]}
+
+                // value={filters.assign ?  filters.assign : loggedInUserId}
                 value={filters.assign}
-                onChange={e => setFilters({ ...filters, assign: e.target.value })}
-              >
-                <MenuItem value=''>All</MenuItem>
-                {userList.map(u => (
-                  <MenuItem key={u.user_id} value={u.user_id}>
-                    {u.user_name}
-                  </MenuItem>
-                ))}
-              </TextField>
-              <TextField
-                autoComplete='off'
+                // onChange={e =>
+                //   setSelectedUsers(typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value)
+                // }
+                 onChange={e => setFilters({ ...filters, assign: e.target.value })}
+                // SelectProps={{ multiple: true }}
                 size='small'
+                sx={{ minWidth: 200 }}
+              >
+                <MenuItem value="">{'All'}</MenuItem>
+                {userList.filter(u => u.user_id !== "41ea614a8ccc").map(u => (
+                    <MenuItem key={u.user_id} value={u.user_id}>
+                      {u.user_name}
+                    </MenuItem>
+                  ))}
+              </TextField>
+            </Grid>
+
+
+            <Grid item xs={12} sm={2}>
+              <TextField
                 select
+                size='small'
+                fullWidth
                 label='Source'
                 value={filters.source}
                 onChange={e => setFilters({ ...filters, source: e.target.value })}
+                SelectProps={{
+                  MenuProps: {
+                    PaperProps: {
+                      style: {
+                        maxHeight: 250, // menu height limit, scroll auto varum
+                        width: 200 // optional width
+                      }
+                    }
+                  }
+                }}
               >
                 <MenuItem value=''>All</MenuItem>
                 {uniqueSources.map(source => (
@@ -592,7 +737,8 @@ const LeadTable = () => {
                   </MenuItem>
                 ))}
               </TextField>
-
+            </Grid>
+            <Grid item xs={12} sm={2}>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   label='From Date'
@@ -600,6 +746,10 @@ const LeadTable = () => {
                   onChange={val => setFilters({ ...filters, fromDate: val })}
                   slotProps={{ textField: { size: 'small', fullWidth: true } }}
                 />
+              </LocalizationProvider>
+            </Grid>
+            <Grid item xs={12} sm={2}>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   label='To Date'
                   value={filters.toDate}
@@ -607,46 +757,126 @@ const LeadTable = () => {
                   slotProps={{ textField: { size: 'small', fullWidth: true } }}
                 />
               </LocalizationProvider>
+            </Grid>
 
+            
+          </Grid>
+
+          <Box mt={2} display='flex' justifyContent={'flex-end'} gap={1}>
+            <Button variant='outlined' onClick={handleExcelClick} startIcon={<GridOnIcon />}>
+              Export Excel
+            </Button>
+
+            {/* Excel Menu */}
+            <Menu
+              anchorEl={anchorExcelEl}
+              open={Boolean(anchorExcelEl)}
+              onClose={handleExcelClose}
+              PaperProps={{
+                style: { maxHeight: 300, width: 250 }
+              }}
+            >
+              {/* Select All */}
+              <MenuItem
+                onClick={() => {
+                  if (selectedExcelFields.length === fieldsExcel.length) {
+                    setSelectedExcelFields([]) // unselect all
+                  } else {
+                    setSelectedExcelFields(fieldsExcel) // select all
+                  }
+                }}
+              >
+                <Checkbox
+                  checked={selectedExcelFields.length === fieldsExcel.length}
+                  indeterminate={selectedExcelFields.length > 0 && selectedExcelFields.length < fieldsExcel.length}
+                />
+                <ListItemText primary='Select All' primaryTypographyProps={{ fontWeight: 'bold' }} />
+              </MenuItem>
+
+              <Divider />
+
+              {/* Individual fields */}
+              {fieldsExcel.map(field => (
+                <MenuItem key={field} onClick={() => handleExcelToggle(field)}>
+                  <Checkbox checked={selectedExcelFields.includes(field)} />
+                  <ListItemText primary={field} />
+                </MenuItem>
+              ))}
+
+              <Divider />
+              <MenuItem onClick={exportToExcel} sx={{ fontWeight: 'bold', color: 'red', textAlign: 'center' }}>
+                Confirm Export
+              </MenuItem>
+            </Menu>
+
+            {/* 🔥 FIX HERE - use handlePDFClick instead of handleDrop */}
+            <Button variant='outlined' onClick={handlePDFClick} startIcon={<PictureAsPdfIcon />}>
+              Export PDF
+            </Button>
+
+            {/* PDF Menu */}
+            <Menu
+              anchorEl={anchorPdfEl}
+              open={Boolean(anchorPdfEl)}
+              onClose={handlePdfClose}
+              PaperProps={{
+                style: { maxHeight: 300, width: 250 }
+              }}
+            >
+              {/* Select All */}
+              <MenuItem
+                onClick={() => {
+                  if (selectedPdfFields.length === fieldsPdf.length) {
+                    setSelectedPdfFields([]) // unselect all
+                  } else {
+                    setSelectedPdfFields(fieldsPdf) // select all
+                  }
+                }}
+              >
+                <Checkbox
+                  checked={selectedPdfFields.length === fieldsPdf.length}
+                  indeterminate={selectedPdfFields.length > 0 && selectedPdfFields.length < fieldsPdf.length}
+                />
+                <ListItemText primary='Select All' primaryTypographyProps={{ fontWeight: 'bold' }} />
+              </MenuItem>
+
+              <Divider />
+
+              {/* Individual fields */}
+              {fieldsPdf.map(field => (
+                <MenuItem key={field} onClick={() => handlePdfToggle(field)}>
+                  <Checkbox checked={selectedPdfFields.includes(field)} />
+                  <ListItemText primary={field} />
+                </MenuItem>
+              ))}
+
+              <Divider />
+              <MenuItem onClick={exportToPDF} sx={{ fontWeight: 'bold', color: 'red', textAlign: 'center' }}>
+                Confirm Export
+              </MenuItem>
+            </Menu>
+
+
+
+            <Grid item xs={12} sm={2}>
               <Button
                 variant='contained'
                 color='success'
                 fullWidth
                 onClick={fetchFilterData}
-                disabled={Object.values(filters).every(v => !v)}
+                disabled={Object.values(filters).every(v => !v || v === '')}
               >
                 Apply
               </Button>
-            </Stack>
-          </Card>
-        </Grid>
+            </Grid>
+          </Box>
 
-        {/* 🔹 Right Column: Table + Actions */}
-        <Grid item xs={12} sm={10}>
+          <Divider sx={{ my: 2 }} />
+
+          {/* 🔥 Scrollable and Skeleton Table */}
+
           <Box sx={{ width: '100%', overflowX: 'auto', maxHeight: 500 }}>
-            <Table
-              stickyHeader
-              size='small'
-              sx={{
-                minWidth: 1200,
-                borderRadius: 2,
-                boxShadow: '0px 3px 8px rgba(0,0,0,0.05)',
-                '& .MuiTableRow-root:hover': {
-                  backgroundColor: '#f1f5f9',
-                  cursor: 'pointer'
-                },
-                '& .MuiTableCell-root': {
-                  borderBottom: '1px solid #e0e0e0',
-                  py: 1.5
-                },
-                '& .MuiTableCell-stickyHeader': {
-                  backgroundColor: '#fff',
-                  color: '#333',
-                  fontWeight: 'bold',
-                  letterSpacing: 0.5
-                }
-              }}
-            >
+            <Table stickyHeader size='small' sx={{ minWidth: 1200 }}>
               <TableHead>
                 <TableRow>
                   <TableCell
@@ -726,38 +956,28 @@ const LeadTable = () => {
                             textOverflow: 'ellipsis'
                           }}
                         >
-                          <Tooltip title={row.values['Company'] || ''} arrow enterDelay={300} leaveDelay={150}>
-                            <span
-                              style={{
-                                display: 'block',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap'
-                              }}
-                            >
-                              {row.values['Company']}
-                            </span>
+                          <Tooltip title={row.values['Company'] || ''} arrow>
+                            <span>{row.values['Company']}</span>
                           </Tooltip>
                         </TableCell>
                         <TableCell>{row.values['City']}</TableCell>
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
-
                           <Chip
-                                                      label={row.values['Timeline to Buy'] ? row.values['Timeline to Buy'] : '-'}
-                                                      sx={{
-                                                        color: "#ffffff",
-                                                        backgroundColor:
-                                                          row.values['Timeline to Buy'] == '3–6 Months'
-                                                            ? '#00FF48'
-                                                            : row.values['Timeline to Buy'] == '6+ Months'
-                                                              ? '#FF8800'
-                                                              : row.values['Timeline to Buy'] == 'Immediately'
-                                                                ? '#FF0000'
-                                                                : '#ffffff',
-                                                        fontWeight: 'bold'
-                                                      }}
-                                                      size='small'
-                                                    />
+                            label={row.values['Timeline to Buy'] ? row.values['Timeline to Buy'] : '-'}
+                            sx={{
+                              color: "#ffffff",
+                              backgroundColor:
+                                row.values['Timeline to Buy'] == '3–6 Months'
+                                  ? '#00FF48'
+                                  : row.values['Timeline to Buy'] == '6+ Months'
+                                    ? '#FF8800'
+                                    : row.values['Timeline to Buy'] == 'Immediately'
+                                      ? '#FF0000'
+                                      : '#ffffff',
+                              fontWeight: 'bold'
+                            }}
+                            size='small'
+                          />
                         </TableCell>
                         <TableCell>
                           <Chip
@@ -809,24 +1029,19 @@ const LeadTable = () => {
                             sx={{
                               backgroundColor:
                                 (row.values['Score'] || 0) >= 75
-                                  ? '#f44336'
+                                  ? '#d32f2f'
                                   : (row.values['Score'] || 0) >= 40
                                     ? '#ff9800'
-                                    : '#2196f3',
+                                    : '#1976d2',
                               color: '#fff',
                               px: 1.5,
-                              py: 1,
-                              width: 36,
-                              height: 36,
+                              py: 0.5,
                               borderRadius: '50%',
-                              fontSize: '0.85rem',
+                              fontSize: '0.8rem',
                               fontWeight: 'bold',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
+                              display: 'inline-block',
+                              textAlign: 'center'
                             }}
-                            title={`Lead Score: ${row.values['Score'] || 0}`}
                           >
                             {row.values['Score'] || 0}
                           </Box>
@@ -878,18 +1093,32 @@ const LeadTable = () => {
                       </TableRow>
                     ))}
                 {!loading && data?.length === 0 && (
-                  <TableCell colSpan={13} align='center' sx={{ py: 6, backgroundColor: '#f8f9fa' }}>
-                    <Box display='flex' flexDirection='column' alignItems='center' gap={1}>
-                      <i className='ri-search-line' style={{ fontSize: 36, color: '#ced4da' }}></i>
-                      <Typography variant='h6' color='#adb5bd'>
-                        No records found
-                      </Typography>
-                    </Box>
+                  <TableCell
+                    colSpan={10}
+                    align='center'
+                    sx={{
+                      py: 0,
+                      border: 'none',
+                      backgroundColor: '#f9fafb',
+                      height: 300
+                    }}
+                  >
+                    <Typography
+                      variant='h5'
+                      sx={{
+                        fontWeight: 'bold',
+                        color: '#9e9e9e',
+                        letterSpacing: 0.5
+                      }}
+                    >
+                      🚫 No record found!
+                    </Typography>
                   </TableCell>
                 )}
               </TableBody>
             </Table>
           </Box>
+
           <TablePagination
             component='div'
             count={total}
@@ -902,8 +1131,8 @@ const LeadTable = () => {
             }}
             rowsPerPageOptions={[5, 10, 20, 50, 100]}
           />
-        </Grid>
-      </Grid>
+        </CardContent>
+      </Card>
     </Box>
   )
 }

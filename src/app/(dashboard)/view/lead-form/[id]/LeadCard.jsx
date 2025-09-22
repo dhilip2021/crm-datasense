@@ -1,7 +1,9 @@
 import { Box, Typography, Chip, Divider } from '@mui/material'
 import EditableField from './EditableField'
 
-export default function LeadCard({ fields }) {
+export default function LeadCard({ fields, leadId }) {
+
+  console.log(fields,"<<< fieldssss")
   return (
     <Box
       sx={{
@@ -21,10 +23,21 @@ export default function LeadCard({ fields }) {
     >
       {/* Name Section */}
       <Box display={'flex'} justifyContent={'space-between'}>
-        <Typography variant='h5' fontWeight='bold' gutterBottom>
-          {fields['First Name']}
-          {'   '} {fields['Last Name']}
+        <Box>
+          <Typography variant='h5' fontWeight='bold' gutterBottom>
+          {fields['First Name']}{'   '} {fields['Last Name']}
         </Typography>
+        <Typography variant='body1'>
+            <Chip
+              label={fields['Lead Status']}
+              color='primary'
+              variant='outlined'
+              size='small'
+              sx={{ fontWeight: 'medium' }}
+            />
+          </Typography>
+        </Box>
+        
         <Typography variant='body1'>
           <strong>Score:</strong>{' '}
           <Chip
@@ -39,38 +52,35 @@ export default function LeadCard({ fields }) {
 
       {/* Details */}
       <Box display='flex' flexDirection='column' gap={1.2}>
-        <Typography variant='body1'>
-          <strong>Job Title:</strong> <span style={{ color: '#374151' }}>{fields['Job Title']}</span>
+       
+        <Typography variant='body1' color={"#000"}>
+         Lead Id:<span style={{ color: '#374151',fontWeight:600 }}> {' '}{leadId}</span>
         </Typography>
+        <Typography variant='body1' color={"#000"}>
+         Designation:<span style={{ color: '#374151',fontWeight:600 }}> {' '}{fields['Job Title']}</span>
+        </Typography>
+        <Typography variant='body1' color={"#000"}>
 
-        <Box display={'flex'} justifyContent={'space-between'}>
-          <Typography variant='body1'>
-            <strong>Website:</strong>{' '}
+          Website:{' '}
             {fields['Website'] ? (
               <a
                 href={fields['Website'].startsWith('http') ? fields['Website'] : `https://${fields['Website']}`}
                 target='_blank'
                 rel='noopener noreferrer'
-                style={{ color: '#2563eb', textDecoration: 'underline' }}
+                style={{ color: '#2563eb', fontWeight:600 ,textDecoration: 'underline' }}
               >
                 {fields['Website']}
               </a>
             ) : (
-              <span style={{ color: '#374151' }}>-</span>
+              <span style={{ color: '#374151', fontWeight:600  }}>-</span>
             )}
-          </Typography>
+        </Typography>
+        <Typography variant='body1' color='#000'>
+         Lead Source:<span style={{ color: "primary", fontWeight:600 }}> {' '}{fields['Lead Source']}</span>
+        </Typography>
+         
 
-          <Typography variant='body1'>
-            <strong>Lead Source:</strong>{' '}
-            <Chip
-              label={fields['Lead Source']}
-              color='primary'
-              variant='outlined'
-              size='small'
-              sx={{ fontWeight: 'medium' }}
-            />
-          </Typography>
-        </Box>
+       
       </Box>
     </Box>
   )
