@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { create_UUID, verifyAccessToken } from '@/helper/clientHelper'
 import connectMongoDB from '@/libs/mongodb'
-import { Product } from '@/models/Product'
+import Product from '@/models/Product'
+// import { Product } from '@/models/Product'
 
 let sendResponse = {
   success: '',

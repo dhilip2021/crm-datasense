@@ -39,4 +39,8 @@ const ProductSchema = new mongoose.Schema(
 );
 
 // ✅ Fix OverwriteModelError
-export const Product = mongoose.models.Product || mongoose.model('Product', ProductSchema, 'products')
+// export const Product = mongoose.models.Product || mongoose.model('Product', ProductSchema, 'products')
+
+
+
+export default mongoose.models.Product || mongoose.model("Product", ProductSchema);

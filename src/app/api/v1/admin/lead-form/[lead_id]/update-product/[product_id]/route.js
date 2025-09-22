@@ -1,15 +1,14 @@
 import connectMongoDB from '@/libs/mongodb'
 import Leadform from '@/models/Leadform'
-import { Product } from '@/models/Product'
+import Product from '@/models/Product'
+// import { Product } from '@/models/Product'
 
 export async function PUT(req, { params }) {
   await connectMongoDB()
   try {
     const { lead_id, product_id } = params
 
-    console.log(lead_id,"<<<LEAD ID")
-    console.log(product_id,"<<<PRODUCT ID")
-
+  
     const body = await req.json()
 
     const { quantity, unitPrice, discount } = body

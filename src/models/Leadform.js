@@ -78,8 +78,9 @@ const LeadFormSchema = new mongoose.Schema(
         product_id: { type: String },
         quantity: { type: Number, default: 1 },
         unitPrice: { type: Number },
-        discount: { type: Number, default: 0 }, // %
-        finalPrice: { type: Number } // (qty * unitPrice) - discount
+        discount: { type: Number, default: 0 }, 
+        finalPrice: { type: Number }, 
+        discountType: { type: String } 
       }
     ],
     'values.Notes': [NoteSchema],

@@ -1,6 +1,7 @@
 import connectMongoDB from '@/libs/mongodb'
 import Leadform from '@/models/Leadform'
-import { Product } from '@/models/Product'
+import Product from '@/models/Product'
+// import { Product } from '@/models/Product'
 
 export async function POST(req, { params }) {
   await connectMongoDB()
