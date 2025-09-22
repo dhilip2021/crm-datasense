@@ -96,14 +96,13 @@ const NotesSection = ({ leadId, leadData }) => {
     return str.length > 0 && str[0] === ' '
   }
 
-  const handleSave = async () => {
-    if (note === '' || hasInitialSpace(note) || !note.trim()) {
-      setNoteError(true)
-      noteRef.current?.focus()
-      return
-    }
+  const handleSave1 = async () => {
 
-    try {
+    console.log(note,"<<< NOTE VALUEEE")
+
+    if(note?.length > 0){
+
+       try {
       const notePayload = {
         title,
         note,
@@ -152,12 +151,103 @@ const NotesSection = ({ leadId, leadData }) => {
       handleClear()
       setEditingNote(null)
       setOpen(false)
+
     } catch (err) {
       setOpen(false)
       setLoader(false)
       toast.error('Error while saving note', { autoClose: 500, position: 'bottom-center', hideProgressBar: true })
     }
+
+    }else{
+       if (note === '' || hasInitialSpace(note) || !note.trim()) {
+      setNoteError(true)
+      noteRef.current?.focus()
+      return
+    }
+    }
   }
+
+  const handleSave = async () => {
+  console.log(note, "<<< NOTE VALUEEE")
+
+  // Remove leading/trailing spaces
+  const trimmedNote = note?.trim()
+
+  if (!trimmedNote) {
+    setNoteError(true)
+    noteRef.current?.focus()
+    return
+  }
+
+  try {
+    const notePayload = {
+      title,
+      note: trimmedNote, // use trimmed value
+      createdAt: editingNote ? editingNote.createdAt : new Date().toISOString(),
+      createdBy: editingNote ? editingNote.createdBy : user_name,
+      _id: editingNote?._id
+    }
+
+    setLoader(true)
+    const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getToken}`
+      },
+      body: JSON.stringify({
+        values: { Notes: [notePayload] }
+      })
+    })
+
+    const result = await res.json()
+    setLoader(false)
+
+    if (result.success) {
+      if (editingNote) {
+        setNotes(prev =>
+          prev.map(n =>
+            n._id === editingNote._id ? { ...n, title, note: trimmedNote } : n
+          )
+        )
+        toast.success('Note updated successfully', {
+          autoClose: 500,
+          position: 'bottom-center',
+          hideProgressBar: true
+        })
+      } else {
+        toast.success('Note added successfully', {
+          autoClose: 500,
+          position: 'bottom-center',
+          hideProgressBar: true
+        })
+        const notes = result?.data?.values?.Notes
+        const lastNote = notes?.[notes.length - 1]
+        setNotes(prev => [lastNote, ...prev])
+      }
+    } else {
+      toast.error(result.error || 'Error saving note', {
+        autoClose: 500,
+        position: 'bottom-center',
+        hideProgressBar: true
+      })
+    }
+
+    handleClear()
+    setEditingNote(null)
+    setOpen(false)
+
+  } catch (err) {
+    setOpen(false)
+    setLoader(false)
+    toast.error('Error while saving note', {
+      autoClose: 500,
+      position: 'bottom-center',
+      hideProgressBar: true
+    })
+  }
+}
+
 
   // 🔎 Filter + Sort notes
   const filteredNotes = [...notes]
