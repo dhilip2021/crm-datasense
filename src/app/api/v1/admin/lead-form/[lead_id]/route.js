@@ -92,7 +92,7 @@ export async function GET(req, { params }) {
       .populate({
         path: 'products.productRef',
         model: Product,                     // ✅ explicitly tell mongoose
-        select: 'name category code'
+        select: 'name category code uom'
       })
       .select('-__v')
       .lean()

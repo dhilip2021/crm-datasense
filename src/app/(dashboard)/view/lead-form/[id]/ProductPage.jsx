@@ -37,6 +37,9 @@ function ProductPage({ leadId, leadData, fetchLeadFromId }) {
 
   // ✅ Calculate summary
   const summary = useMemo(() => {
+
+    console.log(leadData,"<<< LEAD DATAAAAAA")
+
     if (!leadData?.products?.length) return { qty: 0, subtotal: 0, discount: 0, total: 0 }
 
     const qty = leadData.products.reduce((acc, p) => acc + (p.quantity || 0), 0)
@@ -123,7 +126,7 @@ function ProductPage({ leadId, leadData, fetchLeadFromId }) {
           <Table stickyHeader size='small'>
             <TableHead>
               <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-                {['Code', 'Name', 'Category', 'Qty', 'Unit Price', 'Discount', 'Final Price', 'Actions'].map(head => (
+                {['Code', 'Name', 'Category', 'Qty', 'UOM', 'Unit Price', 'Discount', 'Final Price', 'Actions'].map(head => (
                   <TableCell
                     key={head}
                     sx={{
@@ -173,6 +176,9 @@ function ProductPage({ leadId, leadData, fetchLeadFromId }) {
                     </TableCell>
                     <TableCell align='center' sx={{ py: 2, fontSize: 13 }}>
                       {p.quantity}
+                    </TableCell>
+                     <TableCell align='center' sx={{ py: 2, fontSize: 13 }}>
+                      {p.productRef?.uom || '—'}
                     </TableCell>
                     <TableCell align='right' sx={{ py: 2, fontSize: 13 }}>
                       {formatCurrency(p.unitPrice)}
