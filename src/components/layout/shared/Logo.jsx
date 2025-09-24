@@ -2,7 +2,6 @@
 
 // Third-party Imports
 import styled from '@emotion/styled'
-
 import Cookies from 'js-cookie'
 import { Box } from '@mui/material'
 
@@ -12,37 +11,24 @@ import MaterioLogo from '@core/svg/Logo'
 // Config Imports
 import themeConfig from '@configs/themeConfig'
 
-
-
-
 const LogoText = styled.span`
   color: ${({ color }) => color ?? 'var(--mui-palette-text-primary)'};
-  font-size: 1.25rem;
+  font-size: 0.9rem;
   line-height: 1.2;
   font-weight: 600;
   letter-spacing: 0.15px;
   text-transform: uppercase;
-  margin-inline-start: 10px;
+  margin-top: 4px; /* gap between logo and text */
 `
 
 const Logo = ({ color }) => {
-  
-  const orgName = Cookies.get("organization_name");
+  const orgName = Cookies.get('organization_name') || themeConfig.templateName
 
   return (
-    <Box>
-       <div className='flex items-center min-bs-[24px]'>
-       <MaterioLogo className='text-[22px] text-primary' />
-       
-       {/* <LogoText color={color}>{themeConfig.templateName}   </LogoText> */}
-       <LogoText color={color}>{orgName}   </LogoText>
-       </div>
-       <div>
-         {/* <h4> <span style={{color:"#a7a7a7"}}></span>  {orgName}</h4> */}
-       </div>
-      
+    <Box display="flex" flexDirection="column" alignItems="center" minHeight={32}>
+      <MaterioLogo className='text-[28px] text-primary' />
+      <LogoText color={color}>{orgName}</LogoText>
     </Box>
-
   )
 }
 

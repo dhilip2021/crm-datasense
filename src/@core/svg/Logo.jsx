@@ -4,7 +4,7 @@ import LogoImg from "@assets/images/logo.png"
 
 const Logo = props => {
   return (
-    <Image src={LogoImg} width={30} height={30} alt="logo" />
+    <Image src={LogoImg} width={180} height={50} alt="logo" />
   )
 }
 
