@@ -28,8 +28,8 @@ import {
   Tooltip,
   Typography
 } from '@mui/material'
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+// import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
+// import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs from 'dayjs'
 import * as XLSX from 'xlsx'
 import jsPDF from 'jspdf'
@@ -45,7 +45,12 @@ import { getUserAllListApi } from '@/apiFunctions/ApiAction'
 import FlagIcon from '@mui/icons-material/Flag' // ✅ MUI icon
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import SearchIcon from '@mui/icons-material/Search'
-import { DateRangePicker, MultiInputDateRangeField } from '@mui/x-date-pickers-pro/DateRangePicker'
+// import { DateRangePicker, MultiInputDateRangeField } from '@mui/x-date-pickers-pro/DateRangePicker'
+
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo'
+import { LocalizationProvider } from '@mui/x-date-pickers-pro/LocalizationProvider'
+import { AdapterDayjs } from '@mui/x-date-pickers-pro/AdapterDayjs'
+import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker'
 
 const LeadTable = () => {
   const organization_id = Cookies.get('organization_id')
@@ -553,8 +558,10 @@ const LeadTable = () => {
   }, [page, limit])
 
   useEffect(() => {
-    if (!filters.search) {
+    if (!filters.search && !filters.fromDate  && !filters.toDate) {
       fetchFilterData()
+    }else if(filters.fromDate && filters.toDate){
+       fetchFilterData()
     }
   }, [filters])
 
@@ -715,99 +722,123 @@ const LeadTable = () => {
         {/* 🔹 Left Column: Filters */}
 
         <Grid item xs={12}>
+          <Box display='flex' alignItems='center' gap={1.5} flexWrap='wrap' sx={{ mb: 2 }}>
+            {/* Search */}
+            <TextField
+              autoComplete='off'
+              size='small'
+              placeholder='Search'
+              value={filters.search}
+              onChange={e => setFilters({ ...filters, search: e.target.value })}
+              onKeyDown={e => e.key === 'Enter' && fetchFilterData()}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position='start'>
+                    <SearchIcon sx={{ color: 'action.active' }} />
+                  </InputAdornment>
+                )
+              }}
+            />
+            {/* Status */}
+            <TextField
+              select
+              size='small'
+              variant='outlined'
+              label='Status'
+              value={filters.status}
+              onChange={e => setFilters({ ...filters, status: e.target.value })}
+              sx={{ minWidth: 120, maxWidth: 150, bgcolor: 'white' }}
+            >
+              <MenuItem value=''>All</MenuItem>
+              {uniqueStatus.map(status => (
+                <MenuItem key={status} value={status}>
+                  {status}
+                </MenuItem>
+              ))}
+            </TextField>
 
-              <Box display='flex' alignItems='center' gap={1.5} flexWrap='wrap' sx={{ mb: 2 }}>
+            {/* Touch */}
+            <TextField
+              autoComplete='off'
+              size='small'
+              variant='outlined'
+              select
+              label='Touch'
+              value={filters.touch}
+              onChange={e => setFilters({ ...filters, touch: e.target.value })}
+              sx={{ minWidth: 120, maxWidth: 150, bgcolor: 'white' }}
+            >
+              <MenuItem value=''>All</MenuItem>
+              {['touch', 'untouch'].map(touch => (
+                <MenuItem key={touch} value={touch}>
+                  {touch}
+                </MenuItem>
+              ))}
+            </TextField>
 
-                 {/* Search */}
-              <TextField
-                autoComplete='off'
-                size='small'
-                placeholder='Search'
-                value={filters.search}
-                onChange={e => setFilters({ ...filters, search: e.target.value })}
-                onKeyDown={e => e.key === 'Enter' && fetchFilterData()}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position='start'>
-                      <SearchIcon sx={{ color: 'action.active' }} />
-                    </InputAdornment>
-                  )
+            {/* Assigned To */}
+            <TextField
+              select
+              size='small'
+              variant='outlined'
+              label='Assigned to'
+              value={filters.assign}
+              onChange={e => setFilters({ ...filters, assign: e.target.value })}
+              sx={{ minWidth: 140, maxWidth: 160, bgcolor: 'white' }}
+            >
+              <MenuItem value=''>All</MenuItem>
+              {userList.map(u => (
+                <MenuItem key={u.user_id} value={u.user_id}>
+                  {u.user_name}
+                </MenuItem>
+              ))}
+            </TextField>
+
+            <TextField
+              autoComplete='off'
+              size='small'
+              select
+              label='Source'
+              value={filters.source}
+              onChange={e => setFilters({ ...filters, source: e.target.value })}
+              sx={{ minWidth: 120, maxWidth: 150, bgcolor: 'white' }}
+            >
+              <MenuItem value=''>All</MenuItem>
+              {uniqueSources.map(source => (
+                <MenuItem key={source} value={source}>
+                  {source}
+                </MenuItem>
+              ))}
+            </TextField>
+
+            {/* Date Range Picker */}
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DateRangePicker
+                value={[filters.fromDate, filters.toDate]} // 🔹 filters la connect pannirukken
+                label='Date Range'
+                onChange={newValue => {
+                  setFilters({
+                    ...filters,
+                    fromDate: newValue[0],
+                    toDate: newValue[1]
+                  })
+                }}
+                slotProps={{
+                  textField: ({ position }) => ({
+                    size: 'small',
+                    sx: {
+                      minWidth: 250,
+                      maxWidth: 280,
+                      bgcolor: 'white',
+                      mr: position === 'start' ? 1 : 0
+                    }
+                  })
                 }}
               />
-              {/* Status */}
-              <TextField
-                select
-                size='small'
-                variant='outlined'
-                label='Status'
-                value={filters.status}
-                onChange={e => setFilters({ ...filters, status: e.target.value })}
-                sx={{ minWidth: 120, maxWidth: 150, bgcolor: 'white' }}
-              >
-                <MenuItem value=''>All</MenuItem>
-                {uniqueStatus.map(status => (
-                  <MenuItem key={status} value={status}>
-                    {status}
-                  </MenuItem>
-                ))}
-              </TextField>
+            </LocalizationProvider>
 
-              {/* Touch */}
-              <TextField
-                autoComplete='off'
-                size='small'
-                variant='outlined'
-                select
-                label='Touch'
-                value={filters.touch}
-                onChange={e => setFilters({ ...filters, touch: e.target.value })}
-                sx={{ minWidth: 120, maxWidth: 150, bgcolor: 'white' }}
-              >
-                <MenuItem value=''>All</MenuItem>
-                {['touch', 'untouch'].map(touch => (
-                  <MenuItem key={touch} value={touch}>
-                    {touch}
-                  </MenuItem>
-                ))}
-              </TextField>
-
-              {/* Assigned To */}
-              <TextField
-                select
-                size='small'
-                variant='outlined'
-                label='Assigned to'
-                value={filters.assign}
-                onChange={e => setFilters({ ...filters, assign: e.target.value })}
-                sx={{ minWidth: 140, maxWidth: 160, bgcolor: 'white' }}
-              >
-                <MenuItem value=''>All</MenuItem>
-                {userList.map(u => (
-                  <MenuItem key={u.user_id} value={u.user_id}>
-                    {u.user_name}
-                  </MenuItem>
-                ))}
-              </TextField>
-
-              <TextField
-                autoComplete='off'
-                size='small'
-                select
-                label='Source'
-                value={filters.source}
-                onChange={e => setFilters({ ...filters, source: e.target.value })}
-                sx={{ minWidth: 120, maxWidth: 150, bgcolor: 'white' }}
-              >
-                <MenuItem value=''>All</MenuItem>
-                {uniqueSources.map(source => (
-                  <MenuItem key={source} value={source}>
-                    {source}
-                  </MenuItem>
-                ))}
-              </TextField>
-
-              {/* Date Range */}
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
+            {/* Date Range */}
+            {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   label='Date Range'
                   value={filters.toDate}
@@ -816,9 +847,9 @@ const LeadTable = () => {
                     textField: { size: 'small', sx: { minWidth: 100, maxWidth: 150, bgcolor: 'white' } }
                   }}
                 />
-              </LocalizationProvider>
+              </LocalizationProvider> */}
 
-              {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
+            {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DateRangePicker
                 value={value}
                 onChange={newValue => setValue(newValue)}
@@ -832,7 +863,7 @@ const LeadTable = () => {
               />
             </LocalizationProvider> */}
 
-              {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
+            {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
   <Box display="flex" gap={1}>
     <DatePicker
       label="Start Date"
@@ -859,30 +890,26 @@ const LeadTable = () => {
   </Box>
 </LocalizationProvider> */}
 
-              {/* Clear All */}
-              <Button
-                variant='text'
-                sx={{ color: '#009CDE', fontWeight: 500, ml: 'auto' }}
-                onClick={() =>
-                  setFilters({
-                    search: '',
-                    status: '',
-                    touch: '',
-                    assign: '',
-                    company: '',
-                    city: '',
-                    label: '',
-                    toDate: null
-                  })
-                }
-              >
-                Clear All
-              </Button>
-            </Box>
-
-
-
-          
+            {/* Clear All */}
+            <Button
+              variant='text'
+              sx={{ color: '#009CDE', fontWeight: 500, ml: 'auto' }}
+              onClick={() =>
+                setFilters({
+                  search: '',
+                  status: '',
+                  touch: '',
+                  assign: '',
+                  company: '',
+                  city: '',
+                  label: '',
+                  toDate: null
+                })
+              }
+            >
+              Clear All
+            </Button>
+          </Box>
         </Grid>
 
         {/* 🔹 Right Column: Table + Actions */}
