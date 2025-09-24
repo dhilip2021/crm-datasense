@@ -66,7 +66,15 @@ const LeadFormSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-
+    lead_touch: {
+      type: String,
+      enum: ['touch', 'untouch'],
+      default: 'untouch'
+    },
+    lead_flag: {
+      type: Number,
+      default: 0
+    },
     // 👇 Structure for Notes + Activity inside values
     values: {
       type: Object,
@@ -78,9 +86,9 @@ const LeadFormSchema = new mongoose.Schema(
         product_id: { type: String },
         quantity: { type: Number, default: 1 },
         unitPrice: { type: Number },
-        discount: { type: Number, default: 0 }, 
-        finalPrice: { type: Number }, 
-        discountType: { type: String } 
+        discount: { type: Number, default: 0 },
+        finalPrice: { type: Number },
+        discountType: { type: String }
       }
     ],
     'values.Notes': [NoteSchema],

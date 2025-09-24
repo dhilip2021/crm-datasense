@@ -86,7 +86,8 @@ const handleSave = async () => {
         body: JSON.stringify({
           values: {
             Tasks: [newTask] // ✅ only send new task
-          }
+          },
+          lead_touch: 'touch'
         })
       })
 

@@ -96,79 +96,9 @@ const NotesSection = ({ leadId, leadData }) => {
     return str.length > 0 && str[0] === ' '
   }
 
-  const handleSave1 = async () => {
-
-    console.log(note,"<<< NOTE VALUEEE")
-
-    if(note?.length > 0){
-
-       try {
-      const notePayload = {
-        title,
-        note,
-        createdAt: editingNote ? editingNote.createdAt : new Date().toISOString(),
-        createdBy: editingNote ? editingNote.createdBy : user_name,
-        _id: editingNote?._id
-      }
-
-      setLoader(true)
-      const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken}`
-        },
-        body: JSON.stringify({
-          values: { Notes: [notePayload] }
-        })
-      })
-
-      const result = await res.json()
-      setLoader(false)
-
-      if (result.success) {
-        if (editingNote) {
-          setNotes(prev => prev.map(n => (n._id === editingNote._id ? { ...n, title, note } : n)))
-          toast.success('Note updated successfully', {
-            autoClose: 500,
-            position: 'bottom-center',
-            hideProgressBar: true
-          })
-        } else {
-          toast.success('Note added successfully', { autoClose: 500, position: 'bottom-center', hideProgressBar: true })
-          const notes = result?.data?.values?.Notes
-          const lastNote = notes?.[notes.length - 1]
-          setNotes(prev => [lastNote, ...prev])
-        }
-      } else {
-        toast.error(result.error || 'Error saving note', {
-          autoClose: 500,
-          position: 'bottom-center',
-          hideProgressBar: true
-        })
-      }
-
-      handleClear()
-      setEditingNote(null)
-      setOpen(false)
-
-    } catch (err) {
-      setOpen(false)
-      setLoader(false)
-      toast.error('Error while saving note', { autoClose: 500, position: 'bottom-center', hideProgressBar: true })
-    }
-
-    }else{
-       if (note === '' || hasInitialSpace(note) || !note.trim()) {
-      setNoteError(true)
-      noteRef.current?.focus()
-      return
-    }
-    }
-  }
+  
 
   const handleSave = async () => {
-  console.log(note, "<<< NOTE VALUEEE")
 
   // Remove leading/trailing spaces
   const trimmedNote = note?.trim()
@@ -196,7 +126,8 @@ const NotesSection = ({ leadId, leadData }) => {
         Authorization: `Bearer ${getToken}`
       },
       body: JSON.stringify({
-        values: { Notes: [notePayload] }
+        values: { Notes: [notePayload] },
+        lead_touch: 'touch'   // 🔹 Add this
       })
     })
 
@@ -281,10 +212,10 @@ const NotesSection = ({ leadId, leadData }) => {
     <Box>
       {/* Header */}
       <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
-        <Typography variant='h6' fontWeight='bold'>
+        {/* <Typography variant='h6' fontWeight='bold'>
           Notes
-        </Typography>
-        <Button
+        </Typography> */}
+        {/* <Button
           variant='contained'
           onClick={() => {
             setOpen(true)
@@ -292,8 +223,8 @@ const NotesSection = ({ leadId, leadData }) => {
           }}
           sx={{ bgcolor: '#AB09F7',size:"small", '&:hover': { bgcolor: '#AB09F7' }, borderRadius: '8px', textTransform: 'none' }}
         >
-          + Create Note
-        </Button>
+          + Create Note 
+        </Button> */}
       </Box>
 
       {/* Search + Sort */}

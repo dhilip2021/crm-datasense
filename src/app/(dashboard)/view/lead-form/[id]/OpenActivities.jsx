@@ -253,7 +253,8 @@ export default function OpenActivities({ leadId, leadData }) {
                   task: [updateTask] // backend push pannum
                 }
               ]
-            }
+            },
+            lead_touch: 'touch'
           })
         })
 
@@ -329,7 +330,8 @@ export default function OpenActivities({ leadId, leadData }) {
                   task: [newTask] // backend push pannum
                 }
               ]
-            }
+            },
+            lead_touch: 'touch'
           })
         })
 

@@ -229,7 +229,8 @@ export default function TaskTabs({ leadId, leadData }) {
                   task: [updateTask] // backend push pannum
                 }
               ]
-            }
+            },
+            lead_touch: 'touch'
           })
         })
 
@@ -312,7 +313,8 @@ export default function TaskTabs({ leadId, leadData }) {
                   task: [newTask] // backend push pannum
                 }
               ]
-            }
+            },
+            lead_touch: 'touch'
           })
         })
 

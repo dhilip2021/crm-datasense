@@ -20,6 +20,7 @@ export async function GET(req) {
     const form_name = searchParams.get('form_name')
     const search = searchParams.get('search') || ''
     const status = searchParams.get('status') || ''
+    const touch = searchParams.get('touch') || ''
     const assign = searchParams.get('assign') || ''
     const source = searchParams.get('source') || ''
     const page = parseInt(searchParams.get('page') || '1', 10)
@@ -103,6 +104,13 @@ export async function GET(req) {
       query.$and.push({ 'values.Lead Status': { $regex: status, $options: 'i' } })
     }
 
+        // 🔍 Touch
+    if (touch) {
+      query.$and = query.$and || []
+      // query.$and.push({ 'lead_touch': { $regex: touch, $options: 'i' } })
+      query.$and.push({ 'lead_touch': touch })
+    }
+
     // 🔍 Source
     if (source) {
       query.$and = query.$and || []
@@ -130,7 +138,8 @@ export async function GET(req) {
     const [data, total] = await Promise.all([
       Leadform.aggregate([
         { $match: query },
-        { $sort: { createdAt: -1 } },
+        // { $sort: { createdAt: -1 } },
+        { $sort: { lead_flag: -1, updatedAt: -1, createdAt: -1 } }, // ✅ first flag=1 then latest updated
         { $skip: skip },
         { $limit: limit },
         {

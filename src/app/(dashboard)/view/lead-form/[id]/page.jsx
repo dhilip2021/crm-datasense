@@ -171,10 +171,74 @@ const LeadDetailView = () => {
     fetchFormTemplate()
   }, [])
 
+
+
+const onToggleFlag = async (row) => {
+    const leadId = row?.lead_id
+
+    console.log(row,"<<< ROWWWW")
+
+    try {
+      const flagupdatedValues = {
+        _id: row?._id,
+        organization_id: row?.organization_id,
+        auto_inc_id: row?.auto_inc_id,
+        lead_name: row?.lead_name,
+        lead_id: row?.lead_id,
+        lead_flag: row?.lead_flag === 1 ? 0 : 1,
+        lead_touch: row?.lead_touch,
+        lead_slug_name: row?.lead_slug_name,
+        form_name: row?.form_name,
+        submittedAt: new Date().toISOString(),
+        c_role_id: row?.c_role_id,
+        c_createdBy: row?.c_createdBy,
+        updatedAt: row?.updatedAt,
+        createdAt: row?.createdAt
+      }
+
+      // 🔹 Persist to API
+      const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken}`
+        },
+        body: JSON.stringify(flagupdatedValues)
+      })
+
+      const result = await res.json()
+
+      if (!result.success) {
+        toast.error('Failed to update field')
+        // fetchData()
+         fetchLeadFromId()
+      } else {
+        toast.success('Flag Updated successfully', {
+          autoClose: 800,
+          position: 'bottom-center',
+          hideProgressBar: true
+        })
+        // fetchData()
+         fetchLeadFromId()
+      }
+    } catch (err) {
+      toast.error('Error saving field')
+      console.error(err)
+    }
+  }
+
+
+
+
+
   // 🔹 Save handler
   const handleFieldSave = async (label, newValue) => {
+
+    console.log(leadData,"<<< LEAD DATAAA")
+
+
     try {
-      const updatedValues = {
+      const updatedLeadValues = {
         _id: leadData?._id,
         organization_id: leadData?.organization_id,
         auto_inc_id: leadData?.auto_inc_id,
@@ -182,6 +246,7 @@ const LeadDetailView = () => {
         lead_id: leadData?.lead_id,
         lead_slug_name: leadData?.lead_slug_name,
         form_name: leadData?.form_name,
+        lead_touch: "touch",
         values: {
           [label]: newValue // update particular field
         },
@@ -199,7 +264,7 @@ const LeadDetailView = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${getToken}`
         },
-        body: JSON.stringify(updatedValues)
+        body: JSON.stringify(updatedLeadValues)
       })
 
       const result = await res.json()
@@ -270,24 +335,29 @@ const LeadDetailView = () => {
             variant='fullWidth' // ✅ make tabs full width
             TabIndicatorProps={{ style: { display: 'none' } }}
             sx={{
-              bgcolor: '#f7f8fc',
-              borderRadius: '20px',
-              minHeight: '40px',
-              p: '4px',
-              '& .MuiTab-root': {
-                flex: 1, // ✅ distribute equally
-                minHeight: '32px',
-                borderRadius: '20px',
-                textTransform: 'none',
-                fontWeight: 500,
-                color: '#000',
-                '&.Mui-selected': {
-                  bgcolor: '#fff',
-                  color: '#d100f9',
-                  fontWeight: 600
-                }
-              }
-            }}
+    bgcolor: "#f7f8fc",
+    borderRadius: "20px",
+    minHeight: "40px",
+    p: "4px",
+    "& .MuiTab-root": {
+      flex: 1,
+      minHeight: "32px",
+      borderRadius: "20px",
+      textTransform: "none",
+      fontWeight: 500,
+      color: "#000",
+      transition: "all 0.2s ease-in-out",
+      "&:hover": {
+        bgcolor: "#e5d4ef", // hover background
+        color: "#d100f9", // hover text color
+      },
+      "&.Mui-selected": {
+        color: "#fff",
+        bgcolor: "#d100f9",
+        fontWeight: 600,
+      },
+    },
+  }}
           >
             <Tab label='Notes' />
             <Tab label='Activities' />
@@ -302,7 +372,7 @@ const LeadDetailView = () => {
         {/* Tab Panels */}
         {tabIndex === 0 && (
           <Box>
-            <NotesSection leadId={leadId} leadData={leadData} />
+            <NotesSection leadId={leadId} leadData={leadData}/>
           </Box>
         )}
 
@@ -332,7 +402,7 @@ const LeadDetailView = () => {
             pr: 1 // scrollbar overlap avoid
           }}
         >
-          <LeadCard fields={fields} leadId={leadId} />
+          <LeadCard fields={fields} leadId={leadId} leadData={leadData} onToggleFlag={onToggleFlag}/>
 
           {/* 🔹 Dynamic Sections */}
           {sections.map((section, index) => (
