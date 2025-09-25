@@ -215,7 +215,7 @@ const NotesSection = ({ leadId, leadData }) => {
         {/* <Typography variant='h6' fontWeight='bold'>
           Notes
         </Typography> */}
-        {/* <Button
+        <Button
           variant='contained'
           onClick={() => {
             setOpen(true)
@@ -224,7 +224,7 @@ const NotesSection = ({ leadId, leadData }) => {
           sx={{ bgcolor: '#AB09F7',size:"small", '&:hover': { bgcolor: '#AB09F7' }, borderRadius: '8px', textTransform: 'none' }}
         >
           + Create Note 
-        </Button> */}
+        </Button>
       </Box>
 
       {/* Search + Sort */}
