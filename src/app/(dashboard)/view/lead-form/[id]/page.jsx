@@ -171,12 +171,10 @@ const LeadDetailView = () => {
     fetchFormTemplate()
   }, [])
 
-
-
-const onToggleFlag = async (row) => {
+  const onToggleFlag = async row => {
     const leadId = row?.lead_id
 
-    console.log(row,"<<< ROWWWW")
+    console.log(row, '<<< ROWWWW')
 
     try {
       const flagupdatedValues = {
@@ -211,7 +209,7 @@ const onToggleFlag = async (row) => {
       if (!result.success) {
         toast.error('Failed to update field')
         // fetchData()
-         fetchLeadFromId()
+        fetchLeadFromId()
       } else {
         toast.success('Flag Updated successfully', {
           autoClose: 800,
@@ -219,7 +217,7 @@ const onToggleFlag = async (row) => {
           hideProgressBar: true
         })
         // fetchData()
-         fetchLeadFromId()
+        fetchLeadFromId()
       }
     } catch (err) {
       toast.error('Error saving field')
@@ -227,15 +225,8 @@ const onToggleFlag = async (row) => {
     }
   }
 
-
-
-
-
   // 🔹 Save handler
   const handleFieldSave = async (label, newValue) => {
-
-    console.log(leadData,"<<< LEAD DATAAA")
-
 
     try {
       const updatedLeadValues = {
@@ -246,7 +237,7 @@ const onToggleFlag = async (row) => {
         lead_id: leadData?.lead_id,
         lead_slug_name: leadData?.lead_slug_name,
         form_name: leadData?.form_name,
-        lead_touch: "touch",
+        lead_touch: 'touch',
         values: {
           [label]: newValue // update particular field
         },
@@ -301,7 +292,7 @@ const onToggleFlag = async (row) => {
           zIndex: 1300
         }}
       >
-        <Image src={LoaderGif} alt='loading' width={200} height={200} />
+        <Image src={LoaderGif} alt='loading' width={100} height={100} />
       </Box>
     )
   }
@@ -326,7 +317,7 @@ const onToggleFlag = async (row) => {
       <Grid item xs={12} md={12}>
         <Box
           sx={{
-            width: '100%',
+            width: '100%'
           }}
         >
           <Tabs
@@ -335,29 +326,29 @@ const onToggleFlag = async (row) => {
             variant='fullWidth' // ✅ make tabs full width
             TabIndicatorProps={{ style: { display: 'none' } }}
             sx={{
-    bgcolor: "#f7f8fc",
-    borderRadius: "20px",
-    minHeight: "40px",
-    p: "4px",
-    "& .MuiTab-root": {
-      flex: 1,
-      minHeight: "32px",
-      borderRadius: "20px",
-      textTransform: "none",
-      fontWeight: 500,
-      color: "#000",
-      transition: "all 0.2s ease-in-out",
-      "&:hover": {
-        bgcolor: "#e5d4ef", // hover background
-        color: "#d100f9", // hover text color
-      },
-      "&.Mui-selected": {
-        color: "#fff",
-        bgcolor: "#d100f9",
-        fontWeight: 600,
-      },
-    },
-  }}
+              bgcolor: '#f7f8fc',
+              borderRadius: '20px',
+              minHeight: '40px',
+              p: '4px',
+              '& .MuiTab-root': {
+                flex: 1,
+                minHeight: '32px',
+                borderRadius: '20px',
+                textTransform: 'none',
+                fontWeight: 500,
+                color: '#000',
+                transition: 'all 0.2s ease-in-out',
+                '&:hover': {
+                  bgcolor: '#e5d4ef', // hover background
+                  color: '#009cde' // hover text color
+                },
+                '&.Mui-selected': {
+                  color: '#fff',
+                  bgcolor: '#009cde',
+                  fontWeight: 600
+                }
+              }
+            }}
           >
             <Tab label='Notes' />
             <Tab label='Activities' />
@@ -372,7 +363,7 @@ const onToggleFlag = async (row) => {
         {/* Tab Panels */}
         {tabIndex === 0 && (
           <Box>
-            <NotesSection leadId={leadId} leadData={leadData}/>
+            <NotesSection leadId={leadId} leadData={leadData} />
           </Box>
         )}
 
@@ -402,7 +393,7 @@ const onToggleFlag = async (row) => {
             pr: 1 // scrollbar overlap avoid
           }}
         >
-          <LeadCard fields={fields} leadId={leadId} leadData={leadData} onToggleFlag={onToggleFlag}/>
+          <LeadCard fields={fields} leadId={leadId} leadData={leadData} onToggleFlag={onToggleFlag} />
 
           {/* 🔹 Dynamic Sections */}
           {sections.map((section, index) => (

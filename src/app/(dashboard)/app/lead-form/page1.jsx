@@ -697,14 +697,14 @@ function LeadFormAppPage() {
             zIndex: 1300 // above all dialogs
           }}
         >
-          <Image src={LoaderGif} alt='loading' width={200} height={200} />
+          <Image src={LoaderGif} alt='loading' width={100} height={100} />
         </Box>
       ) : sections.length === 0 ? (
         <></>
       ) : (
         <>
           {sections.map((section, sIndex) => (
-            <Card key={sIndex} sx={{ mb: 4, borderLeft: '8px solid #8c57ff' }}>
+            <Card key={sIndex} sx={{ mb: 4, borderLeft: '8px solid #009CDE' }}>
               <CardContent>
                 <Typography variant='h6' fontWeight='bold' mb={2}>
                   {section.title || `Section ${sIndex + 1}`}

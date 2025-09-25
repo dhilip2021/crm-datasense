@@ -21,6 +21,7 @@ import {
 } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import EditIcon from '@mui/icons-material/Edit'
+import DeleteIcon from '@mui/icons-material/Delete'
 
 import Cookies from 'js-cookie'
 import { toast, ToastContainer } from 'react-toastify'
@@ -30,12 +31,12 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import NoteDialog from './NoteDialog'
 
-
 const NotesSection = ({ leadId, leadData }) => {
   const getToken = Cookies.get('_token')
   const user_name = Cookies.get('user_name')
 
   const leadArrayData = leadData?.values?.Notes || []
+  const companyName = leadData?.values?.Company || '-'
   const sortedNotes = [...leadArrayData].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
 
   const [note, setNote] = useState('')
@@ -50,9 +51,11 @@ const NotesSection = ({ leadId, leadData }) => {
   const [view, setView] = useState('latest')
   const [visibleCount, setVisibleCount] = useState(5) // show first 5 initially
   const loaderRef = useRef(null)
+  const [collapsed, setCollapsed] = useState(true)
 
   const noteRef = useRef(null)
   const saveRef = useRef(null)
+  const scrollContainerRef = useRef(null)
 
   // menu state
   const [anchorEl, setAnchorEl] = useState(null)
@@ -66,8 +69,9 @@ const NotesSection = ({ leadId, leadData }) => {
   }
 
   const handleMenuOpen = (event, note) => {
-    setAnchorEl(event.currentTarget)
+    // setAnchorEl(event.currentTarget)
     setMenuNote(note)
+    // setOpen(true)
   }
 
   const handleMenuClose = () => {
@@ -96,89 +100,84 @@ const NotesSection = ({ leadId, leadData }) => {
     return str.length > 0 && str[0] === ' '
   }
 
-  
-
   const handleSave = async () => {
+    // Remove leading/trailing spaces
+    const trimmedNote = note?.trim()
 
-  // Remove leading/trailing spaces
-  const trimmedNote = note?.trim()
-
-  if (!trimmedNote) {
-    setNoteError(true)
-    noteRef.current?.focus()
-    return
-  }
-
-  try {
-    const notePayload = {
-      title,
-      note: trimmedNote, // use trimmed value
-      createdAt: editingNote ? editingNote.createdAt : new Date().toISOString(),
-      createdBy: editingNote ? editingNote.createdBy : user_name,
-      _id: editingNote?._id
+    if (!trimmedNote) {
+      setNoteError(true)
+      setTimeout(() => {
+        noteRef.current?.focus()
+      }, 0) // 👈 ensures ref mounted
+      return
     }
 
-    setLoader(true)
-    const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken}`
-      },
-      body: JSON.stringify({
-        values: { Notes: [notePayload] },
-        lead_touch: 'touch'   // 🔹 Add this
-      })
-    })
-
-    const result = await res.json()
-    setLoader(false)
-
-    if (result.success) {
-      if (editingNote) {
-        setNotes(prev =>
-          prev.map(n =>
-            n._id === editingNote._id ? { ...n, title, note: trimmedNote } : n
-          )
-        )
-        toast.success('Note updated successfully', {
-          autoClose: 500,
-          position: 'bottom-center',
-          hideProgressBar: true
-        })
-      } else {
-        toast.success('Note added successfully', {
-          autoClose: 500,
-          position: 'bottom-center',
-          hideProgressBar: true
-        })
-        const notes = result?.data?.values?.Notes
-        const lastNote = notes?.[notes.length - 1]
-        setNotes(prev => [lastNote, ...prev])
+    try {
+      const notePayload = {
+        title,
+        note: trimmedNote, // use trimmed value
+        createdAt: editingNote ? editingNote.createdAt : new Date().toISOString(),
+        createdBy: editingNote ? editingNote.createdBy : user_name,
+        _id: editingNote?._id
       }
-    } else {
-      toast.error(result.error || 'Error saving note', {
+
+      setLoader(true)
+      const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken}`
+        },
+        body: JSON.stringify({
+          values: { Notes: [notePayload] },
+          lead_touch: 'touch' // 🔹 Add this
+        })
+      })
+
+      const result = await res.json()
+      setLoader(false)
+
+      if (result.success) {
+        if (editingNote) {
+          setNotes(prev => prev.map(n => (n._id === editingNote._id ? { ...n, title, note: trimmedNote } : n)))
+          toast.success('Note updated successfully', {
+            autoClose: 500,
+            position: 'bottom-center',
+            hideProgressBar: true
+          })
+          noteRef.current?.focus()
+        } else {
+          toast.success('Note added successfully', {
+            autoClose: 500,
+            position: 'bottom-center',
+            hideProgressBar: true
+          })
+          const notes = result?.data?.values?.Notes
+          const lastNote = notes?.[notes.length - 1]
+          setNotes(prev => [lastNote, ...prev])
+          noteRef.current?.focus()
+        }
+      } else {
+        toast.error(result.error || 'Error saving note', {
+          autoClose: 500,
+          position: 'bottom-center',
+          hideProgressBar: true
+        })
+      }
+
+      handleClear()
+      setEditingNote(null)
+      setOpen(false)
+    } catch (err) {
+      setOpen(false)
+      setLoader(false)
+      toast.error('Error while saving note', {
         autoClose: 500,
         position: 'bottom-center',
         hideProgressBar: true
       })
     }
-
-    handleClear()
-    setEditingNote(null)
-    setOpen(false)
-
-  } catch (err) {
-    setOpen(false)
-    setLoader(false)
-    toast.error('Error while saving note', {
-      autoClose: 500,
-      position: 'bottom-center',
-      hideProgressBar: true
-    })
   }
-}
-
 
   // 🔎 Filter + Sort notes
   const filteredNotes = [...notes]
@@ -190,49 +189,47 @@ const NotesSection = ({ leadId, leadData }) => {
     )
 
   useEffect(() => {
-    if (!loaderRef.current) return
+    if (!scrollContainerRef.current) return
 
     const observer = new IntersectionObserver(
       entries => {
         if (entries[0].isIntersecting) {
-          setVisibleCount(prev => prev + 5) // load 5 more when reached
+          setVisibleCount(prev => Math.min(prev + 5, filteredNotes.length))
         }
       },
-      { threshold: 1.0 }
+      { root: scrollContainerRef.current, threshold: 0.1 } // 👈 observe inside scrollable box
     )
 
-    observer.observe(loaderRef.current)
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current)
+    }
 
     return () => {
       if (loaderRef.current) observer.unobserve(loaderRef.current)
     }
-  }, [])
+  }, [filteredNotes.length])
 
   return (
     <Box>
       {/* Header */}
-      <Box display="flex" justifyContent="flex-end" mb={2}>
-        {/* <Typography variant='h6' fontWeight='bold'>
-          Notes
-        </Typography> */}
+      {/* <Box display='flex' justifyContent='flex-end' mb={2}>
         <Button
           variant='contained'
           onClick={() => {
             setOpen(true)
             handleClear()
           }}
-          sx={{ bgcolor: '#AB09F7',size:"small", '&:hover': { bgcolor: '#AB09F7' }, borderRadius: '8px', textTransform: 'none' }}
         >
-          + Create Note 
+          + Create Note
         </Button>
-      </Box>
+      </Box> */}
 
       {/* Search + Sort */}
-      <Grid container spacing={2}>
+      <Grid container spacing={0}>
         <Grid item xs={12} md={10}>
           <TextField
             autoComplete='off'
-            placeholder='Search Notes'
+            placeholder='Search notes'
             variant='outlined'
             fullWidth
             value={search}
@@ -245,14 +242,24 @@ const NotesSection = ({ leadId, leadData }) => {
                 </InputAdornment>
               )
             }}
-            sx={{ mb: 2, bgcolor: '#f9f9f9', borderRadius: 2 }}
+            sx={{
+              mb: 2,
+              bgcolor: '#ffffff',
+              color: '#4c4c4c',
+              font: '14px',
+              borderRadius: 2,
+              '& .MuiInputBase-input::placeholder': {
+                color: '#4c4c4c', // placeholder black
+                opacity: 1 // important, illati grey ah blend aagum
+              }
+            }}
           />
         </Grid>
 
         <Grid item xs={12} md={2}>
           <Box display='flex' justifyContent='flex-end'>
             <Button
-              sx={{ marginRight: '25px', color: '#000', border: '1px solid #000' }}
+              sx={{ color: '#000', border: '1px solid #000' }}
               variant='outlined'
               endIcon={<ArrowDropDownIcon />}
               onClick={e => {
@@ -284,132 +291,454 @@ const NotesSection = ({ leadId, leadData }) => {
         </Grid>
       </Grid>
 
-      {/* Notes list */}
-      {filteredNotes.length > 0 ? (
-        filteredNotes.slice(0, visibleCount).map(n => (
-          <Card
-            key={n._id}
-            sx={{
-              p: 2,
-              mb: 4,
-              mt: 2,
-              borderRadius: 2,
-              border: '2px solid #ebebeb',
-              boxShadow: 'none',
-              '&:hover': { bgcolor: '#fafafa' }
-            }}
-          >
-            {/* Top Row */}
-            <Box display='flex' justifyContent='space-between' alignItems='flex-start'>
-              <Box flex={1}>
-                <Typography fontWeight='bold'>{n.title || ''}</Typography>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '74vh', // total container height
+          gap: 1
+        }}
+      >
+        <Box
+          ref={scrollContainerRef}
+          sx={{
+            flex: 1, // take remaining space
+            overflowY: 'auto',
+            pr: 1 // padding for scrollbar
+          }}
+        >
+          {/* Notes list */}
+          {filteredNotes.length > 0 ? (
+            filteredNotes.slice(0, visibleCount).map(n => (
+              <>
+                <Card
+                  key={n._id}
+                  sx={{
+                    p: 2,
+                    mb: 4,
+                    mt: 2,
+                    borderRadius: 2,
+                    border: '2px solid #ebebeb',
+                    boxShadow: 'none',
+                    '&:hover': { bgcolor: '#fafafa' }
+                  }}
+                >
+                  {/* Top Row */}
+                  <Box display='flex' justifyContent='space-between' alignItems='flex-start'>
+                    <Box flex={1}>
+                      <Box display='flex' alignItems='center' gap={2} mb={4}>
+                        <Typography fontWeight='bold'>{n.title || ''}</Typography>
+                        <Typography
+                          variant='body2'
+                          color='text.secondary'
+                          display={'flex'}
+                          alignItems={'center'}
+                          gap={2}
+                        >
+                          <img loading='lazy' width='20' src='/images/icons/building.svg' alt='Building Icon' />
+                          {companyName}
+                        </Typography>
+                        <Typography
+                          variant='body2'
+                          color='text.secondary'
+                          display={'flex'}
+                          alignItems={'center'}
+                          gap={2}
+                        >
+                          <img loading='lazy' width='20' src='/images/icons/calendar.svg' alt='calendar icon' />
+                          {new Date(n.createdAt).toLocaleDateString('en-GB')}{' '}
+                          {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </Typography>
+                        <Typography
+                          variant='body2'
+                          color='text.secondary'
+                          display={'flex'}
+                          alignItems={'center'}
+                          gap={2}
+                        >
+                          <img loading='lazy' width='20' src='/images/icons/user.svg' alt='User Icon' />
+                          {n.createdBy}
+                        </Typography>
+                        <Typography variant='body2' color='text.secondary'></Typography>
+                      </Box>
 
-                {/* Show either preview or full note */}
-                <Typography sx={{ mt: 0.5, color: 'text.secondary', whiteSpace: 'pre-line' }}>
-                  {expandedNoteId === n._id
-                    ? // 🔹 Full Note with URL detection
-                      (() => {
-                        const urlRegex = /(https?:\/\/[^\s]+)/g
-                        const parts = n.note.split(urlRegex)
-                        return parts.map((part, index) =>
-                          urlRegex.test(part) ? (
-                            <a
-                              key={index}
-                              href={part}
-                              target='_blank'
-                              rel='noopener noreferrer'
-                              style={{ color: '#1976d2', textDecoration: 'underline', wordBreak: 'break-word' }}
-                            >
-                              {part}
-                            </a>
-                          ) : (
-                            part
+                      {/* Show either preview or full note */}
+                      <Typography sx={{ mt: 0.5, whiteSpace: 'pre-line' }}>
+                        {(() => {
+                          const urlRegex = /(https?:\/\/[^\s]+)/g
+                          const parts = n.note.split(urlRegex)
+                          return parts.map((part, index) =>
+                            urlRegex.test(part) ? (
+                              <a
+                                key={index}
+                                href={part}
+                                target='_blank'
+                                rel='noopener noreferrer'
+                                style={{ color: '#1976d2', textDecoration: 'underline', wordBreak: 'break-word' }}
+                              >
+                                {part}
+                              </a>
+                            ) : (
+                              part
+                            )
                           )
-                        )
-                      })()
-                    : // 🔹 Preview Mode (only first line)
-                      (() => {
-                        const firstLine = n.note.split('\n')[0] // take only first line
-                        return n.note.includes('\n') ? `${firstLine}...` : firstLine
-                      })()}
-                </Typography>
+                        })()}
+                      </Typography>
 
-                {/* Meta (always show at bottom when expanded, else compact) */}
+                      {/* Meta (always show at bottom when expanded, else compact) */}
+                    </Box>
 
-                <Box display='flex' alignItems='center' gap={2} mt={2}>
-                  <Typography variant='body2' color='text.secondary' display={"flex"} alignItems={"center"} gap={2}>
-                    <img loading='lazy' width='20' src='/images/icons/user.svg' alt='User Icon' />
-                    {n.createdBy}
-                  </Typography>
-                  <Typography variant='body2' color='text.secondary' display={"flex"} alignItems={"center"} gap={2}>
-                    <img loading='lazy' width='20' src='/images/icons/calendar.svg' alt='calendar' />
-                    
-                    {new Date(n.createdAt).toLocaleDateString('en-GB')}  {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </Typography>
-                  <Typography variant='body2' color='text.secondary'>
-                   
-                  </Typography>
+                    {/* Actions */}
+                    <Box display='flex' alignItems='center' gap={1}>
+                      <img
+                        onClick={() => {
+                          setEditingNote(n) // set the note to edit
+                          setTitle(n.title) // populate title field
+                          setNote(n.note) // populate note field
+                          // setOpen(true) // open the modal/form
+                        }}
+                        loading='lazy'
+                        width='35'
+                        src='/images/icons/edit.svg'
+                        alt='Building Icon'
+                        style={{ cursor: 'pointer' }}
+                      />
+                    </Box>
+                  </Box>
+                </Card>
+                {editingNote && editingNote._id === n._id && (
+                  <Card
+                    sx={{
+                      p: 2,
+                      border: '2px solid #009cde',
+                      borderRadius: 2,
+                      boxShadow: 'none',
+                      mt: 2
+                    }}
+                  >
+                    <Box display='flex' flexDirection='column' gap={2}>
+                      {/* Title */}
+                      <TextField
+                        name='title'
+                        placeholder='Title..'
+                        variant='standard'
+                        value={title}
+                        onChange={handleChange}
+                        fullWidth
+                        InputProps={{ disableUnderline: true }}
+                        sx={{
+                          fontWeight: 500,
+                          '& input::placeholder': { fontSize: 15 }
+                        }}
+                      />
+
+                      {/* Notes */}
+                      <TextField
+                        name='note'
+                        placeholder='Notes...'
+                        variant='standard'
+                        multiline
+                        rows={3}
+                        value={note}
+                        onChange={handleChange}
+                        // inputRef={noteRef}   // ✅ correct ref binding
+                        fullWidth
+                        error={noteError}
+                        InputProps={{ disableUnderline: true }}
+                        sx={{
+                          '& textarea::placeholder': { fontSize: 14 }
+                        }}
+                        helperText={noteError && 'Please enter notes'}
+                        onKeyDown={e => {
+                          if (e.key === ' ' && note.length === 0) {
+                            e.preventDefault()
+                          } else if (e.key === 'Enter' && e.shiftKey) {
+                            e.preventDefault()
+                            saveRef.current?.focus()
+                          }
+                        }}
+                      />
+
+                      {/* Bottom row - Attachment + Actions */}
+                      <Box
+                        display='flex'
+                        alignItems='center'
+                        justifyContent='space-between'
+                        mt={1}
+                        pt={1}
+                        borderTop='1px solid #eee'
+                      >
+                        {/* Attachment Icon */}
+                        <IconButton size='small'>
+                          <img src='/images/icons/attachment.svg' alt='Attach' width='20' />
+                        </IconButton>
+
+                        {/* Actions */}
+                        <Box display='flex' gap={1}>
+                          <Button onClick={handleClear} variant='text' sx={{ textTransform: 'none', color: '#555' }}>
+                            Cancel
+                          </Button>
+                          <Button
+                            ref={saveRef}
+                            variant='contained'
+                            onClick={handleSave}
+                            disabled={loader}
+                            sx={{
+                              textTransform: 'none',
+                              borderRadius: 2,
+                              bgcolor: '#0096db',
+                              '&:hover': { bgcolor: '#0288d1' }
+                            }}
+                          >
+                            {loader ? <CircularProgress size={18} color='inherit' /> : editingNote ? 'Update' : 'Save'}
+                          </Button>
+                        </Box>
+                      </Box>
+                    </Box>
+                  </Card>
+                )}
+              </>
+            ))
+          ) : (
+            <Card
+              sx={{ p: 4, textAlign: 'center', bgcolor: '#fafafa', border: '1px dashed #ccc', borderRadius: 3, mt: 3 }}
+            >
+              <Typography variant='h6' color='text.secondary' gutterBottom>
+                📝 No Notes Found
+              </Typography>
+              <Typography variant='body2' color='text.disabled' mb={2}>
+                Start by adding your first note for this lead.
+              </Typography>
+              {/* <Button variant='contained' onClick={() => setOpen(true)}>
+                + Create Note
+              </Button> */}
+            </Card>
+          )}
+
+          {visibleCount < filteredNotes.length && (
+            <Box ref={loaderRef} sx={{ textAlign: 'center', py: 2 }}>
+              <CircularProgress size={24} />
+            </Box>
+          )}
+        </Box>
+
+        {/* <Box
+          sx={{
+            pr: 4 // padding for scrollbar
+          }}
+        >
+          {!editingNote && (
+            <Card
+              sx={{
+                p: 2,
+                border: '1px solid #e0e0e0',
+                borderRadius: 2,
+                boxShadow: 'none',
+                mt: 2
+              }}
+            >
+              <Box display='flex' flexDirection='column' gap={2}>
+                <TextField
+                  name='title'
+                  placeholder='Title..'
+                  variant='standard'
+                  value={title}
+                  onChange={handleChange}
+                  fullWidth
+                  InputProps={{ disableUnderline: true }}
+                  sx={{
+                    fontWeight: 500,
+                    '& input::placeholder': { fontSize: 15 }
+                  }}
+                />
+
+                <TextField
+                  name='note'
+                  placeholder='Notes...'
+                  variant='standard'
+                  multiline
+                  rows={3}
+                  value={note}
+                  onChange={handleChange}
+                  inputRef={noteRef}
+                  fullWidth
+                  error={noteError}
+                  InputProps={{ disableUnderline: true }}
+                  sx={{
+                    '& textarea::placeholder': { fontSize: 14 }
+                  }}
+                  helperText={noteError && 'Please enter notes'}
+                  onKeyDown={e => {
+                    if (e.key === ' ' && note.length === 0) {
+                      e.preventDefault()
+                    } else if (e.key === 'Enter' && e.shiftKey) {
+                      e.preventDefault()
+                      saveRef.current?.focus()
+                    }
+                  }}
+                />
+
+                <Box
+                  display='flex'
+                  alignItems='center'
+                  justifyContent='space-between'
+                  mt={1}
+                  pt={1}
+                  borderTop='1px solid #eee'
+                >
+                  <IconButton size='small'>
+                    <img src='/images/icons/attachment.svg' alt='Attach' width='20' />
+                  </IconButton>
+
+                  <Box display='flex' gap={1}>
+                    <Button onClick={handleClear} variant='text' sx={{ textTransform: 'none', color: '#555' }}>
+                      Cancel
+                    </Button>
+                    <Button
+                      ref={saveRef}
+                      variant='contained'
+                      onClick={handleSave}
+                      disabled={loader}
+                      sx={{
+                        textTransform: 'none',
+                        borderRadius: 2,
+                        bgcolor: '#0096db',
+                        '&:hover': { bgcolor: '#0288d1' }
+                      }}
+                    >
+                      {loader ? <CircularProgress size={18} color='inherit' /> : editingNote ? 'Update' : 'Save'}
+                    </Button>
+                  </Box>
                 </Box>
               </Box>
+            </Card>
+          )}
+        </Box> */}
 
-              {/* Actions */}
-              <Box display='flex' alignItems='center' gap={1}>
-                <IconButton size='small' onClick={() => toggleExpand(n._id)}>
-                  <ExpandMoreIcon
-                    fontSize='small'
-                    style={{
-                      transform: expandedNoteId === n._id ? 'rotate(180deg)' : 'rotate(0deg)',
-                      transition: 'transform 0.2s ease'
-                    }}
-                  />
-                </IconButton>
-                <IconButton size='small' onClick={e => handleMenuOpen(e, n)}>
-                  <MoreVertIcon fontSize='small' />
-                </IconButton>
+        <Box sx={{ pr: 4 }}>
+          {!editingNote && (
+            <Card
+              sx={{
+                p: 2,
+                border: '2px solid #009cde',
+                borderRadius: 2,
+                boxShadow: 'none',
+                mt: 2
+              }}
+            >
+              <Box display='flex' flexDirection='column' gap={2}>
+                {/* Title */}
+                <TextField
+                  name='title'
+                  placeholder='Title..'
+                  variant='standard'
+                  value={title}
+                  onChange={handleChange}
+                  onFocus={() => setCollapsed(false)} // 👈 expand when clicked
+                  fullWidth
+                  InputProps={{ disableUnderline: true }}
+                  sx={{
+                    fontWeight: 500,
+                    '& input::placeholder': { fontSize: 15 }
+                  }}
+                />
+
+                {/* Show other fields only if expanded */}
+                {!collapsed && (
+                  <>
+                    {/* Notes */}
+                    <TextField
+                      name='note'
+                      placeholder='Notes...'
+                      variant='standard'
+                      multiline
+                      rows={3}
+                      value={note}
+                      onChange={handleChange}
+                      inputRef={noteRef}
+                      fullWidth
+                      error={noteError}
+                      InputProps={{ disableUnderline: true }}
+                      sx={{
+                        '& textarea::placeholder': { fontSize: 14 }
+                      }}
+                      helperText={noteError && 'Please enter notes'}
+                      onKeyDown={e => {
+                        if (e.key === ' ' && note.length === 0) {
+                          e.preventDefault()
+                        } else if (e.key === 'Enter' && e.shiftKey) {
+                          e.preventDefault()
+                          saveRef.current?.focus()
+                        }
+                      }}
+                    />
+
+                    {/* Bottom row - Actions */}
+                    <Box
+                      display='flex'
+                      alignItems='center'
+                      justifyContent='space-between'
+                      mt={1}
+                      pt={1}
+                      borderTop='1px solid #eee'
+                    >
+                      <IconButton size='small'>
+                        <img src='/images/icons/attachment.svg' alt='Attach' width='20' />
+                      </IconButton>
+
+                      <Box display='flex' gap={1}>
+                        <Button
+                          onClick={() => {
+                            handleClear()
+                            setCollapsed(true) // 👈 collapse again
+                          }}
+                          variant='text'
+                          sx={{ textTransform: 'none', color: '#555' }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          ref={saveRef}
+                          variant='contained'
+                          onClick={handleSave}
+                          disabled={loader}
+                          sx={{
+                            textTransform: 'none',
+                            borderRadius: 2,
+                            bgcolor: '#0096db',
+                            '&:hover': { bgcolor: '#0288d1' }
+                          }}
+                        >
+                          {loader ? <CircularProgress size={18} color='inherit' /> : editingNote ? 'Update' : 'Save'}
+                        </Button>
+                      </Box>
+                    </Box>
+                  </>
+                )}
               </Box>
-            </Box>
-          </Card>
-        ))
-      ) : (
-        <Card sx={{ p: 4, textAlign: 'center', bgcolor: '#fafafa', border: '1px dashed #ccc', borderRadius: 3, mt: 3 }}>
-          <Typography variant='h6' color='text.secondary' gutterBottom>
-            📝 No Notes Found
-          </Typography>
-          <Typography variant='body2' color='text.disabled' mb={2}>
-            Start by adding your first note for this lead.
-          </Typography>
-          <Button variant='contained' onClick={() => setOpen(true)}>
-            + Create Note
-          </Button>
-        </Card>
-      )}
+            </Card>
+          )}
+        </Box>
+      </Box>
 
       {/* Loader div (trigger infinite scroll) */}
-      {visibleCount < filteredNotes.length && (
-        <Box ref={loaderRef} sx={{ textAlign: 'center', py: 2 }}>
-          <CircularProgress size={24} />
-        </Box>
-      )}
 
-          {/* Modal */}
-          <NoteDialog 
-          open={open}
-          setOpen={setOpen}
-          setEditingNote ={setEditingNote}
-          handleClear={handleClear}
-          editingNote={editingNote}
-          title={title}
-          note={note}
-          handleChange={handleChange}
-          noteRef={noteRef}
-          noteError={noteError}
-          loader={loader}
-          handleSave={handleSave}
-          saveRef={saveRef}
-          />
-
-
-
+      {/* Modal */}
+      <NoteDialog
+        open={open}
+        setOpen={setOpen}
+        setEditingNote={setEditingNote}
+        handleClear={handleClear}
+        editingNote={editingNote}
+        title={title}
+        note={note}
+        handleChange={handleChange}
+        noteRef={noteRef}
+        noteError={noteError}
+        loader={loader}
+        handleSave={handleSave}
+        saveRef={saveRef}
+      />
 
       {/* More Menu */}
       <Menu
@@ -425,7 +754,7 @@ const NotesSection = ({ leadId, leadData }) => {
               setEditingNote(menuNote)
               setTitle(menuNote.title)
               setNote(menuNote.note)
-              setOpen(true)
+              // setOpen(true)
             }
             handleMenuClose()
           }}

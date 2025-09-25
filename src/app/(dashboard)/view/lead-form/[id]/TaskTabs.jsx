@@ -69,7 +69,6 @@ export default function TaskTabs({ leadId, leadData }) {
   // const leadArrayTasks = leadData?.values?.Activity?.[0]?.task || []
   const leadArrayTasks = leadData?.values?.Activity?.[0]?.task?.filter(t => t.status !== 'Completed') || []
 
-  console.log(leadArrayTasks, '<<< leadArrayTasks')
 
   const sortedTasks = [...leadArrayTasks]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -401,7 +400,7 @@ export default function TaskTabs({ leadId, leadData }) {
             <Tab label='Calls (0)' />
           </Tabs>
 
-          <Button
+          {/* <Button
             variant='contained'
             onClick={() => {
               setOpenTaskDialog(true) // ✅ Open the popup
@@ -417,7 +416,20 @@ export default function TaskTabs({ leadId, leadData }) {
             }}
           >
             + New Task
-          </Button>
+          </Button> */}
+
+             <Button
+                      variant='contained'
+                      onClick={() => {
+                         setOpenTaskDialog(true) // ✅ Open the popup
+              setAddAnchor(null)
+                      }}
+                      sx={{ bgcolor: '#009cde',size:"small", '&:hover': { bgcolor: '#007bb5' }, borderRadius: '8px', textTransform: 'none' }}
+                    >
+                      + Create Task 
+                    </Button>
+
+
         </Box>
 
         <Divider sx={{ my: 2 }} />

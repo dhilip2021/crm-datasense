@@ -139,7 +139,7 @@ const ProductMasterDialog = ({ open, onClose, fetchProducts }) => {
     >
       <DialogTitle
         sx={{
-          bgcolor: '#8c57ff',
+          bgcolor: '#009CDE',
           color: 'white',
           fontWeight: 'bold',
           borderRadius: '12px 12px 0 0',
@@ -406,7 +406,7 @@ const ProductMasterDialog = ({ open, onClose, fetchProducts }) => {
                     startIcon={<AddIcon />}
                     onClick={handleAddPriceBook}
                     sx={{
-                      bgcolor: '#8c57ff',
+                      bgcolor: '#009CDE',
                       color: 'white',
                       borderRadius: '8px',
                       textTransform: 'none',
@@ -443,7 +443,7 @@ const ProductMasterDialog = ({ open, onClose, fetchProducts }) => {
             sx={{
               borderRadius: '8px',
               textTransform: 'none',
-              bgcolor: '#8c57ff',
+              bgcolor: '#009CDE',
               '&:hover': { bgcolor: '#1565c0' }
             }}
           >

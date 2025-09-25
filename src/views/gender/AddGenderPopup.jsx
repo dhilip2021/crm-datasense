@@ -58,7 +58,7 @@ export default function AddGenderPopup(props) {
       >
         <DialogTitle
           id="responsive-dialog-title"
-          sx={{ bgcolor: "#8C57FF", color: "#fff" }}
+          sx={{ bgcolor: "#009CDE", color: "#fff" }}
         >
           {titles}
           <i 

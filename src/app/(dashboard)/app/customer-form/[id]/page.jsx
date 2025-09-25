@@ -255,7 +255,7 @@ function CustomerFormAppIdPage() {
       )}
 
       {!loader && sections.map((section, sIndex) => (
-  <Card key={section.id} sx={{ mb: 3, borderLeft: '8px solid #8c57ff' }}>
+  <Card key={section.id} sx={{ mb: 3, borderLeft: '8px solid #009CDE' }}>
     <CardContent>
       <Typography variant='h6' fontWeight='bold' mb={2}>
         {section.title || `Section ${sIndex + 1}`}

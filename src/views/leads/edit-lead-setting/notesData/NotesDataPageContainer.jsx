@@ -293,7 +293,7 @@ const NotesDataPageContainer = () => {
                         zIndex: 1300, // above all dialogs
                       }}
                     >
-                        <Image src={LoaderGif} alt="loading" width={200} height={200} />
+                        <Image src={LoaderGif} alt="loading" width={100} height={100} />
                        
                     </Box>
               </CardContent>

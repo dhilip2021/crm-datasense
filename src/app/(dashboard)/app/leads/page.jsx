@@ -704,7 +704,7 @@ const LeadTable = () => {
               variant='contained'
               size='small'
               sx={{
-                bgcolor: '#009CDE',
+                bgcolor: '#009cde',
                 color: '#fff',
                 fontWeight: 500,
                 borderRadius: '6px',
@@ -893,7 +893,7 @@ const LeadTable = () => {
             {/* Clear All */}
             <Button
               variant='text'
-              sx={{ color: '#009CDE', fontWeight: 500, ml: 'auto' }}
+              sx={{ color: '#009cde', fontWeight: 500, ml: 'auto' }}
               onClick={() =>
                 setFilters({
                   search: '',

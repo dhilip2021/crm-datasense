@@ -52,7 +52,7 @@ export default function AddTerritoryPopup(props) {
           }
         }}
       >
-        <DialogTitle id='responsive-dialog-title' sx={{ bgcolor: '#8C57FF', color: '#fff' }}>
+        <DialogTitle id='responsive-dialog-title' sx={{ bgcolor: '#009CDE', color: '#fff' }}>
           {titles}
           <i
             style={{

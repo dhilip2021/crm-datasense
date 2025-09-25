@@ -180,8 +180,8 @@ const ProductMasterList = () => {
               sx={{
                 borderRadius: '8px',
                 textTransform: 'none',
-                bgcolor: '#8c57ff',
-                '&:hover': { bgcolor: '#8c57ff' }
+                bgcolor: '#009CDE',
+                '&:hover': { bgcolor: '#009CDE' }
               }}
             >
               Create Product
@@ -236,7 +236,7 @@ const ProductMasterList = () => {
                       <TableCell>
                         {editingIndex === i ? (
                           <>
-                            <IconButton onClick={() => handleSaveEdit(p._id)} sx={{ color: '#8c57ff', '&:hover': { bgcolor: '#e3f2fd' } }}>
+                            <IconButton onClick={() => handleSaveEdit(p._id)} sx={{ color: '#009CDE', '&:hover': { bgcolor: '#e3f2fd' } }}>
                               <SaveIcon />
                             </IconButton>
                             <IconButton onClick={handleCancelEdit} sx={{ color: '#ef4444', '&:hover': { bgcolor: '#fee2e2' } }}>
@@ -245,7 +245,7 @@ const ProductMasterList = () => {
                           </>
                         ) : (
                           <>
-                            <IconButton onClick={() => handleEdit(i)} sx={{ color: '#8c57ff', '&:hover': { bgcolor: '#e3f2fd' } }}>
+                            <IconButton onClick={() => handleEdit(i)} sx={{ color: '#009CDE', '&:hover': { bgcolor: '#e3f2fd' } }}>
                               <EditIcon />
                             </IconButton>
                             <IconButton onClick={() => openDeleteDialog(p._id)} sx={{ color: '#ef4444', '&:hover': { bgcolor: '#fee2e2' } }}>
