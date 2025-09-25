@@ -174,7 +174,6 @@ const LeadDetailView = () => {
   const onToggleFlag = async row => {
     const leadId = row?.lead_id
 
-    console.log(row, '<<< ROWWWW')
 
     try {
       const flagupdatedValues = {
@@ -321,39 +320,44 @@ const LeadDetailView = () => {
           }}
         >
           <Tabs
-            value={tabIndex}
-            onChange={handleTabChange}
-            variant='fullWidth' // ✅ make tabs full width
-            TabIndicatorProps={{ style: { display: 'none' } }}
-            sx={{
-              bgcolor: '#f7f8fc',
-              borderRadius: '20px',
-              minHeight: '40px',
-              p: '4px',
-              '& .MuiTab-root': {
-                flex: 1,
-                minHeight: '32px',
-                borderRadius: '20px',
-                textTransform: 'none',
-                fontWeight: 500,
-                color: '#000',
-                transition: 'all 0.2s ease-in-out',
-                '&:hover': {
-                  bgcolor: '#e5d4ef', // hover background
-                  color: '#009cde' // hover text color
-                },
-                '&.Mui-selected': {
-                  color: '#fff',
-                  bgcolor: '#009cde',
-                  fontWeight: 600
-                }
-              }
-            }}
-          >
-            <Tab label='Notes' />
-            <Tab label='Activities' />
-            <Tab label='Product' />
-          </Tabs>
+  value={tabIndex}
+  onChange={handleTabChange}
+  variant="fullWidth"
+  TabIndicatorProps={{ style: { display: "none" } }}
+  sx={{
+    bgcolor: "#fff",
+    border: "1px solid #e0e0e0",
+    borderRadius: "16px",
+    minHeight: "44px",
+    p: "4px",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+    "& .MuiTab-root": {
+      flex: 1,
+      minHeight: "36px",
+      borderRadius: "12px",
+      textTransform: "none",
+      fontWeight: 500,
+      fontSize: "14px",
+      color: "#444",
+      // transition: "all 0.25s ease",
+      "&:hover": {
+        bgcolor: "#f0f7ff",
+        color: "#009cde",
+        border: "1px solid #009cde33",
+      },
+      "&.Mui-selected": {
+        color: "#fff",
+        bgcolor: "#009cde",
+        fontWeight: 600,
+        boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+      },
+    },
+  }}
+>
+  <Tab label="Notes" />
+  <Tab label="Activities" />
+  <Tab label="Product" />
+</Tabs>
         </Box>
       </Grid>
 
