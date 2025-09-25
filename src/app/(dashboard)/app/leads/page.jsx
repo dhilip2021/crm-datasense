@@ -71,6 +71,8 @@ const LeadTable = () => {
   const [selectedUsers, setSelectedUsers] = useState([])
   const [anchorPdfEl, setAnchorPdfEl] = useState(null)
   const [selectedPdfFields, setSelectedPdfFields] = useState([])
+  const [fetched, setFetched] = useState(false)
+
   // const dynamicPdfFields = data.length > 0 ? Object.keys(data[0].values) : []
   // const fieldsPdf = [...new Set([...dynamicPdfFields])]
 
@@ -166,6 +168,7 @@ const LeadTable = () => {
 
       if (!result.success) {
         toast.error('Failed to update field')
+        console.log("cal 6")
         fetchData()
       } else {
         toast.success('Flag Updated successfully', {
@@ -173,6 +176,7 @@ const LeadTable = () => {
           position: 'bottom-center',
           hideProgressBar: true
         })
+        console.log("cal 7")
         fetchData()
       }
     } catch (err) {
@@ -532,9 +536,11 @@ const LeadTable = () => {
       const data = await res.json()
       if (data?.success) {
         toast.success(data.message, { autoClose: 1000 })
+        console.log("cal 3")
         fetchData()
       } else {
         toast.error('File not uploaded !!!', { autoClose: 1000 })
+        console.log("cal 4")
         fetchData()
       }
     } catch (err) {
@@ -548,22 +554,44 @@ const LeadTable = () => {
     }
   }
 
-  useEffect(() => {
+ useEffect(() => {
+  if (!fetched) {
+    console.log("cal 5")
     fetchData()
-  }, [sections])
+    setFetched(true)
+  }
+}, [sections, fetched])
+
 
   useEffect(() => {
     fetchFormTemplate()
     getUserListFn()
   }, [page, limit])
 
+  // useEffect(() => {
+  //   if ((!filters.search && !filters.fromDate  && !filters.toDate) ) {
+  //     console.log("cal 1")
+  //     fetchFilterData()
+  //   }else if(filters.fromDate && filters.toDate){
+  //     console.log("cal 2")
+  //      fetchFilterData()
+  //   }
+  // }, [filters])
+
   useEffect(() => {
-    if (!filters.search && !filters.fromDate  && !filters.toDate) {
-      fetchFilterData()
-    }else if(filters.fromDate && filters.toDate){
-       fetchFilterData()
-    }
-  }, [filters])
+  const { search, fromDate, toDate, ...otherFilters } = filters
+
+  const hasOtherFilters = Object.values(otherFilters).some(v => v !== '')
+  const hasDateRange = fromDate && toDate
+  const hasSearch = search && search.trim() !== ''
+
+  if (hasOtherFilters || hasDateRange || hasSearch) {
+    console.log("fetching filters...")
+    fetchFilterData()
+  } else {
+    console.log("❌ skipped fetch (all filters empty)")
+  }
+}, [filters])
 
   return (
     <Box px={2} py={2}>
