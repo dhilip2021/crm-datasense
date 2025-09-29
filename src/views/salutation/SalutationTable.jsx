@@ -369,7 +369,7 @@ const SalutationTable = () => {
                         <TableCell>
                           <Box display={'flex'}>
                             {' '}
-                            <Tooltip title='Edit Lead' arrow>
+                            <Tooltip title='Edit Salutation' arrow>
                               <i
                                 className='ri-edit-box-line'
                                 onClick={() => editChanges(row)}
@@ -377,7 +377,7 @@ const SalutationTable = () => {
                               ></i>
                             </Tooltip>{' '}
                             <Box>
-                              <Tooltip title='Delete Lead' arrow>
+                              <Tooltip title='Delete Salutation' arrow>
                                 <i
                                   className='ri-delete-bin-3-fill'
                                   style={{ color: '#ff5555', cursor: 'pointer' }}

@@ -179,6 +179,39 @@ const NotesSection = ({ leadId, leadData }) => {
     }
   }
 
+  const highlightText = (text, query) => {
+    if (!query) return text
+
+    const regex = new RegExp(`(${query})`, 'gi')
+    const parts = text.split(regex)
+
+    return parts.map((part, i) =>
+      regex.test(part) ? (
+        <span key={i} style={{ backgroundColor: '#ffeb3b', fontWeight: 500 }}>
+          {part}
+        </span>
+      ) : (
+        part
+      )
+    )
+  }
+
+  const highlightNoteText = (text, query) => {
+  if (!query) return text
+  const regex = new RegExp(`(${query})`, 'gi')
+  const parts = text.split(regex)
+
+  return parts.map((part, i) =>
+    regex.test(part) ? (
+      <span key={i} style={{ backgroundColor: '#ffeb3b', fontWeight: 500 }}>
+        {part}
+      </span>
+    ) : (
+      part
+    )
+  )
+}
+
   // 🔎 Filter + Sort notes
   const filteredNotes = [...notes]
     .filter(
@@ -327,7 +360,8 @@ const NotesSection = ({ leadId, leadData }) => {
                   <Box display='flex' justifyContent='space-between' alignItems='flex-start'>
                     <Box flex={1}>
                       <Box display='flex' alignItems='center' gap={2} mb={4}>
-                        <Typography fontWeight='bold'>{n.title || ''}</Typography>
+                        {/* <Typography fontWeight='bold'>{n.title || ''}</Typography> */}
+                        <Typography fontWeight='bold'>{highlightText(n.title || '', search)}</Typography>
                         <Typography
                           variant='body2'
                           color='text.secondary'
@@ -336,7 +370,8 @@ const NotesSection = ({ leadId, leadData }) => {
                           gap={2}
                         >
                           <img loading='lazy' width='20' src='/images/icons/building.svg' alt='Building Icon' />
-                          {companyName}
+                          {/* {companyName} */}
+                          {highlightText(companyName, search)}
                         </Typography>
                         <Typography
                           variant='body2'
@@ -363,7 +398,7 @@ const NotesSection = ({ leadId, leadData }) => {
                       </Box>
 
                       {/* Show either preview or full note */}
-                      <Typography sx={{ mt: 0.5, whiteSpace: 'pre-line' }}>
+                      {/* <Typography sx={{ mt: 0.5, whiteSpace: 'pre-line' }}>
                         {(() => {
                           const urlRegex = /(https?:\/\/[^\s]+)/g
                           const parts = n.note.split(urlRegex)
@@ -380,6 +415,33 @@ const NotesSection = ({ leadId, leadData }) => {
                               </a>
                             ) : (
                               part
+                            )
+                          )
+                        })()}
+                      </Typography> */}
+
+                      <Typography sx={{ mt: 0.5, whiteSpace: 'pre-line' }}>
+                        {(() => {
+                          const urlRegex = /(https?:\/\/[^\s]+)/g
+                          const parts = n.note.split(urlRegex)
+
+                          return parts.map((part, index) =>
+                            urlRegex.test(part) ? (
+                              <a
+                                key={index}
+                                href={part}
+                                target='_blank'
+                                rel='noopener noreferrer'
+                                style={{
+                                  color: '#1976d2',
+                                  textDecoration: 'underline',
+                                  wordBreak: 'break-word'
+                                }}
+                              >
+                                {part}
+                              </a>
+                            ) : (
+                              <React.Fragment key={index}>{highlightNoteText(part, search)}</React.Fragment>
                             )
                           )
                         })()}

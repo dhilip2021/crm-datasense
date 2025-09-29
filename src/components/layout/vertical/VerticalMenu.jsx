@@ -96,8 +96,17 @@ const VerticalMenu = ({ scrollMenu, roles }) => {
           <MenuItem href='/campaign-type' icon={<i className='ri-map-pin-line' />}>
             Campaign Type
           </MenuItem>
-          <MenuItem href='/products' icon={<i className='ri-inbox-archive-line' />}>
+          {/* <MenuItem href='/products' icon={<i className='ri-inbox-archive-line' />}>
             Product Master
+          </MenuItem> */}
+           <MenuItem href='/tax-master' icon={<i className='ri-inbox-archive-line' />}>
+            Tax Master
+          </MenuItem>
+           <MenuItem href='/uom-master' icon={<i className='ri-inbox-archive-line' />}>
+            UOM Master
+          </MenuItem>
+           <MenuItem href='/items' icon={<i className='ri-inbox-archive-line' />}>
+            Item Master
           </MenuItem>
         </SubMenu>
         <MenuSection label='Apps & Pages'>

@@ -704,3 +704,153 @@ export const deleteRoleApi = async (body,header) => {
       return err;
     });
 };
+
+
+// Tax Master model api's
+  
+export const createTaxMaster = async (body, header) => {
+  
+  return await axios.post(`/api/v1/admin/tax-master/add`, body,{ headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const postTaxMasterListApi = async (body,header) => {
+  return await axios
+    .post(`/api/v1/admin/tax-master/list`, body, { headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const getTaxMasterListApi = async (body) => {
+  return await axios
+    .get(`/api/v1/admin/tax-master/list?name=${body}`,{ headers: AppHeader })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const deleteTaxMasterApi = async (body,header) => {
+  return await axios
+    .delete(`/api/v1/admin/tax-master/delete?id=${body}`, {
+      headers: header,
+    })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+
+
+// UOM Master model api's
+  
+export const createUOMMaster = async (body, header) => {
+  
+  return await axios.post(`/api/v1/admin/uom-master/add`, body,{ headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const postUOMMasterListApi = async (body,header) => {
+  return await axios
+    .post(`/api/v1/admin/uom-master/list`, body, { headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const getUOMMasterListApi = async (header) => {
+  return await axios
+    .get(`/api/v1/admin/uom-master/list`,{ headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const deleteUOMMasterApi = async (body,header) => {
+  return await axios
+    .delete(`/api/v1/admin/uom-master/delete?id=${body}`, {
+      headers: header,
+    })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+
+
+
+// Item Master model api's
+  
+export const createItemMaster = async (body, header) => {
+  
+  return await axios.post(`/api/v1/admin/item-master/add`, body,{ headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const postItemMasterListApi = async (body,header) => {
+  return await axios
+    .post(`/api/v1/admin/item-master/list`, body, { headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const getItemMasterListApi = async (header) => {
+  return await axios
+    .get(`/api/v1/admin/item-master/list`,{ headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const deleteItemMasterApi = async (body,header) => {
+  return await axios
+    .delete(`/api/v1/admin/Item-master/delete?id=${body}`, {
+      headers: header,
+    })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
