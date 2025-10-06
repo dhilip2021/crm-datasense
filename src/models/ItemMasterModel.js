@@ -12,7 +12,7 @@ const ItemMasterSchema = new mongoose.Schema(
     },
     // Common fields
     item_name: { type: String, required: true, trim: true },
-    item_code: { type: String, required: true, unique: true, trim: true },
+    item_code: { type: String, required: true, trim: true },
     description: { type: String, default: '' },
     uom: {type: String, required: true },
     basePrice: { type: Number, required: true, min: 0 },

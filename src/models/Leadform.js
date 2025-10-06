@@ -1,5 +1,29 @@
 import mongoose from 'mongoose'
 
+
+
+
+const ItemRefSchema = new mongoose.Schema(
+  {
+    itemMasterRef: { type: mongoose.Schema.Types.ObjectId, ref: 'ItemMaster' },
+    item_id: { type: String },
+    quantity: { type: Number, default: 1 },
+    unitPrice: { type: Number },
+    discount: { type: Number, default: 0 },
+    finalPrice: { type: Number },
+    discountType: { type: String }
+  },
+  { _id: true } // keep _id for each item
+)
+
+const OrderSchema = new mongoose.Schema(
+  {
+    order_id: { type: String, required: true },
+    item_ref: [ItemRefSchema] // nested item list
+  },
+  { _id: false }
+)
+
 // ------------------ Sub Schemas ------------------ //
 const NoteSchema = new mongoose.Schema(
   {
@@ -80,17 +104,33 @@ const LeadFormSchema = new mongoose.Schema(
       type: Object,
       required: true
     },
-    products: [
-      {
-        productRef: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-        product_id: { type: String },
-        quantity: { type: Number, default: 1 },
-        unitPrice: { type: Number },
-        discount: { type: Number, default: 0 },
-        finalPrice: { type: Number },
-        discountType: { type: String }
-      }
-    ],
+    // products: [
+    //   {
+    //     productRef: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+    //     product_id: { type: String },
+    //     quantity: { type: Number, default: 1 },
+    //     unitPrice: { type: Number },
+    //     discount: { type: Number, default: 0 },
+    //     finalPrice: { type: Number },
+    //     discountType: { type: String }
+    //   }
+    // ],
+
+    // 🔥 new structure
+    items: [OrderSchema],
+
+    // items: [
+    //   {
+    //     itemMasterRef: { type: mongoose.Schema.Types.ObjectId, ref: 'ItemMaster' }, // ✅ required for populate
+    //     item_id: { type: String },
+    //     quantity: { type: Number, default: 1 },
+    //     unitPrice: { type: Number },
+    //     discount: { type: Number, default: 0 },
+    //     finalPrice: { type: Number },
+    //     discountType: { type: String }
+    //   }
+    // ],
+
     'values.Notes': [NoteSchema],
     'values.Activity': [ActivitySchema],
 

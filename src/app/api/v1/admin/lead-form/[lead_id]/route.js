@@ -2,8 +2,9 @@
 
 import { verifyAccessToken } from '@/helper/clientHelper'
 import connectMongoDB from '@/libs/mongodb'
+import { ItemMaster } from '@/models/ItemMasterModel'
 import Leadform from '@/models/Leadform'
-import Product from '@/models/Product' // ✅ important
+// ✅ important
 
 import mongoose from 'mongoose'
 import { NextResponse } from 'next/server'
@@ -75,33 +76,19 @@ export async function GET(req, { params }) {
     try {
       const { lead_id } = params
 
-      console.log(lead_id, '<<< LEAD ID')
-
       if (!lead_id) {
         return NextResponse.json({ success: false, message: 'Missing lead_id' }, { status: 400 })
       }
 
-      // const lead = await Leadform.findOne({ lead_id }).select('-__v').lean()
+      const lead = await Leadform.findOne({ lead_id }).lean()
 
-      //     const lead = await Leadform.findOne({ lead_id })
-      // .populate('products.productRef', 'name category code')
-      // .select('-__v')
-      // .lean();
-
-      const lead = await Leadform.findOne({ lead_id })
-        .populate({
-          path: 'products.productRef',
-          model: Product, // ✅ explicitly tell mongoose
-          select: 'name category code uom'
-        })
-        .select('-__v')
-        .lean()
-
-      // const lead = await Leadform.findOne({ lead_id }).populate('products.productRef', 'name category code').select('-__v').lean()
-
-      // const lead = await Leadform.findOne({ lead_id }).populate('Product.productRef', 'name category code').select('-__v').lean()
-
-      //  const lead = await Leadform.findOne({ lead_id }).populate('Product.productRef', 'name category code').select('-__v').lean();
+      // ✅ Only try populate if items exist
+      if (lead?.items?.length) {
+        await ItemMaster.populate(
+          lead.items.flatMap(i => i.item_ref),
+          { path: 'itemMasterRef', select: 'item_code item_name item_type uom gst description mrp' }
+        )
+      }
 
       if (!lead) {
         return NextResponse.json({ success: false, message: 'Lead not found' }, { status: 404 })
@@ -113,7 +100,7 @@ export async function GET(req, { params }) {
       })
     } catch (error) {
       console.error('⨯ Lead fetch error:', error)
-      return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
+      return NextResponse.json({ success: false, message: 'Internal Server Error', error: error }, { status: 500 })
     }
   } else {
     return NextResponse.json(

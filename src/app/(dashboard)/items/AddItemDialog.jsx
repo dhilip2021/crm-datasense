@@ -21,9 +21,10 @@ import CancelIcon from '@mui/icons-material/Close'
 import Cookies from 'js-cookie'
 import { createItemMaster } from '@/apiFunctions/ApiAction'
 
-const GST_LIST = ['5%', '18%', '40%']
 
 const AddItemDialog = ({ open, onClose, fetchItems, uomList, taxList, titles, item, handleSubmit, handleChange }) => {
+
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth='md'>
       <DialogTitle
@@ -34,7 +35,7 @@ const AddItemDialog = ({ open, onClose, fetchItems, uomList, taxList, titles, it
           fontWeight: 'bold'
         }}
       >
-        {titles}
+        {titles} {item.item_type}
         <CancelIcon onClick={onClose} sx={{ cursor: 'pointer', fontSize: 20 }} />
       </DialogTitle>
 
@@ -157,7 +158,7 @@ const AddItemDialog = ({ open, onClose, fetchItems, uomList, taxList, titles, it
               <Grid item xs={12} sm={6} md={3}>
                 <TextField
                   autoComplete='off'
-                  label='SAC Code'
+                  label='SAC/HSN Code'
                   fullWidth
                   size='small'
                   value={item.hsn}
@@ -231,9 +232,9 @@ const AddItemDialog = ({ open, onClose, fetchItems, uomList, taxList, titles, it
                   value={item.gst}
                   onChange={e => handleChange('gst', e.target.value)}
                 >
-                  {GST_LIST.map(g => (
-                    <MenuItem key={g} value={g}>
-                      {g}
+                  {taxList.map((g,i) => (
+                    <MenuItem key={i} value={g.tax_value}>
+                      {g.tax_value}%
                     </MenuItem>
                   ))}
                 </TextField>

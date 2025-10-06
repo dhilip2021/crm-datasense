@@ -46,7 +46,7 @@ export async function GET(request) {
       }
     } else {
       _search = {
-        $and: [{ n_status: 1 }, { n_published: 1 }, { organization_id: organizationId }]
+        $and: [{ n_status: 'Active' }, { n_published: 1 }, { organization_id: organizationId }]
       }
     }
 
@@ -105,28 +105,29 @@ export async function GET(request) {
       { $sort: { createdAt: -1 } }
     ]
 
-    if (!id) {
-      // if listing all, also join createdBy user
-      pipeline.push(
-        {
-          $lookup: {
-            from: 'users',
-            localField: 'c_createdBy',
-            foreignField: 'user_id',
-            as: 'createdById'
-          }
-        },
-        { $unwind: { path: '$createdById', preserveNullAndEmptyArrays: true } },
-        { $addFields: { createdName: '$createdById.user_name' } }
-      )
-    }
+    // if (!id) {
+    //   pipeline.push(
+    //     {
+    //       $lookup: {
+    //         from: 'users',
+    //         localField: 'c_createdBy',
+    //         foreignField: 'user_id',
+    //         as: 'createdById'
+    //       }
+    //     },
+    //     { $unwind: { path: '$createdById', preserveNullAndEmptyArrays: true } },
+    //     { $addFields: { createdName: '$createdById.user_name' } }
+    //   )
+    // }
 
     const data = await ItemMaster.aggregate(pipeline)
+
+    console.log(data,"<<< get item list")
 
     if (data.length > 0) {
       sendResponse = { appStatusCode: 0, message: '', payloadJson: data, error: [] }
     } else {
-      sendResponse = { appStatusCode: 0, message: 'Record not found!', payloadJson: [], error: [] }
+      sendResponse = { appStatusCode: 0, message: 'Record not found!!', payloadJson: [], error: [] }
     }
 
     return NextResponse.json(sendResponse, { status: 200 })

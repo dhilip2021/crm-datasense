@@ -63,6 +63,9 @@ const LeadDetailView = () => {
   const leadId = decrypCryptoReq(encryptedId)
   const [expanded, setExpanded] = useState(0) // 0 = first open by default
   const [tabIndex, setTabIndex] = useState(0)
+  const [open, setOpen] = useState(false)
+
+  
 
   const [userList, setUserList] = useState([])
   const organization_id = Cookies.get('organization_id')
@@ -75,6 +78,7 @@ const LeadDetailView = () => {
   const [leadData, setLeadData] = useState(null)
   const [sections, setSections] = useState([])
   const [fieldConfig, setFieldConfig] = useState({})
+  const [itemsData, setItemsData] = useState([])
 
   // 🔹 Flatten helper
   const flattenFields = sections => {
@@ -92,7 +96,13 @@ const LeadDetailView = () => {
     return flat
   }
 
-  const handleTabChange = (e, newValue) => setTabIndex(newValue)
+  const handleTabChange = (e, newValue) => {
+    setTabIndex(newValue)
+    if(newValue === 2){
+       setOpen(true)
+    }
+   
+  }
   // 🔹 Fetch template
   const fetchFormTemplate = async () => {
     setLoader(true)
@@ -171,9 +181,27 @@ const LeadDetailView = () => {
     fetchFormTemplate()
   }, [])
 
+  // Fetch products from API
+  useEffect(() => {
+    const header = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken}`
+    }
+
+    if (open) {
+      setLoader(true)
+      fetch('/api/v1/admin/item-master/list', { headers: header })
+        .then(res => res.json())
+        .then(data => {
+          setLoader(false)
+
+          if (data.appStatusCode === 0) setItemsData(data.payloadJson)
+        })
+    }
+  }, [open])
+
   const onToggleFlag = async row => {
     const leadId = row?.lead_id
-
 
     try {
       const flagupdatedValues = {
@@ -226,7 +254,6 @@ const LeadDetailView = () => {
 
   // 🔹 Save handler
   const handleFieldSave = async (label, newValue) => {
-
     try {
       const updatedLeadValues = {
         _id: leadData?._id,
@@ -320,44 +347,44 @@ const LeadDetailView = () => {
           }}
         >
           <Tabs
-  value={tabIndex}
-  onChange={handleTabChange}
-  variant="fullWidth"
-  TabIndicatorProps={{ style: { display: "none" } }}
-  sx={{
-    bgcolor: "#fff",
-    border: "1px solid #e0e0e0",
-    borderRadius: "16px",
-    minHeight: "44px",
-    p: "4px",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-    "& .MuiTab-root": {
-      flex: 1,
-      minHeight: "36px",
-      borderRadius: "12px",
-      textTransform: "none",
-      fontWeight: 500,
-      fontSize: "14px",
-      color: "#444",
-      // transition: "all 0.25s ease",
-      "&:hover": {
-        bgcolor: "#f0f7ff",
-        color: "#009cde",
-        border: "1px solid #009cde33",
-      },
-      "&.Mui-selected": {
-        color: "#fff",
-        bgcolor: "#009cde",
-        fontWeight: 600,
-        boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-      },
-    },
-  }}
->
-  <Tab label="Notes" />
-  <Tab label="Activities" />
-  <Tab label="Product" />
-</Tabs>
+            value={tabIndex}
+            onChange={handleTabChange}
+            variant='fullWidth'
+            TabIndicatorProps={{ style: { display: 'none' } }}
+            sx={{
+              bgcolor: '#fff',
+              border: '1px solid #e0e0e0',
+              borderRadius: '16px',
+              minHeight: '44px',
+              p: '4px',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
+              '& .MuiTab-root': {
+                flex: 1,
+                minHeight: '36px',
+                borderRadius: '12px',
+                textTransform: 'none',
+                fontWeight: 500,
+                fontSize: '14px',
+                color: '#444',
+                // transition: "all 0.25s ease",
+                '&:hover': {
+                  bgcolor: '#f0f7ff',
+                  color: '#009cde',
+                  border: '1px solid #009cde33'
+                },
+                '&.Mui-selected': {
+                  color: '#fff',
+                  bgcolor: '#009cde',
+                  fontWeight: 600,
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
+                }
+              }
+            }}
+          >
+            <Tab label='Notes' />
+            <Tab label='Activities' />
+            <Tab label='Items' />
+          </Tabs>
         </Box>
       </Grid>
 
@@ -381,7 +408,7 @@ const LeadDetailView = () => {
 
         {tabIndex === 2 && (
           <Box>
-            <ProductPage leadId={leadId} leadData={leadData} fetchLeadFromId={fetchLeadFromId} />
+            <ProductPage leadId={leadId} leadData={leadData} fetchLeadFromId={fetchLeadFromId} itemsData={itemsData} />
           </Box>
         )}
       </Grid>
