@@ -555,10 +555,16 @@ const LeadTable = () => {
   }
 
  useEffect(() => {
+
+
+console.log(sections,"<<< SECTIONSSS")
+
   if (!fetched) {
     console.log("cal 5")
     fetchData()
     setFetched(true)
+  }else if(fetched && sections){
+    fetchData()
   }
 }, [sections, fetched])
 
@@ -568,15 +574,6 @@ const LeadTable = () => {
     getUserListFn()
   }, [page, limit])
 
-  // useEffect(() => {
-  //   if ((!filters.search && !filters.fromDate  && !filters.toDate) ) {
-  //     console.log("cal 1")
-  //     fetchFilterData()
-  //   }else if(filters.fromDate && filters.toDate){
-  //     console.log("cal 2")
-  //      fetchFilterData()
-  //   }
-  // }, [filters])
 
   useEffect(() => {
   const { search, fromDate, toDate, ...otherFilters } = filters
@@ -596,80 +593,6 @@ const LeadTable = () => {
   return (
     <Box px={2} py={2}>
       {/* 🔹 Header */}
-      {/* <Grid container justifyContent='space-between' alignItems='center' mb={3}>
-       
-        <Grid item xs={12} sm={6}>
-          <form onSubmit={handleUpload}>
-            <Box display='flex' gap={2}>
-              
-              {fileName && <Typography sx={{ lineHeight: 2 }}>{fileName}</Typography>}
-            </Box>
-            <Box>
-              <Typography
-                component='a'
-                href='/sample/sample_lead_data.xlsx'
-                download
-                variant='body2'
-                sx={{
-                  cursor: 'pointer',
-                  color: '#1976d2',
-                  fontWeight: 500,
-                  textDecoration: 'underline',
-                  '&:hover': { color: 'primary.dark' }
-                }}
-              >
-                Download sample excel
-              </Typography>
-            </Box>
-          </form>
-        </Grid>
-
-        <Grid item xs={12} sm={3} textAlign='right'>
-          <Box mb={2} display='flex' justifyContent='flex-end' gap={1}>
-            <Button variant='outlined' onClick={handleExcelClick} startIcon={<GridOnIcon />}>
-              Export Excel
-            </Button>
-            <Button variant='outlined' onClick={handlePDFClick} startIcon={<PictureAsPdfIcon />}>
-              Export PDF
-            </Button>
-          </Box>
-        </Grid>
-
-     
-         <Grid item xs={12} sm={3} textAlign='right'>
-                 <Button type='submit' component='label' variant='outlined' color='info' startIcon={<CloudUploadIcon />}>
-                {loader ? 'Uploading...' : 'Import'}
-                <input
-                  type='file'
-                  name='file'
-                  accept='.csv, .xlsx'
-                  hidden
-                  onChange={e => {
-                    const file = e.target.files[0]
-                    if (file) handleUpload(file)
-                  }}
-                />
-              </Button>  
-         </Grid>
-        <Grid item xs={12} sm={3} textAlign='right'>
-             
-
-          <Button
-            href='/app/lead-form'
-            variant='contained'
-            sx={{
-              color: '#ffffff',
-              bgcolor: '#009CDE',
-              '&:hover': {
-                bgcolor: '#007bb5' // hover color
-              }
-            }}
-            disabled={loader}
-          >
-            + New Lead
-          </Button>
-        </Grid>
-      </Grid> */}
 
       <Grid container alignItems='center' justifyContent='space-between' mb={3}>
         {/* Left Side: Title */}
@@ -865,59 +788,6 @@ const LeadTable = () => {
               />
             </LocalizationProvider>
 
-            {/* Date Range */}
-            {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  label='Date Range'
-                  value={filters.toDate}
-                  onChange={val => setFilters({ ...filters, toDate: val })}
-                  slotProps={{
-                    textField: { size: 'small', sx: { minWidth: 100, maxWidth: 150, bgcolor: 'white' } }
-                  }}
-                />
-              </LocalizationProvider> */}
-
-            {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DateRangePicker
-                value={value}
-                onChange={newValue => setValue(newValue)}
-                slots={{ field: MultiInputDateRangeField }}
-                slotProps={{
-                  textField: ({ position }) => ({
-                    size: 'small',
-                    sx: { minWidth: 180, bgcolor: 'white', mr: position === 'start' ? 1 : 0 }
-                  })
-                }}
-              />
-            </LocalizationProvider> */}
-
-            {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
-  <Box display="flex" gap={1}>
-    <DatePicker
-      label="Start Date"
-      value={value[0]}
-      onChange={(newValue) => setValue([newValue, value[1]])}
-      slotProps={{
-        textField: {
-          size: 'small',
-          sx: { minWidth: 180, bgcolor: 'white' },
-        },
-      }}
-    />
-    <DatePicker
-      label="End Date"
-      value={value[1]}
-      onChange={(newValue) => setValue([value[0], newValue])}
-      slotProps={{
-        textField: {
-          size: 'small',
-          sx: { minWidth: 180, bgcolor: 'white' },
-        },
-      }}
-    />
-  </Box>
-</LocalizationProvider> */}
-
             {/* Clear All */}
             <Button
               variant='text'
@@ -968,6 +838,7 @@ const LeadTable = () => {
             >
               <TableHead>
                 <TableRow>
+                  <TableCell sx={{ minWidth: 100, maxWidth: 150, whiteSpace: 'nowrap' }}>S.No</TableCell>
                   <TableCell
                     sx={{
                       position: 'sticky',
@@ -989,7 +860,7 @@ const LeadTable = () => {
                   <TableCell>Source</TableCell>
                   <TableCell>Score</TableCell>
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Label</TableCell>
-                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Last Contact Date1</TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Last Contact Date</TableCell>
                   <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Next Follow-up</TableCell>
                   <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Created By</TableCell>
                   {/* <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Action</TableCell> */}
@@ -1000,7 +871,7 @@ const LeadTable = () => {
                 {loading
                   ? [...Array(limit)].map((_, i) => (
                       <TableRow key={i}>
-                        {Array.from({ length: 13 }).map((_, j) => (
+                        {Array.from({ length: 14 }).map((_, j) => (
                           <TableCell key={j}>
                             <Skeleton variant='text' width='100%' />
                           </TableCell>
@@ -1009,6 +880,14 @@ const LeadTable = () => {
                     ))
                   : data.map((row, i) => (
                       <TableRow key={i}>
+                         <TableCell
+                          sx={{
+                            backgroundColor: '#fff',
+                            minWidth: 100
+                          }}
+                        >
+                           <strong>{page * limit + i + 1}</strong>
+                        </TableCell>
                         <TableCell
                           sx={{
                             position: 'sticky',
