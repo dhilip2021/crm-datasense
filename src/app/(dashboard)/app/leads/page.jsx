@@ -153,7 +153,7 @@ const LeadTable = () => {
         updatedAt: row?.updatedAt,
         createdAt: row?.createdAt
       }
-
+      console.log("cal1")
       // 🔹 Persist to API
       const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
         method: 'PUT',
@@ -190,6 +190,7 @@ const LeadTable = () => {
     const lead_form = 'lead-form'
     // setLoader(true)
     try {
+      console.log("cal2")
       const res = await fetch(
         `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${lead_form}`,
         {
@@ -255,6 +256,7 @@ const LeadTable = () => {
     }
 
     try {
+      console.log("cal3")
       const res = await fetch(`/api/v1/admin/lead-form/list?${query}`, {
         method: 'GET',
         headers: header
@@ -333,7 +335,7 @@ const LeadTable = () => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${getToken}`
       }
-
+console.log("cal4")
       const res = await fetch(`/api/v1/admin/lead-form/list?${query}`, {
         method: 'GET',
         headers: header
@@ -525,6 +527,7 @@ const LeadTable = () => {
     setLoader(true)
 
     try {
+      console.log("cal5")
       const res = await fetch('/api/v1/admin/lead-form/import', {
         method: 'POST',
         headers: {
@@ -575,19 +578,39 @@ console.log(sections,"<<< SECTIONSSS")
   }, [page, limit])
 
 
-  useEffect(() => {
+//   useEffect(() => {
+//   const { search, fromDate, toDate, ...otherFilters } = filters
+
+//   const hasOtherFilters = Object.values(otherFilters).some(v => v !== '')
+//   const hasDateRange = fromDate && toDate
+//   const hasSearch = search && search.trim() !== ''
+
+//   if (hasOtherFilters || hasDateRange || !hasSearch ) {
+    
+//     fetchFilterData()
+//   } else {
+//     console.log("❌ skipped fetch (all filters empty)")
+//   }
+// }, [filters])
+
+useEffect(() => {
   const { search, fromDate, toDate, ...otherFilters } = filters
 
   const hasOtherFilters = Object.values(otherFilters).some(v => v !== '')
   const hasDateRange = fromDate && toDate
-  const hasSearch = search && search.trim() !== ''
+    const hasSearch = search && search.trim() !== ''
 
-  if (hasOtherFilters || hasDateRange || hasSearch) {
-    console.log("fetching filters...")
-    fetchFilterData()
-  } else {
-    console.log("❌ skipped fetch (all filters empty)")
-  }
+  // Only trigger after user stops typing for 500ms
+  const handler = setTimeout(() => {
+    if (hasOtherFilters || hasDateRange || (search && search.trim() !== '')) {
+      fetchFilterData()
+    } else if(!hasSearch) {
+      fetchFilterData()
+    }
+  }, 500) // 500ms delay
+
+  // Cleanup previous timeout if filters change again
+  return () => clearTimeout(handler)
 }, [filters])
 
   return (
