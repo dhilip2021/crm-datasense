@@ -33,6 +33,7 @@ import ProductSelectorDialog from './ProductSelectorDialog'
 import ProductPage from './ProductPage'
 import TaskTabs from './TaskTabs'
 import { getUserAllListApi } from '@/apiFunctions/ApiAction'
+import slugify from 'slugify'
 // import CloseActivities from './closeActivities'
 
 // ✅ Validation rules
@@ -60,6 +61,7 @@ const fieldValidators = {
 const LeadDetailView = () => {
   const params = useParams()
   const encryptedId = decodeURIComponent(params.id)
+
   const leadId = decrypCryptoReq(encryptedId)
   const [expanded, setExpanded] = useState(0) // 0 = first open by default
   const [tabIndex, setTabIndex] = useState(0)
@@ -75,6 +77,8 @@ const LeadDetailView = () => {
   const router = useRouter()
 
   const [loader, setLoader] = useState(true)
+  const [loading, setLoading] = useState(false)
+  
   const [leadData, setLeadData] = useState(null)
   const [sections, setSections] = useState([])
   const [fieldConfig, setFieldConfig] = useState({})
@@ -252,6 +256,84 @@ const LeadDetailView = () => {
     }
   }
 
+
+  
+   
+  
+    const convertDealFn = async(id, lead_name) => {
+
+      const original = lead_name
+      const nextLeadName = original.replace(/lead/i, 'OPPORTUNITY')
+  
+      const slugLeadString = nextLeadName.replace(/[^\w\s]|_/g, '')
+  
+      const slug_lead_name = slugify(slugLeadString, {
+        replacement: '-',
+        remove: undefined,
+        lower: true,
+        strict: false,
+        locale: 'vi',
+        trim: true
+      })
+  
+      const body = {
+        Id: id,
+        form_name: 'opportunity-form',
+        lead_name: nextLeadName,
+        lead_slug_name: slug_lead_name,
+      }
+
+
+
+      try {
+      const updatedLeadValues = {
+        _id: id,
+        form_name: 'opportunity-form',
+        lead_name: nextLeadName,
+        lead_slug_name: slug_lead_name,
+        lead_touch: 'touch',
+        updatedAt: new Date().toISOString(),
+        // organization_id: leadData?.organization_id,
+        
+      }
+      setLoading(true)
+      // 🔹 Persist to API
+      const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken}`
+        },
+        body: JSON.stringify(updatedLeadValues)
+      })
+
+      const result = await res.json()
+      setLoading(false)
+
+      if (!result.success) {
+        toast.error('Failed to update field')
+        fetchLeadFromId() // rollback to latest DB values
+      } else {
+        toast.success('Lead to Opportunity Successfully Converted', {
+          autoClose: 1000,
+          position: 'bottom-center',
+          hideProgressBar: true
+        })
+        router.push(`/app/opportunity`)
+      }
+    } catch (err) {
+      toast.error('Error saving field')
+      console.error(err)
+    }
+
+
+
+
+    }
+
+
+
+
   // 🔹 Save handler
   const handleFieldSave = async (label, newValue) => {
     try {
@@ -415,6 +497,19 @@ const LeadDetailView = () => {
 
       {/* Right side */}
       <Grid item xs={12} md={4}>
+        <Box>
+           <Button
+               disabled={loading}
+              fullWidth
+              variant='contained'
+              color='primary'
+              onClick={() => convertDealFn(leadData?._id, leadData?.lead_name, "converted the lead to this deal")}
+            >
+              {' '}
+              {loading ? <CircularProgress size={18} /> :  'Convert to Opportunity'}
+
+            </Button>
+        </Box>
         <Box
           sx={{
             position: 'sticky',

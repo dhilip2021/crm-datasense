@@ -82,8 +82,6 @@ export default function ReminderAlert() {
         const res = await fetch(`/api/cron/reminder?organization_id=${orgId}&user_id=${userId}`)
         const data = await res.json()
 
-        console.log(data, ' reminderssss')
-
         if (!data?.dueReminders?.length) return
 
         data.dueReminders.forEach(async rem => {

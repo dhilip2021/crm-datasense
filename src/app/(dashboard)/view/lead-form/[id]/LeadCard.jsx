@@ -3,7 +3,7 @@ import { Box, Typography, Chip, Divider, Button, IconButton } from '@mui/materia
 import FlagIcon from '@mui/icons-material/Flag' // ✅ MUI icon
 
 export default function LeadCard({ fields, leadId, leadData, onToggleFlag }) {
-  console.log(leadData?.lead_flag, '<<< leadData')
+  console.log(fields, '<<< fields')
   return (
     <Box
       sx={{
@@ -24,20 +24,6 @@ export default function LeadCard({ fields, leadId, leadData, onToggleFlag }) {
       {/* Name Section */}
       <Box display={'flex'} justifyContent={'space-between'}>
         <Box>
-          {/* <Box display={'flex'} justifyContent={'space-between'}>
-            <Typography variant='h5' fontWeight='bold' gutterBottom>
-              {fields['First Name']}
-              {'   '} {fields['Last Name']}
-            </Typography>
-            <Typography variant='h5' fontWeight='bold' gutterBottom onClick={() => onToggleFlag(leadData)}>
-              {leadData.lead_flag === 0 ? (
-                <FlagIcon sx={{ color: 'grey' }} /> // 0 -> orange flag
-              ) : (
-                <FlagIcon sx={{ color: 'orange' }} /> // 1 -> green flag
-              )}
-            </Typography>
-          </Box> */}
-
           <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
             {/* Lead Name */}
             <Typography
@@ -100,6 +86,9 @@ export default function LeadCard({ fields, leadId, leadData, onToggleFlag }) {
       <Box display='flex' flexDirection='column' gap={1.2}>
         <Typography variant='body1' color={'#000'}>
           Lead Id:<span style={{ color: '#374151', fontWeight: 600 }}> {leadId}</span>
+        </Typography>
+         <Typography variant='body1' color={'#000'}>
+          Company Name:<span style={{ color: '#374151', fontWeight: 600 }}> {fields['Company']}</span>
         </Typography>
         <Typography variant='body1' color={'#000'}>
           Designation:<span style={{ color: '#374151', fontWeight: 600 }}> {fields['Job Title']}</span>

@@ -383,7 +383,6 @@ const UserTable = () => {
     const segments = fullUrl.split('/')
     const id = segments.at(4) // or segments[segments.length - 1]
 
-    console.log(id, '<<< IDDDDDD')
     if (id !== undefined) {
       setUserId(id)
       setEdit(true)

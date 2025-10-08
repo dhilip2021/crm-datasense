@@ -32,6 +32,8 @@ import AssignedStatusCard from '@/views/dashboard/AssignedStatusCard'
 import DashboardWidgets from '@/views/dashboard/DashboardWidgets'
 import ConversionFunnel from '@/views/dashboard/ConversionFunnel'
 import SalesRepSummary from '@/views/dashboard/SalesRepSummary'
+import KanbanView from '@/views/dashboard/KanbanView'
+import SalesFunnelChart from '@/views/dashboard/SalesFunnelChart'
 
 const DashboardAnalytics = () => {
   const user_id = Cookies.get('user_id')
@@ -63,6 +65,17 @@ const DashboardAnalytics = () => {
       <Grid item xs={12} md={12} lg={12}>
         <LeadStatus />
       </Grid>
+        <Grid item xs={12}>
+        <KanbanView />
+        </Grid>
+
+        <Grid item xs={6}>
+        <SalesFunnelChart />
+        </Grid>
+         <Grid item xs={6}>
+          
+         </Grid>
+
 
       {/* <Grid item xs={12}>
         <LeadStatusSummary />
