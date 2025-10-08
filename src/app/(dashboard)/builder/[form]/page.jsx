@@ -11,6 +11,8 @@ import { toast, ToastContainer } from 'react-toastify'
 import Cookies from 'js-cookie'
 import { useParams } from 'next/navigation'
 import { LoadingButton } from '@mui/lab'
+import LoaderGif from '@assets/gif/loader.gif'
+import Image from 'next/image'
 
 const fieldOptions = [
   'Single Line',
@@ -39,6 +41,10 @@ export default function LeadFormPage() {
   const organization_id = Cookies.get('organization_id')
    const getToken = Cookies.get('_token')
   const { form } = useParams()
+
+  console.log(form,"<<<< LEAD FORMMMMMMMMM")
+
+
   const lead_form = form
 
   const [sections, setSections] = useState([])
@@ -270,7 +276,24 @@ export default function LeadFormPage() {
     const orgId = organization_id
     const formName = lead_form
     if (formName === 'lead-form') {
+       setLoader(true)
       const res = await fetch(`/api/v1/admin/lead-form-template/single?organization_id=${orgId}&form_name=${formName}`)
+      setLoader(false)
+      const json = await res.json()
+      if (json?.success) {
+        if (json?.data?.sections?.length > 0) {
+          setSections(json?.data?.sections)
+          setFormId(json.data._id)
+        }
+      } else {
+        setSections([])
+        console.error('Error:', json.error)
+        setFormId(null)
+      }
+    }else if (formName === 'opportunities-form') {
+       setLoader(true)
+      const res = await fetch(`/api/v1/admin/lead-form-template/single?organization_id=${orgId}&form_name=${formName}`)
+     setLoader(false)
       const json = await res.json()
       if (json?.success) {
         if (json?.data?.sections?.length > 0) {
@@ -283,9 +306,11 @@ export default function LeadFormPage() {
         setFormId(null)
       }
     } else if (formName === 'customer-form') {
+       setLoader(true)
       const res = await fetch(
         `/api/v1/admin/customer-form-template/single?organization_id=${orgId}&form_name=${formName}`
       )
+       setLoader(false)
       const json = await res.json()
       if (json?.success) {
         if (json?.data?.sections?.length > 0) {
@@ -306,7 +331,30 @@ export default function LeadFormPage() {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className='flex gap-6 p-6'>
+      {loader ? (
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100vh', // full screen center
+                  width: '100vw',
+                  bgcolor: 'rgba(255, 255, 255, 0.7)', // semi-transparent overlay
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  zIndex: 1300 // above all dialogs
+                }}
+              >
+                <Image src={LoaderGif} alt='loading' width={100} height={100} />
+              </Box>
+            ) : !loader && sections.length === 0 ? (
+              <>
+              
+              </>
+            ) : (
+              <>
+              <div className='flex gap-6 p-6'>
         <div className='w-[220px] bg-slate-900 text-white rounded p-4 space-y-2 max-h-[85vh] overflow-y-auto'>
           <h2 className='text-lg font-semibold mb-2'>Lead Fields</h2>
           <button
@@ -405,10 +453,10 @@ export default function LeadFormPage() {
             ))}
           </div>
 
-          <Box display='flex' justifyContent={'space-between'} mt={2}>
-            <Button variant='contained' color='success' onClick={() => setOpen(true)}>
+          <Box display='flex' justifyContent={'flex-end'}  mt={2}>
+            {/* <Button variant='contained' color='success' onClick={() => setOpen(true)}>
               Preview
-            </Button>
+            </Button> */}
             {/* <Button onClick={handleSaveLayout} variant='contained' loadingPosition="start">
               {formId ? 'Update' : 'Save'}
             </Button> */}
@@ -425,6 +473,10 @@ export default function LeadFormPage() {
           <PreviewModal open={open} onClose={() => setOpen(false)} sections={sections} />
         </div>
       </div>
+              </>
+
+            )}
+      
     </DndProvider>
   )
 }

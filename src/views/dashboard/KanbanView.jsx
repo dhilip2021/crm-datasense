@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import { Box, Card, Typography, Avatar, CircularProgress, Chip, Divider, IconButton } from '@mui/material'
+import { Box, Card, Typography, CircularProgress, Chip, IconButton, Select, MenuItem } from '@mui/material'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import Cookies from 'js-cookie'
 import { toast } from 'react-toastify'
@@ -8,6 +8,7 @@ import { encryptCryptoRes } from '@/helper/frontendHelper'
 import Link from 'next/link'
 import { ArrowBackIosNew, ArrowForwardIos } from '@mui/icons-material'
 
+// 💰 Format currency (INR)
 const formatCurrency = value => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value)
 
 // 🎨 Generate consistent colors dynamically for statuses
@@ -31,25 +32,28 @@ const generateStatusColors = statuses => {
   statuses.forEach((status, index) => {
     colorMap[status] = palette[index % palette.length]
   })
-
-  // Fallback color
   colorMap['Unassigned'] = { bg: '#f5f5f5', text: '#616161' }
-
   return colorMap
 }
 
 export default function KanbanView() {
   const organization_id = Cookies.get('organization_id')
   const user_id = Cookies.get('user_id')
+  const getToken = Cookies.get('_token')
   const form_name = 'lead-form'
-  const [pagination, setPagination] = useState({})
 
   const [kanbanData, setKanbanData] = useState([])
   const [loading, setLoading] = useState(false)
   const [loader, setLoader] = useState(false)
-  const [sections, setSections] = useState([])
   const [values, setValues] = useState({})
+  const [pagination, setPagination] = useState({})
   const [statusColors, setStatusColors] = useState({})
+  const [globalPagination, setGlobalPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 1
+  })
 
   // 🧩 Step 1: Fetch form to get "Lead Status" options
   const fetchForm = async () => {
@@ -62,58 +66,51 @@ export default function KanbanView() {
       setLoader(false)
 
       if (data?.success && data.data?.sections?.length > 0) {
-        setSections(data.data.sections)
-        const defaultValues = {}
+        const sections = data.data.sections
         let leadStatusOptions = []
 
-        data.data.sections.forEach(section => {
+        sections.forEach(section => {
           const fields = [
             ...(section.fields.left || []),
             ...(section.fields.center || []),
             ...(section.fields.right || [])
           ]
           fields.forEach(field => {
-            if (field.defaultValue) defaultValues[field.id] = field.defaultValue
-            if ((field.label === 'Assigned To' || field.label === 'Sales Executive') && user_id) {
-              defaultValues[field.id] = user_id
-            }
             if (field.label === 'Lead Status' && Array.isArray(field.options)) {
               leadStatusOptions = field.options
             }
           })
         })
 
-        // ✅ Save Lead Status options
-        setValues(prev => ({
-          ...prev,
-          leadStatusOptions,
-          ...defaultValues
-        }))
+        if (!leadStatusOptions.length) {
+          toast.error('Lead Status options missing', { autoClose: 1500 })
+          return
+        }
 
-        // 👉 After fetching form, build empty Kanban columns and fetch leads
+        setValues(prev => ({ ...prev, leadStatusOptions }))
         buildKanbanStructure(leadStatusOptions)
-        fetchData(leadStatusOptions, 1, 5)
+        fetchData(leadStatusOptions, globalPagination.page, globalPagination.limit)
       } else {
-        toast.error('Form not found', { autoClose: 1500, position: 'bottom-center' })
+        toast.error('Form not found', { autoClose: 1500 })
       }
     } catch (err) {
       console.error('❌ Error fetching form:', err)
+      toast.error('Error fetching form', { autoClose: 1500 })
       setLoader(false)
-      toast.error('Error fetching form', { autoClose: 1500, position: 'bottom-center' })
     }
   }
 
-  // 🧩 Step 2: Initialize empty Kanban structure based on Lead Status
+  // 🧩 Step 2: Initialize empty Kanban structure
   const buildKanbanStructure = leadStatusOptions => {
     const initialColumns = (leadStatusOptions || []).map(status => ({
       status,
       leads: []
     }))
-
     setKanbanData(initialColumns)
   }
 
-  const fetchData = async (leadStatusOptions, page = 1, limit = 5, singleStatus = null) => {
+  // 🧩 Step 3: Fetch leads
+  const fetchData = async (leadStatusOptions, page, limit, singleStatus = null) => {
     setLoading(true)
     try {
       const query = new URLSearchParams({
@@ -121,51 +118,43 @@ export default function KanbanView() {
         form_name,
         page: page.toString(),
         limit: limit.toString(),
-        ...(singleStatus ? { status: singleStatus } : {}) // 👈 new param
+        ...(singleStatus ? { status: singleStatus } : {})
       })
 
       const res = await fetch(`/api/v1/admin/lead-form/kanban-view?${query}`)
       const json = await res.json()
-      console.log(json,"<<<JSONNN")
+
       if (json.success) {
-        // If we fetched for all statuses
+        // ✅ Set global pagination from API
+        setGlobalPagination(prev => ({
+          ...prev,
+          total: json.totalLeads || 0,
+          totalPages: Math.ceil((json.totalLeads || 0) / prev.limit)
+        }))
+
+        // ✅ Existing code (distribute leads by status)
         if (!singleStatus) {
-          const distributed = (leadStatusOptions || []).map(status => ({
-            status,
-            leads: json.kanban.flatMap(col => col.leads).filter(lead => lead.values['Lead Status'] === status),
-            total: json.total || 0
-          }))
+          const distributed = (leadStatusOptions || []).map(status => {
+            const leads = json.kanban.flatMap(col => col.leads).filter(lead => lead.values['Lead Status'] === status)
+            const kanbanItem = json.kanban.find(col => col.status === status)
+            const totalCountForStatus = kanbanItem ? kanbanItem.totalCount : 0
+            const total = totalCountForStatus
+            const totalPages = Math.ceil(total / limit)
+            return { status, leads, total, totalPages, page, limit }
+          })
 
           const newPagination = {}
           distributed.forEach(col => {
-            const totalPages = Math.ceil((col.total || col.leads.length) / limit)
-            newPagination[col.status] = { page, limit, total: col.total, totalPages }
+            newPagination[col.status] = {
+              page,
+              limit,
+              total: col.total,
+              totalPages: col.totalPages
+            }
           })
-
           setPagination(newPagination)
           setKanbanData(distributed)
-        } else {
-          // 👇 Update only one column
-          const updated = [...kanbanData]
-          const columnIndex = updated.findIndex(c => c.status === singleStatus)
-          if (columnIndex !== -1) {
-            const leads = json.kanban
-              .flatMap(col => col.leads)
-              .filter(lead => lead.values['Lead Status'] === singleStatus)
-            const total = json.total || leads.length
-            updated[columnIndex] = { ...updated[columnIndex], leads, total }
-
-            const totalPages = Math.ceil(total / limit)
-            setPagination(prev => ({
-              ...prev,
-              [singleStatus]: { page, limit, total, totalPages }
-            }))
-
-            setKanbanData(updated)
-          }
         }
-      } else {
-        setKanbanData([])
       }
     } catch (err) {
       console.error('❌ Error fetching leads:', err)
@@ -174,7 +163,6 @@ export default function KanbanView() {
     }
   }
 
-  // ✅ Initial load — first fetch form, then Kanban data automatically handled
   useEffect(() => {
     fetchForm()
   }, [])
@@ -187,22 +175,70 @@ export default function KanbanView() {
   }, [values.leadStatusOptions])
 
   // 🎯 Handle drag & drop
-  const handleDragEnd = result => {
+  // const handleDragEnd = result => {
+  //   const { source, destination } = result
+  //   if (!destination) return
+
+  //   const newKanban = [...kanbanData]
+  //   const sourceIndex = parseInt(source.droppableId, 10)
+  //   const destIndex = parseInt(destination.droppableId, 10)
+
+  //   const [movedLead] = newKanban[sourceIndex].leads.splice(source.index, 1)
+  //   newKanban[destIndex].leads.splice(destination.index, 0, movedLead)
+  //   setKanbanData(newKanban)
+  // }
+
+  // 🎯 Handle drag & drop
+  const handleDragEnd = async result => {
     const { source, destination } = result
     if (!destination) return
 
     const newKanban = [...kanbanData]
-
     const sourceIndex = parseInt(source.droppableId, 10)
     const destIndex = parseInt(destination.droppableId, 10)
 
+    // 🔹 Move lead locally
     const [movedLead] = newKanban[sourceIndex].leads.splice(source.index, 1)
     newKanban[destIndex].leads.splice(destination.index, 0, movedLead)
 
+    // 🔹 Update the lead status locally
+    movedLead.values['Lead Status'] = newKanban[destIndex].status
     setKanbanData(newKanban)
+    const leadId = movedLead.lead_id;
+
+    try {
+      setLoading(true)
+      // 🔹 Persist to API
+      const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken}`
+        },
+        body: JSON.stringify(movedLead)
+      })
+
+      const result = await res.json()
+      setLoading(false)
+
+      if (!result.success) {
+        console.log(result, '<< result result result')
+
+        fetchForm() // rollback to latest DB values
+      } else {
+        toast.success('Successfully Updated', {
+          autoClose: 1000,
+          position: 'bottom-center',
+          hideProgressBar: true
+        })
+        fetchForm()
+      }
+    } catch (err) {
+      toast.error('Error saving field')
+    }
   }
 
-  // 🌀 Loader UI
+  // 🌀 Loader
   if (loader || loading) {
     return (
       <Box display='flex' justifyContent='center' alignItems='center' height='70vh'>
@@ -211,7 +247,6 @@ export default function KanbanView() {
     )
   }
 
-  // 🎨 Render Kanban columns
   return (
     <Box p={2}>
       <Typography variant='h6' fontWeight='600' mb={1}>
@@ -225,165 +260,181 @@ export default function KanbanView() {
         <Box display='flex' gap={2} overflow='auto' p={1}>
           {kanbanData.map((column, colIndex) => {
             const colors = statusColors[column.status] || statusColors.Unassigned
-            const pag = pagination[column.status] || { page: 1, limit: 5, total: column.leads.length }
             return (
-              <Droppable droppableId={colIndex.toString()} key={column.status}>
-                {provided => (
-                  <Box
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    sx={{
-                      minWidth: 320,
-                      bgcolor: colors.bg,
-                      p: 2,
-                      borderRadius: 2,
-                      boxShadow: '0 0 6px rgba(0,0,0,0.08)'
-                    }}
-                  >
-                    <Box display='flex' alignItems='center' justifyContent='space-between' mb={2}>
-                      <Typography variant='subtitle1' fontWeight='600' color={colors.text}>
-                        {column.status}
-                      </Typography>
-                      <Chip label={column.leads.length} size='small' sx={{ bgcolor: colors.text, color: '#fff' }} />
-                    </Box>
+              <Box p={2}>
+                <Droppable droppableId={colIndex.toString()} key={column.status}>
+                  {provided => (
                     <Box
-                      display='flex'
-                      flexDirection='column'
-                      height='70vh' // fixed height for scroll area
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      sx={{
+                        minWidth: 320,
+                        bgcolor: colors.bg,
+                        p: 2,
+                        borderRadius: 2,
+                        boxShadow: '0 0 6px rgba(0,0,0,0.08)'
+                      }}
                     >
-                      {/* 🔹 Scrollable leads list */}
-                      <Box
-                        flex='1'
-                        overflow='auto'
-                        pr={1}
-                        sx={{
-                          '&::-webkit-scrollbar': { width: 6 },
-                          '&::-webkit-scrollbar-thumb': { bgcolor: '#ccc', borderRadius: 3 }
-                        }}
-                      >
-                        {column.leads.map((lead, index) => (
-                          <Draggable draggableId={lead._id} index={index} key={lead._id}>
-                            {provided => (
-                              <Card
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                sx={{
-                                  mb: 2,
-                                  p: 2,
-                                  borderRadius: 2,
-                                  boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-                                  '&:hover': { boxShadow: '0 3px 8px rgba(0,0,0,0.15)' },
-                                  transition: '0.2s'
-                                }}
-                              >
-                                <Typography fontWeight='bold'>
-                                  <Link
-                                    href={`/view/lead-form/${encodeURIComponent(encryptCryptoRes(lead.lead_id))}`}
-                                    style={{ textDecoration: 'none' }}
-                                  >
-                                    {lead.values.Company || '-'}
-                                  </Link>
-                                </Typography>
-                                <Typography variant='body2' color='text.secondary'>
-                                  {lead.items?.length > 0
-                                    ? lead.items?.map(order => (
-                                        <Box key={order.order_id} sx={{ mb: 0.5 }}>
-                                          <strong>{order.order_id}:</strong> <br />{' '}
-                                          {order.item_ref.map(i => i.item_name).join(', ')}
-                                        </Box>
-                                      ))
-                                    : lead.lead_name}
-                                </Typography>
-
-                                <Box display='flex' justifyContent='space-between' mt={1}>
-                                  <Typography variant='body2' color='success.main' fontWeight='600'>
-                                    {lead.items
-                                      ? formatCurrency(
-                                          lead.items.reduce((total, order) => {
-                                            const itemTotal =
-                                              order.item_ref?.reduce((sum, i) => sum + (i.finalPrice || 0), 0) || 0
-                                            return total + itemTotal
-                                          }, 0)
-                                        )
-                                      : formatCurrency(0)}
-                                  </Typography>
-                                  <Typography variant='body2' color='text.secondary'>
-                                    {lead.values.Score || '—'}%
-                                  </Typography>
-                                </Box>
-
-                                <Box display='flex' justifyContent='space-between' alignItems='center'>
-                                  <Typography variant='caption' color='text.secondary'>
-                                    {lead.values['Next Follow-up Date'] || '-'}
-                                  </Typography>
-                                  <Box display='flex' alignItems='center' gap={0.5}>
-                                    <img loading='lazy' width='20' src='/images/icons/user.svg' alt='User Icon' />
-                                    <Typography variant='caption'>{lead.user_name || '-'}</Typography>
-                                  </Box>
-                                </Box>
-                              </Card>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
+                      {/* 🔹 Column Header */}
+                      <Box display='flex' alignItems='center' justifyContent='space-between' mb={2}>
+                        <Typography variant='subtitle1' fontWeight='600' color={colors.text}>
+                          {column.status}
+                        </Typography>
+                        <Chip label={column.total} size='small' sx={{ bgcolor: colors.text, color: '#fff' }} />
                       </Box>
 
-                      {/* 🔹 Fixed bottom pagination bar */}
-                      <Box
-                        display='flex'
-                        alignItems='center'
-                        justifyContent='space-between'
-                        p={1}
-                        mt={1}
-                        sx={{
-                          bgcolor: '#fff',
-                          borderRadius: 1,
-                          borderTop: '1px solid #eee',
-                          position: 'sticky',
-                          bottom: 0
-                        }}
-                      >
-                        <Typography variant='caption'>
-                          {(() => {
-                            const start = (pag.page - 1) * pag.limit + 1
-                            const end = Math.min(pag.page * pag.limit, pag.total)
-                            return `${start}-${end} of ${pag.total}`
-                          })()}
-                        </Typography>
+                      {/* 🔹 Scrollable Leads */}
+                      <Box display='flex' flexDirection='column' height='70vh'>
+                        <Box
+                          flex='1'
+                          overflow='auto'
+                          pr={1}
+                          sx={{
+                            '&::-webkit-scrollbar': { width: 6 },
+                            '&::-webkit-scrollbar-thumb': { bgcolor: '#ccc', borderRadius: 3 }
+                          }}
+                        >
+                          {column.leads.map((lead, index) => (
+                            <Draggable draggableId={lead._id} index={index} key={lead._id}>
+                              {provided => (
+                                <Card
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  sx={{
+                                    mb: 2,
+                                    p: 2,
+                                    borderRadius: 2,
+                                    boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+                                    '&:hover': { boxShadow: '0 3px 8px rgba(0,0,0,0.15)' },
+                                    transition: '0.2s'
+                                  }}
+                                >
+                                  <Typography fontWeight='bold'>
+                                    <Link
+                                      href={`/view/lead-form/${encodeURIComponent(encryptCryptoRes(lead.lead_id))}`}
+                                      style={{ textDecoration: 'none' }}
+                                    >
+                                      {lead.values.Company || '-'}
+                                    </Link>
+                                  </Typography>
+                                  <Typography variant='body2' color='text.secondary'>
+                                    {lead.items?.length > 0
+                                      ? lead.items.map(order => (
+                                          <Box key={order.order_id} sx={{ mb: 0.5 }}>
+                                            <strong>{order.order_id}:</strong> <br />
+                                            {order.item_ref.map(i => i.item_name).join(', ')}
+                                          </Box>
+                                        ))
+                                      : lead.lead_name}
+                                  </Typography>
 
-                        <Box display='flex' alignItems='center' gap={0.5}>
-                          <IconButton
-                            size='small'
-                            disabled={pag.page <= 1}
-                            onClick={() => {
-                              fetchData(values.leadStatusOptions, pag.page - 1, pag.limit, column.status)
-                            }}
-                          >
-                            <ArrowBackIosNew sx={{ fontSize: 14 }} />
-                          </IconButton>
+                                  <Box display='flex' justifyContent='space-between' mt={1}>
+                                    <Typography variant='body2' color='success.main' fontWeight='600'>
+                                      {lead.items
+                                        ? formatCurrency(
+                                            lead.items.reduce((total, order) => {
+                                              const itemTotal =
+                                                order.item_ref?.reduce((sum, i) => sum + (i.finalPrice || 0), 0) || 0
+                                              return total + itemTotal
+                                            }, 0)
+                                          )
+                                        : formatCurrency(0)}
+                                    </Typography>
+                                    <Typography variant='body2' color='text.secondary'>
+                                      {lead.values.Score || '—'}%
+                                    </Typography>
+                                  </Box>
 
-                          <Typography variant='caption'>{pag.page || 1}</Typography>
-
-                          <IconButton
-                            size='small'
-                            disabled={pag.page >= pag.totalPages}
-                            onClick={() => {
-                              fetchData(values.leadStatusOptions, pag.page + 1, pag.limit, column.status)
-                            }}
-                          >
-                            <ArrowForwardIos sx={{ fontSize: 14 }} />
-                          </IconButton>
+                                  <Box display='flex' justifyContent='space-between' alignItems='center'>
+                                    <Typography variant='caption' color='text.secondary'>
+                                      {lead.values['Next Follow-up Date'] || '-'}
+                                    </Typography>
+                                    <Box display='flex' alignItems='center' gap={0.5}>
+                                      <img loading='lazy' width='20' src='/images/icons/user.svg' alt='User Icon' />
+                                      <Typography variant='caption'>{lead.user_name || '-'}</Typography>
+                                    </Box>
+                                  </Box>
+                                </Card>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
                         </Box>
                       </Box>
                     </Box>
-                  </Box>
-                )}
-              </Droppable>
+                  )}
+                </Droppable>
+              </Box>
             )
           })}
         </Box>
       </DragDropContext>
+      {/* 🧭 Global Pagination (outside Kanban) */}
+      <Box
+        mt={2}
+        display='flex'
+        alignItems='center'
+        width={'25%'}
+        justifyContent='space-between'
+        p={1}
+        sx={{
+          bgcolor: '#fff',
+          borderRadius: 1,
+          borderTop: '1px solid #eee',
+          position: 'sticky',
+          bottom: 0
+        }}
+      >
+        <Box display='flex' alignItems='center' gap={0.5}>
+          <IconButton
+            size='small'
+            disabled={globalPagination.page <= 1}
+            onClick={() => {
+              const newPage = globalPagination.page - 1
+              setGlobalPagination(prev => ({ ...prev, page: newPage }))
+              fetchData(values.leadStatusOptions, newPage, globalPagination.limit)
+            }}
+          >
+            <ArrowBackIosNew sx={{ fontSize: 14 }} />
+          </IconButton>
+          <Select
+            size='small'
+            value={globalPagination.limit}
+            onChange={e => {
+              const newLimit = parseInt(e.target.value)
+              setGlobalPagination(prev => ({ ...prev, page: 1, limit: newLimit }))
+              fetchData(values.leadStatusOptions, 1, newLimit)
+            }}
+          >
+            {[5, 10, 50, 100].map(size => (
+              <MenuItem key={size} value={size}>
+                {size}
+              </MenuItem>
+            ))}
+          </Select>
+
+          <IconButton
+            size='small'
+            disabled={globalPagination.page >= globalPagination.totalPages}
+            onClick={() => {
+              const newPage = globalPagination.page + 1
+              setGlobalPagination(prev => ({ ...prev, page: newPage }))
+              fetchData(values.leadStatusOptions, newPage, globalPagination.limit)
+            }}
+          >
+            <ArrowForwardIos sx={{ fontSize: 14 }} />
+          </IconButton>
+        </Box>
+
+        <Typography variant='caption' sx={{ mr: 2 }}>
+          {(() => {
+            const start = (globalPagination.page - 1) * globalPagination.limit + 1
+            const end = Math.min(globalPagination.page * globalPagination.limit, globalPagination.total)
+            return `${start}-${end} of ${globalPagination.total}`
+          })()}
+        </Typography>
+      </Box>
     </Box>
   )
 }
