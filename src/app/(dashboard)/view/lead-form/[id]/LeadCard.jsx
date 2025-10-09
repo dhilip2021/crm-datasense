@@ -3,7 +3,7 @@ import { Box, Typography, Chip, Divider, Button, IconButton } from '@mui/materia
 import FlagIcon from '@mui/icons-material/Flag' // ✅ MUI icon
 
 export default function LeadCard({ fields, leadId, leadData, onToggleFlag }) {
-  console.log(fields, '<<< fields')
+  
   return (
     <Box
       sx={{

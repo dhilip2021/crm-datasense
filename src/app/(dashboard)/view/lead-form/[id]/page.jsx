@@ -34,6 +34,7 @@ import ProductPage from './ProductPage'
 import TaskTabs from './TaskTabs'
 import { getUserAllListApi } from '@/apiFunctions/ApiAction'
 import slugify from 'slugify'
+import ConvertDealDialog from './ConvertDealDialog'
 // import CloseActivities from './closeActivities'
 
 // ✅ Validation rules
@@ -66,23 +67,25 @@ const LeadDetailView = () => {
   const [expanded, setExpanded] = useState(0) // 0 = first open by default
   const [tabIndex, setTabIndex] = useState(0)
   const [open, setOpen] = useState(false)
-
-  
-
   const [userList, setUserList] = useState([])
   const organization_id = Cookies.get('organization_id')
   const lead_form = 'lead-form'
   const deal_form = 'deal-form'
   const getToken = Cookies.get('_token')
   const router = useRouter()
-
   const [loader, setLoader] = useState(true)
   const [loading, setLoading] = useState(false)
-  
   const [leadData, setLeadData] = useState(null)
   const [sections, setSections] = useState([])
   const [fieldConfig, setFieldConfig] = useState({})
   const [itemsData, setItemsData] = useState([])
+  const [confirm, setConfirm] = useState(false)
+
+  // 🧠 leadData = API response object you shared above
+  const [accountName, setAccountName] = useState('')
+  const [contactName, setContactName] = useState('')
+  const [createDeal, setCreateDeal] = useState(false)
+  const [ownerName, setOwnerName] = useState('')
 
   // 🔹 Flatten helper
   const flattenFields = sections => {
@@ -102,10 +105,9 @@ const LeadDetailView = () => {
 
   const handleTabChange = (e, newValue) => {
     setTabIndex(newValue)
-    if(newValue === 2){
-       setOpen(true)
+    if (newValue === 2) {
+      setOpen(true)
     }
-   
   }
   // 🔹 Fetch template
   const fetchFormTemplate = async () => {
@@ -166,6 +168,7 @@ const LeadDetailView = () => {
         }
       })
       const data = await res.json()
+
       if (data.success) setLeadData(data.data)
     } catch (err) {
       console.error(err)
@@ -256,83 +259,192 @@ const LeadDetailView = () => {
     }
   }
 
+  const dealFnCall = (id, lead_name) => {
+    setConfirm(true)
+  }
 
-  
+  const handleClose = () => {
+    setConfirm(false)
+  }
+
+  const handleConvert = () => {
+
+    convertLeadFn(leadData,createDeal) 
+    onClose()
+  }
+
+  // const convertDealFn = async (leadData) => {
+
+  //    console.log(leadData,"<<< BODYYYYYYYYYY")
+
+
+  //     const id= leadData?._id;
+  //   const lead_name= leadData?.lead_name;
+
+  //   const original = lead_name
+  //   const nextLeadName = original.replace(/lead/i, 'OPPORTUNITY')
+
+  //   const slugLeadString = nextLeadName.replace(/[^\w\s]|_/g, '')
+
+  //   const slug_lead_name = slugify(slugLeadString, {
+  //     replacement: '-',
+  //     remove: undefined,
+  //     lower: true,
+  //     strict: false,
+  //     locale: 'vi',
+  //     trim: true
+  //   })
+
+  //   const body = {
+  //     Id: id,
+  //     form_name: 'opportunity-form',
+  //     lead_name: nextLeadName,
+  //     lead_slug_name: slug_lead_name
+  //   }
+
+
    
-  
-    const convertDealFn = async(id, lead_name) => {
 
-      const original = lead_name
-      const nextLeadName = original.replace(/lead/i, 'OPPORTUNITY')
-  
-      const slugLeadString = nextLeadName.replace(/[^\w\s]|_/g, '')
-  
-      const slug_lead_name = slugify(slugLeadString, {
-        replacement: '-',
-        remove: undefined,
-        lower: true,
-        strict: false,
-        locale: 'vi',
-        trim: true
-      })
-  
-      const body = {
-        Id: id,
-        form_name: 'opportunity-form',
-        lead_name: nextLeadName,
-        lead_slug_name: slug_lead_name,
-      }
+  //   // try {
+  //   //   const updatedLeadValues = {
+  //   //     _id: id,
+  //   //     form_name: 'opportunity-form',
+  //   //     lead_name: nextLeadName,
+  //   //     lead_slug_name: slug_lead_name,
+  //   //     lead_touch: 'touch',
+  //   //     updatedAt: new Date().toISOString()
+  //   //   }
+  //   //   setLoading(true)
+  //   //   // 🔹 Persist to API
+  //   //   const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
+  //   //     method: 'PUT',
+  //   //     headers: {
+  //   //       'Content-Type': 'application/json',
+  //   //       Authorization: `Bearer ${getToken}`
+  //   //     },
+  //   //     body: JSON.stringify(updatedLeadValues)
+  //   //   })
+
+  //   //   const result = await res.json()
+  //   //   setLoading(false)
+
+  //   //   if (!result.success) {
+  //   //     toast.error('Failed to update field')
+  //   //     fetchLeadFromId() // rollback to latest DB values
+  //   //   } else {
+  //   //     toast.success('Lead to Opportunity Successfully Converted', {
+  //   //       autoClose: 1000,
+  //   //       position: 'bottom-center',
+  //   //       hideProgressBar: true
+  //   //     })
+  //   //     router.push(`/app/opportunity`)
+  //   //   }
+  //   // } catch (err) {
+  //   //   toast.error('Error saving field')
+  //   //   console.error(err)
+  //   // }
+  // }
 
 
 
-      try {
-      const updatedLeadValues = {
-        _id: id,
-        form_name: 'opportunity-form',
-        lead_name: nextLeadName,
-        lead_slug_name: slug_lead_name,
-        lead_touch: 'touch',
-        updatedAt: new Date().toISOString(),
-        // organization_id: leadData?.organization_id,
-        
-      }
-      setLoading(true)
-      // 🔹 Persist to API
-      const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken}`
-        },
-        body: JSON.stringify(updatedLeadValues)
-      })
+const convertLeadFn = async (leadData, createDeal) => {
+  try {
+    const id = leadData?._id
+    const organization_id = leadData?.organization_id
+    const auto_inc_id = leadData?.auto_inc_id
+    const lead_id = leadData?.lead_id
+    const form_name = createDeal ? 'opportunity-form' : 'lead-form'
+    const c_role_id = leadData?.c_role_id
+    const c_createdBy = leadData?.c_createdBy
+    const c_createdByName = leadData?.c_createdByName
+    const submittedAt = leadData?.submittedAt
+    const createdAt = leadData?.createdAt
+    const updatedAt = new Date().toISOString()
 
-      const result = await res.json()
-      setLoading(false)
+    // 💡 Build new lead_name based on createDeal flag
+    const originalName = leadData?.lead_name || ''
+    const nextLeadName = createDeal
+      ? originalName.replace(/lead/i, 'OPPORTUNITY')
+      : originalName
 
-      if (!result.success) {
-        toast.error('Failed to update field')
-        fetchLeadFromId() // rollback to latest DB values
-      } else {
-        toast.success('Lead to Opportunity Successfully Converted', {
-          autoClose: 1000,
-          position: 'bottom-center',
-          hideProgressBar: true
-        })
-        router.push(`/app/opportunity`)
-      }
-    } catch (err) {
-      toast.error('Error saving field')
-      console.error(err)
+    // 💡 Slugify for URL safe name
+    const slugLeadString = nextLeadName.replace(/[^\w\s]|_/g, '')
+    const slug_lead_name = slugify(slugLeadString, {
+      replacement: '-',
+      lower: true,
+      locale: 'en'
+    })
+
+    // 💡 Lead Status update logic
+    const values = {
+      'Lead Status': createDeal ? 'Converted To Deal' : 'Contacted'
     }
 
+    // 🧠 Final payload
+    const payload = {
+      _id: id,
+      form_name,
+      lead_name: nextLeadName,
+      lead_slug_name: slug_lead_name,
+      values,
+      lead_touch: 'touch',
+      updatedAt: new Date().toISOString(),
 
 
-
+      // organization_id,
+      // auto_inc_id,
+      // lead_id,
+      // submittedAt,
+      // c_role_id,
+      // c_createdBy,
+      // c_createdByName,
+      // createdAt,
+      // updatedAt
     }
 
+    // 🔹 If you want to update to API, uncomment below:
+  
+    const res = await fetch(`/api/v1/admin/lead-form/${lead_id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getToken}`
+      },
+      body: JSON.stringify(payload)
+    })
+
+    const result = await res.json()
+    if (result.success) {
+      toast.success(
+        createDeal
+          ? 'Lead successfully converted to Opportunity'
+          : 'Lead updated successfully',
+        { autoClose: 1000, position: 'bottom-center', hideProgressBar: true }
+      )
+      router.push(createDeal ? '/app/opportunity' : '/app/leads')
+    } else {
+      toast.error('Update failed, please try again!')
+    }
+  
+  } catch (err) {
+    console.error('❌ Error converting lead:', err)
+  }
+}
 
 
+
+
+  useEffect(() => {
+    if (leadData) {
+      const values = leadData.values || {}
+      const firstName = values['First Name']?.trim() || ''
+      const lastName = values['Last Name']?.trim() || ''
+      const fullContactName = `${firstName} ${lastName}`.trim()
+      setAccountName(values['Company'] || '—')
+      setContactName(fullContactName || '—')
+      setOwnerName(leadData.c_createdByName || '—')
+    }
+  }, [leadData])
 
   // 🔹 Save handler
   const handleFieldSave = async (label, newValue) => {
@@ -498,17 +610,16 @@ const LeadDetailView = () => {
       {/* Right side */}
       <Grid item xs={12} md={4}>
         <Box>
-           <Button
-               disabled={loading}
-              fullWidth
-              variant='contained'
-              color='primary'
-              onClick={() => convertDealFn(leadData?._id, leadData?.lead_name, "converted the lead to this deal")}
-            >
-              {' '}
-              {loading ? <CircularProgress size={18} /> :  'Convert to Opportunity'}
-
-            </Button>
+          <Button
+            disabled={loading}
+            fullWidth
+            variant='contained'
+            color='primary'
+            onClick={() => dealFnCall(leadData?._id, leadData?.lead_name)}
+          >
+            {' '}
+            {loading ? <CircularProgress size={18} /> : 'Convert to Opportunity'}
+          </Button>
         </Box>
         <Box
           sx={{
@@ -569,6 +680,16 @@ const LeadDetailView = () => {
             </Box>
           ))}
         </Box>
+        <ConvertDealDialog
+          open={confirm}
+          onClose={handleClose}
+          accountName={accountName}
+          contactName={contactName}
+          createDeal={createDeal}
+          setCreateDeal={setCreateDeal}
+          ownerName={ownerName}
+          handleConvert={handleConvert}
+        />
       </Grid>
     </Grid>
   )

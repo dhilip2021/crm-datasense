@@ -5,12 +5,13 @@ import { Card, Typography, Box } from '@mui/material'
 
 // 💡 Sample Data (replace with your API response)
 const data = [
-  { stage: 'Prospecting', value: 85000, count: 1, fill: '#0288d1' },
-  { stage: 'Qualification', value: 70000, count: 1, fill: '#80deea' },
-  { stage: 'Proposal', value: 60000, count: 1, fill: '#ef9a9a' },
-  { stage: 'Negotiation', value: 40000, count: 1, fill: '#ffb300' },
-  { stage: 'Won', value: 25000, count: 1, fill: '#43a047' },
-  { stage: 'Lost', value: 10000, count: 1, fill: '#ba68c8' }
+  { stage: 'Prospecting', value: 20000, count: 1, fill: '#0288d1' },
+  { stage: 'Qualification', value: 18000, count: 1, fill: '#80deea' },
+  { stage: 'Proposal', value: 16000, count: 1, fill: '#ef9a9a' },
+  { stage: 'Negotiation', value: 14000, count: 1, fill: '#ffb300' },
+  { stage: 'Won', value: 12000, count: 1, fill: '#43a047' },
+  { stage: 'Lost', value: 10000, count: 10, fill: '#ba68c8' },
+  
 ]
 
 // 💰 Format to INR currency
@@ -51,14 +52,15 @@ export default function SalesFunnelChart() {
                 return null
               }}
             />
-            <Funnel dataKey='value' data={data} isAnimationActive>
+            <Funnel dataKey='value' data={data} isAnimationActive gap={2}>
               <LabelList
-                position='right'
-                fill='#000'
-                stroke='none'
+                position="right"
+                fill="#000"
+                stroke="none"
                 dataKey='stage'
-                formatter={(value, entry) =>
-                  entry ? `${entry.stage} : ${entry.count}` : ''
+                // formatter={(entry) => `${entry.stage} : ${entry.count}`}
+                 formatter={(value, entry) =>
+                  entry ? `${entry.stage} : ${entry.count}` : ``
                 }
               />
             </Funnel>

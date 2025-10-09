@@ -1,15 +1,15 @@
 // File: app/api/v1/admin/lead-form/[lead_id]/route.js
+// company name showing
 
 import { verifyAccessToken } from '@/helper/clientHelper'
 import connectMongoDB from '@/libs/mongodb'
 import { ItemMaster } from '@/models/ItemMasterModel'
 import Leadform from '@/models/Leadform'
 import { Organization } from '@/models/organizationModel' // 👈 Add this model import
-import { User } from '@/models/userModel' // 👈 Add user model
 import mongoose from 'mongoose'
 import { NextResponse } from 'next/server'
 
-// 🧮 Lead Scoring Logic (same as before)
+// 🔥 Lead Scoring Logic (same as before)
 const calculateLeadScore = values => {
   let score = 0
   const designation = values['Job Tilte']
@@ -34,12 +34,21 @@ const calculateLeadScore = values => {
   if (companySize && parseInt(companySize) > 50) score += 15
   if (
     industry &&
-    ['Logistics', 'Manufacturing', 'FMCG', 'Education', 'Pharma', 'Retail'].includes(industry)
+    ['Logistics', 'Manufacturing', 'Logistics', 'FMCG', 'Education', 'Pharma', 'Retail'].includes(industry)
   )
     score += 20
   if (
     location &&
-    ['Chennai', 'Coimabtore', 'Bangalore', 'Delhi'].includes(location)
+    [
+      'Kennethchester',
+      'North Austinville',
+      'Port Heathertown',
+      'South Samanthamouth',
+      'Chennai',
+      'Coimabtore',
+      'Bangalore',
+      'Delhi'
+    ].includes(location)
   )
     score += 10
 
@@ -84,12 +93,7 @@ export async function GET(req, { params }) {
       organization_id: lead.organization_id
     }).lean()
 
-    // 🧩 3. Fetch createdBy user details
-    const createdByUser = await User.findOne({
-      user_id: lead.c_createdBy
-    }).lean()
-
-    // 🧩 4. Populate item details if any
+    // 🧩 3. Populate item details if available
     if (lead?.items?.length) {
       await ItemMaster.populate(
         lead.items.flatMap(i => i.item_ref),
@@ -97,11 +101,10 @@ export async function GET(req, { params }) {
       )
     }
 
-    // ✅ 5. Merge all info
+    // ✅ 4. Attach organization_name to response
     const response = {
       ...lead,
-      organization_name: organization?.organization_name || null,
-      c_createdByName: createdByUser?.user_name || null
+      organization_name: organization?.organization_name || null
     }
 
     return NextResponse.json({ success: true, data: response })
@@ -113,6 +116,7 @@ export async function GET(req, { params }) {
     )
   }
 }
+
 
 // 🔁 PUT – Update lead by lead_id
 // export async function PUT(req, { params }) {

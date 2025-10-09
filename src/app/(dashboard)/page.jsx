@@ -34,6 +34,7 @@ import ConversionFunnel from '@/views/dashboard/ConversionFunnel'
 import SalesRepSummary from '@/views/dashboard/SalesRepSummary'
 import KanbanView from '@/views/dashboard/KanbanView'
 import SalesFunnelChart from '@/views/dashboard/SalesFunnelChart'
+import TopAccountsCard from '@/views/dashboard/TopAccountsCard'
 
 const DashboardAnalytics = () => {
   const user_id = Cookies.get('user_id')
@@ -72,8 +73,9 @@ const DashboardAnalytics = () => {
         <Grid item xs={6}>
         <SalesFunnelChart />
         </Grid>
+        
          <Grid item xs={6}>
-          
+          <TopAccountsCard />
          </Grid>
 
 

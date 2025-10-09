@@ -173,7 +173,8 @@ export default function ReminderAlert() {
       }
     }
 
-    const interval = setInterval(fetchReminders, 60000)
+    // const interval = setInterval(fetchReminders, 60000)
+    const interval = setInterval(fetchReminders, 600000)
     fetchReminders()
 
     return () => clearInterval(interval)
