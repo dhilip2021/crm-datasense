@@ -61,7 +61,7 @@ const LeadTable = () => {
   const [data, setData] = useState([])
   const [dataFilter, setDataFilter] = useState([])
   const [page, setPage] = useState(0)
-  const [limit, setLimit] = useState(10)
+  const [limit, setLimit] = useState(20)
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
   const [loader, setLoader] = useState(false)
@@ -105,6 +105,7 @@ const LeadTable = () => {
   const fieldsExcel = [...new Set([...dynamicExcelFields])]
 
   const [filters, setFilters] = useState({
+    search: '',
     status: '',
     touch: '',
     source: '',
@@ -114,7 +115,8 @@ const LeadTable = () => {
     value: '',
     fromDate: null,
     toDate: null,
-    search: ''
+    fromFollowDate: null,
+    toFollowDate: null
   })
 
   const flattenFields = sections => {
@@ -153,7 +155,7 @@ const LeadTable = () => {
         updatedAt: row?.updatedAt,
         createdAt: row?.createdAt
       }
-      console.log("cal1")
+      console.log('cal1')
       // 🔹 Persist to API
       const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
         method: 'PUT',
@@ -168,7 +170,7 @@ const LeadTable = () => {
 
       if (!result.success) {
         toast.error('Failed to update field')
-        console.log("cal 6")
+        console.log('calling 5555')
         fetchData()
       } else {
         toast.success('Flag Updated successfully', {
@@ -176,7 +178,7 @@ const LeadTable = () => {
           position: 'bottom-center',
           hideProgressBar: true
         })
-        console.log("cal 7")
+        console.log('calling 6666')
         fetchData()
       }
     } catch (err) {
@@ -190,7 +192,6 @@ const LeadTable = () => {
     const lead_form = 'lead-form'
     // setLoader(true)
     try {
-      console.log("cal2")
       const res = await fetch(
         `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${lead_form}`,
         {
@@ -247,7 +248,9 @@ const LeadTable = () => {
       ...(filters.rep && { rep: filters.rep }),
       ...(filters.value && { value: filters.value }),
       ...(filters.fromDate && { from: dayjs(filters.fromDate).format('YYYY-MM-DD') }),
-      ...(filters.toDate && { to: dayjs(filters.toDate).format('YYYY-MM-DD') })
+      ...(filters.toDate && { to: dayjs(filters.toDate).format('YYYY-MM-DD') }),      
+      ...(filters.fromFollowDate && { from: dayjs(filters.fromFollowDate).format('YYYY-MM-DD') }),
+      ...(filters.toFollowDate && { to: dayjs(filters.toFollowDate).format('YYYY-MM-DD') })
     })
 
     const header = {
@@ -256,14 +259,12 @@ const LeadTable = () => {
     }
 
     try {
-      console.log("cal3")
       const res = await fetch(`/api/v1/admin/lead-form/list?${query}`, {
         method: 'GET',
         headers: header
       })
       const json = await res.json()
       if (json.success) {
-        console.log(json.data, '<<< dataaaaaa')
         setData(json.data)
         setDataFilter(json.data)
         setTotal(json.total)
@@ -275,40 +276,7 @@ const LeadTable = () => {
     }
   }
 
-  const handlePDFClick = event => {
-    setAnchorPdfEl(event.currentTarget)
-  }
-
-  const handlePdfClose = () => {
-    setAnchorPdfEl(null)
-  }
-
-  const handlePdfToggle = field => {
-    if (selectedPdfFields.includes(field)) {
-      setSelectedPdfFields(prev => prev.filter(f => f !== field))
-    } else {
-      setSelectedPdfFields(prev => [...prev, field])
-    }
-  }
-
-  const handleExcelClick = event => {
-    setAnchorExcelEl(event.currentTarget)
-  }
-
-  const handleExcelClose = () => {
-    setAnchorExcelEl(null)
-  }
-
-  const handleExcelToggle = field => {
-    if (selectedExcelFields.includes(field)) {
-      setSelectedExcelFields(prev => prev.filter(f => f !== field))
-    } else {
-      setSelectedExcelFields(prev => [...prev, field])
-    }
-  }
-
   const fetchFilterData = async () => {
-    console.log(selectedUsers, '<<< SELECTED USERSSSS')
     setLoading(true)
     const organization_id = Cookies.get('organization_id')
     const form_name = 'lead-form'
@@ -327,7 +295,9 @@ const LeadTable = () => {
       ...(filters.rep && { rep: filters.rep }),
       ...(filters.value && { value: filters.value }),
       ...(filters.fromDate && { from: dayjs(filters.fromDate).format('YYYY-MM-DD') }),
-      ...(filters.toDate && { to: dayjs(filters.toDate).format('YYYY-MM-DD') })
+      ...(filters.toDate && { to: dayjs(filters.toDate).format('YYYY-MM-DD') }),
+      ...(filters.fromFollowDate && { fromFollowDate: dayjs(filters.fromFollowDate).format('YYYY-MM-DD') }),
+      ...(filters.toFollowDate && { toFollowDate: dayjs(filters.toFollowDate).format('YYYY-MM-DD') })
     })
 
     try {
@@ -335,7 +305,6 @@ const LeadTable = () => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${getToken}`
       }
-console.log("cal4")
       const res = await fetch(`/api/v1/admin/lead-form/list?${query}`, {
         method: 'GET',
         headers: header
@@ -352,138 +321,12 @@ console.log("cal4")
     }
   }
 
-  const exportToExcel = () => {
-    if (selectedExcelFields.length === 0) {
-      toast.error('Please select at least one field to export', {
-        autoClose: 500, // 1 second la close
-        position: 'bottom-center',
-        hideProgressBar: true, // progress bar venam na
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: false,
-        progress: undefined
-      })
-      return
-    }
-
-    // Columns → selected fields
-    const columns = selectedExcelFields
-
-    // Rows → map each lead values to only selected fields
-    const rows = data.map(d => {
-      const row = {}
-      selectedExcelFields.forEach(field => {
-        switch (field) {
-          case 'Lead ID':
-            row[field] = d.lead_id
-            break
-          case 'Name':
-            row[field] = d.values['First Name'] || ''
-            break
-          case 'Company':
-            row[field] = d.values['Company'] || ''
-            break
-          case 'Status':
-            row[field] = d.values['Lead Status'] || ''
-            break
-          case 'Assigned To':
-            row[field] = d.values['Assigned To'] || ''
-            break
-          case 'Phone':
-            row[field] = d.values['Phone'] || ''
-            break
-          case 'Email':
-            row[field] = d.values['Email'] || ''
-            break
-          case 'City':
-            row[field] = d.values['City'] || ''
-            break
-          case 'Country':
-            row[field] = d.values['Country'] || ''
-            break
-          case 'Next Follow-up Date':
-            row[field] = d.values['Next Follow-up Date'] ? formatDateShort(d.values['Next Follow-up Date']) : ''
-            break
-          case 'Last Contact Date':
-            row[field] = converDayJsDate(d.updatedAt)
-            break
-          case 'Score':
-            row[field] = d.values['Score'] || 0
-            break
-          default:
-            row[field] = d.values[field] || '' // fallback for dynamic fields
-        }
-      })
-      return row
-    })
-
-    // Convert to sheet
-    const sheet = XLSX.utils.json_to_sheet(rows, { header: columns })
-    const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, sheet, 'Leads')
-    XLSX.writeFile(wb, 'leads_export.xlsx')
-
-    handleExcelClose()
+  const handlePDFClick = event => {
+    setAnchorPdfEl(event.currentTarget)
   }
 
-  // Replace your existing exportToPDF function with this:
-  const exportToPDF = () => {
-    if (selectedPdfFields.length === 0) {
-      toast.error('Please select at least one field to export', {
-        autoClose: 500, // 1 second la close
-        position: 'bottom-center',
-        hideProgressBar: true, // progress bar venam na
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: false,
-        progress: undefined
-      })
-      return
-    }
-
-    const doc = new jsPDF()
-
-    // PDF columns → selectedPdfFields la irukkara names
-    const columns = selectedPdfFields
-
-    // PDF rows → dynamic mapping from data
-    const rows = data.map(d =>
-      selectedPdfFields.map(field => {
-        switch (field) {
-          case 'Lead ID':
-            return d.lead_id
-          case 'Name':
-            return d.values['First Name'] || ''
-          case 'Company':
-            return d.values['Company'] || ''
-          case 'Status':
-            return d.values['Lead Status'] || ''
-          case 'Assigned To':
-            return d.values['Assigned To'] || ''
-          case 'Phone':
-            return d.values['Phone'] || ''
-          case 'Email':
-            return d.values['Email'] || ''
-          case 'City':
-            return d.values['City'] || ''
-          case 'Country':
-            return d.values['Country'] || ''
-          case 'Next Follow-up Date':
-            return d.values['Next Follow-up Date'] ? formatDateShort(d.values['Next Follow-up Date']) : ''
-          case 'Last Contact Date':
-            return converDayJsDate(d.updatedAt)
-          case 'Score':
-            return d.values['Score'] || 0
-          default:
-            return d.values[field] || '' // fallback
-        }
-      })
-    )
-
-    autoTable(doc, { head: [columns], body: rows })
-    doc.save('leads_export.pdf')
-
-    handlePdfClose()
+  const handleExcelClick = event => {
+    setAnchorExcelEl(event.currentTarget)
   }
 
   const getUserListFn = async () => {
@@ -500,7 +343,6 @@ console.log("cal4")
   }
 
   const uniqueSources = useMemo(() => {
-    console.log(fieldConfig, '<<< Field Config')
     if (fieldConfig && Array.isArray(fieldConfig['Lead Source'])) {
       return [...fieldConfig['Lead Source']]
     }
@@ -527,7 +369,7 @@ console.log("cal4")
     setLoader(true)
 
     try {
-      console.log("cal5")
+      console.log('cal5')
       const res = await fetch('/api/v1/admin/lead-form/import', {
         method: 'POST',
         headers: {
@@ -539,11 +381,9 @@ console.log("cal4")
       const data = await res.json()
       if (data?.success) {
         toast.success(data.message, { autoClose: 1000 })
-        console.log("cal 3")
         fetchData()
       } else {
         toast.error('File not uploaded !!!', { autoClose: 1000 })
-        console.log("cal 4")
         fetchData()
       }
     } catch (err) {
@@ -557,61 +397,42 @@ console.log("cal4")
     }
   }
 
- useEffect(() => {
-
-
-console.log(sections,"<<< SECTIONSSS")
-
-  if (!fetched) {
-    console.log("cal 5")
-    fetchData()
-    setFetched(true)
-  }else if(fetched && sections){
-    fetchData()
-  }
-}, [sections, fetched])
-
+  useEffect(() => {
+    if (!fetched) {
+      console.log('calling 3333')
+      fetchData()
+      setFetched(true)
+    }
+ 
+  }, [sections])
 
   useEffect(() => {
     fetchFormTemplate()
     getUserListFn()
   }, [page, limit])
 
+  useEffect(() => {
+    const { search, fromDate, toDate, fromFollowDate, toFollowDate, ...otherFilters } = filters
 
-//   useEffect(() => {
-//   const { search, fromDate, toDate, ...otherFilters } = filters
+    const hasOtherFilters = Object.values(otherFilters).some(v => v !== '')
+    const hasDateRange = Boolean(fromDate && toDate)
+    const hasDateFollowRange = Boolean(fromFollowDate && toFollowDate)
+    const hasSearch = Boolean(search && search.trim() !== '')
 
-//   const hasOtherFilters = Object.values(otherFilters).some(v => v !== '')
-//   const hasDateRange = fromDate && toDate
-//   const hasSearch = search && search.trim() !== ''
+    // ✅ Debounced API call — fires only once after 500ms
+    const handler = setTimeout(() => {
+      if (hasOtherFilters || hasDateRange || hasSearch || hasDateFollowRange) {
+        console.log('📡 Fetch filtered data')
+      } else {
+        console.log('📡 Fetch default data (no filters)')
+      }
 
-//   if (hasOtherFilters || hasDateRange || !hasSearch ) {
-    
-//     fetchFilterData()
-//   } else {
-//     console.log("❌ skipped fetch (all filters empty)")
-//   }
-// }, [filters])
-
-useEffect(() => {
-  const { search, fromDate, toDate, ...otherFilters } = filters
-
-  const hasOtherFilters = Object.values(otherFilters).some(v => v !== '')
-  const hasDateRange = fromDate && toDate
-    const hasSearch = search && search.trim() !== ''
-
-  // Only trigger after user stops typing for 500ms
-  const handler = setTimeout(() => {
-    if (hasOtherFilters || hasDateRange || (search && search.trim() !== '')) {
       fetchFilterData()
-    } else if(!hasSearch) {
-      fetchFilterData()
-    }
-  }, 500) // 500ms delay
+    }, 500)
 
-  // Cleanup previous timeout if filters change again
-  return () => clearTimeout(handler)
-}, [filters])
+    // ✅ Cleanup timeout on dependency change
+    return () => clearTimeout(handler)
+  }, [filters])
 
   return (
     <Box px={2} py={2}>
@@ -789,12 +610,36 @@ useEffect(() => {
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DateRangePicker
                 value={[filters.fromDate, filters.toDate]} // 🔹 filters la connect pannirukken
-                label='Date Range'
+                label='Created Date Range'
                 onChange={newValue => {
                   setFilters({
                     ...filters,
                     fromDate: newValue[0],
                     toDate: newValue[1]
+                  })
+                }}
+                slotProps={{
+                  textField: ({ position }) => ({
+                    size: 'small',
+                    sx: {
+                      minWidth: 250,
+                      maxWidth: 280,
+                      bgcolor: 'white',
+                      mr: position === 'start' ? 1 : 0
+                    }
+                  })
+                }}
+              />
+            </LocalizationProvider>
+             <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DateRangePicker
+                value={[filters.fromFollowDate, filters.toFollowDate]} // 🔹 filters la connect pannirukken
+                label='Follow-Up Date Range'
+                onChange={newValue => {
+                  setFilters({
+                    ...filters,
+                    fromFollowDate: newValue[0],
+                    toFollowDate: newValue[1]
                   })
                 }}
                 slotProps={{
@@ -824,7 +669,10 @@ useEffect(() => {
                   company: '',
                   city: '',
                   label: '',
-                  toDate: null
+                  fromDate: null,
+                  toDate: null,
+                  fromFollowDate: null,
+                  toFollowDate: null
                 })
               }
             >
@@ -835,7 +683,7 @@ useEffect(() => {
 
         {/* 🔹 Right Column: Table + Actions */}
         <Grid item xs={12} sm={12}>
-          <Box sx={{ width: '100%', overflowX: 'auto', maxHeight: 500 }}>
+          <Box sx={{ width: '100%', overflowX: 'auto', maxHeight: 800 }}>
             <Table
               stickyHeader
               size='small'
@@ -861,30 +709,30 @@ useEffect(() => {
             >
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ minWidth: 100, maxWidth: 150, whiteSpace: 'nowrap' }}>S.No</TableCell>
+                  <TableCell sx={{ minWidth: 50, maxWidth: 150, whiteSpace: 'nowrap' }}>S.No</TableCell>
                   <TableCell
                     sx={{
                       position: 'sticky',
                       left: 0,
                       zIndex: 9,
-                      minWidth: 120
+                      minWidth: 250
                     }}
                   >
-                    Lead ID
+                    Full Name
                   </TableCell>
-                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>First Name</TableCell>
+                  {/* <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>First Name</TableCell> */}
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Company</TableCell>
                   <TableCell sx={{ minWidth: 50, maxWidth: 80, whiteSpace: 'nowrap' }}>Flag</TableCell>
                   <TableCell>City</TableCell>
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Timeline to Buy</TableCell>
                   <TableCell>Status</TableCell>
+                  <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Next Follow-up</TableCell>
 
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Assigned To</TableCell>
                   <TableCell>Source</TableCell>
                   <TableCell>Score</TableCell>
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Label</TableCell>
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Last Contact Date</TableCell>
-                  <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Next Follow-up</TableCell>
                   <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Created By</TableCell>
                   {/* <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Action</TableCell> */}
                 </TableRow>
@@ -903,13 +751,13 @@ useEffect(() => {
                     ))
                   : data.map((row, i) => (
                       <TableRow key={i}>
-                         <TableCell
+                        <TableCell
                           sx={{
                             backgroundColor: '#fff',
-                            minWidth: 100
+                            minWidth: 50
                           }}
                         >
-                           <strong>{page * limit + i + 1}</strong>
+                          <strong>{page * limit + i + 1}</strong>
                         </TableCell>
                         <TableCell
                           sx={{
@@ -917,17 +765,26 @@ useEffect(() => {
                             left: 0,
                             zIndex: 2,
                             backgroundColor: '#fff',
-                            minWidth: 120
+                            minWidth: 250
                           }}
                         >
                           <Link
                             href={`/view/lead-form/${encodeURIComponent(encryptCryptoRes(row.lead_id))}`}
                             style={{ textDecoration: 'none' }}
                           >
-                            <strong>{row.lead_id}</strong>
+                            <strong>
+                              <Tooltip
+                                title={`${row.values['First Name'] || ''} ${row.values['Last Name'] || ''}`.trim()}
+                                arrow
+                              >
+                                <span>
+                                  {`${row.values['First Name'] || ''} ${row.values['Last Name'] || ''}`.trim() || ''}
+                                </span>
+                              </Tooltip>
+                            </strong>
                           </Link>
                         </TableCell>
-                        <TableCell
+                        {/* <TableCell
                           sx={{
                             minWidth: 180,
                             maxWidth: 200,
@@ -939,7 +796,7 @@ useEffect(() => {
                           <Tooltip title={row.values['First Name'] || ''} arrow>
                             {row.values['First Name'] || ''}
                           </Tooltip>
-                        </TableCell>
+                        </TableCell> */}
                         <TableCell
                           sx={{
                             minWidth: 180,
@@ -1033,7 +890,9 @@ useEffect(() => {
                             size='small'
                           />
                         </TableCell>
-
+                        <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                          {formatDateShort(row.values['Next Follow-up Date'])}
+                        </TableCell>
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           {row.assignedTo}
                         </TableCell>
@@ -1090,9 +949,7 @@ useEffect(() => {
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           {converDayJsDate(row.updatedAt)}
                         </TableCell>
-                        <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
-                          {formatDateShort(row.values['Next Follow-up Date'])}
-                        </TableCell>
+
                         <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           {row.createdByName}
                         </TableCell>
@@ -1134,7 +991,7 @@ useEffect(() => {
               setLimit(parseInt(e.target.value, 10))
               setPage(0)
             }}
-            rowsPerPageOptions={[5, 10, 20, 50, 100]}
+            rowsPerPageOptions={[10, 20, 50, 100]}
           />
         </Grid>
       </Grid>

@@ -263,7 +263,6 @@ const OpportunityTable = () => {
       })
       const json = await res.json()
       if (json.success) {
-        console.log(json.data, '<<< dataaaaaa')
         setData(json.data)
         setDataFilter(json.data)
         setTotal(json.total)
@@ -334,7 +333,7 @@ const OpportunityTable = () => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${getToken}`
       }
-console.log("cal4")
+      console.log("cal4")
       const res = await fetch(`/api/v1/admin/lead-form/list?${query}`, {
         method: 'GET',
         headers: header
@@ -499,7 +498,6 @@ console.log("cal4")
   }
 
   const uniqueSources = useMemo(() => {
-    console.log(fieldConfig, '<<< Field Config')
     if (fieldConfig && Array.isArray(fieldConfig['Lead Source'])) {
       return [...fieldConfig['Lead Source']]
     }
@@ -559,13 +557,13 @@ console.log("cal4")
  useEffect(() => {
 
 
-console.log(sections,"<<< SECTIONSSS")
 
   if (!fetched) {
-    console.log("cal 5")
+    console.log("list 1111")
     fetchData()
     setFetched(true)
   }else if(fetched && sections){
+    console.log("list 222")
     fetchData()
   }
 }, [sections, fetched])
@@ -602,8 +600,10 @@ useEffect(() => {
   // Only trigger after user stops typing for 500ms
   const handler = setTimeout(() => {
     if (hasOtherFilters || hasDateRange || (search && search.trim() !== '')) {
+      console.log("list 3333")
       fetchFilterData()
     } else if(!hasSearch) {
+       console.log("list 4444")
       fetchFilterData()
     }
   }, 500) // 500ms delay

@@ -70,7 +70,7 @@ export default function TaskList() {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${getToken}`
       }
-
+      console.log("call task List 1")
       const res = await fetch('/api/v1/admin/lead-form/list', {
         method: 'POST',
         headers: header,

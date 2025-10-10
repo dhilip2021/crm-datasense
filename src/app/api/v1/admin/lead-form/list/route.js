@@ -27,6 +27,8 @@ export async function GET(req) {
     const limit = parseInt(searchParams.get('limit') || '10', 10)
     const from = searchParams.get('from')
     const to = searchParams.get('to')
+    const fromFollow = searchParams.get('fromFollowDate')
+    const toFollow = searchParams.get('toFollowDate')
 
     // 🟢 STEP 1: Find current user role
     const userRole = await UserRole.findOne({ c_role_id: verified.data.c_role_id }).lean()
@@ -75,7 +77,7 @@ export async function GET(req) {
         query.$or = [
           { c_createdBy: verified.data.user_id }, // ✅ own leads always
           { c_role_id: { $in: lowerRoleIds } }, // ✅ lower roles
-          { 'values.Assigned To': String(verified.data.user_id) } 
+          { 'values.Assigned To': String(verified.data.user_id) }
         ]
       }
     }
@@ -98,27 +100,26 @@ export async function GET(req) {
     //   query.$and.push(searchFilter)
     // }
 
-
     // 🔍 Search
-if (search) {
-  const searchFilter = {
-    $or: [
-      { lead_id: { $regex: search, $options: 'i' } },
-      { 'values.First Name': { $regex: search, $options: 'i' } },
-      { 'values.Last Name': { $regex: search, $options: 'i' } },
-      { 'values.Company': { $regex: search, $options: 'i' } },
-      { 'values.Email': { $regex: search, $options: 'i' } },
-      { 'values.Phone': { $regex: search, $options: 'i' } },
-      { 'values.City': { $regex: search, $options: 'i' } },
-      { 'values.Job Title': { $regex: search, $options: 'i' } },
-      { 'values.Notes.note': { $regex: search, $options: 'i' } }, // 👈 NEW LINE
-      { 'values.Notes.title': { $regex: search, $options: 'i' } } // optional
-    ]
-  }
+    if (search) {
+      const searchFilter = {
+        $or: [
+          { lead_id: { $regex: search, $options: 'i' } },
+          { 'values.First Name': { $regex: search, $options: 'i' } },
+          { 'values.Last Name': { $regex: search, $options: 'i' } },
+          { 'values.Company': { $regex: search, $options: 'i' } },
+          { 'values.Email': { $regex: search, $options: 'i' } },
+          { 'values.Phone': { $regex: search, $options: 'i' } },
+          { 'values.City': { $regex: search, $options: 'i' } },
+          { 'values.Job Title': { $regex: search, $options: 'i' } },
+          { 'values.Notes.note': { $regex: search, $options: 'i' } }, // 👈 NEW LINE
+          { 'values.Notes.title': { $regex: search, $options: 'i' } } // optional
+        ]
+      }
 
-  query.$and = query.$and || []
-  query.$and.push(searchFilter)
-}
+      query.$and = query.$and || []
+      query.$and.push(searchFilter)
+    }
 
     // 🔍 Status
     if (status) {
@@ -126,11 +127,11 @@ if (search) {
       query.$and.push({ 'values.Lead Status': { $regex: status, $options: 'i' } })
     }
 
-        // 🔍 Touch
+    // 🔍 Touch
     if (touch) {
       query.$and = query.$and || []
       // query.$and.push({ 'lead_touch': { $regex: touch, $options: 'i' } })
-      query.$and.push({ 'lead_touch': touch })
+      query.$and.push({ lead_touch: touch })
     }
 
     // 🔍 Source
@@ -143,14 +144,32 @@ if (search) {
       query.$and.push({ 'values.Assigned To': { $regex: assign, $options: 'i' } })
     }
 
-    // 🔍 Date Range
+    // // 🔍 Date Range
     if (from || to) {
       const dateFilter = {}
       if (from) dateFilter.$gte = new Date(from)
       if (to) dateFilter.$lte = new Date(to + 'T23:59:59')
 
       query.$and = query.$and || []
-      query.$and.push({ submittedAt: dateFilter })
+      query.$and.push({ createdAt: dateFilter })
+      //  submittedAt
+
+    }
+
+    // 🔍 Date Range Filter based on Next Follow-up Date
+    if (fromFollow || toFollow) {
+      const fromDate = fromFollow ? new Date(fromFollow) : null
+      const toDate = toFollow ? new Date(toFollow + 'T23:59:59') : null
+
+      query.$and = query.$and || []
+      query.$and.push({
+        $expr: {
+          $and: [
+            fromDate ? { $gte: [{ $toDate: '$values.Next Follow-up Date' }, fromDate] } : {},
+            toDate ? { $lte: [{ $toDate: '$values.Next Follow-up Date' }, toDate] } : {}
+          ].filter(Boolean)
+        }
+      })
     }
 
     // 🟢 Pagination
@@ -267,7 +286,7 @@ export async function POST(req) {
                 c_createdBy: '$c_createdBy',
                 'First Name': '$values.First Name',
                 'Last Name': '$values.Last Name',
-                'Company': '$values.Company',
+                Company: '$values.Company',
                 Phone: '$values.Phone'
               }
             ]

@@ -1,15 +1,15 @@
 // File: app/api/v1/admin/lead-form/[lead_id]/route.js
-// company name showing
 
 import { verifyAccessToken } from '@/helper/clientHelper'
 import connectMongoDB from '@/libs/mongodb'
 import { ItemMaster } from '@/models/ItemMasterModel'
 import Leadform from '@/models/Leadform'
 import { Organization } from '@/models/organizationModel' // 👈 Add this model import
+import { User } from '@/models/userModel' // 👈 Add user model
 import mongoose from 'mongoose'
 import { NextResponse } from 'next/server'
 
-// 🔥 Lead Scoring Logic (same as before)
+// 🧮 Lead Scoring Logic (same as before)
 const calculateLeadScore = values => {
   let score = 0
   const designation = values['Job Tilte']
@@ -34,21 +34,12 @@ const calculateLeadScore = values => {
   if (companySize && parseInt(companySize) > 50) score += 15
   if (
     industry &&
-    ['Logistics', 'Manufacturing', 'Logistics', 'FMCG', 'Education', 'Pharma', 'Retail'].includes(industry)
+    ['Logistics', 'Manufacturing', 'FMCG', 'Education', 'Pharma', 'Retail'].includes(industry)
   )
     score += 20
   if (
     location &&
-    [
-      'Kennethchester',
-      'North Austinville',
-      'Port Heathertown',
-      'South Samanthamouth',
-      'Chennai',
-      'Coimabtore',
-      'Bangalore',
-      'Delhi'
-    ].includes(location)
+    ['Chennai', 'Coimabtore', 'Bangalore', 'Delhi'].includes(location)
   )
     score += 10
 
@@ -93,7 +84,12 @@ export async function GET(req, { params }) {
       organization_id: lead.organization_id
     }).lean()
 
-    // 🧩 3. Populate item details if available
+    // 🧩 3. Fetch createdBy user details
+    const createdByUser = await User.findOne({
+      user_id: lead.c_createdBy
+    }).lean()
+
+    // 🧩 4. Populate item details if any
     if (lead?.items?.length) {
       await ItemMaster.populate(
         lead.items.flatMap(i => i.item_ref),
@@ -101,10 +97,11 @@ export async function GET(req, { params }) {
       )
     }
 
-    // ✅ 4. Attach organization_name to response
+    // ✅ 5. Merge all info
     const response = {
       ...lead,
-      organization_name: organization?.organization_name || null
+      organization_name: organization?.organization_name || null,
+      c_createdByName: createdByUser?.user_name || null
     }
 
     return NextResponse.json({ success: true, data: response })
@@ -116,7 +113,6 @@ export async function GET(req, { params }) {
     )
   }
 }
-
 
 // 🔁 PUT – Update lead by lead_id
 // export async function PUT(req, { params }) {
@@ -504,80 +500,6 @@ export async function PATCH(req, { params }) {
         message: 'Updated successfully',
         data: updated
       })
-
-      // if (updateNote) {
-      //   const noteId = toObjectId(noteFromBody._id)
-      //   // const noteId = new mongoose.Types.ObjectId(noteFromBody._id)
-      //   const updated = await Leadform.findOneAndUpdate(
-      //     { lead_id },
-      //     {
-      //       $set: {
-      //         'values.Notes.$[n].title': updateNote.title,
-      //         'values.Notes.$[n].note': updateNote.note,
-      //         'values.Notes.$[n].createdAt': updateNote.createdAt,
-      //         'values.Notes.$[n].createdBy': updateNote.createdBy,
-      //         updatedAt: new Date()
-      //       }
-      //     },
-      //     {
-      //       arrayFilters: [{ 'n._id': noteId }],
-      //       new: true
-      //     }
-      //   )
-
-      //   return NextResponse.json({
-      //     success: true,
-      //     message: 'Note updated successfully',
-      //     data: updated
-      //   })
-      // }
-
-      // if (newTask) {
-      //   newTask._id = toObjectId(newTask._id)
-      //   updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Activity.0.task': newTask }
-      // }
-
-      // if (updateTask) {
-
-      //   const taskId = toObjectId(taskFromBody._id)
-
-      //   const updatedTask = await Leadform.findOneAndUpdate(
-      //     { lead_id },
-      //     {
-      //       $set: {
-      //         'values.Activity.0.task.$[t].subject': updateTask.subject,
-      //         'values.Activity.0.task.$[t].dueDate': updateTask.dueDate,
-      //         'values.Activity.0.task.$[t].priority': updateTask.priority,
-      //         'values.Activity.0.task.$[t].status': updateTask.status,
-      //         'values.Activity.0.task.$[t].owner': updateTask.owner,
-      //         'values.Activity.0.task.$[t].reminderEnabled': updateTask.reminderEnabled,
-      //         'values.Activity.0.task.$[t].reminderDate': updateTask.reminderDate,
-      //         'values.Activity.0.task.$[t].reminderTime': updateTask.reminderTime,
-      //         'values.Activity.0.task.$[t].alertType': updateTask.alertType,
-      //         'values.Activity.0.task.$[t].createdAt': updateTask.createdAt,
-      //         updatedAt: new Date()
-      //       }
-      //     },
-      //     {
-      //       arrayFilters: [{ 't._id': taskId }],
-      //       new: true
-      //     }
-      //   )
-
-      //   console.log(updatedTask, '<<< updatedTask')
-
-      //   return NextResponse.json({
-      //     success: true,
-      //     message: 'Task updated successfully',
-      //     data: updatedTask
-      //   })
-      // }
-
-      // if (!updateQuery.$push) {
-      //   return NextResponse.json({ success: false, message: 'Nothing to update' }, { status: 400 })
-      // }
-
-      // const updated = await Leadform.findOneAndUpdate({ lead_id }, updateQuery, { new: true, upsert: true })
     } catch (error) {
       console.error('⨯ Add note+activity error:', error)
       return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })

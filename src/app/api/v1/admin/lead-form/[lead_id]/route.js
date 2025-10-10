@@ -56,6 +56,7 @@ const calculateLeadScore = values => {
   return { lead_score: score, lead_label: label }
 }
 
+
 export async function GET(req, { params }) {
   const verified = verifyAccessToken()
   await connectMongoDB()
@@ -342,250 +343,359 @@ const toObjectId = id => {
   }
 }
 
+// export async function PATCH(req, { params }) {
+//   const verified = verifyAccessToken()
+//   await connectMongoDB()
+//   const { lead_id } = params
+//   const body = await req.json()
+
+//   if (verified.success) {
+//     try {
+//       const lead = await Leadform.findOne({ lead_id })
+//       if (!lead) {
+//         return NextResponse.json({ success: false, message: 'Lead not found' }, { status: 404 })
+//       }
+
+//       const noteFromBody = body.values?.Notes?.[0] || {}
+
+//       let newNote = null
+//       let updateNote = null
+//       let newTask = null
+//       let updateTask = null
+
+//       if (noteFromBody && (noteFromBody.title || noteFromBody.note)) {
+//         if (noteFromBody._id) {
+//           console.log('coming 1')
+
+//           updateNote = {
+//             title: noteFromBody.title || null,
+//             note: noteFromBody.note || null,
+//             createdAt: noteFromBody.createdAt ? new Date(noteFromBody.createdAt) : new Date(),
+//             createdBy: noteFromBody.createdBy || null
+//           }
+//         } else {
+//           console.log('coming 2')
+//           newNote = {
+//             _id: new mongoose.Types.ObjectId(),
+//             title: noteFromBody.title || null,
+//             note: noteFromBody.note || null,
+//             createdAt: noteFromBody.createdAt ? new Date(noteFromBody.createdAt) : new Date(),
+//             createdBy: noteFromBody.createdBy || null
+//           }
+//         }
+//       }
+
+//       const activityFromBody = body.values?.Activity?.[0] || {}
+//       const taskFromBody = activityFromBody.task?.[0] || {}
+
+//       if (taskFromBody && (taskFromBody.subject || taskFromBody.dueDate)) {
+//         if (taskFromBody._id) {
+//           updateTask = {
+//             subject: taskFromBody.subject || null,
+//             dueDate: taskFromBody.dueDate ? new Date(taskFromBody.dueDate) : null,
+//             priority: taskFromBody.priority || null,
+//             status: taskFromBody.status || null,
+//             owner: taskFromBody.owner || null,
+//             reminderEnabled: !!taskFromBody.reminderEnabled,
+//             reminderDate: taskFromBody.reminderDate ? new Date(taskFromBody.reminderDate) : null,
+//             reminderTime: taskFromBody.reminderTime || null,
+//             alertType: taskFromBody.alertType || 'Email',
+//             createdAt: new Date()
+//           }
+//         } else {
+//           newTask = {
+//             _id: new mongoose.Types.ObjectId(),
+//             subject: taskFromBody.subject || null,
+//             dueDate: taskFromBody.dueDate ? new Date(taskFromBody.dueDate) : null,
+//             priority: taskFromBody.priority || null,
+//             status: taskFromBody.status || null,
+//             owner: taskFromBody.owner || null,
+//             reminderEnabled: !!taskFromBody.reminderEnabled,
+//             reminderDate: taskFromBody.reminderDate ? new Date(taskFromBody.reminderDate) : null,
+//             reminderTime: taskFromBody.reminderTime || null,
+//             alertType: taskFromBody.alertType || 'Email',
+//             createdAt: new Date()
+//           }
+//         }
+//       }
+
+
+//       const updateFields = { updatedAt: new Date() }
+
+//       if (body.lead_touch !== undefined) {
+//         updateFields.lead_touch = body.lead_touch
+//       }
+
+//       const updateQuery = { $set: updateFields }
+
+//       if (newNote) {
+//         newNote._id = toObjectId(newNote._id)
+//         updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Notes': newNote }
+//       }
+
+//       if (newTask) {
+//         newTask._id = toObjectId(newTask._id)
+//         updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Activity.0.task': newTask }
+//       }
+
+//       if (updateNote) {
+//         const noteId = toObjectId(noteFromBody._id)
+//         const updated = await Leadform.findOneAndUpdate(
+//           { lead_id },
+//           {
+//             $set: {
+//               'values.Notes.$[n].title': updateNote.title,
+//               'values.Notes.$[n].note': updateNote.note,
+//               'values.Notes.$[n].createdAt': updateNote.createdAt,
+//               'values.Notes.$[n].createdBy': updateNote.createdBy,
+//               lead_touch: body.lead_touch, // ✅ also update here
+//               updatedAt: new Date()
+//             }
+//           },
+//           {
+//             arrayFilters: [{ 'n._id': noteId }],
+//             new: true
+//           }
+//         )
+//         return NextResponse.json({ success: true, message: 'Note updated successfully', data: updated })
+//       }
+
+//       if (updateTask) {
+//         const taskId = toObjectId(taskFromBody._id)
+//         const updatedTask = await Leadform.findOneAndUpdate(
+//           { lead_id },
+//           {
+//             $set: {
+//               'values.Activity.0.task.$[t].subject': updateTask.subject,
+//               'values.Activity.0.task.$[t].dueDate': updateTask.dueDate,
+//               'values.Activity.0.task.$[t].priority': updateTask.priority,
+//               'values.Activity.0.task.$[t].status': updateTask.status,
+//               'values.Activity.0.task.$[t].owner': updateTask.owner,
+//               'values.Activity.0.task.$[t].reminderEnabled': updateTask.reminderEnabled,
+//               'values.Activity.0.task.$[t].reminderDate': updateTask.reminderDate,
+//               'values.Activity.0.task.$[t].reminderTime': updateTask.reminderTime,
+//               'values.Activity.0.task.$[t].alertType': updateTask.alertType,
+//               'values.Activity.0.task.$[t].createdAt': updateTask.createdAt,
+//               lead_touch: body.lead_touch, // ✅ also update here
+//               updatedAt: new Date()
+//             }
+//           },
+//           {
+//             arrayFilters: [{ 't._id': taskId }],
+//             new: true
+//           }
+//         )
+//         return NextResponse.json({ success: true, message: 'Task updated successfully', data: updatedTask })
+//       }
+
+//       const updated = await Leadform.findOneAndUpdate({ lead_id }, updateQuery, { new: true, upsert: true })
+
+//       return NextResponse.json({
+//         success: true,
+//         message: 'Updated successfully',
+//         data: updated
+//       })
+//     } catch (error) {
+//       console.error('⨯ Add note+activity error:', error)
+//       return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
+//     }
+//   } else {
+//     return NextResponse.json(
+//       {
+//         success: false,
+//         message: '',
+//         error: 'token expired!'
+//       },
+//       { status: 400 }
+//     )
+//   }
+// }
+
+
+
+
+
 export async function PATCH(req, { params }) {
   const verified = verifyAccessToken()
   await connectMongoDB()
   const { lead_id } = params
   const body = await req.json()
 
-  if (verified.success) {
-    try {
-      const lead = await Leadform.findOne({ lead_id })
-      if (!lead) {
-        return NextResponse.json({ success: false, message: 'Lead not found' }, { status: 404 })
-      }
-
-      // ---------------- NOTES ----------------
-      const noteFromBody = body.values?.Notes?.[0] || {}
-
-      let newNote = null
-      let updateNote = null
-      let newTask = null
-      let updateTask = null
-
-      if (noteFromBody && (noteFromBody.title || noteFromBody.note)) {
-        if (noteFromBody._id) {
-          console.log('coming 1')
-
-          updateNote = {
-            title: noteFromBody.title || null,
-            note: noteFromBody.note || null,
-            createdAt: noteFromBody.createdAt ? new Date(noteFromBody.createdAt) : new Date(),
-            createdBy: noteFromBody.createdBy || null
-          }
-        } else {
-          console.log('coming 2')
-          newNote = {
-            _id: new mongoose.Types.ObjectId(),
-            title: noteFromBody.title || null,
-            note: noteFromBody.note || null,
-            createdAt: noteFromBody.createdAt ? new Date(noteFromBody.createdAt) : new Date(),
-            createdBy: noteFromBody.createdBy || null
-          }
-        }
-      }
-
-      // ---------------- TASK ----------------
-      const activityFromBody = body.values?.Activity?.[0] || {}
-      const taskFromBody = activityFromBody.task?.[0] || {}
-
-      if (taskFromBody && (taskFromBody.subject || taskFromBody.dueDate)) {
-        if (taskFromBody._id) {
-          updateTask = {
-            subject: taskFromBody.subject || null,
-            dueDate: taskFromBody.dueDate ? new Date(taskFromBody.dueDate) : null,
-            priority: taskFromBody.priority || null,
-            status: taskFromBody.status || null,
-            owner: taskFromBody.owner || null,
-            reminderEnabled: !!taskFromBody.reminderEnabled,
-            reminderDate: taskFromBody.reminderDate ? new Date(taskFromBody.reminderDate) : null,
-            reminderTime: taskFromBody.reminderTime || null,
-            alertType: taskFromBody.alertType || 'Email',
-            createdAt: new Date()
-          }
-        } else {
-          newTask = {
-            _id: new mongoose.Types.ObjectId(),
-            subject: taskFromBody.subject || null,
-            dueDate: taskFromBody.dueDate ? new Date(taskFromBody.dueDate) : null,
-            priority: taskFromBody.priority || null,
-            status: taskFromBody.status || null,
-            owner: taskFromBody.owner || null,
-            reminderEnabled: !!taskFromBody.reminderEnabled,
-            reminderDate: taskFromBody.reminderDate ? new Date(taskFromBody.reminderDate) : null,
-            reminderTime: taskFromBody.reminderTime || null,
-            alertType: taskFromBody.alertType || 'Email',
-            createdAt: new Date()
-          }
-        }
-      }
-
-      // ---------------- UPDATE QUERY ----------------
-
-      const updateFields = { updatedAt: new Date() }
-
-      // lead_touch set panna
-      if (body.lead_touch !== undefined) {
-        updateFields.lead_touch = body.lead_touch
-      }
-
-      const updateQuery = { $set: updateFields }
-
-      // Notes push
-      if (newNote) {
-        newNote._id = toObjectId(newNote._id)
-        updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Notes': newNote }
-      }
-
-      // Tasks push
-      if (newTask) {
-        newTask._id = toObjectId(newTask._id)
-        updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Activity.0.task': newTask }
-      }
-
-      if (updateNote) {
-        const noteId = toObjectId(noteFromBody._id)
-        const updated = await Leadform.findOneAndUpdate(
-          { lead_id },
-          {
-            $set: {
-              'values.Notes.$[n].title': updateNote.title,
-              'values.Notes.$[n].note': updateNote.note,
-              'values.Notes.$[n].createdAt': updateNote.createdAt,
-              'values.Notes.$[n].createdBy': updateNote.createdBy,
-              lead_touch: body.lead_touch, // ✅ also update here
-              updatedAt: new Date()
-            }
-          },
-          {
-            arrayFilters: [{ 'n._id': noteId }],
-            new: true
-          }
-        )
-        return NextResponse.json({ success: true, message: 'Note updated successfully', data: updated })
-      }
-
-      if (updateTask) {
-        const taskId = toObjectId(taskFromBody._id)
-        const updatedTask = await Leadform.findOneAndUpdate(
-          { lead_id },
-          {
-            $set: {
-              'values.Activity.0.task.$[t].subject': updateTask.subject,
-              'values.Activity.0.task.$[t].dueDate': updateTask.dueDate,
-              'values.Activity.0.task.$[t].priority': updateTask.priority,
-              'values.Activity.0.task.$[t].status': updateTask.status,
-              'values.Activity.0.task.$[t].owner': updateTask.owner,
-              'values.Activity.0.task.$[t].reminderEnabled': updateTask.reminderEnabled,
-              'values.Activity.0.task.$[t].reminderDate': updateTask.reminderDate,
-              'values.Activity.0.task.$[t].reminderTime': updateTask.reminderTime,
-              'values.Activity.0.task.$[t].alertType': updateTask.alertType,
-              'values.Activity.0.task.$[t].createdAt': updateTask.createdAt,
-              lead_touch: body.lead_touch, // ✅ also update here
-              updatedAt: new Date()
-            }
-          },
-          {
-            arrayFilters: [{ 't._id': taskId }],
-            new: true
-          }
-        )
-        return NextResponse.json({ success: true, message: 'Task updated successfully', data: updatedTask })
-      }
-
-      const updated = await Leadform.findOneAndUpdate({ lead_id }, updateQuery, { new: true, upsert: true })
-
-      return NextResponse.json({
-        success: true,
-        message: 'Updated successfully',
-        data: updated
-      })
-
-      // if (updateNote) {
-      //   const noteId = toObjectId(noteFromBody._id)
-      //   // const noteId = new mongoose.Types.ObjectId(noteFromBody._id)
-      //   const updated = await Leadform.findOneAndUpdate(
-      //     { lead_id },
-      //     {
-      //       $set: {
-      //         'values.Notes.$[n].title': updateNote.title,
-      //         'values.Notes.$[n].note': updateNote.note,
-      //         'values.Notes.$[n].createdAt': updateNote.createdAt,
-      //         'values.Notes.$[n].createdBy': updateNote.createdBy,
-      //         updatedAt: new Date()
-      //       }
-      //     },
-      //     {
-      //       arrayFilters: [{ 'n._id': noteId }],
-      //       new: true
-      //     }
-      //   )
-
-      //   return NextResponse.json({
-      //     success: true,
-      //     message: 'Note updated successfully',
-      //     data: updated
-      //   })
-      // }
-
-      // if (newTask) {
-      //   newTask._id = toObjectId(newTask._id)
-      //   updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Activity.0.task': newTask }
-      // }
-
-      // if (updateTask) {
-
-      //   const taskId = toObjectId(taskFromBody._id)
-
-      //   const updatedTask = await Leadform.findOneAndUpdate(
-      //     { lead_id },
-      //     {
-      //       $set: {
-      //         'values.Activity.0.task.$[t].subject': updateTask.subject,
-      //         'values.Activity.0.task.$[t].dueDate': updateTask.dueDate,
-      //         'values.Activity.0.task.$[t].priority': updateTask.priority,
-      //         'values.Activity.0.task.$[t].status': updateTask.status,
-      //         'values.Activity.0.task.$[t].owner': updateTask.owner,
-      //         'values.Activity.0.task.$[t].reminderEnabled': updateTask.reminderEnabled,
-      //         'values.Activity.0.task.$[t].reminderDate': updateTask.reminderDate,
-      //         'values.Activity.0.task.$[t].reminderTime': updateTask.reminderTime,
-      //         'values.Activity.0.task.$[t].alertType': updateTask.alertType,
-      //         'values.Activity.0.task.$[t].createdAt': updateTask.createdAt,
-      //         updatedAt: new Date()
-      //       }
-      //     },
-      //     {
-      //       arrayFilters: [{ 't._id': taskId }],
-      //       new: true
-      //     }
-      //   )
-
-      //   console.log(updatedTask, '<<< updatedTask')
-
-      //   return NextResponse.json({
-      //     success: true,
-      //     message: 'Task updated successfully',
-      //     data: updatedTask
-      //   })
-      // }
-
-      // if (!updateQuery.$push) {
-      //   return NextResponse.json({ success: false, message: 'Nothing to update' }, { status: 400 })
-      // }
-
-      // const updated = await Leadform.findOneAndUpdate({ lead_id }, updateQuery, { new: true, upsert: true })
-    } catch (error) {
-      console.error('⨯ Add note+activity error:', error)
-      return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
-    }
-  } else {
+  if (!verified.success) {
     return NextResponse.json(
-      {
-        success: false,
-        message: '',
-        error: 'token expired!'
-      },
+      { success: false, message: '', error: 'token expired!' },
       { status: 400 }
     )
   }
+
+  try {
+    const lead = await Leadform.findOne({ lead_id })
+    if (!lead) {
+      return NextResponse.json({ success: false, message: 'Lead not found' }, { status: 404 })
+    }
+
+    // ---------------- NOTES ----------------
+    const noteFromBody = body.values?.Notes?.[0] || {}
+    let newNote = null
+    let updateNote = null
+    let newTask = null
+    let updateTask = null
+
+    if (noteFromBody && (noteFromBody.title || noteFromBody.note)) {
+      if (noteFromBody._id) {
+        updateNote = {
+          title: noteFromBody.title || null,
+          note: noteFromBody.note || null,
+          createdAt: noteFromBody.createdAt ? new Date(noteFromBody.createdAt) : new Date(),
+          createdBy: noteFromBody.createdBy || null
+        }
+      } else {
+        newNote = {
+          _id: new mongoose.Types.ObjectId(),
+          title: noteFromBody.title || null,
+          note: noteFromBody.note || null,
+          createdAt: noteFromBody.createdAt ? new Date(noteFromBody.createdAt) : new Date(),
+          createdBy: noteFromBody.createdBy || null
+        }
+      }
+    }
+
+    // ---------------- TASK ----------------
+    const activityFromBody = body.values?.Activity?.[0] || {}
+    const taskFromBody = activityFromBody.task?.[0] || {}
+
+    if (taskFromBody && (taskFromBody.subject || taskFromBody.dueDate)) {
+      if (taskFromBody._id) {
+        updateTask = {
+          subject: taskFromBody.subject || null,
+          dueDate: taskFromBody.dueDate ? new Date(taskFromBody.dueDate) : null,
+          priority: taskFromBody.priority || null,
+          status: taskFromBody.status || null,
+          owner: taskFromBody.owner || null,
+          reminderEnabled: !!taskFromBody.reminderEnabled,
+          reminderDate: taskFromBody.reminderDate ? new Date(taskFromBody.reminderDate) : null,
+          reminderTime: taskFromBody.reminderTime || null,
+          alertType: taskFromBody.alertType || 'Email',
+          createdAt: new Date()
+        }
+      } else {
+        newTask = {
+          _id: new mongoose.Types.ObjectId(),
+          subject: taskFromBody.subject || null,
+          dueDate: taskFromBody.dueDate ? new Date(taskFromBody.dueDate) : null,
+          priority: taskFromBody.priority || null,
+          status: taskFromBody.status || null,
+          owner: taskFromBody.owner || null,
+          reminderEnabled: !!taskFromBody.reminderEnabled,
+          reminderDate: taskFromBody.reminderDate ? new Date(taskFromBody.reminderDate) : null,
+          reminderTime: taskFromBody.reminderTime || null,
+          alertType: taskFromBody.alertType || 'Email',
+          createdAt: new Date()
+        }
+      }
+    }
+
+    // ---------------- UPDATE QUERY ----------------
+    const updateFields = { updatedAt: new Date() }
+
+    // lead_touch set panna
+    if (body.lead_touch !== undefined) {
+      updateFields.lead_touch = body.lead_touch
+    }
+
+    const updateQuery = { $set: updateFields }
+
+    // ✅ Generic field updates (like Next Follow-up Date)
+    const valuesToUpdate = body.values || {}
+    for (const [key, val] of Object.entries(valuesToUpdate)) {
+      // skip arrays handled separately
+      if (['Notes', 'Activity'].includes(key)) continue
+
+      updateQuery.$set[`values.${key}`] = val
+    }
+
+    // Notes push
+    if (newNote) {
+      newNote._id = toObjectId(newNote._id)
+      updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Notes': newNote }
+    }
+
+    // Tasks push
+    if (newTask) {
+      newTask._id = toObjectId(newTask._id)
+      updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Activity.0.task': newTask }
+    }
+
+    // Update note
+    if (updateNote) {
+      const noteId = toObjectId(noteFromBody._id)
+      const updated = await Leadform.findOneAndUpdate(
+        { lead_id },
+        {
+          $set: {
+            'values.Notes.$[n].title': updateNote.title,
+            'values.Notes.$[n].note': updateNote.note,
+            'values.Notes.$[n].createdAt': updateNote.createdAt,
+            'values.Notes.$[n].createdBy': updateNote.createdBy,
+            lead_touch: body.lead_touch,
+            updatedAt: new Date()
+          }
+        },
+        { arrayFilters: [{ 'n._id': noteId }], new: true }
+      )
+      return NextResponse.json({ success: true, message: 'Note updated successfully', data: updated })
+    }
+
+    // Update task
+    if (updateTask) {
+  const taskId = toObjectId(taskFromBody._id)
+  const updateSet = {
+    'values.Activity.0.task.$[t].subject': updateTask.subject,
+    'values.Activity.0.task.$[t].dueDate': updateTask.dueDate,
+    'values.Activity.0.task.$[t].priority': updateTask.priority,
+    'values.Activity.0.task.$[t].status': updateTask.status,
+    'values.Activity.0.task.$[t].owner': updateTask.owner,
+    'values.Activity.0.task.$[t].reminderEnabled': updateTask.reminderEnabled,
+    'values.Activity.0.task.$[t].reminderDate': updateTask.reminderDate,
+    'values.Activity.0.task.$[t].reminderTime': updateTask.reminderTime,
+    'values.Activity.0.task.$[t].alertType': updateTask.alertType,
+    'values.Activity.0.task.$[t].createdAt': updateTask.createdAt,
+    lead_touch: body.lead_touch,
+    updatedAt: new Date()
+  }
+
+  // ✅ Add Next Follow-up Date if present in body
+  if (body.values?.['Next Follow-up Date']) {
+    updateSet['values.Next Follow-up Date'] = body.values['Next Follow-up Date']
+  }
+
+  const updatedTask = await Leadform.findOneAndUpdate(
+    { lead_id },
+    { $set: updateSet },
+    { arrayFilters: [{ 't._id': taskId }], new: true }
+  )
+
+  return NextResponse.json({
+    success: true,
+    message: 'Task updated successfully',
+    data: updatedTask
+  })
 }
+
+    // Final update (includes Next Follow-up Date and other fields)
+    const updated = await Leadform.findOneAndUpdate({ lead_id }, updateQuery, {
+      new: true,
+      upsert: true
+    })
+
+    return NextResponse.json({
+      success: true,
+      message: 'Updated successfully',
+      data: updated
+    })
+  } catch (error) {
+    console.error('⨯ Add note+activity error:', error)
+    return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
+  }
+}
+

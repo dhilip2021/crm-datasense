@@ -87,6 +87,14 @@ const LeadDetailView = () => {
   const [createDeal, setCreateDeal] = useState(false)
   const [ownerName, setOwnerName] = useState('')
 
+    // 🧩 Prefill default values from leadData
+    const [dealData, setDealData] = useState({
+      amount: '',
+      dealName: leadData?.values?.Company || accountName || '',
+      closingDate: '',
+      stage: leadData?.values?.['Lead Status'] || 'Qualification'
+    })
+
   // 🔹 Flatten helper
   const flattenFields = sections => {
     const flat = []
@@ -268,82 +276,12 @@ const LeadDetailView = () => {
   }
 
   const handleConvert = () => {
-
     convertLeadFn(leadData,createDeal) 
     onClose()
   }
 
-  // const convertDealFn = async (leadData) => {
-
-  //    console.log(leadData,"<<< BODYYYYYYYYYY")
 
 
-  //     const id= leadData?._id;
-  //   const lead_name= leadData?.lead_name;
-
-  //   const original = lead_name
-  //   const nextLeadName = original.replace(/lead/i, 'OPPORTUNITY')
-
-  //   const slugLeadString = nextLeadName.replace(/[^\w\s]|_/g, '')
-
-  //   const slug_lead_name = slugify(slugLeadString, {
-  //     replacement: '-',
-  //     remove: undefined,
-  //     lower: true,
-  //     strict: false,
-  //     locale: 'vi',
-  //     trim: true
-  //   })
-
-  //   const body = {
-  //     Id: id,
-  //     form_name: 'opportunity-form',
-  //     lead_name: nextLeadName,
-  //     lead_slug_name: slug_lead_name
-  //   }
-
-
-   
-
-  //   // try {
-  //   //   const updatedLeadValues = {
-  //   //     _id: id,
-  //   //     form_name: 'opportunity-form',
-  //   //     lead_name: nextLeadName,
-  //   //     lead_slug_name: slug_lead_name,
-  //   //     lead_touch: 'touch',
-  //   //     updatedAt: new Date().toISOString()
-  //   //   }
-  //   //   setLoading(true)
-  //   //   // 🔹 Persist to API
-  //   //   const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
-  //   //     method: 'PUT',
-  //   //     headers: {
-  //   //       'Content-Type': 'application/json',
-  //   //       Authorization: `Bearer ${getToken}`
-  //   //     },
-  //   //     body: JSON.stringify(updatedLeadValues)
-  //   //   })
-
-  //   //   const result = await res.json()
-  //   //   setLoading(false)
-
-  //   //   if (!result.success) {
-  //   //     toast.error('Failed to update field')
-  //   //     fetchLeadFromId() // rollback to latest DB values
-  //   //   } else {
-  //   //     toast.success('Lead to Opportunity Successfully Converted', {
-  //   //       autoClose: 1000,
-  //   //       position: 'bottom-center',
-  //   //       hideProgressBar: true
-  //   //     })
-  //   //     router.push(`/app/opportunity`)
-  //   //   }
-  //   // } catch (err) {
-  //   //   toast.error('Error saving field')
-  //   //   console.error(err)
-  //   // }
-  // }
 
 
 
@@ -596,7 +534,7 @@ const convertLeadFn = async (leadData, createDeal) => {
           <Box>
             {/* <OpenActivities leadId={leadId} leadData={leadData} /> */}
 
-            <TaskTabs leadId={leadId} leadData={leadData} />
+            <TaskTabs leadId={leadId} leadData={leadData} fetchLeadFromId={fetchLeadFromId} />
           </Box>
         )}
 
@@ -689,6 +627,10 @@ const convertLeadFn = async (leadData, createDeal) => {
           setCreateDeal={setCreateDeal}
           ownerName={ownerName}
           handleConvert={handleConvert}
+          fieldConfig={fieldConfig}
+          leadData={leadData}
+          dealData={dealData}
+          setDealData={setDealData}
         />
       </Grid>
     </Grid>

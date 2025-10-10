@@ -105,18 +105,19 @@ const CustomersTable = () => {
       ...(filters.toDate && { to: dayjs(filters.toDate).format('YYYY-MM-DD') })
     })
 
-    try {
-      const res = await fetch(`/api/v1/admin/lead-form/list?${query}`)
-      const json = await res.json()
-      if (json.success) {
-        setData(json.data)
-        setTotal(json.total)
-      }
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
+    // try {
+    //   console.log("call task List 1")
+    //   const res = await fetch(`/api/v1/admin/lead-form/list?${query}`)
+    //   const json = await res.json()
+    //   if (json.success) {
+    //     setData(json.data)
+    //     setTotal(json.total)
+    //   }
+    // } catch (err) {
+    //   console.error(err)
+    // } finally {
+    //   setLoading(false)
+    // }
   }
 
   useEffect(() => {
