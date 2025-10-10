@@ -421,13 +421,26 @@ const LeadTable = () => {
 
     // ✅ Debounced API call — fires only once after 500ms
     const handler = setTimeout(() => {
+
+        console.log(fromDate,"<< fromDate")
+        console.log(toDate,"<< toDate")
+        console.log(fromFollowDate,"<< fromFollowDate")
+        console.log(toFollowDate,"<< toFollowDate")
+        console.log(otherFilters,"<< otherFilters")
       if (hasOtherFilters || hasDateRange || hasSearch || hasDateFollowRange) {
         console.log('📡 Fetch filtered data')
+        fetchFilterData()
       } else {
-        console.log('📡 Fetch default data (no filters)')
+        if(!fromDate && !toDate && !fromFollowDate && !toFollowDate){
+          console.log('📡 Fetch default data (no filters)')
+          fetchFilterData()
+        }
+
+        
+
       }
 
-      fetchFilterData()
+      
     }, 500)
 
     // ✅ Cleanup timeout on dependency change
