@@ -40,7 +40,7 @@ export default function KanbanView() {
   const organization_id = Cookies.get('organization_id')
   const user_id = Cookies.get('user_id')
   const getToken = Cookies.get('_token')
-  const form_name = 'lead-form'
+  const form_name = 'opportunities-form'
 
   const [kanbanData, setKanbanData] = useState([])
   const [loading, setLoading] = useState(false)
@@ -321,8 +321,8 @@ export default function KanbanView() {
                                   <Typography variant='body2' color='text.secondary'>
                                     {lead.items?.length > 0
                                       ? lead.items.map(order => (
-                                          <Box key={order.order_id} sx={{ mb: 0.5 }}>
-                                            <strong>{order.order_id}:</strong> <br />
+                                          <Box key={order.item_id} sx={{ mb: 0.5 }}>
+                                            <strong>{order.item_id}:</strong> <br />
                                             {order.item_ref.map(i => i.item_name).join(', ')}
                                           </Box>
                                         ))

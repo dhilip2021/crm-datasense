@@ -13,9 +13,6 @@ const topAccounts = [
 export default function TopAccountsCard() {
   return (
      <Card sx={{ p: 3 }}>
-      {/* <Typography variant='subtitle1' fontWeight={600} gutterBottom>
-        Top Accounts by Value
-      </Typography> */}
        <Typography variant='h6' fontWeight={600} mb={2}>
               Top Accounts by Value
             </Typography>

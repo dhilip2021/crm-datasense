@@ -9,10 +9,10 @@ import { NextResponse } from 'next/server'
 //   try {
 //     const { lead_id } = params
 //     const body = await req.json()
-//     const { order_id, items } = body
+//     const { item_id, items } = body
 
-//     if (!order_id) {
-//       return NextResponse.json({ success: false, message: 'order_id required' }, { status: 400 })
+//     if (!item_id) {
+//       return NextResponse.json({ success: false, message: 'item_id required' }, { status: 400 })
 //     }
 
 //     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -26,7 +26,7 @@ import { NextResponse } from 'next/server'
 //     }
 
 //     // 2️⃣ Find the particular order
-//     const order = lead.items.find(o => o.order_id === order_id)
+//     const order = lead.items.find(o => o.item_id === item_id)
 //     if (!order) {
 //       return NextResponse.json({ success: false, message: 'Order not found' }, { status: 404 })
 //     }
@@ -75,10 +75,10 @@ export async function PUT(req, { params }) {
   try {
     const { lead_id } = params
     const body = await req.json()
-    const { order_id, items } = body
+    const { item_id, items } = body
 
-    if (!order_id) {
-      return NextResponse.json({ success: false, message: 'order_id required' }, { status: 400 })
+    if (!item_id) {
+      return NextResponse.json({ success: false, message: 'item_id required' }, { status: 400 })
     }
 
     // 1️⃣ Find the lead
@@ -88,7 +88,7 @@ export async function PUT(req, { params }) {
     }
 
     // 2️⃣ Find the particular order
-    const order = lead.items.find(o => o.order_id === order_id)
+    const order = lead.items.find(o => o.item_id === item_id)
     if (!order) {
       return NextResponse.json({ success: false, message: 'Order not found' }, { status: 404 })
     }

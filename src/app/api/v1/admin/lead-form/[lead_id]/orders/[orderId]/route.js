@@ -4,12 +4,12 @@ import { NextResponse } from 'next/server'
 
 export async function DELETE(req, { params }) {
   await connectMongoDB()
-//   const { leadId, orderId } = params
+//   const { leadId, itemId } = params
 
-  const { lead_id, orderId } = params   // ⚠️ Mismatch check
+  const { lead_id, itemId } = params   // ⚠️ Mismatch check
   console.log(params,"<<< PARAMSSSSS")
 
-  if (!lead_id || !orderId) {
+  if (!lead_id || !itemId) {
     return NextResponse.json({ success: false, message: 'Missing parameters' }, { status: 400 })
   }
 
@@ -19,7 +19,7 @@ export async function DELETE(req, { params }) {
 
     // 🔹 Remove the order from lead.items
     const initialLength = lead.items.length
-    lead.items = lead.items.filter(o => o.order_id !== orderId)
+    lead.items = lead.items.filter(o => o.item_id !== itemId)
 
     if (lead.items.length === initialLength) {
       return NextResponse.json({ success: false, message: 'Order not found' }, { status: 404 })

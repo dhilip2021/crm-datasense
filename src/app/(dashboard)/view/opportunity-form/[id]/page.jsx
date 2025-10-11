@@ -35,6 +35,7 @@ import TaskTabs from './TaskTabs'
 import { getUserAllListApi } from '@/apiFunctions/ApiAction'
 import slugify from 'slugify'
 import ConvertDealDialog from './ConvertDealDialog'
+import ProposalDialogPage from './ProposalDialogPage'
 // import CloseActivities from './closeActivities'
 
 // ✅ Validation rules
@@ -305,23 +306,28 @@ const LeadDetailView = () => {
 
   const dealFnCall = (id, lead_name) => {
     setConfirm(true)
+   
   }
 
   const handleClose = () => {
     setConfirm(false)
-    setCreateDeal(false)
-    setDealData({
-       amount: '',
-    dealName: leadData?.values?.Company || accountName || '',
-    closingDate: null,
-    stage: leadData?.values?.['Lead Status'] || 'Qualification'
-    })
+    // setCreateDeal(false)
+    // setDealData({
+    //    amount: '',
+    // dealName: leadData?.values?.Company || accountName || '',
+    // closingDate: null,
+    // stage: leadData?.values?.['Lead Status'] || 'Qualification'
+    // })
     
   }
 
   const handleConvert = () => {
-    convertLeadFn(leadData, createDeal, dealData)
-    handleClose()
+
+    console.log(leadData,"<<< deal Data")
+
+
+    // convertLeadFn(leadData, createDeal, dealData)
+    // handleClose()
   }
 
   const convertLeadFn = async (leadData, createDeal, dealData) => {
@@ -371,8 +377,6 @@ const LeadDetailView = () => {
         lead_touch: 'touch',
         updatedAt: new Date().toISOString()
       }
-
-      console.log(payload, '<<< PAYLOADDDDD')
 
       // 🔹 If you want to update to API, uncomment below:
 
@@ -545,7 +549,7 @@ const LeadDetailView = () => {
           >
             <Tab label='Notes' />
             <Tab label='Activities' />
-            {/* <Tab label='Items' /> */}
+            <Tab label='Items' />
           </Tabs>
         </Box>
       </Grid>
@@ -586,7 +590,7 @@ const LeadDetailView = () => {
             onClick={() => dealFnCall(leadData?._id, leadData?.lead_name)}
           >
             {' '}
-            {loading ? <CircularProgress size={18} /> : 'Convert to Opportunity'}
+            {loading ? <CircularProgress size={18} /> : 'Send Quotation'}
           </Button>
         </Box>
         <Box
@@ -648,7 +652,7 @@ const LeadDetailView = () => {
             </Box>
           ))}
         </Box>
-        <ConvertDealDialog
+        {/* <ConvertDealDialog
           open={confirm}
           onClose={handleClose}
           accountName={accountName}
@@ -661,7 +665,15 @@ const LeadDetailView = () => {
           leadData={leadData}
           dealData={dealData}
           setDealData={setDealData}
+        /> */}
+
+        <ProposalDialogPage
+          open={confirm}
+          onClose={handleClose}
+          leadData={leadData}
         />
+
+
       </Grid>
     </Grid>
   )

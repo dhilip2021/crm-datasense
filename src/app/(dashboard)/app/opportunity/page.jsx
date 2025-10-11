@@ -153,7 +153,7 @@ const OpportunityTable = () => {
         updatedAt: row?.updatedAt,
         createdAt: row?.createdAt
       }
-      console.log("cal1")
+      console.log('cal1')
       // 🔹 Persist to API
       const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
         method: 'PUT',
@@ -168,7 +168,7 @@ const OpportunityTable = () => {
 
       if (!result.success) {
         toast.error('Failed to update field')
-        console.log("cal 6")
+        console.log('cal 6')
         fetchData()
       } else {
         toast.success('Flag Updated successfully', {
@@ -176,7 +176,7 @@ const OpportunityTable = () => {
           position: 'bottom-center',
           hideProgressBar: true
         })
-        console.log("cal 7")
+        console.log('cal 7')
         fetchData()
       }
     } catch (err) {
@@ -190,7 +190,7 @@ const OpportunityTable = () => {
     const lead_form = 'opportunity-form'
     // setLoader(true)
     try {
-      console.log("cal2")
+      console.log('cal2')
       const res = await fetch(
         `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${lead_form}`,
         {
@@ -256,7 +256,7 @@ const OpportunityTable = () => {
     }
 
     try {
-      console.log("cal3")
+      console.log('cal3')
       const res = await fetch(`/api/v1/admin/lead-form/list?${query}`, {
         method: 'GET',
         headers: header
@@ -333,12 +333,15 @@ const OpportunityTable = () => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${getToken}`
       }
-      console.log("cal4")
+      console.log('cal4')
       const res = await fetch(`/api/v1/admin/lead-form/list?${query}`, {
         method: 'GET',
         headers: header
       })
       const json = await res.json()
+
+      console.log(json.data)
+
       if (json.success) {
         setData(json.data)
         setTotal(json.total)
@@ -524,7 +527,7 @@ const OpportunityTable = () => {
     setLoader(true)
 
     try {
-      console.log("cal5")
+      console.log('cal5')
       const res = await fetch('/api/v1/admin/lead-form/import', {
         method: 'POST',
         headers: {
@@ -536,11 +539,11 @@ const OpportunityTable = () => {
       const data = await res.json()
       if (data?.success) {
         toast.success(data.message, { autoClose: 1000 })
-        console.log("cal 3")
+        console.log('cal 3')
         fetchData()
       } else {
         toast.error('File not uploaded !!!', { autoClose: 1000 })
-        console.log("cal 4")
+        console.log('cal 4')
         fetchData()
       }
     } catch (err) {
@@ -554,63 +557,58 @@ const OpportunityTable = () => {
     }
   }
 
- useEffect(() => {
-
-
-
-  if (!fetched) {
-    console.log("list 1111")
-    fetchData()
-    setFetched(true)
-  }else if(fetched && sections){
-    console.log("list 222")
-    fetchData()
-  }
-}, [sections, fetched])
-
+  useEffect(() => {
+    if (!fetched) {
+      console.log('list 1111')
+      fetchData()
+      setFetched(true)
+    } else if (fetched && sections) {
+      console.log('list 222')
+      fetchData()
+    }
+  }, [sections, fetched])
 
   useEffect(() => {
     fetchFormTemplate()
     getUserListFn()
   }, [page, limit])
 
+  //   useEffect(() => {
+  //   const { search, fromDate, toDate, ...otherFilters } = filters
 
-//   useEffect(() => {
-//   const { search, fromDate, toDate, ...otherFilters } = filters
+  //   const hasOtherFilters = Object.values(otherFilters).some(v => v !== '')
+  //   const hasDateRange = fromDate && toDate
+  //   const hasSearch = search && search.trim() !== ''
 
-//   const hasOtherFilters = Object.values(otherFilters).some(v => v !== '')
-//   const hasDateRange = fromDate && toDate
-//   const hasSearch = search && search.trim() !== ''
+  //   if (hasOtherFilters || hasDateRange || !hasSearch ) {
 
-//   if (hasOtherFilters || hasDateRange || !hasSearch ) {
-    
-//     fetchFilterData()
-//   } else {
-//     console.log("❌ skipped fetch (all filters empty)")
-//   }
-// }, [filters])
+  //     fetchFilterData()
+  //   } else {
+  //     console.log("❌ skipped fetch (all filters empty)")
+  //   }
+  // }, [filters])
 
-useEffect(() => {
-  const { search, fromDate, toDate, ...otherFilters } = filters
+  useEffect(() => {
+    const { search, fromDate, toDate, ...otherFilters } = filters
 
-  const hasOtherFilters = Object.values(otherFilters).some(v => v !== '')
-  const hasDateRange = fromDate && toDate
+    const hasOtherFilters = Object.values(otherFilters).some(v => v !== '')
+    const hasDateRange = fromDate && toDate
     const hasSearch = search && search.trim() !== ''
 
-  // Only trigger after user stops typing for 500ms
-  const handler = setTimeout(() => {
-    if (hasOtherFilters || hasDateRange || (search && search.trim() !== '')) {
-      console.log("list 3333")
-      fetchFilterData()
-    } else if(!hasSearch) {
-       console.log("list 4444")
-      fetchFilterData()
-    }
-  }, 500) // 500ms delay
+    // Only trigger after user stops typing for 500ms
+    const handler = setTimeout(() => {
+      if (hasOtherFilters || hasDateRange || (search && search.trim() !== '')) {
+        console.log('list 3333')
+        fetchFilterData()
+      } else if (!hasSearch) {
+        console.log('list 4444')
+        fetchFilterData()
+      }
+    }, 500) // 500ms delay
 
-  // Cleanup previous timeout if filters change again
-  return () => clearTimeout(handler)
-}, [filters])
+    // Cleanup previous timeout if filters change again
+    return () => clearTimeout(handler)
+  }, [filters])
 
   return (
     <Box px={2} py={2}>
@@ -620,7 +618,7 @@ useEffect(() => {
         {/* Left Side: Title */}
         <Grid item>
           <Typography variant='h6' fontWeight='bold'>
-            Leads
+            Opportunities List
           </Typography>
         </Grid>
 
@@ -685,7 +683,7 @@ useEffect(() => {
               }}
               disabled={loader}
             >
-              + New Lead
+              + New Opportunity
             </Button>
           </Box>
         </Grid>
@@ -866,15 +864,17 @@ useEffect(() => {
                       position: 'sticky',
                       left: 0,
                       zIndex: 9,
-                      minWidth: 120
+                      minWidth: 250
                     }}
                   >
-                    Lead ID
+                    Deal Name
                   </TableCell>
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>First Name</TableCell>
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Company</TableCell>
                   <TableCell sx={{ minWidth: 50, maxWidth: 80, whiteSpace: 'nowrap' }}>Flag</TableCell>
                   <TableCell>City</TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Expected Revenue</TableCell>
+                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Closing Date</TableCell>
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Timeline to Buy</TableCell>
                   <TableCell>Status</TableCell>
 
@@ -902,13 +902,13 @@ useEffect(() => {
                     ))
                   : data.map((row, i) => (
                       <TableRow key={i}>
-                         <TableCell
+                        <TableCell
                           sx={{
                             backgroundColor: '#fff',
                             minWidth: 100
                           }}
                         >
-                           <strong>{page * limit + i + 1}</strong>
+                          <strong>{page * limit + i + 1}</strong>
                         </TableCell>
                         <TableCell
                           sx={{
@@ -916,14 +916,14 @@ useEffect(() => {
                             left: 0,
                             zIndex: 2,
                             backgroundColor: '#fff',
-                            minWidth: 120
+                            minWidth: 250
                           }}
                         >
                           <Link
-                            href={`/view/lead-form/${encodeURIComponent(encryptCryptoRes(row.lead_id))}`}
+                            href={`/view/opportunity-form/${encodeURIComponent(encryptCryptoRes(row.lead_id))}`}
                             style={{ textDecoration: 'none' }}
                           >
-                            <strong>{row.lead_id}</strong>
+                            <strong> {row.values['Deal Name'] || ''}</strong>
                           </Link>
                         </TableCell>
                         <TableCell
@@ -973,6 +973,8 @@ useEffect(() => {
                         </TableCell>
 
                         <TableCell>{row.values['City']}</TableCell>
+                        <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>{row.values['Expected Revenue']}</TableCell>
+                        <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>{row.values['Closing Date']}</TableCell>
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           <Chip
                             label={row.values['Timeline to Buy'] ? row.values['Timeline to Buy'] : '-'}
@@ -1111,12 +1113,70 @@ useEffect(() => {
                       </TableRow>
                     ))}
                 {!loading && data?.length === 0 && (
-                  <TableCell colSpan={13} align='center' sx={{ py: 6, backgroundColor: '#f8f9fa' }}>
-                    <Box display='flex' flexDirection='column' alignItems='center' gap={1}>
-                      <i className='ri-search-line' style={{ fontSize: 36, color: '#ced4da' }}></i>
-                      <Typography variant='h6' color='#adb5bd'>
-                        No records found
-                      </Typography>
+                  <TableCell
+                    colSpan={10}
+                    align='center'
+                    sx={{
+                      py: 8,
+                      background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)',
+                      border: 'none'
+                    }}
+                  >
+                    <Box
+                      display='flex'
+                      flexDirection='column'
+                      alignItems='center'
+                      justifyContent='center'
+                      gap={2}
+                      sx={{
+                        animation: 'fadeIn 0.6s ease-in-out',
+                        '@keyframes fadeIn': {
+                          '0%': { opacity: 0, transform: 'translateY(10px)' },
+                          '100%': { opacity: 1, transform: 'translateY(0)' }
+                        }
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: 80,
+                          height: 80,
+                          borderRadius: '50%',
+                          backgroundColor: '#e9ecef',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: 'inset 0 0 10px rgba(0,0,0,0.05)'
+                        }}
+                      >
+                        <i
+                          className='ri-search-line'
+                          style={{
+                            fontSize: 38,
+                            color: '#9ca3af'
+                          }}
+                        ></i>
+                      </Box>
+
+                      <Box>
+                        <Typography
+                          variant='h6'
+                          sx={{
+                            fontWeight: 600,
+                            color: '#64748b'
+                          }}
+                        >
+                          No Records Found
+                        </Typography>
+                        <Typography
+                          variant='body2'
+                          sx={{
+                            color: '#94a3b8',
+                            mt: 0.5
+                          }}
+                        >
+                          Try adjusting filters or adding new data to get started
+                        </Typography>
+                      </Box>
                     </Box>
                   </TableCell>
                 )}

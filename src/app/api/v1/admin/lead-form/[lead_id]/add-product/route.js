@@ -15,10 +15,10 @@ import Leadform from '@/models/Leadform'
 
 //     // 🔹 Loop over each order in payload
 //     for (const order of body.items) {
-//       const order_id = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`
+//       const item_id = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`
 
 //       const orderObject = {
-//         order_id,
+//         item_id,
 //         item_ref: []
 //       }
 
@@ -72,10 +72,10 @@ export async function POST(req, { params }) {
       return Response.json({ success: false, message: 'Lead not found' }, { status: 404 })
     }
 
-    // 🔹 Generate one single order_id
-    const order_id = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`
+    // 🔹 Generate one single item_id
+    const item_id = `ITEM-${Date.now()}-${Math.floor(Math.random() * 1000)}`
     const orderObject = {
-      order_id,
+      item_id,
       item_ref: []
     }
 

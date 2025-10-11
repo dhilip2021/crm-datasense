@@ -35,6 +35,8 @@ import SalesRepSummary from '@/views/dashboard/SalesRepSummary'
 import KanbanView from '@/views/dashboard/KanbanView'
 import SalesFunnelChart from '@/views/dashboard/SalesFunnelChart'
 import TopAccountsCard from '@/views/dashboard/TopAccountsCard'
+import DealAgingAnalysis from '@/views/dashboard/DealAgingAnalysis'
+import SmartAlertsCard from '@/views/dashboard/SmartAlertsCard'
 
 const DashboardAnalytics = () => {
   const user_id = Cookies.get('user_id')
@@ -66,22 +68,13 @@ const DashboardAnalytics = () => {
       <Grid item xs={12} md={12} lg={12}>
         <LeadStatus />
       </Grid>
-        <Grid item xs={12}>
-        <KanbanView />
-        </Grid>
+     
 
-        <Grid item xs={6}>
-        <SalesFunnelChart />
-        </Grid>
-        
-         <Grid item xs={6}>
-          <TopAccountsCard />
-         </Grid>
+      
 
+     
 
-      {/* <Grid item xs={12}>
-        <LeadStatusSummary />
-      </Grid> */}
+     
       <Grid item xs={12} md={6} lg={6}>
         <LeadByLocation />
       </Grid>
@@ -100,8 +93,6 @@ const DashboardAnalytics = () => {
       <Grid item xs={12} md={12} lg={6}>
         <ConversionFunnel />
       </Grid>
-
-      
 
       <Grid item xs={12} md={12} lg={12}>
         <LeadBySource />
@@ -143,6 +134,10 @@ const DashboardAnalytics = () => {
       <Grid item xs={12} sm={12} lg={12}>
         <SalesRepSummary />
       </Grid>
+
+       {/* <Grid item xs={12}>
+        <LeadStatusSummary />
+      </Grid> */}
     </Grid>
   )
 }

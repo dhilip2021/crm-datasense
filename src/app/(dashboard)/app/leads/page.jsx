@@ -248,7 +248,7 @@ const LeadTable = () => {
       ...(filters.rep && { rep: filters.rep }),
       ...(filters.value && { value: filters.value }),
       ...(filters.fromDate && { from: dayjs(filters.fromDate).format('YYYY-MM-DD') }),
-      ...(filters.toDate && { to: dayjs(filters.toDate).format('YYYY-MM-DD') }),      
+      ...(filters.toDate && { to: dayjs(filters.toDate).format('YYYY-MM-DD') }),
       ...(filters.fromFollowDate && { from: dayjs(filters.fromFollowDate).format('YYYY-MM-DD') }),
       ...(filters.toFollowDate && { to: dayjs(filters.toFollowDate).format('YYYY-MM-DD') })
     })
@@ -403,7 +403,6 @@ const LeadTable = () => {
       fetchData()
       setFetched(true)
     }
- 
   }, [sections])
 
   useEffect(() => {
@@ -421,26 +420,20 @@ const LeadTable = () => {
 
     // ✅ Debounced API call — fires only once after 500ms
     const handler = setTimeout(() => {
-
-        console.log(fromDate,"<< fromDate")
-        console.log(toDate,"<< toDate")
-        console.log(fromFollowDate,"<< fromFollowDate")
-        console.log(toFollowDate,"<< toFollowDate")
-        console.log(otherFilters,"<< otherFilters")
+      console.log(fromDate, '<< fromDate')
+      console.log(toDate, '<< toDate')
+      console.log(fromFollowDate, '<< fromFollowDate')
+      console.log(toFollowDate, '<< toFollowDate')
+      console.log(otherFilters, '<< otherFilters')
       if (hasOtherFilters || hasDateRange || hasSearch || hasDateFollowRange) {
         console.log('📡 Fetch filtered data')
         fetchFilterData()
       } else {
-        if(!fromDate && !toDate && !fromFollowDate && !toFollowDate){
+        if (!fromDate && !toDate && !fromFollowDate && !toFollowDate) {
           console.log('📡 Fetch default data (no filters)')
           fetchFilterData()
         }
-
-        
-
       }
-
-      
     }, 500)
 
     // ✅ Cleanup timeout on dependency change
@@ -644,7 +637,7 @@ const LeadTable = () => {
                 }}
               />
             </LocalizationProvider>
-             <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DateRangePicker
                 value={[filters.fromFollowDate, filters.toFollowDate]} // 🔹 filters la connect pannirukken
                 label='Follow-Up Date Range'
@@ -903,8 +896,11 @@ const LeadTable = () => {
                             size='small'
                           />
                         </TableCell>
-                        <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                        {/* <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           {formatDateShort(row.values['Next Follow-up Date'])}
+                        </TableCell> */}
+                        <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                          {row.values['Next Follow-up Date'] ? formatDateShort(row.values['Next Follow-up Date']) : '-'}
                         </TableCell>
                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           {row.assignedTo}
@@ -982,12 +978,70 @@ const LeadTable = () => {
                       </TableRow>
                     ))}
                 {!loading && data?.length === 0 && (
-                  <TableCell colSpan={13} align='center' sx={{ py: 6, backgroundColor: '#f8f9fa' }}>
-                    <Box display='flex' flexDirection='column' alignItems='center' gap={1}>
-                      <i className='ri-search-line' style={{ fontSize: 36, color: '#ced4da' }}></i>
-                      <Typography variant='h6' color='#adb5bd'>
-                        No records found
-                      </Typography>
+                  <TableCell
+                    colSpan={10}
+                    align='center'
+                    sx={{
+                      py: 8,
+                      background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)',
+                      border: 'none'
+                    }}
+                  >
+                    <Box
+                      display='flex'
+                      flexDirection='column'
+                      alignItems='center'
+                      justifyContent='center'
+                      gap={2}
+                      sx={{
+                        animation: 'fadeIn 0.6s ease-in-out',
+                        '@keyframes fadeIn': {
+                          '0%': { opacity: 0, transform: 'translateY(10px)' },
+                          '100%': { opacity: 1, transform: 'translateY(0)' }
+                        }
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: 80,
+                          height: 80,
+                          borderRadius: '50%',
+                          backgroundColor: '#e9ecef',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: 'inset 0 0 10px rgba(0,0,0,0.05)'
+                        }}
+                      >
+                        <i
+                          className='ri-search-line'
+                          style={{
+                            fontSize: 38,
+                            color: '#9ca3af'
+                          }}
+                        ></i>
+                      </Box>
+
+                      <Box>
+                        <Typography
+                          variant='h6'
+                          sx={{
+                            fontWeight: 600,
+                            color: '#64748b'
+                          }}
+                        >
+                          No Records Found
+                        </Typography>
+                        <Typography
+                          variant='body2'
+                          sx={{
+                            color: '#94a3b8',
+                            mt: 0.5
+                          }}
+                        >
+                          Try adjusting filters or adding new data to get started
+                        </Typography>
+                      </Box>
                     </Box>
                   </TableCell>
                 )}

@@ -16,9 +16,9 @@ const ItemRefSchema = new mongoose.Schema(
   { _id: true } // keep _id for each item
 )
 
-const OrderSchema = new mongoose.Schema(
+const ItemSchema = new mongoose.Schema(
   {
-    order_id: { type: String, required: true },
+    item_id: { type: String, required: true },
     item_ref: [ItemRefSchema] // nested item list
   },
   { _id: false }
@@ -117,7 +117,7 @@ const LeadFormSchema = new mongoose.Schema(
     // ],
 
     // 🔥 new structure
-    items: [OrderSchema],
+    items: [ItemSchema],
 
     // items: [
     //   {

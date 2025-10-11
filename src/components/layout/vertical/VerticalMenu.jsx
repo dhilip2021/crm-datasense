@@ -84,12 +84,12 @@ const VerticalMenu = ({ scrollMenu, roles }) => {
           </MenuItem>
         </SubMenu>
         <SubMenu label='Master' icon={<i className='ri-bar-chart-box-line' />}>
-          <MenuItem href='/salutation' icon={<i className='ri-id-card-line' />}>
+          {/* <MenuItem href='/salutation' icon={<i className='ri-id-card-line' />}>
             Salutation
           </MenuItem>
           <MenuItem href='/gender' icon={<i className='ri-women-line' />}>
             Gender
-          </MenuItem>
+          </MenuItem> */}
           <MenuItem href='/territory' icon={<i className='ri-map-pin-line' />}>
             Territory
           </MenuItem>

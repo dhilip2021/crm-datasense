@@ -6,7 +6,7 @@ import { Card, Typography, Box } from '@mui/material'
 // 💡 Sample Data (replace with your API response)
 const data = [
   { stage: 'Prospecting', value: 20000, count: 1, fill: '#0288d1' },
-  { stage: 'Qualification', value: 18000, count: 1, fill: '#80deea' },
+  { stage: 'Qualification', value: 16500, count: 1, fill: '#80deea' },
   { stage: 'Proposal', value: 16000, count: 1, fill: '#ef9a9a' },
   { stage: 'Negotiation', value: 14000, count: 1, fill: '#ffb300' },
   { stage: 'Won', value: 12000, count: 1, fill: '#43a047' },
