@@ -34,7 +34,13 @@ const ProposalDialogPage = ({ open, onClose, leadData }) => {
    const user_name = Cookies.get('user_name')
    const email = Cookies.get('email')
 
-  const [items, setItems] = useState(leadData.items[0]?.item_ref || [])
+  // const [items, setItems] = useState(leadData.items[0]?.item_ref || [])
+
+  const [items, setItems] = useState(
+  Array.isArray(leadData?.items) && leadData.items.length > 0
+    ? leadData.items[0]?.item_ref || []
+    : []
+)
   const [notes, setNotes] = useState('')
   const [uploadedFiles, setUploadedFiles] = useState([])
 

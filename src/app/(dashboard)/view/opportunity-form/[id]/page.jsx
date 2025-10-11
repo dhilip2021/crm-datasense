@@ -492,12 +492,12 @@ const LeadDetailView = () => {
   if (!leadData && !loader) {
     return (
       <Card sx={{ p: 4, textAlign: 'center', mt: 3 }}>
-        <Typography variant='h6'>📝 No lead found</Typography>
+        {/* <Typography variant='h6'>📝 No lead found</Typography>
         <Link href='/app/lead-form'>
           <Button variant='contained' size='small'>
             + Create New Lead
           </Button>
-        </Link>
+        </Link> */}
       </Card>
     )
   }
