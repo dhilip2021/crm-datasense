@@ -281,12 +281,12 @@ function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData, dealFnCall 
                 </Typography>
               </Box>
               <Box textAlign='right'>
-                <Typography variant='body1' >
+                <Typography variant='body1'>
                   <Chip
-                    onClick={()=>dealFnCall(order.item_id)}
+                    onClick={() => dealFnCall(order.item_id)}
                     label='Send Quotation'
                     color='primary'
-                    variant='outlined'
+                    variant='filled' // ← change this
                     sx={{
                       fontWeight: 'regular',
                       cursor: 'pointer',
@@ -296,10 +296,9 @@ function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData, dealFnCall 
                       borderRadius: '12px',
                       transition: 'all 0.3s ease',
                       '&:hover': {
-                        backgroundColor: (theme) => theme.palette.primary.main,
-                        color: '#fff',
-                        boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
-                        transform: 'scale(1.05)'
+                        backgroundColor: '#f3f4f6',
+                        color: '#009cde',
+                        boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
                       }
                     }}
                   />

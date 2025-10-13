@@ -132,6 +132,7 @@ const LeadDetailView = () => {
           }
         }
       )
+      setLoader(false)
       const json = await res.json()
       if (json?.success && json.data?.sections?.length > 0) {
         setSections(json.data.sections)
@@ -165,6 +166,7 @@ const LeadDetailView = () => {
           }
         }
       )
+      setLoader(false)
       const json = await res.json()
       if (json?.success && json.data?.sections?.length > 0) {
         setSectionsOpportunity(json.data.sections)
@@ -210,8 +212,8 @@ const LeadDetailView = () => {
           Authorization: `Bearer ${getToken}`
         }
       })
+       setLoader(false)
       const data = await res.json()
-
       if (data.success) setLeadData(data.data)
     } catch (err) {
       console.error(err)
@@ -448,6 +450,8 @@ const LeadDetailView = () => {
 
       const result = await res.json()
 
+      console.log(result,"<<<responseeee")
+
       if (!result.success) {
         toast.error('Failed to update field')
         fetchLeadFromId() // rollback to latest DB values
@@ -457,6 +461,7 @@ const LeadDetailView = () => {
           position: 'bottom-center',
           hideProgressBar: true
         })
+        fetchLeadFromId() // rollback to latest DB values
       }
     } catch (err) {
       toast.error('Error saving field')
@@ -601,7 +606,15 @@ const LeadDetailView = () => {
             pr: 1 // scrollbar overlap avoid
           }}
         >
-          <LeadCard fields={fields} leadId={leadId} leadData={leadData} onToggleFlag={onToggleFlag} />
+          <LeadCard 
+          fields={fields} 
+          leadId={leadId} 
+          leadData={leadData} 
+          onToggleFlag={onToggleFlag}
+          sections={sections} 
+          handleFieldSave={handleFieldSave}
+          
+          />
 
           {/* 🔹 Dynamic Sections */}
           {sections.map((section, index) => (

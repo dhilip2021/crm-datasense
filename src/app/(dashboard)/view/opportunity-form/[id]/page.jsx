@@ -435,6 +435,11 @@ const LeadDetailView = () => {
 
   // 🔹 Save handler
   const handleFieldSave = async (label, newValue) => {
+
+    console.log(label,"<<<LABELLLLL")
+    console.log(newValue,"<<<newValueeeeeee")
+
+
     try {
       const updatedLeadValues = {
         _id: leadData?._id,
@@ -476,6 +481,7 @@ const LeadDetailView = () => {
           position: 'bottom-center',
           hideProgressBar: true
         })
+        fetchLeadFromId()
       }
     } catch (err) {
       toast.error('Error saving field')
@@ -625,7 +631,7 @@ const LeadDetailView = () => {
             pr: 1 // scrollbar overlap avoid
           }}
         >
-          <LeadCard fields={fields} leadId={leadId} leadData={leadData} onToggleFlag={onToggleFlag} />
+          <LeadCard fields={fields} leadId={leadId} leadData={leadData} onToggleFlag={onToggleFlag} sections={sections} handleFieldSave={handleFieldSave} />
 
           {/* 🔹 Dynamic Sections */}
           {sections.map((section, index) => (

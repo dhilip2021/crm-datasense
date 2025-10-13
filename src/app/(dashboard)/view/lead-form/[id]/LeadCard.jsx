@@ -1,8 +1,27 @@
-import { Box, Typography, Chip, Divider, Button, IconButton } from '@mui/material'
+import { Box, Typography, Chip, Divider, Button, IconButton, TextField, MenuItem } from '@mui/material'
 // import EditableField from './EditableField'
 import FlagIcon from '@mui/icons-material/Flag' // ✅ MUI icon
+import { useState } from 'react'
 
-export default function LeadCard({ fields, leadId, leadData, onToggleFlag }) {
+export default function LeadCard({ fields, leadId, leadData, onToggleFlag, sections, handleFieldSave }) {
+
+    console.log(fields,"<<< FILELDSSSS")
+
+    const [editing, setEditing] = useState(false)
+    const [leadStatus, setLeadStatus] = useState(fields['Lead Status'] || '')
+  
+  
+  
+      // Find Lead Status options from your sections response
+    const leadStatusOptions = sections
+      .flatMap(sec => [...sec.fields.left, ...sec.fields.center, ...sec.fields.right])
+      .filter(f => f.label === 'Lead Status')[0]?.options || []
+  
+    const handleStatusChange = (e) => {
+      setLeadStatus(e.target.value)
+      handleFieldSave('Lead Status', e.target.value)
+      setEditing(false)
+    }
   
   return (
     <Box
@@ -59,7 +78,7 @@ export default function LeadCard({ fields, leadId, leadData, onToggleFlag }) {
             </IconButton>
           </Box>
 
-          <Typography variant='body1'>
+          {/* <Typography variant='body1'>
             <Chip
               label={fields['Lead Status']}
               color='primary'
@@ -67,7 +86,31 @@ export default function LeadCard({ fields, leadId, leadData, onToggleFlag }) {
               size='small'
               sx={{ fontWeight: 'medium' }}
             />
-          </Typography>
+          </Typography> */}
+           {editing ? (
+          <TextField
+            select
+            value={leadStatus}
+            onChange={handleStatusChange}
+            size='small'
+            onBlur={() => setEditing(false)}
+          >
+            {leadStatusOptions.map(opt => (
+              <MenuItem key={opt} value={opt}>
+                {opt}
+              </MenuItem>
+            ))}
+          </TextField>
+        ) : (
+          <Chip
+            label={leadStatus}
+            color='primary'
+            variant='outlined'
+            size='small'
+            sx={{ cursor: 'pointer' }}
+            onClick={() => setEditing(true)}
+          />
+        )}
         </Box>
 
         <Typography variant='body1'>
