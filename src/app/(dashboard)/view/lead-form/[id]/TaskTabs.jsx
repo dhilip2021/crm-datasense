@@ -344,7 +344,7 @@ const upcomingTasks = useMemo(
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box sx={{ width: '100%', mx: 'auto', mt: 4 }}>
+      <Box sx={{ width: '100%', mx: 'auto', mt: 0 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Tabs
             value={tab}
@@ -374,74 +374,6 @@ const upcomingTasks = useMemo(
 
         {tab === 0 ? (
           tasks.length > 0 ? (
-            // <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            //   {tasks.map(task => (
-            //     <Card
-            //       key={task._id}
-            //       sx={{ p: 2, borderRadius: 2, boxShadow: '0px 2px 6px rgba(0,0,0,0.08)', position: 'relative' }}
-            //     >
-            //       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-            //         <Typography variant='subtitle1' fontWeight={600}>
-            //           {task.subject}
-            //         </Typography>
-            //         <Chip
-            //           label={task.status}
-            //           size='small'
-            //           sx={{
-            //             backgroundColor: statusColors[task.status]?.bg,
-            //             color: statusColors[task.status]?.color,
-            //             fontWeight: 600,
-            //             fontSize: 12,
-            //             px: 1,
-            //             height: 24,
-            //             '& .MuiChip-label': { px: 1 }
-            //           }}
-            //         />
-            //         <Chip
-            //           label={task.priority}
-            //           size='small'
-            //           sx={{
-            //             backgroundColor: priorityColors[task.priority]?.bg,
-            //             color: priorityColors[task.priority]?.color,
-            //             fontWeight: 600,
-            //             fontSize: 12,
-            //             px: 1,
-            //             height: 24,
-            //             '& .MuiChip-label': { px: 1 }
-            //           }}
-            //         />
-            //       </Box>
-
-            //       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 14, color: 'text.secondary' }}>
-            //         <CalendarMonthOutlinedIcon sx={{ fontSize: 18 }} />
-            //         <Typography variant='caption'>
-            //           {dayjs(task.dueDate).format('DD MMM YYYY')} . {task.reminderTime || '—'}
-            //         </Typography>
-            //         <Typography variant='caption' sx={{ ml: 2 }}>
-            //           Created By <b>{task.owner}</b>
-            //         </Typography>
-            //       </Box>
-
-            //       <IconButton
-            //         size='small'
-            //         sx={{
-            //           position: 'absolute',
-            //           top: 8,
-            //           right: 8,
-            //           bgcolor: '#f5f5f5',
-            //           '&:hover': { bgcolor: '#e0e0e0' }
-            //         }}
-            //         onClick={() => {
-            //           setEditingTask(task)
-            //           setTaskData(task)
-            //           setOpenTaskDialog(true)
-            //         }}
-            //       >
-            //         <EditOutlinedIcon fontSize='small' />
-            //       </IconButton>
-            //     </Card>
-            //   ))}
-            // </Box>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
   {/* Current Tasks */}
