@@ -40,7 +40,8 @@ export default function KanbanView() {
   const organization_id = Cookies.get('organization_id')
   const user_id = Cookies.get('user_id')
   const getToken = Cookies.get('_token')
-  const form_name = 'opportunities-form'
+  const form_view = 'opportunities-form'
+  const form_name = 'opportunity-form'
 
   const [kanbanData, setKanbanData] = useState([])
   const [loading, setLoading] = useState(false)
@@ -60,9 +61,11 @@ export default function KanbanView() {
     setLoader(true)
     try {
       const res = await fetch(
-        `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${form_name}`
+        `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${form_view}`
       )
       const data = await res.json()
+
+      console.log(data,"<<< DATAAAAA")
       setLoader(false)
 
       if (data?.success && data.data?.sections?.length > 0) {

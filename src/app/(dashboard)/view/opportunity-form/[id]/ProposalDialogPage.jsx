@@ -105,8 +105,8 @@ const ProposalDialogPage = ({ open, onClose, leadData }) => {
     index + 1,
     item.itemMasterRef.item_name,
     item.quantity,
-    `₹${item.unitPrice}`,
-    `₹${item.finalPrice}`
+    `${item.unitPrice}`,
+    `${item.finalPrice}`
   ]);
 
   autoTable(doc, {
@@ -127,9 +127,9 @@ const ProposalDialogPage = ({ open, onClose, leadData }) => {
   const totalAmount = subtotal + gst;
 
   doc.setFont('helvetica', 'bold');
-  doc.text(`Subtotal: ₹ ${subtotal}`, margin + 350, finalY);
-  doc.text(`GST (18%): ₹ ${gst}`, margin + 350, finalY + lineHeight);
-  doc.text(`Total Amount: ₹ ${totalAmount}`, margin + 350, finalY + lineHeight * 2);
+  doc.text(`Subtotal:  ${subtotal}`, margin + 350, finalY);
+  doc.text(`GST (18%):  ${gst}`, margin + 350, finalY + lineHeight);
+  doc.text(`Total Amount:  ${totalAmount}`, margin + 350, finalY + lineHeight * 2);
 
   // Terms & Conditions
   const termsY = finalY + lineHeight * 5;
@@ -233,7 +233,7 @@ const ProposalDialogPage = ({ open, onClose, leadData }) => {
           <b>Deal Name:</b> {leadData.values['Deal Name']}
         </Typography>
         <Typography>
-          <b>Expected Revenue:</b> ₹{leadData.values['Expected Revenue']}
+          <b>Expected Revenue:</b> {leadData.values['Expected Revenue']}
         </Typography>
         <Typography>
           <b>Closing Date:</b> {leadData.values['Closing Date']}
@@ -287,8 +287,8 @@ const ProposalDialogPage = ({ open, onClose, leadData }) => {
                           inputProps={{ min: 0 }}
                         />
                       </TableCell>
-                      <TableCell>₹{item.unitPrice}</TableCell>
-                      <TableCell>₹{item.finalPrice}</TableCell>
+                      <TableCell>{item.unitPrice}</TableCell>
+                      <TableCell>{item.finalPrice}</TableCell>
                     </TableRow>
                   ))}
                   <TableRow>
@@ -296,7 +296,7 @@ const ProposalDialogPage = ({ open, onClose, leadData }) => {
                       <b>Grand Total:</b>
                     </TableCell>
                     <TableCell>
-                      <b>₹{grandTotal}</b>
+                      <b>{grandTotal}</b>
                     </TableCell>
                   </TableRow>
                 </TableBody>

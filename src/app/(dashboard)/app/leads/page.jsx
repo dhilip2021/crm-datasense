@@ -44,6 +44,7 @@ import { toast, ToastContainer } from 'react-toastify'
 import { getUserAllListApi } from '@/apiFunctions/ApiAction'
 import FlagIcon from '@mui/icons-material/Flag' // ✅ MUI icon
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload'
 import SearchIcon from '@mui/icons-material/Search'
 // import { DateRangePicker, MultiInputDateRangeField } from '@mui/x-date-pickers-pro/DateRangePicker'
 
@@ -444,80 +445,107 @@ const LeadTable = () => {
     <Box px={2} py={2}>
       {/* 🔹 Header */}
 
-      <Grid container alignItems='center' justifyContent='space-between' mb={3}>
-        {/* Left Side: Title */}
-        <Grid item>
-          <Typography variant='h6' fontWeight='bold'>
-            Leads
-          </Typography>
-        </Grid>
+     <Grid container alignItems="center" justifyContent="space-between" mb={3}>
+  {/* Left: Title */}
+  <Grid item>
+    <Typography variant="h6" fontWeight="bold">
+      Leads
+    </Typography>
+  </Grid>
 
-        {/* Right Side: Actions */}
-        <Grid item>
-          <Box display='flex' alignItems='center' gap={1.5}>
-            {/* Export Dropdown */}
-            <Button variant='outlined' size='small' endIcon={<KeyboardArrowDownIcon />} onClick={handleClick}>
-              Export
-            </Button>
+  {/* Right: Actions */}
+  <Grid item>
+    <Stack direction="row" alignItems="center" spacing={1.5}>
+      {/* Export */}
+      <Button
+        variant="outlined"
+        size="small"
+        endIcon={<KeyboardArrowDownIcon />}
+        onClick={handleClick}
+      >
+        Export
+      </Button>
+      <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+        <MenuItem
+          onClick={() => {
+            handleExcelClick()
+            handleClose()
+          }}
+        >
+          Export Excel
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handlePDFClick()
+            handleClose()
+          }}
+        >
+          Export PDF
+        </MenuItem>
+      </Menu>
 
-            <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-              <MenuItem
-                onClick={() => {
-                  handleExcelClick()
-                  handleClose()
-                }}
-              >
-                Export Excel
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  handlePDFClick()
-                  handleClose()
-                }}
-              >
-                Export PDF
-              </MenuItem>
-            </Menu>
+      {/* Import */}
+      <Button
+        variant="outlined"
+        size="small"
+        startIcon={<CloudUploadIcon />}
+        component="label"
+        sx={{
+          color: '#1976d2',
+          borderColor: '#E0E0E0',
+          bgcolor: '#fff',
+          '&:hover': { bgcolor: '#f5f5f5' }
+        }}
+      >
+        Import
+        <input
+          type="file"
+          hidden
+          accept=".csv,.xlsx"
+          onChange={e => {
+            const file = e.target.files[0]
+            if (file) handleUpload(file)
+          }}
+        />
+      </Button>
 
-            {/* Import */}
-            <Button
-              variant='outlined'
-              size='small'
-              startIcon={<CloudUploadIcon />}
-              component='label'
-              sx={{ color: '#1976d2', borderColor: '#E0E0E0', bgcolor: '#fff' }}
-            >
-              Import
-              <input
-                type='file'
-                hidden
-                accept='.csv,.xlsx'
-                onChange={e => {
-                  const file = e.target.files[0]
-                  if (file) handleUpload(file)
-                }}
-              />
-            </Button>
+      {/* Sample Data */}
+      <Button
+        variant="outlined"
+        size="small"
+        startIcon={<CloudDownloadIcon />}
+        sx={{
+          color: '#388e3c',
+          borderColor: '#E0E0E0',
+          bgcolor: '#fff',
+          '&:hover': { bgcolor: '#f1f8e9' }
+        }}
+        href="/sample/sample_lead_data.xlsx"
+        download
+      >
+        Download Sample Data
+      </Button>
 
-            {/* New Lead */}
-            <Button
-              href='/app/lead-form'
-              variant='contained'
-              size='small'
-              sx={{
-                bgcolor: '#009cde',
-                color: '#fff',
-                fontWeight: 500,
-                borderRadius: '6px',
-                '&:hover': { bgcolor: '#007bb5' }
-              }}
-              disabled={loader}
-            >
-              + New Lead
-            </Button>
-          </Box>
-        </Grid>
-      </Grid>
+      {/* New Lead */}
+      <Button
+        href="/app/lead-form"
+        variant="contained"
+        size="small"
+        sx={{
+          bgcolor: '#009cde',
+          color: '#fff',
+          fontWeight: 500,
+          borderRadius: '6px',
+          '&:hover': { bgcolor: '#007bb5' }
+        }}
+        disabled={loader}
+      >
+        + New Lead
+      </Button>
+    </Stack>
+  </Grid>
+</Grid>
+
 
       <Grid container spacing={2}>
         {/* 🔹 Left Column: Filters */}

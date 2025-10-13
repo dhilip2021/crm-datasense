@@ -125,7 +125,7 @@ const LeadDetailView = () => {
     setLoader(true)
     try {
       const res = await fetch(
-        `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${lead_form}`,
+        `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${opportunity_form}`,
         {
           headers: {
             'Content-Type': 'application/json',
