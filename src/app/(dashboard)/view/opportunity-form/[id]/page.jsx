@@ -34,9 +34,7 @@ import ProductPage from './ProductPage'
 import TaskTabs from './TaskTabs'
 import { getUserAllListApi } from '@/apiFunctions/ApiAction'
 import slugify from 'slugify'
-import ConvertDealDialog from './ConvertDealDialog'
 import ProposalDialogPage from './ProposalDialogPage'
-// import CloseActivities from './closeActivities'
 
 // ✅ Validation rules
 const fieldValidators = {
@@ -74,7 +72,7 @@ const LeadDetailView = () => {
   const opportunity_form = 'opportunities-form'
   const getToken = Cookies.get('_token')
   const router = useRouter()
-  const [loader, setLoader] = useState(true)
+  const [loader, setLoader] = useState(false)
   const [loading, setLoading] = useState(false)
   const [leadData, setLeadData] = useState(null)
   const [sections, setSections] = useState([])
@@ -83,12 +81,15 @@ const LeadDetailView = () => {
   const [fieldOpportunityConfig, setFieldOpportunityConfig] = useState({})
   const [itemsData, setItemsData] = useState([])
   const [confirm, setConfirm] = useState(false)
+  const [orderId, setOrderId] = useState('')
 
   // 🧠 leadData = API response object you shared above
   const [accountName, setAccountName] = useState('')
   const [contactName, setContactName] = useState('')
   const [createDeal, setCreateDeal] = useState(false)
   const [ownerName, setOwnerName] = useState('')
+  // ✅ Filter items by selected orderId
+  const [dataItems, setDataItems] = useState([])
 
   // 🧩 Prefill default values from leadData
   const [dealData, setDealData] = useState({
@@ -304,35 +305,51 @@ const LeadDetailView = () => {
     }
   }
 
-  const dealFnCall = (id, lead_name) => {
+  const dealFnCall = order_ID => {
+
+    console.log(leadData,"<<< leadData")
+    console.log(order_ID,"<<< order_ID")
+
+
+
+
+    if (!leadData?.items || leadData.items.length === 0 || !order_ID) {
+      setDataItems([])
+      return
+    }
+
+    // Find the matching item group by orderId
+    const selectedOrder = leadData.items.find(item => item.item_id === order_ID)
+
+    console.log(selectedOrder?.item_ref,"<<< REFFFFFFF")
+
+    setDataItems(selectedOrder?.item_ref || [])
+
+    setOrderId(order_ID)
     setConfirm(true)
-   
+  }
+
+
+
+  const handleQtyChange = (index, value) => {
+    const newItems = [...items]
+    newItems[index].quantity = Number(value)
+    newItems[index].finalPrice = newItems[index].quantity * newItems[index].unitPrice
+    setDataItems(newItems)
   }
 
   const handleClose = () => {
     setConfirm(false)
-    // setCreateDeal(false)
-    // setDealData({
-    //    amount: '',
-    // dealName: leadData?.values?.Company || accountName || '',
-    // closingDate: null,
-    // stage: leadData?.values?.['Lead Status'] || 'Qualification'
-    // })
-    
   }
 
   const handleConvert = () => {
-
-    console.log(leadData,"<<< deal Data")
-
+    console.log(leadData, '<<< deal Data')
 
     // convertLeadFn(leadData, createDeal, dealData)
     // handleClose()
   }
 
   const convertLeadFn = async (leadData, createDeal, dealData) => {
-  
-
     try {
       const id = leadData?._id
       const organization_id = leadData?.organization_id
@@ -357,7 +374,6 @@ const LeadDetailView = () => {
         lower: true,
         locale: 'en'
       })
-
 
       // 💡 Lead Status update logic
       const values = {
@@ -391,12 +407,11 @@ const LeadDetailView = () => {
 
       const result = await res.json()
       if (result.success) {
-        toast.success(
-          createDeal
-            ? 'Lead successfully converted to Opportunity'
-            : 'Lead updated successfully',
-          { autoClose: 1000, position: 'bottom-center', hideProgressBar: true }
-        )
+        toast.success(createDeal ? 'Lead successfully converted to Opportunity' : 'Lead updated successfully', {
+          autoClose: 1000,
+          position: 'bottom-center',
+          hideProgressBar: true
+        })
         router.push(createDeal ? '/app/opportunity' : '/app/leads')
       } else {
         toast.error('Update failed, please try again!')
@@ -491,14 +506,15 @@ const LeadDetailView = () => {
 
   if (!leadData && !loader) {
     return (
-      <Card sx={{ p: 4, textAlign: 'center', mt: 3 }}>
-        {/* <Typography variant='h6'>📝 No lead found</Typography>
-        <Link href='/app/lead-form'>
-          <Button variant='contained' size='small'>
-            + Create New Lead
-          </Button>
-        </Link> */}
-      </Card>
+      <></>
+      // <Card sx={{ p: 4, textAlign: 'center', mt: 3 }}>
+      //   <Typography variant='h6'>📝 No lead found</Typography>
+      //   <Link href='/app/lead-form'>
+      //     <Button variant='contained' size='small'>
+      //       + Create New Lead
+      //     </Button>
+      //   </Link>
+      // </Card>
     )
   }
 
@@ -574,14 +590,21 @@ const LeadDetailView = () => {
 
         {tabIndex === 2 && (
           <Box>
-            <ProductPage leadId={leadId} leadData={leadData} fetchLeadFromId={fetchLeadFromId} itemsData={itemsData} />
+            <ProductPage
+              leadId={leadId}
+              leadData={leadData}
+              fetchLeadFromId={fetchLeadFromId}
+              itemsData={itemsData}
+              dealFnCall={dealFnCall}
+              items={dataItems}
+            />
           </Box>
         )}
       </Grid>
 
       {/* Right side */}
       <Grid item xs={12} md={4}>
-        <Box>
+        {/* <Box>
           <Button
             disabled={loading}
             fullWidth
@@ -592,7 +615,7 @@ const LeadDetailView = () => {
             {' '}
             {loading ? <CircularProgress size={18} /> : 'Send Quotation'}
           </Button>
-        </Box>
+        </Box> */}
         <Box
           sx={{
             position: 'sticky',
@@ -652,28 +675,14 @@ const LeadDetailView = () => {
             </Box>
           ))}
         </Box>
-        {/* <ConvertDealDialog
-          open={confirm}
-          onClose={handleClose}
-          accountName={accountName}
-          contactName={contactName}
-          createDeal={createDeal}
-          setCreateDeal={setCreateDeal}
-          ownerName={ownerName}
-          handleConvert={handleConvert}
-          fieldOpportunityConfig={fieldOpportunityConfig}
-          leadData={leadData}
-          dealData={dealData}
-          setDealData={setDealData}
-        /> */}
-
-        <ProposalDialogPage
-          open={confirm}
-          onClose={handleClose}
-          leadData={leadData}
+        <ProposalDialogPage 
+        open={confirm} 
+        onClose={handleClose} 
+        leadData={leadData} 
+        orderId={orderId} 
+        dataItems={dataItems}
+        handleQtyChange={handleQtyChange}
         />
-
-
       </Grid>
     </Grid>
   )

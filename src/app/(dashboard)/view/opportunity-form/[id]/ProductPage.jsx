@@ -25,7 +25,7 @@ import { toast } from 'react-toastify'
 // ✅ Utility for currency
 const formatCurrency = value => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value)
 
-function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData }) {
+function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData, dealFnCall }) {
   const [openDialog, setOpenDialog] = useState(false)
   const [loader, setLoader] = useState(false)
 
@@ -268,11 +268,42 @@ function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData }) {
                 <Typography variant='body2' sx={{ fontSize: 13 }}>
                   GST: <strong>{formatCurrency(gstAmount)}</strong>
                 </Typography>
-                <Typography variant='body2' sx={{ fontSize: 13 }}> ---------------------------------</Typography>
+                <Typography variant='body2' sx={{ fontSize: 13 }}>
+                  {' '}
+                  ---------------------------------
+                </Typography>
                 <Typography variant='subtitle1' fontWeight={700} color='#4caf50'>
                   Grand Total: {formatCurrency(total)}
                 </Typography>
-                <Typography variant='body2' sx={{ fontSize: 13 }}> ---------------------------------</Typography>
+                <Typography variant='body2' sx={{ fontSize: 13 }}>
+                  {' '}
+                  ---------------------------------
+                </Typography>
+              </Box>
+              <Box textAlign='right'>
+                <Typography variant='body1' >
+                  <Chip
+                    onClick={()=>dealFnCall(order.item_id)}
+                    label='Send Quotation'
+                    color='primary'
+                    variant='outlined'
+                    sx={{
+                      fontWeight: 'regular',
+                      cursor: 'pointer',
+                      fontSize: '1rem',
+                      px: 5,
+                      py: 3,
+                      borderRadius: '12px',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        backgroundColor: (theme) => theme.palette.primary.main,
+                        color: '#fff',
+                        boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
+                        transform: 'scale(1.05)'
+                      }
+                    }}
+                  />
+                </Typography>
               </Box>
             </Paper>
           )

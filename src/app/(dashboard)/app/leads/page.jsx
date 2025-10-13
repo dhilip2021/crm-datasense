@@ -523,7 +523,7 @@ const LeadTable = () => {
         href="/sample/sample_lead_data.xlsx"
         download
       >
-        Download Sample Data
+         Sample Data
       </Button>
 
       {/* New Lead */}

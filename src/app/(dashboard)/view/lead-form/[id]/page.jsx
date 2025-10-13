@@ -73,7 +73,7 @@ const LeadDetailView = () => {
   const opportunity_form = 'opportunities-form'
   const getToken = Cookies.get('_token')
   const router = useRouter()
-  const [loader, setLoader] = useState(true)
+  const [loader, setLoader] = useState(false)
   const [loading, setLoading] = useState(false)
   const [leadData, setLeadData] = useState(null)
   const [sections, setSections] = useState([])
@@ -487,14 +487,17 @@ const LeadDetailView = () => {
 
   if (!leadData && !loader) {
     return (
-      <Card sx={{ p: 4, textAlign: 'center', mt: 3 }}>
-        {/* <Typography variant='h6'>📝 No lead found</Typography>
-        <Link href='/app/lead-form'>
-          <Button variant='contained' size='small'>
-            + Create New Lead
-          </Button>
-        </Link> */}
-      </Card>
+      <>
+      
+      </>
+      // <Card sx={{ p: 4, textAlign: 'center', mt: 3 }}>
+      //   <Typography variant='h6'>📝 No lead found</Typography>
+      //   <Link href='/app/lead-form'>
+      //     <Button variant='contained' size='small'>
+      //       + Create New Lead
+      //     </Button>
+      //   </Link>
+      // </Card>
     )
   }
 
