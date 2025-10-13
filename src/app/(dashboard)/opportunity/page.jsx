@@ -14,9 +14,9 @@ const Opportunity = () => {
       <Grid item xs={12}>
         <Typography variant='h5'>Opportunity Dashboard</Typography>
       </Grid>
-      <Grid item xs={12}>
+      {/* <Grid item xs={12}>
         <KanbanView />
-      </Grid>
+      </Grid> */}
       <Grid item xs={6}>
         <SalesFunnelChart />
       </Grid>

@@ -51,6 +51,7 @@ import { DemoContainer } from '@mui/x-date-pickers/internals/demo'
 import { LocalizationProvider } from '@mui/x-date-pickers-pro/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers-pro/AdapterDayjs'
 import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker'
+import KanbanView from '@/views/dashboard/KanbanView'
 
 const OpportunityTable = () => {
   const organization_id = Cookies.get('organization_id')
@@ -80,7 +81,11 @@ const OpportunityTable = () => {
   const [selectedExcelFields, setSelectedExcelFields] = useState([])
 
   const [anchorEl, setAnchorEl] = useState(null)
+  const [anchorViewEl, setAnchorViewEl] = useState(null)
+  const [viewType, setViewType] = useState('List View')
+
   const open = Boolean(anchorEl)
+  const view = Boolean(anchorViewEl)
 
   const handleClick = event => {
     setAnchorEl(event.currentTarget)
@@ -88,6 +93,13 @@ const OpportunityTable = () => {
 
   const handleClose = () => {
     setAnchorEl(null)
+  }
+
+  const handleViewClick = event => {
+    setAnchorViewEl(event.currentTarget)
+  }
+  const handleViewClose = () => {
+    setAnchorViewEl(null)
   }
 
   const [sections, setSections] = useState([])
@@ -618,7 +630,7 @@ const OpportunityTable = () => {
         {/* Left Side: Title */}
         <Grid item>
           <Typography variant='h6' fontWeight='bold'>
-            Opportunities List
+            {viewType} 
           </Typography>
         </Grid>
 
@@ -685,423 +697,456 @@ const OpportunityTable = () => {
             >
               + New Opportunity
             </Button>
+
+            <Button variant='outlined' size='small' endIcon={<KeyboardArrowDownIcon />} onClick={handleViewClick}>
+              {viewType}
+            </Button>
+
+            <Menu anchorEl={anchorViewEl} open={view} onClose={handleViewClose}>
+              <MenuItem
+                onClick={() => {
+                  setViewType('List View')
+                  handleViewClose()
+                }}
+              >
+                List View
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setViewType('Kanban View')
+                  handleViewClose()
+                }}
+              >
+                Kanban View
+              </MenuItem>
+            </Menu>
           </Box>
         </Grid>
       </Grid>
 
-      <Grid container spacing={2}>
+     
         {/* 🔹 Left Column: Filters */}
 
-        <Grid item xs={12}>
-          <Box display='flex' alignItems='center' gap={1.5} flexWrap='wrap' sx={{ mb: 2 }}>
-            {/* Search */}
-            <TextField
-              autoComplete='off'
-              size='small'
-              placeholder='Search'
-              value={filters.search}
-              onChange={e => setFilters({ ...filters, search: e.target.value })}
-              onKeyDown={e => e.key === 'Enter' && fetchFilterData()}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position='start'>
-                    <SearchIcon sx={{ color: 'action.active' }} />
-                  </InputAdornment>
-                )
-              }}
-            />
-            {/* Status */}
-            <TextField
-              select
-              size='small'
-              variant='outlined'
-              label='Status'
-              value={filters.status}
-              onChange={e => setFilters({ ...filters, status: e.target.value })}
-              sx={{ minWidth: 120, maxWidth: 150, bgcolor: 'white' }}
-            >
-              <MenuItem value=''>All</MenuItem>
-              {uniqueStatus.map(status => (
-                <MenuItem key={status} value={status}>
-                  {status}
-                </MenuItem>
-              ))}
-            </TextField>
-
-            {/* Touch */}
-            <TextField
-              autoComplete='off'
-              size='small'
-              variant='outlined'
-              select
-              label='Touch'
-              value={filters.touch}
-              onChange={e => setFilters({ ...filters, touch: e.target.value })}
-              sx={{ minWidth: 120, maxWidth: 150, bgcolor: 'white' }}
-            >
-              <MenuItem value=''>All</MenuItem>
-              {['touch', 'untouch'].map(touch => (
-                <MenuItem key={touch} value={touch}>
-                  {touch}
-                </MenuItem>
-              ))}
-            </TextField>
-
-            {/* Assigned To */}
-            <TextField
-              select
-              size='small'
-              variant='outlined'
-              label='Assigned to'
-              value={filters.assign}
-              onChange={e => setFilters({ ...filters, assign: e.target.value })}
-              sx={{ minWidth: 140, maxWidth: 160, bgcolor: 'white' }}
-            >
-              <MenuItem value=''>All</MenuItem>
-              {userList.map(u => (
-                <MenuItem key={u.user_id} value={u.user_id}>
-                  {u.user_name}
-                </MenuItem>
-              ))}
-            </TextField>
-
-            <TextField
-              autoComplete='off'
-              size='small'
-              select
-              label='Source'
-              value={filters.source}
-              onChange={e => setFilters({ ...filters, source: e.target.value })}
-              sx={{ minWidth: 120, maxWidth: 150, bgcolor: 'white' }}
-            >
-              <MenuItem value=''>All</MenuItem>
-              {uniqueSources.map(source => (
-                <MenuItem key={source} value={source}>
-                  {source}
-                </MenuItem>
-              ))}
-            </TextField>
-
-            {/* Date Range Picker */}
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DateRangePicker
-                value={[filters.fromDate, filters.toDate]} // 🔹 filters la connect pannirukken
-                label='Date Range'
-                onChange={newValue => {
-                  setFilters({
-                    ...filters,
-                    fromDate: newValue[0],
-                    toDate: newValue[1]
-                  })
-                }}
-                slotProps={{
-                  textField: ({ position }) => ({
-                    size: 'small',
-                    sx: {
-                      minWidth: 250,
-                      maxWidth: 280,
-                      bgcolor: 'white',
-                      mr: position === 'start' ? 1 : 0
-                    }
-                  })
-                }}
-              />
-            </LocalizationProvider>
-
-            {/* Clear All */}
-            <Button
-              variant='text'
-              sx={{ color: '#009cde', fontWeight: 500, ml: 'auto' }}
-              onClick={() =>
-                setFilters({
-                  search: '',
-                  status: '',
-                  touch: '',
-                  assign: '',
-                  company: '',
-                  city: '',
-                  label: '',
-                  toDate: null
-                })
-              }
-            >
-              Clear All
-            </Button>
-          </Box>
-        </Grid>
-
         {/* 🔹 Right Column: Table + Actions */}
-        <Grid item xs={12} sm={12}>
-          <Box sx={{ width: '100%', overflowX: 'auto', maxHeight: 500 }}>
-            <Table
-              stickyHeader
-              size='small'
-              sx={{
-                minWidth: 1200,
-                borderRadius: 2,
-                boxShadow: '0px 3px 8px rgba(0,0,0,0.05)',
-                '& .MuiTableRow-root:hover': {
-                  backgroundColor: '#f1f5f9',
-                  cursor: 'pointer'
-                },
-                '& .MuiTableCell-root': {
-                  borderBottom: '1px solid #e0e0e0',
-                  py: 1.5
-                },
-                '& .MuiTableCell-stickyHeader': {
-                  backgroundColor: '#fff',
-                  color: '#333',
-                  fontWeight: 'bold',
-                  letterSpacing: 0.5
-                }
-              }}
-            >
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ minWidth: 100, maxWidth: 150, whiteSpace: 'nowrap' }}>S.No</TableCell>
-                  <TableCell
-                    sx={{
-                      position: 'sticky',
-                      left: 0,
-                      zIndex: 9,
-                      minWidth: 250
+
+        {viewType === 'List View' ? (
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Box display='flex' alignItems='center' gap={1.5} flexWrap='wrap' sx={{ mb: 2 }}>
+                {/* Search */}
+                <TextField
+                  autoComplete='off'
+                  size='small'
+                  placeholder='Search'
+                  value={filters.search}
+                  onChange={e => setFilters({ ...filters, search: e.target.value })}
+                  onKeyDown={e => e.key === 'Enter' && fetchFilterData()}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position='start'>
+                        <SearchIcon sx={{ color: 'action.active' }} />
+                      </InputAdornment>
+                    )
+                  }}
+                />
+                {/* Status */}
+                <TextField
+                  select
+                  size='small'
+                  variant='outlined'
+                  label='Status'
+                  value={filters.status}
+                  onChange={e => setFilters({ ...filters, status: e.target.value })}
+                  sx={{ minWidth: 120, maxWidth: 150, bgcolor: 'white' }}
+                >
+                  <MenuItem value=''>All</MenuItem>
+                  {uniqueStatus.map(status => (
+                    <MenuItem key={status} value={status}>
+                      {status}
+                    </MenuItem>
+                  ))}
+                </TextField>
+
+                {/* Touch */}
+                <TextField
+                  autoComplete='off'
+                  size='small'
+                  variant='outlined'
+                  select
+                  label='Touch'
+                  value={filters.touch}
+                  onChange={e => setFilters({ ...filters, touch: e.target.value })}
+                  sx={{ minWidth: 120, maxWidth: 150, bgcolor: 'white' }}
+                >
+                  <MenuItem value=''>All</MenuItem>
+                  {['touch', 'untouch'].map(touch => (
+                    <MenuItem key={touch} value={touch}>
+                      {touch}
+                    </MenuItem>
+                  ))}
+                </TextField>
+
+                {/* Assigned To */}
+                <TextField
+                  select
+                  size='small'
+                  variant='outlined'
+                  label='Assigned to'
+                  value={filters.assign}
+                  onChange={e => setFilters({ ...filters, assign: e.target.value })}
+                  sx={{ minWidth: 140, maxWidth: 160, bgcolor: 'white' }}
+                >
+                  <MenuItem value=''>All</MenuItem>
+                  {userList.map(u => (
+                    <MenuItem key={u.user_id} value={u.user_id}>
+                      {u.user_name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+
+                <TextField
+                  autoComplete='off'
+                  size='small'
+                  select
+                  label='Source'
+                  value={filters.source}
+                  onChange={e => setFilters({ ...filters, source: e.target.value })}
+                  sx={{ minWidth: 120, maxWidth: 150, bgcolor: 'white' }}
+                >
+                  <MenuItem value=''>All</MenuItem>
+                  {uniqueSources.map(source => (
+                    <MenuItem key={source} value={source}>
+                      {source}
+                    </MenuItem>
+                  ))}
+                </TextField>
+
+                {/* Date Range Picker */}
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DateRangePicker
+                    value={[filters.fromDate, filters.toDate]} // 🔹 filters la connect pannirukken
+                    label='Date Range'
+                    onChange={newValue => {
+                      setFilters({
+                        ...filters,
+                        fromDate: newValue[0],
+                        toDate: newValue[1]
+                      })
                     }}
-                  >
-                    Deal Name
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>First Name</TableCell>
-                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Company</TableCell>
-                  <TableCell sx={{ minWidth: 50, maxWidth: 80, whiteSpace: 'nowrap' }}>Flag</TableCell>
-                  <TableCell>City</TableCell>
+                    slotProps={{
+                      textField: ({ position }) => ({
+                        size: 'small',
+                        sx: {
+                          minWidth: 250,
+                          maxWidth: 280,
+                          bgcolor: 'white',
+                          mr: position === 'start' ? 1 : 0
+                        }
+                      })
+                    }}
+                  />
+                </LocalizationProvider>
 
-                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Expected Revenue</TableCell>
-                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Closing Date</TableCell>
-                   <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Next Follow-up</TableCell>
-                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Timeline to Buy</TableCell>
-                  <TableCell>Status</TableCell>
+                {/* Clear All */}
+                <Button
+                  variant='text'
+                  sx={{ color: '#009cde', fontWeight: 500, ml: 'auto' }}
+                  onClick={() =>
+                    setFilters({
+                      search: '',
+                      status: '',
+                      touch: '',
+                      assign: '',
+                      company: '',
+                      city: '',
+                      label: '',
+                      toDate: null
+                    })
+                  }
+                >
+                  Clear All
+                </Button>
+              </Box>
+            </Grid>
+            <Grid item xs={12} sm={12}>
+              <Box sx={{ width: '100%', overflowX: 'auto', maxHeight: 500 }}>
+                <Table
+                  stickyHeader
+                  size='small'
+                  sx={{
+                    minWidth: 1200,
+                    borderRadius: 2,
+                    boxShadow: '0px 3px 8px rgba(0,0,0,0.05)',
+                    '& .MuiTableRow-root:hover': {
+                      backgroundColor: '#f1f5f9',
+                      cursor: 'pointer'
+                    },
+                    '& .MuiTableCell-root': {
+                      borderBottom: '1px solid #e0e0e0',
+                      py: 1.5
+                    },
+                    '& .MuiTableCell-stickyHeader': {
+                      backgroundColor: '#fff',
+                      color: '#333',
+                      fontWeight: 'bold',
+                      letterSpacing: 0.5
+                    }
+                  }}
+                >
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ minWidth: 100, maxWidth: 150, whiteSpace: 'nowrap' }}>S.No</TableCell>
+                      <TableCell
+                        sx={{
+                          position: 'sticky',
+                          left: 0,
+                          zIndex: 9,
+                          minWidth: 250
+                        }}
+                      >
+                        Deal Name
+                      </TableCell>
+                      <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>First Name</TableCell>
+                      <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Company</TableCell>
+                      <TableCell sx={{ minWidth: 50, maxWidth: 80, whiteSpace: 'nowrap' }}>Flag</TableCell>
+                      <TableCell>City</TableCell>
 
-                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Assigned To</TableCell>
-                  <TableCell>Source</TableCell>
-                  <TableCell>Score</TableCell>
-                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Label</TableCell>
-                  <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Last Contact Date</TableCell>
-                 
-                  <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Created By</TableCell>
-                  {/* <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Action</TableCell> */}
-                </TableRow>
-              </TableHead>
+                      <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                        Expected Revenue
+                      </TableCell>
+                      <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Closing Date</TableCell>
+                      <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Next Follow-up</TableCell>
+                      <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Timeline to Buy</TableCell>
+                      <TableCell>Status</TableCell>
 
-              <TableBody>
-                {loading
-                  ? [...Array(limit)].map((_, i) => (
-                      <TableRow key={i}>
-                        {Array.from({ length: 14 }).map((_, j) => (
-                          <TableCell key={j}>
-                            <Skeleton variant='text' width='100%' />
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))
-                  : data.map((row, i) => (
-                      <TableRow key={i}>
-                        <TableCell
-                          sx={{
-                            backgroundColor: '#fff',
-                            minWidth: 100
-                          }}
-                        >
-                          <strong>{page * limit + i + 1}</strong>
-                        </TableCell>
-                        <TableCell
-                          sx={{
-                            position: 'sticky',
-                            left: 0,
-                            zIndex: 2,
-                            backgroundColor: '#fff',
-                            minWidth: 250
-                          }}
-                        >
-                          <Link
-                            href={`/view/opportunity-form/${encodeURIComponent(encryptCryptoRes(row.lead_id))}`}
-                            style={{ textDecoration: 'none' }}
-                          >
-                            <strong> {row.values['Deal Name'] || ''}</strong>
-                          </Link>
-                        </TableCell>
-                        <TableCell
-                          sx={{
-                            minWidth: 180,
-                            maxWidth: 200,
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis'
-                          }}
-                        >
-                          <Tooltip title={row.values['First Name'] || ''} arrow>
-                            {row.values['First Name'] || ''}
-                          </Tooltip>
-                        </TableCell>
-                        <TableCell
-                          sx={{
-                            minWidth: 180,
-                            maxWidth: 200,
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis'
-                          }}
-                        >
-                          <Tooltip title={row.values['Company'] || ''} arrow enterDelay={300} leaveDelay={150}>
-                            <span
-                              style={{
-                                display: 'block',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap'
+                      <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Assigned To</TableCell>
+                      <TableCell>Source</TableCell>
+                      <TableCell>Score</TableCell>
+                      <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Label</TableCell>
+                      <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                        Last Contact Date
+                      </TableCell>
+
+                      <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Created By</TableCell>
+                      {/* <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Action</TableCell> */}
+                    </TableRow>
+                  </TableHead>
+
+                  <TableBody>
+                    {loading
+                      ? [...Array(limit)].map((_, i) => (
+                          <TableRow key={i}>
+                            {Array.from({ length: 14 }).map((_, j) => (
+                              <TableCell key={j}>
+                                <Skeleton variant='text' width='100%' />
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        ))
+                      : data.map((row, i) => (
+                          <TableRow key={i}>
+                            <TableCell
+                              sx={{
+                                backgroundColor: '#fff',
+                                minWidth: 100
                               }}
                             >
-                              {row.values['Company']}
-                            </span>
-                          </Tooltip>
-                        </TableCell>
-                        <TableCell
-                          onClick={() => onToggleFlag(row)}
-                          sx={{ minWidth: 50, maxWidth: 80, whiteSpace: 'nowrap' }}
-                        >
-                          {row.lead_flag === 0 ? (
-                            <FlagIcon sx={{ color: 'grey' }} /> // 0 -> orange flag
-                          ) : (
-                            <FlagIcon sx={{ color: 'orange' }} /> // 1 -> green flag
-                          )}
-                        </TableCell>
+                              <strong>{page * limit + i + 1}</strong>
+                            </TableCell>
+                            <TableCell
+                              sx={{
+                                position: 'sticky',
+                                left: 0,
+                                zIndex: 2,
+                                backgroundColor: '#fff',
+                                minWidth: 250
+                              }}
+                            >
+                              <Link
+                                href={`/view/opportunity-form/${encodeURIComponent(encryptCryptoRes(row.lead_id))}`}
+                                style={{ textDecoration: 'none' }}
+                              >
+                                <strong> {row.values['Deal Name'] || ''}</strong>
+                              </Link>
+                            </TableCell>
+                            <TableCell
+                              sx={{
+                                minWidth: 180,
+                                maxWidth: 200,
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
+                              }}
+                            >
+                              <Tooltip title={row.values['First Name'] || ''} arrow>
+                                {row.values['First Name'] || ''}
+                              </Tooltip>
+                            </TableCell>
+                            <TableCell
+                              sx={{
+                                minWidth: 180,
+                                maxWidth: 200,
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
+                              }}
+                            >
+                              <Tooltip title={row.values['Company'] || ''} arrow enterDelay={300} leaveDelay={150}>
+                                <span
+                                  style={{
+                                    display: 'block',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap'
+                                  }}
+                                >
+                                  {row.values['Company']}
+                                </span>
+                              </Tooltip>
+                            </TableCell>
+                            <TableCell
+                              onClick={() => onToggleFlag(row)}
+                              sx={{ minWidth: 50, maxWidth: 80, whiteSpace: 'nowrap' }}
+                            >
+                              {row.lead_flag === 0 ? (
+                                <FlagIcon sx={{ color: 'grey' }} /> // 0 -> orange flag
+                              ) : (
+                                <FlagIcon sx={{ color: 'orange' }} /> // 1 -> green flag
+                              )}
+                            </TableCell>
 
-                        <TableCell>{row.values['City']}</TableCell>
-                        <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>{row.values['Expected Revenue']}</TableCell>
-                        <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>{row.values['Closing Date']}</TableCell>
-                         <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
-                          {formatDateShort(row.values['Next Follow-up Date'])}
-                        </TableCell>
-                         <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
-                          <Chip
-                            label={row.values['Timeline to Buy'] ? row.values['Timeline to Buy'] : '-'}
-                            sx={{
-                              color: '#ffffff',
-                              backgroundColor:
-                                row.values['Timeline to Buy'] == '3–6 Months'
-                                  ? '#00FF48'
-                                  : row.values['Timeline to Buy'] == '6+ Months'
-                                    ? '#FF8800'
-                                    : row.values['Timeline to Buy'] == 'Immediately'
-                                      ? '#FF0000'
-                                      : '#ffffff',
-                              fontWeight: 'bold'
-                            }}
-                            size='small'
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={row.values['Lead Status'] || 'Unknown'}
-                            color={
-                              row.values['Lead Status'] === 'New'
-                                ? 'primary'
-                                : row.values['Lead Status'] === 'Contacted'
-                                  ? 'info'
-                                  : row.values['Lead Status'] === 'Qualified'
-                                    ? 'success'
-                                    : row.values['Lead Status'] === 'Proposal Sent'
-                                      ? 'secondary'
-                                      : row.values['Lead Status'] === 'Negotiation'
-                                        ? 'default'
-                                        : row.values['Lead Status'] === 'Closed Lost'
-                                          ? 'warning'
-                                          : row.values['Lead Status'] === 'Closed Won'
-                                            ? 'success'
-                                            : row.values['Lead Status'] === 'Attempted to Contact'
+                            <TableCell>{row.values['City']}</TableCell>
+                            <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                              {row.values['Expected Revenue']}
+                            </TableCell>
+                            <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                              {row.values['Closing Date']}
+                            </TableCell>
+                            <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                              {formatDateShort(row.values['Next Follow-up Date'])}
+                            </TableCell>
+                            <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                              <Chip
+                                label={row.values['Timeline to Buy'] ? row.values['Timeline to Buy'] : '-'}
+                                sx={{
+                                  color: '#ffffff',
+                                  backgroundColor:
+                                    row.values['Timeline to Buy'] == '3–6 Months'
+                                      ? '#00FF48'
+                                      : row.values['Timeline to Buy'] == '6+ Months'
+                                        ? '#FF8800'
+                                        : row.values['Timeline to Buy'] == 'Immediately'
+                                          ? '#FF0000'
+                                          : '#ffffff',
+                                  fontWeight: 'bold'
+                                }}
+                                size='small'
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={row.values['Lead Status'] || 'Unknown'}
+                                color={
+                                  row.values['Lead Status'] === 'New'
+                                    ? 'primary'
+                                    : row.values['Lead Status'] === 'Contacted'
+                                      ? 'info'
+                                      : row.values['Lead Status'] === 'Qualified'
+                                        ? 'success'
+                                        : row.values['Lead Status'] === 'Proposal Sent'
+                                          ? 'secondary'
+                                          : row.values['Lead Status'] === 'Negotiation'
+                                            ? 'default'
+                                            : row.values['Lead Status'] === 'Closed Lost'
                                               ? 'warning'
-                                              : row.values['Lead Status'] === 'Lost Lead - No Requirements'
-                                                ? 'error'
-                                                : row.values['Lead Status'] === 'No Response/Busy'
+                                              : row.values['Lead Status'] === 'Closed Won'
+                                                ? 'success'
+                                                : row.values['Lead Status'] === 'Attempted to Contact'
                                                   ? 'warning'
-                                                  : row.values['Lead Status'] === 'Lost Lead - Already Using'
+                                                  : row.values['Lead Status'] === 'Lost Lead - No Requirements'
                                                     ? 'error'
-                                                    : row.values['Lead Status'] === 'Interested'
+                                                    : row.values['Lead Status'] === 'No Response/Busy'
                                                       ? 'warning'
-                                                      : row.values['Lead Status'] === 'Demo Scheduled'
-                                                        ? 'warning'
-                                                        : row.values['Lead Status'] === 'Need to Schedule Demo'
+                                                      : row.values['Lead Status'] === 'Lost Lead - Already Using'
+                                                        ? 'error'
+                                                        : row.values['Lead Status'] === 'Interested'
                                                           ? 'warning'
-                                                          : row.values['Lead Status'] === 'Demo Completed'
+                                                          : row.values['Lead Status'] === 'Demo Scheduled'
                                                             ? 'warning'
-                                                            : row.values['Lead Status'] === 'Call Back'
+                                                            : row.values['Lead Status'] === 'Need to Schedule Demo'
                                                               ? 'warning'
-                                                              : 'default'
-                            }
-                            size='small'
-                          />
-                        </TableCell>
+                                                              : row.values['Lead Status'] === 'Demo Completed'
+                                                                ? 'warning'
+                                                                : row.values['Lead Status'] === 'Call Back'
+                                                                  ? 'warning'
+                                                                  : 'default'
+                                }
+                                size='small'
+                              />
+                            </TableCell>
 
-                        <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
-                          {row.assignedTo}
-                        </TableCell>
-                        <TableCell>{row.values['Lead Source']}</TableCell>
-                        <TableCell>
-                          <Box
-                            sx={{
-                              backgroundColor:
-                                (row.values['Score'] || 0) >= 75
-                                  ? '#f44336'
-                                  : (row.values['Score'] || 0) >= 40
-                                    ? '#ff9800'
-                                    : '#2196f3',
-                              color: '#fff',
-                              px: 1.5,
-                              py: 1,
-                              width: 36,
-                              height: 36,
-                              borderRadius: '50%',
-                              fontSize: '0.85rem',
-                              fontWeight: 'bold',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
-                            }}
-                            title={`Lead Score: ${row.values['Score'] || 0}`}
-                          >
-                            {row.values['Score'] || 0}
-                          </Box>
-                        </TableCell>
+                            <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                              {row.assignedTo}
+                            </TableCell>
+                            <TableCell>{row.values['Lead Source']}</TableCell>
+                            <TableCell>
+                              <Box
+                                sx={{
+                                  backgroundColor:
+                                    (row.values['Score'] || 0) >= 75
+                                      ? '#f44336'
+                                      : (row.values['Score'] || 0) >= 40
+                                        ? '#ff9800'
+                                        : '#2196f3',
+                                  color: '#fff',
+                                  px: 1.5,
+                                  py: 1,
+                                  width: 36,
+                                  height: 36,
+                                  borderRadius: '50%',
+                                  fontSize: '0.85rem',
+                                  fontWeight: 'bold',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
+                                }}
+                                title={`Lead Score: ${row.values['Score'] || 0}`}
+                              >
+                                {row.values['Score'] || 0}
+                              </Box>
+                            </TableCell>
 
-                        <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
-                          <Chip
-                            label={
-                              (row.values['Score'] || 0) >= 75
-                                ? '🔥 Hot Lead'
-                                : (row.values['Score'] || 0) >= 40
-                                  ? '🟡 Warm Lead'
-                                  : '❄️ Cold Lead'
-                            }
-                            sx={{
-                              backgroundColor:
-                                (row.values['Score'] || 0) >= 75
-                                  ? '#ffcdd2'
-                                  : (row.values['Score'] || 0) >= 40
-                                    ? '#fff3cd'
-                                    : '#bbdefb',
-                              fontWeight: 'bold'
-                            }}
-                            size='small'
-                          />
-                        </TableCell>
-                        <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
-                          {converDayJsDate(row.updatedAt)}
-                        </TableCell>
-                       
-                        <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
-                          {row.createdByName}
-                        </TableCell>
+                            <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                              <Chip
+                                label={
+                                  (row.values['Score'] || 0) >= 75
+                                    ? '🔥 Hot Lead'
+                                    : (row.values['Score'] || 0) >= 40
+                                      ? '🟡 Warm Lead'
+                                      : '❄️ Cold Lead'
+                                }
+                                sx={{
+                                  backgroundColor:
+                                    (row.values['Score'] || 0) >= 75
+                                      ? '#ffcdd2'
+                                      : (row.values['Score'] || 0) >= 40
+                                        ? '#fff3cd'
+                                        : '#bbdefb',
+                                  fontWeight: 'bold'
+                                }}
+                                size='small'
+                              />
+                            </TableCell>
+                            <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                              {converDayJsDate(row.updatedAt)}
+                            </TableCell>
 
-                        {/* <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                            <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                              {row.createdByName}
+                            </TableCell>
+
+                            {/* <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           <Box display={'flex'}>
                             <Tooltip title={`Edit ${row.values['First Name']} Lead`} arrow>
                               <Link
@@ -1113,93 +1158,101 @@ const OpportunityTable = () => {
                             </Tooltip>
                           </Box>
                         </TableCell> */}
-                      </TableRow>
-                    ))}
-                {!loading && data?.length === 0 && (
-                  <TableCell
-                    colSpan={10}
-                    align='center'
-                    sx={{
-                      py: 8,
-                      background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)',
-                      border: 'none'
-                    }}
-                  >
-                    <Box
-                      display='flex'
-                      flexDirection='column'
-                      alignItems='center'
-                      justifyContent='center'
-                      gap={2}
-                      sx={{
-                        animation: 'fadeIn 0.6s ease-in-out',
-                        '@keyframes fadeIn': {
-                          '0%': { opacity: 0, transform: 'translateY(10px)' },
-                          '100%': { opacity: 1, transform: 'translateY(0)' }
-                        }
-                      }}
-                    >
-                      <Box
+                          </TableRow>
+                        ))}
+                    {!loading && data?.length === 0 && (
+                      <TableCell
+                        colSpan={10}
+                        align='center'
                         sx={{
-                          width: 80,
-                          height: 80,
-                          borderRadius: '50%',
-                          backgroundColor: '#e9ecef',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          boxShadow: 'inset 0 0 10px rgba(0,0,0,0.05)'
+                          py: 8,
+                          background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)',
+                          border: 'none'
                         }}
                       >
-                        <i
-                          className='ri-search-line'
-                          style={{
-                            fontSize: 38,
-                            color: '#9ca3af'
+                        <Box
+                          display='flex'
+                          flexDirection='column'
+                          alignItems='center'
+                          justifyContent='center'
+                          gap={2}
+                          sx={{
+                            animation: 'fadeIn 0.6s ease-in-out',
+                            '@keyframes fadeIn': {
+                              '0%': { opacity: 0, transform: 'translateY(10px)' },
+                              '100%': { opacity: 1, transform: 'translateY(0)' }
+                            }
                           }}
-                        ></i>
-                      </Box>
+                        >
+                          <Box
+                            sx={{
+                              width: 80,
+                              height: 80,
+                              borderRadius: '50%',
+                              backgroundColor: '#e9ecef',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxShadow: 'inset 0 0 10px rgba(0,0,0,0.05)'
+                            }}
+                          >
+                            <i
+                              className='ri-search-line'
+                              style={{
+                                fontSize: 38,
+                                color: '#9ca3af'
+                              }}
+                            ></i>
+                          </Box>
 
-                      <Box>
-                        <Typography
-                          variant='h6'
-                          sx={{
-                            fontWeight: 600,
-                            color: '#64748b'
-                          }}
-                        >
-                          No Records Found
-                        </Typography>
-                        <Typography
-                          variant='body2'
-                          sx={{
-                            color: '#94a3b8',
-                            mt: 0.5
-                          }}
-                        >
-                          Try adjusting filters or adding new data to get started
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </TableCell>
-                )}
-              </TableBody>
-            </Table>
-          </Box>
-          <TablePagination
-            component='div'
-            count={total}
-            page={page}
-            onPageChange={(e, newPage) => setPage(newPage)}
-            rowsPerPage={limit}
-            onRowsPerPageChange={e => {
-              setLimit(parseInt(e.target.value, 10))
-              setPage(0)
-            }}
-            rowsPerPageOptions={[5, 10, 20, 50, 100]}
-          />
-        </Grid>
-      </Grid>
+                          <Box>
+                            <Typography
+                              variant='h6'
+                              sx={{
+                                fontWeight: 600,
+                                color: '#64748b'
+                              }}
+                            >
+                              No Records Found
+                            </Typography>
+                            <Typography
+                              variant='body2'
+                              sx={{
+                                color: '#94a3b8',
+                                mt: 0.5
+                              }}
+                            >
+                              Try adjusting filters or adding new data to get started
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </TableCell>
+                    )}
+                  </TableBody>
+                </Table>
+              </Box>
+              <TablePagination
+                component='div'
+                count={total}
+                page={page}
+                onPageChange={(e, newPage) => setPage(newPage)}
+                rowsPerPage={limit}
+                onRowsPerPageChange={e => {
+                  setLimit(parseInt(e.target.value, 10))
+                  setPage(0)
+                }}
+                rowsPerPageOptions={[5, 10, 20, 50, 100]}
+              />
+            </Grid>
+          </Grid>
+        ) : (
+           <Grid container spacing={2}>
+          <Grid item xs={12} sm={12}>
+            <KanbanView />
+          </Grid>
+           </Grid>
+        )}
+     
     </Box>
   )
 }
