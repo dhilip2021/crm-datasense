@@ -32,16 +32,9 @@ const calculateLeadScore = values => {
   )
     score += 25
   if (companySize && parseInt(companySize) > 50) score += 15
-  if (
-    industry &&
-    ['Logistics', 'Manufacturing', 'FMCG', 'Education', 'Pharma', 'Retail'].includes(industry)
-  )
+  if (industry && ['Logistics', 'Manufacturing', 'FMCG', 'Education', 'Pharma', 'Retail'].includes(industry))
     score += 20
-  if (
-    location &&
-    ['Chennai', 'Coimabtore', 'Bangalore', 'Delhi'].includes(location)
-  )
-    score += 10
+  if (location && ['Chennai', 'Coimabtore', 'Bangalore', 'Delhi'].includes(location)) score += 10
 
   if (Object.values(values).length >= 8) score += 15
   if (values['Clicked Email'] || values['Opened WhatsApp']) score += 10
@@ -56,16 +49,12 @@ const calculateLeadScore = values => {
   return { lead_score: score, lead_label: label }
 }
 
-
 export async function GET(req, { params }) {
   const verified = verifyAccessToken()
   await connectMongoDB()
 
   if (!verified.success) {
-    return NextResponse.json(
-      { success: false, message: '', error: 'token expired!' },
-      { status: 400 }
-    )
+    return NextResponse.json({ success: false, message: '', error: 'token expired!' }, { status: 400 })
   }
 
   try {
@@ -419,7 +408,6 @@ const toObjectId = id => {
 //         }
 //       }
 
-
 //       const updateFields = { updatedAt: new Date() }
 
 //       if (body.lead_touch !== undefined) {
@@ -511,10 +499,6 @@ const toObjectId = id => {
 //   }
 // }
 
-
-
-
-
 export async function PATCH(req, { params }) {
   const verified = verifyAccessToken()
   await connectMongoDB()
@@ -522,10 +506,7 @@ export async function PATCH(req, { params }) {
   const body = await req.json()
 
   if (!verified.success) {
-    return NextResponse.json(
-      { success: false, message: '', error: 'token expired!' },
-      { status: 400 }
-    )
+    return NextResponse.json({ success: false, message: '', error: 'token expired!' }, { status: 400 })
   }
 
   try {
@@ -540,6 +521,8 @@ export async function PATCH(req, { params }) {
     let updateNote = null
     let newTask = null
     let updateTask = null
+    let newMeeting = null
+    let updateMeeting = null
 
     if (noteFromBody && (noteFromBody.title || noteFromBody.note)) {
       if (noteFromBody._id) {
@@ -563,6 +546,7 @@ export async function PATCH(req, { params }) {
     // ---------------- TASK ----------------
     const activityFromBody = body.values?.Activity?.[0] || {}
     const taskFromBody = activityFromBody.task?.[0] || {}
+    const meetingFromBody = activityFromBody.meeting?.[0] || {}
 
     if (taskFromBody && (taskFromBody.subject || taskFromBody.dueDate)) {
       if (taskFromBody._id) {
@@ -593,6 +577,35 @@ export async function PATCH(req, { params }) {
           createdAt: new Date()
         }
       }
+    } else if (meetingFromBody && (meetingFromBody.title || meetingFromBody.fromDate || meetingFromBody.toDate)) {
+      if (meetingFromBody._id) {
+        updateMeeting = {
+          title: meetingFromBody.title || null,
+          venue: meetingFromBody.venue || null,
+          location: meetingFromBody.location || null,
+          link: meetingFromBody.link || null,
+          host: meetingFromBody.host || null,
+          fromDate: meetingFromBody.fromDate ? new Date(meetingFromBody.fromDate) : null,
+          fromTime: meetingFromBody.fromTime || null,
+          toDate: meetingFromBody.toDate ? new Date(meetingFromBody.toDate) : null,
+          toTime: meetingFromBody.toTime || null,
+          createdAt: new Date()
+        }
+      } else {
+        newMeeting = {
+          _id: new mongoose.Types.ObjectId(),
+          title: meetingFromBody.title || null,
+          venue: meetingFromBody.venue || null,
+          location: meetingFromBody.location || null,
+          link: meetingFromBody.link || null,
+          host: meetingFromBody.host || null,
+          fromDate: meetingFromBody.fromDate ? new Date(meetingFromBody.fromDate) : null,
+          fromTime: meetingFromBody.fromTime || null,
+          toDate: meetingFromBody.toDate ? new Date(meetingFromBody.toDate) : null,
+          toTime: meetingFromBody.toTime || null,
+          createdAt: new Date()
+        }
+      }
     }
 
     // ---------------- UPDATE QUERY ----------------
@@ -610,7 +623,6 @@ export async function PATCH(req, { params }) {
     for (const [key, val] of Object.entries(valuesToUpdate)) {
       // skip arrays handled separately
       if (['Notes', 'Activity'].includes(key)) continue
-
       updateQuery.$set[`values.${key}`] = val
     }
 
@@ -618,12 +630,6 @@ export async function PATCH(req, { params }) {
     if (newNote) {
       newNote._id = toObjectId(newNote._id)
       updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Notes': newNote }
-    }
-
-    // Tasks push
-    if (newTask) {
-      newTask._id = toObjectId(newTask._id)
-      updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Activity.0.task': newTask }
     }
 
     // Update note
@@ -646,41 +652,91 @@ export async function PATCH(req, { params }) {
       return NextResponse.json({ success: true, message: 'Note updated successfully', data: updated })
     }
 
+    // Tasks push
+    if (newTask) {
+      newTask._id = toObjectId(newTask._id)
+      updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Activity.0.task': newTask }
+    }
+
     // Update task
     if (updateTask) {
-  const taskId = toObjectId(taskFromBody._id)
-  const updateSet = {
-    'values.Activity.0.task.$[t].subject': updateTask.subject,
-    'values.Activity.0.task.$[t].dueDate': updateTask.dueDate,
-    'values.Activity.0.task.$[t].priority': updateTask.priority,
-    'values.Activity.0.task.$[t].status': updateTask.status,
-    'values.Activity.0.task.$[t].owner': updateTask.owner,
-    'values.Activity.0.task.$[t].reminderEnabled': updateTask.reminderEnabled,
-    'values.Activity.0.task.$[t].reminderDate': updateTask.reminderDate,
-    'values.Activity.0.task.$[t].reminderTime': updateTask.reminderTime,
-    'values.Activity.0.task.$[t].alertType': updateTask.alertType,
-    'values.Activity.0.task.$[t].createdAt': updateTask.createdAt,
-    lead_touch: body.lead_touch,
-    updatedAt: new Date()
-  }
+      const taskId = toObjectId(taskFromBody._id)
+      const updateSet = {
+        'values.Activity.0.task.$[t].subject': updateTask.subject,
+        'values.Activity.0.task.$[t].dueDate': updateTask.dueDate,
+        'values.Activity.0.task.$[t].priority': updateTask.priority,
+        'values.Activity.0.task.$[t].status': updateTask.status,
+        'values.Activity.0.task.$[t].owner': updateTask.owner,
+        'values.Activity.0.task.$[t].reminderEnabled': updateTask.reminderEnabled,
+        'values.Activity.0.task.$[t].reminderDate': updateTask.reminderDate,
+        'values.Activity.0.task.$[t].reminderTime': updateTask.reminderTime,
+        'values.Activity.0.task.$[t].alertType': updateTask.alertType,
+        'values.Activity.0.task.$[t].createdAt': updateTask.createdAt,
+        lead_touch: body.lead_touch,
+        updatedAt: new Date()
+      }
 
-  // ✅ Add Next Follow-up Date if present in body
-  if (body.values?.['Next Follow-up Date']) {
-    updateSet['values.Next Follow-up Date'] = body.values['Next Follow-up Date']
-  }
+      // ✅ Add Next Follow-up Date if present in body
+      if (body.values?.['Next Follow-up Date']) {
+        updateSet['values.Next Follow-up Date'] = body.values['Next Follow-up Date']
+      }
 
-  const updatedTask = await Leadform.findOneAndUpdate(
-    { lead_id },
-    { $set: updateSet },
-    { arrayFilters: [{ 't._id': taskId }], new: true }
-  )
+      const updatedTask = await Leadform.findOneAndUpdate(
+        { lead_id },
+        { $set: updateSet },
+        { arrayFilters: [{ 't._id': taskId }], new: true }
+      )
 
-  return NextResponse.json({
-    success: true,
-    message: 'Task updated successfully',
-    data: updatedTask
-  })
-}
+      return NextResponse.json({
+        success: true,
+        message: 'Task updated successfully',
+        data: updatedTask
+      })
+    }
+
+    // Tasks push
+    if (newMeeting) {
+      console.log(newMeeting, 'NEW MEETING')
+      newMeeting._id = toObjectId(newMeeting._id)
+      updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Activity.0.meeting': newMeeting }
+    }
+
+    // Update meeting
+    if (updateMeeting) {
+      console.log('UPDATE MEETING')
+      const meetingId = toObjectId(meetingFromBody._id)
+      const updateSet = {
+        'values.Activity.0.meeting.$[t].title': updateMeeting.title,
+        'values.Activity.0.meeting.$[t].venue': updateMeeting.venue,
+        'values.Activity.0.meeting.$[t].location': updateMeeting.location,
+        'values.Activity.0.meeting.$[t].link': updateMeeting.link,
+        'values.Activity.0.meeting.$[t].host': updateMeeting.host,
+        'values.Activity.0.meeting.$[t].fromDate': updateMeeting.fromDate,
+        'values.Activity.0.meeting.$[t].fromTime': updateMeeting.fromTime,
+        'values.Activity.0.meeting.$[t].toDate': updateMeeting.toDate,
+        'values.Activity.0.meeting.$[t].toTime': updateMeeting.toTime,
+        'values.Activity.0.meeting.$[t].createdAt': updateMeeting.createdAt,
+        lead_touch: body.lead_touch,
+        updatedAt: new Date()
+      }
+
+      // ✅ Add Next Follow-up Date if present in body
+      if (body.values?.['Next Follow-up Date']) {
+        updateSet['values.Next Follow-up Date'] = body.values['Next Follow-up Date']
+      }
+
+      const updatedMeeting = await Leadform.findOneAndUpdate(
+        { lead_id },
+        { $set: updateSet },
+        { arrayFilters: [{ 't._id': meetingId }], new: true }
+      )
+
+      return NextResponse.json({
+        success: true,
+        message: 'Task updated successfully',
+        data: updatedMeeting
+      })
+    }
 
     // Final update (includes Next Follow-up Date and other fields)
     const updated = await Leadform.findOneAndUpdate({ lead_id }, updateQuery, {
@@ -698,4 +754,3 @@ export async function PATCH(req, { params }) {
     return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
   }
 }
-

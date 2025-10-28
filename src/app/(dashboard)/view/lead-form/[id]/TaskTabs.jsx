@@ -1,38 +1,19 @@
 'use client'
 import React, { useState, useMemo } from 'react'
-import {
-  Box,
-  Card,
-  Typography,
-  Button,
-  Divider,
-  Tabs,
-  Tab,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Switch,
-  FormControlLabel,
-  Chip,
-  Grid,
-  IconButton,
-  Tooltip
-} from '@mui/material'
+import { Box, Card, Typography, Button, Divider, Tabs, Tab, Chip, IconButton, Tooltip, Stack } from '@mui/material'
 import dayjs from 'dayjs'
 import Cookies from 'js-cookie'
 import { toast } from 'react-toastify'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined'
-import CloseIcon from '@mui/icons-material/Close'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { DatePicker, TimePicker } from '@mui/x-date-pickers'
+import TaskDialog from './TaskDialog'
+import MeetingDialog from './MeetingDialog'
+import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined'
+import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined'
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline'
+import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined'
 
 const statusColors = {
   'Not Started': { bg: '#F2F3F4', color: '#7F8C8D' },
@@ -42,18 +23,11 @@ const statusColors = {
   'Waiting for input': { bg: '#EBF5FB', color: '#2980B9' }
 }
 
-
 const priorityColors = {
   High: { bg: '#C0392B', color: '#FFFFFF' },
   Medium: { bg: '#F39C12', color: '#FFFFFF' },
   Low: { bg: '#27AE60', color: '#FFFFFF' }
 }
-
-
-
-
-
-
 
 export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
   const getToken = Cookies.get('_token')
@@ -62,8 +36,7 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
 
   // Filter out completed tasks for display
   const leadArrayTasks = leadData?.values?.Activity?.[0]?.task || []
-
-
+  const leadArrayMeetings = leadData?.values?.Activity?.[0]?.meeting || []
 
   const sortedTasks = useMemo(() => {
     return [...leadArrayTasks]
@@ -83,35 +56,58 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
       }))
   }, [leadArrayTasks])
 
+  const sortedMeetings = useMemo(() => {
+    return [...leadArrayMeetings]
+      .sort((a, b) => new Date(a.fromDate) - new Date(b.fromDate))
+      .map(t => ({
+        type: 'Meeting',
+        _id: t._id || '',
+        title: t.title || 'New Meeting',
+        venue: t.venue || 'Client Location',
+        link: t.link || 'meeting link',
+        location: t.location || 'meeting location',
+        fromDate: t.fromDate || new Date(),
+        fromTime: t.fromTime,
+        toDate: t.toDate,
+        toTime: t.toTime,
+        host: t.host || 'Unknown',
+        participants: t.participants
+      }))
+  }, [leadArrayMeetings])
 
-const today = dayjs().startOf('day')
+  const today = dayjs().startOf('day')
 
-// Separate tasks based on dueDate
-const completedTasks = useMemo(
-  () => sortedTasks.filter(t => dayjs(t.dueDate).isBefore(today, 'day')),
-  [sortedTasks]
-)
+  // Separate tasks based on dueDate
+  const completedTasks = useMemo(() => sortedTasks.filter(t => dayjs(t.dueDate).isBefore(today, 'day')), [sortedTasks])
+  const currentTasks = useMemo(() => sortedTasks.filter(t => dayjs(t.dueDate).isSame(today, 'day')), [sortedTasks])
+  const upcomingTasks = useMemo(() => sortedTasks.filter(t => dayjs(t.dueDate).isAfter(today, 'day')), [sortedTasks])
 
-const currentTasks = useMemo(
-  () => sortedTasks.filter(t => dayjs(t.dueDate).isSame(today, 'day')),
-  [sortedTasks]
-)
-
-const upcomingTasks = useMemo(
-  () => sortedTasks.filter(t => dayjs(t.dueDate).isAfter(today, 'day')),
-  [sortedTasks]
-)
-
-
-
- 
+  const completedMeetings = useMemo(
+    () => sortedMeetings.filter(t => dayjs(t.fromDate).isBefore(today, 'day')),
+    [sortedMeetings]
+  )
+  const currentMeetings = useMemo(
+    () => sortedMeetings.filter(t => dayjs(t.fromDate).isSame(today, 'day')),
+    [sortedMeetings]
+  )
+  const upcomingMeetings = useMemo(
+    () => sortedMeetings.filter(t => dayjs(t.fromDate).isAfter(today, 'day')),
+    [sortedMeetings]
+  )
 
   const [tab, setTab] = useState(0)
   const [openTaskDialog, setOpenTaskDialog] = useState(false)
+  const [openMeetingDialog, setOpenMeetingDialog] = useState(false)
   const [tasks, setTasks] = useState(sortedTasks)
+  const [meetings, setMeetings] = useState(sortedMeetings)
+  const [calls, setCalls] = useState([])
   const [editingTask, setEditingTask] = useState(null)
-  const [loader, setLoader] = useState(false)
-  const [reminderTimeError, setReminderTimeError] = useState(false)
+  const [editingMeeting, setEditingMeeting] = useState(null)
+  const [loaderTask, setLoaderTask] = useState(false)
+  const [loaderMeeting, setLoaderMeeting] = useState(false)
+  const [reminderTimeTaskError, setReminderTimeTaskError] = useState(false)
+  const [reminderFromTimeMeetingError, setReminderFromTimeMeetingError] = useState(false)
+  const [reminderToTimeMeetingError, setReminderToTimeMeetingError] = useState(false)
 
   const initialTaskData = {
     _id: '',
@@ -125,103 +121,342 @@ const upcomingTasks = useMemo(
     reminderTime: '',
     alertType: 'Both'
   }
+  const initialMeetingData = {
+    _id: '',
+
+    title: 'New Meeting',
+    venue: 'Client Location',
+    location: 'CBE',
+    link: '',
+    fromDate: null,
+    fromTime: null,
+    toDate: null,
+    toTime: null,
+    participants: '',
+    host: user_name
+  }
 
   const [taskData, setTaskData] = useState(initialTaskData)
+  const [meetingData, setMeetingData] = useState(initialMeetingData)
   const [errorTaskData, setErrorTaskData] = useState({
     subject: false,
     dueDate: false,
     reminderDate: false
   })
 
+  const [errorMeetingData, setErrorMeetingData] = useState({
+    title: false,
+    link: false,
+    fromDate: false,
+    fromTime: false,
+    toDate: false,
+    toTime: false
+  })
+
   const renderTaskCard = task => (
-  <Card
-    key={task._id}
-    sx={{ p: 2, borderRadius: 2, boxShadow: '0px 2px 6px rgba(0,0,0,0.08)', position: 'relative' }}
-  >
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-      <Typography variant='subtitle1' fontWeight={600}>
-        {task.subject}
-      </Typography>
-      <Chip
-        label={task.status}
+    <Card
+      key={task._id}
+      sx={{ p: 2, borderRadius: 2, boxShadow: '0px 2px 6px rgba(0,0,0,0.08)', position: 'relative' }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+        <Typography variant='subtitle1' fontWeight={600}>
+          {task.subject}
+        </Typography>
+        <Chip
+          label={task.status}
+          size='small'
+          sx={{
+            backgroundColor: statusColors[task.status]?.bg,
+            color: statusColors[task.status]?.color,
+            fontWeight: 600,
+            fontSize: 12,
+            px: 1,
+            height: 24,
+            '& .MuiChip-label': { px: 1 }
+          }}
+        />
+        <Chip
+          label={task.priority}
+          size='small'
+          sx={{
+            backgroundColor: priorityColors[task.priority]?.bg,
+            color: priorityColors[task.priority]?.color,
+            fontWeight: 600,
+            fontSize: 12,
+            px: 1,
+            height: 24,
+            '& .MuiChip-label': { px: 1 }
+          }}
+        />
+      </Box>
+
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 14, color: 'text.secondary' }}>
+        <CalendarMonthOutlinedIcon sx={{ fontSize: 18 }} />
+        <Typography variant='caption'>
+          {dayjs(task.dueDate).format('DD MMM YYYY')} . {task.reminderTime || '—'}
+        </Typography>
+        <Typography variant='caption' sx={{ ml: 2 }}>
+          Created By <b>{task.owner}</b>
+        </Typography>
+      </Box>
+
+      <IconButton
         size='small'
         sx={{
-          backgroundColor: statusColors[task.status]?.bg,
-          color: statusColors[task.status]?.color,
-          fontWeight: 600,
-          fontSize: 12,
-          px: 1,
-          height: 24,
-          '& .MuiChip-label': { px: 1 }
+          position: 'absolute',
+          top: 8,
+          right: 8,
+          bgcolor: '#f5f5f5',
+          '&:hover': { bgcolor: '#e0e0e0' }
         }}
-      />
-      <Chip
-        label={task.priority}
+        onClick={() => {
+          setEditingTask(task)
+          setTaskData(task)
+          setOpenTaskDialog(true)
+        }}
+      >
+        <EditOutlinedIcon fontSize='small' />
+      </IconButton>
+    </Card>
+  )
+
+  const renderMeetingCard1 = meeting => (
+    <Card
+      key={meeting._id}
+      sx={{ p: 2, borderRadius: 2, boxShadow: '0px 2px 6px rgba(0,0,0,0.08)', position: 'relative' }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+        <Typography variant='subtitle1' fontWeight={600}>
+          {meeting.title}
+        </Typography>
+      </Box>
+
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 14, color: 'text.secondary' }}>
+        Venue: {meeting.venue}
+      </Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 14, color: 'text.secondary' }}>
+        Location: {meeting.location}
+      </Box>
+
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 2,
+          fontSize: 14,
+          color: 'text.secondary'
+        }}
+      >
+        <Box display={'flex'} alignItems={'center'}>
+          From :
+          <CalendarMonthOutlinedIcon sx={{ fontSize: 18 }} />{' '}
+          <Typography variant='caption'>
+            {dayjs(meeting.fromDate).format('DD MMM YYYY')} .{' '}
+            {dayjs(meeting.fromTime, 'HH:mm').format('hh:mm A') || '—'}
+          </Typography>
+        </Box>
+        <Box display={'flex'} alignItems={'center'}>
+          To :
+          <CalendarMonthOutlinedIcon sx={{ fontSize: 18 }} />{' '}
+          <Typography variant='caption'>
+            {dayjs(meeting.toDate).format('DD MMM YYYY')} . {dayjs(meeting.toTime, 'HH:mm').format('hh:mm A') || '—'}
+          </Typography>
+        </Box>
+      </Box>
+
+      <Box>
+        <Typography variant='caption' sx={{ ml: 2 }}>
+          Created By <b>{meeting.host}</b>
+        </Typography>
+      </Box>
+
+      <IconButton
         size='small'
         sx={{
-          backgroundColor: priorityColors[task.priority]?.bg,
-          color: priorityColors[task.priority]?.color,
-          fontWeight: 600,
-          fontSize: 12,
-          px: 1,
-          height: 24,
-          '& .MuiChip-label': { px: 1 }
+          position: 'absolute',
+          top: 8,
+          right: 8,
+          bgcolor: '#f5f5f5',
+          '&:hover': { bgcolor: '#e0e0e0' }
         }}
-      />
-    </Box>
+        onClick={() => {
+          setEditingMeeting(meeting)
+          setMeetingData(meeting)
+          setOpenMeetingDialog(true)
+        }}
+      >
+        <EditOutlinedIcon fontSize='small' />
+      </IconButton>
+    </Card>
+  )
 
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 14, color: 'text.secondary' }}>
-      <CalendarMonthOutlinedIcon sx={{ fontSize: 18 }} />
-      <Typography variant='caption'>
-        {dayjs(task.dueDate).format('DD MMM YYYY')} . {task.reminderTime || '—'}
-      </Typography>
-      <Typography variant='caption' sx={{ ml: 2 }}>
-        Created By <b>{task.owner}</b>
-      </Typography>
-    </Box>
-
-    <IconButton
-      size='small'
+  const renderMeetingCard = meeting => (
+    <Card
+      key={meeting._id}
       sx={{
-        position: 'absolute',
-        top: 8,
-        right: 8,
-        bgcolor: '#f5f5f5',
-        '&:hover': { bgcolor: '#e0e0e0' }
-      }}
-      onClick={() => {
-        setEditingTask(task)
-        setTaskData(task)
-        setOpenTaskDialog(true)
+        p: 2.5,
+        borderRadius: 3,
+        boxShadow: '0 3px 8px rgba(0,0,0,0.08)',
+        position: 'relative',
+        transition: 'all 0.2s ease',
+        '&:hover': {
+          boxShadow: '0 6px 16px rgba(0,0,0,0.12)',
+          transform: 'translateY(-2px)'
+        }
       }}
     >
-      <EditOutlinedIcon fontSize='small' />
-    </IconButton>
-  </Card>
-)
+      {/* Header Section */}
+      <Box display='flex' alignItems='center' justifyContent='space-between'>
+        <Typography variant='subtitle1' fontWeight={600}>
+          {meeting.title || 'Untitled Meeting'}
+        </Typography>
 
-  const handleChange = (field, value) => setTaskData(prev => ({ ...prev, [field]: value }))
+        <Tooltip title='Edit Meeting'>
+          <IconButton
+            size='small'
+            sx={{
+              bgcolor: '#f5f5f5',
+              '&:hover': { bgcolor: '#e0e0e0' }
+            }}
+            onClick={() => {
+              setEditingMeeting(meeting)
+              setMeetingData(meeting)
+              setOpenMeetingDialog(true)
+            }}
+          >
+            <EditOutlinedIcon fontSize='small' />
+          </IconButton>
+        </Tooltip>
+      </Box>
 
-  const handleClose = () => {
+      <Divider sx={{ my: 1.5 }} />
+
+      {/* Details Section */}
+      <Stack spacing={1}>
+        {meeting.venue && (
+          <Box display='flex' alignItems='center' gap={1.2}>
+            <PlaceOutlinedIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+            <Typography variant='body2' color='text.secondary'>
+              <strong>Venue:</strong> {meeting.venue}
+            </Typography>
+          </Box>
+        )}
+
+        {meeting.location && (
+          <Box display='flex' alignItems='center' gap={1.2}>
+            <LocationOnOutlinedIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+            <Typography variant='body2' color='text.secondary'>
+              <strong>Location:</strong> {meeting.location}
+            </Typography>
+          </Box>
+        )}
+
+
+        {meeting.link && (
+          <Box display='flex' alignItems='center' gap={1.2}>
+            <VideocamOutlinedIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+            <Chip
+              label={meeting.link}
+              component='a'
+              href={meeting.link}
+              target='_blank'
+              rel='noopener noreferrer'
+              clickable
+              color='primary'
+              variant='outlined'
+              sx={{
+                fontSize: 12,
+                height: 28,
+                fontWeight: 500,
+                '&:hover': { bgcolor: 'primary.light', color: '#000' }
+              }}
+            />
+          </Box>
+        )}
+
+        {/* Date and Time Section */}
+        <Box display='flex' alignItems='center' gap={3} mt={1}>
+          <Chip
+            icon={<CalendarMonthOutlinedIcon sx={{ fontSize: 18 }} />}
+            label={
+              <>
+                <b>From:</b>{' '}
+                {`${dayjs(meeting.fromDate).format('DD MMM YYYY')} — ${dayjs(meeting.fromTime, 'HH:mm').format(
+                  'hh:mm A'
+                )}`}
+              </>
+            }
+            variant='outlined'
+            sx={{ fontSize: 12, height: 28 }}
+          />
+
+          <Chip
+            icon={<CalendarMonthOutlinedIcon sx={{ fontSize: 18 }} />}
+            label={
+              <>
+                <b>To:</b>{' '}
+                {`${dayjs(meeting.toDate).format('DD MMM YYYY')} — ${dayjs(meeting.toTime, 'HH:mm').format('hh:mm A')}`}
+              </>
+            }
+            variant='outlined'
+            sx={{ fontSize: 12, height: 28 }}
+          />
+        </Box>
+      </Stack>
+
+      <Divider sx={{ my: 1.5 }} />
+
+      {/* Footer */}
+      <Box display='flex' alignItems='center' gap={1} mt={0.5}>
+        <PersonOutlineIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+        <Typography variant='caption' color='text.secondary'>
+          Created by <b>{meeting.host}</b>
+        </Typography>
+      </Box>
+    </Card>
+  )
+
+  const handleTaskChange = (field, value) => setTaskData(prev => ({ ...prev, [field]: value }))
+  const handleMeetingChange = (field, value) => setMeetingData(prev => ({ ...prev, [field]: value }))
+
+  const handleTaskClose = () => {
     setOpenTaskDialog(false)
     setEditingTask(null)
     setTaskData(initialTaskData)
     setErrorTaskData({ subject: false, dueDate: false, reminderDate: false })
-    setReminderTimeError(false)
+    setReminderTimeTaskError(false)
   }
 
-  const hasInitialSpace = str => str?.[0] === ' '
+  const handleMeetingClose = () => {
+    setOpenMeetingDialog(false)
+    setEditingMeeting(null)
+    setMeetingData(initialTaskData)
+    setErrorMeetingData({ title: false, link: false, fromDate: false, toDate: false, fromTime: false, toTime: false })
+    setReminderFromTimeMeetingError(false)
+    setReminderToTimeMeetingError(false)
+  }
 
-  const validateReminderTime = () => {
+  const hasInitialTaskSpace = str => str?.[0] === ' '
+  const hasInitialMeetingSpace = str => str?.[0] === ' '
+
+  const validateReminderTaskTime = () => {
     if (!taskData.reminderEnabled || !taskData.reminderTime || !taskData.reminderDate) return true
     const reminderDateTime = dayjs(`${taskData.reminderDate} ${taskData.reminderTime}`, 'YYYY-MM-DD HH:mm')
     const now = dayjs()
     return !(dayjs(taskData.reminderDate).isSame(now, 'day') && reminderDateTime.isBefore(now))
   }
 
+  const validateReminderMeetingTime = () => {
+    if (!meetingData.reminderEnabled || !meetingData.reminderTime || !meetingData.reminderDate) return true
+    const reminderDateTime = dayjs(`${meetingData.reminderDate} ${meetingData.reminderTime}`, 'YYYY-MM-DD HH:mm')
+    const now = dayjs()
+    return !(dayjs(meetingData.reminderDate).isSame(now, 'day') && reminderDateTime.isBefore(now))
+  }
+
   const saveTask = async () => {
     // Validation
-    if (!taskData.subject || hasInitialSpace(taskData.subject)) {
+    if (!taskData.subject || hasInitialTaskSpace(taskData.subject)) {
       setErrorTaskData(prev => ({ ...prev, subject: true }))
       return
     }
@@ -234,8 +469,8 @@ const upcomingTasks = useMemo(
       setErrorTaskData(prev => ({ ...prev, dueDate: true }))
       return
     }
-    if (!validateReminderTime()) {
-      setReminderTimeError(true)
+    if (!validateReminderTaskTime()) {
+      setReminderTimeTaskError(true)
       return
     }
 
@@ -252,11 +487,6 @@ const upcomingTasks = useMemo(
     const upcomingTasks = allTasks
       .map(t => dayjs(t.dueDate)) // t.dueDate can be string
       .filter(d => d.isAfter(dayjs(), 'day'))
-
-    // Pick the earliest upcoming date
-    // const nextFollowUpDate = upcomingTasks.length
-    //   ? upcomingTasks.reduce((earliest, d) => (d.isBefore(earliest) ? d : earliest), upcomingTasks[0])
-    //   : dayjs(taskData.dueDate)
 
     const nextFollowUpDate = upcomingTasks.length
       ? upcomingTasks.reduce((earliest, d) => (d.isBefore(earliest) ? d : earliest), upcomingTasks[0])
@@ -281,10 +511,9 @@ const upcomingTasks = useMemo(
       new Date(nextFollowUpDate.format('YYYY-MM-DD')) < new Date(taskData.dueDate)
         ? nextFollowUpDate.format('YYYY-MM-DD')
         : taskData.dueDate
-   
 
     try {
-      setLoader(true)
+      setLoaderTask(true)
       const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken}` },
@@ -298,10 +527,7 @@ const upcomingTasks = useMemo(
       })
       const result = await res.json()
 
-
-
-
-      setLoader(false)
+      setLoaderTask(false)
       if (!res.ok || !result.success) throw new Error(result.message || 'Server Error')
 
       const updatedTasks = result.data.values?.Activity?.[0]?.task || []
@@ -327,18 +553,128 @@ const upcomingTasks = useMemo(
           position: 'bottom-center',
           hideProgressBar: true
         })
-        
       } else {
-        
         setTasks(prev => [formattedTask, ...prev])
         toast.success('Task Added Successfully!', { autoClose: 500, position: 'bottom-center', hideProgressBar: true })
       }
       fetchLeadFromId()
-      handleClose()
+      handleTaskClose()
     } catch (err) {
       console.error(err)
       toast.error('❌ Failed to save task')
-      setLoader(false)
+      setLoaderTask(false)
+    }
+  }
+
+  const saveMeeting = async () => {
+    // Validation
+    if (!meetingData.title || hasInitialMeetingSpace(meetingData.title)) {
+      setErrorMeetingData(prev => ({ ...prev, title: true }))
+      return
+    }
+    if (!meetingData.fromDate) {
+      setErrorMeetingData(prev => ({ ...prev, fromDate: true }))
+      return
+    }
+    const today = dayjs().startOf('day')
+    if (dayjs(meetingData.fromDate).isBefore(today)) {
+      setErrorMeetingData(prev => ({ ...prev, fromDate: true }))
+      return
+    }
+    if (!validateReminderMeetingTime()) {
+      setReminderFromTimeMeetingError(true)
+      setReminderToTimeMeetingError(true)
+      return
+    }
+
+    // Flatten all tasks
+    // const allTasks = []
+    // const activity = leadData?.values?.Activity || {}
+    // for (const key in activity) {
+    //   if (activity[key]?.task) {
+    //     allTasks.push(...activity[key].task)
+    //   }
+    // }
+
+    // const upcomingMeetings = allTasks
+    //   .map(t => dayjs(t.dueDate))
+    //   .filter(d => d.isAfter(dayjs(), 'day'))
+
+    // const nextFollowUpDate = upcomingMeetings.length
+    //   ? upcomingMeetings.reduce((earliest, d) => (d.isBefore(earliest) ? d : earliest), upcomingMeetings[0])
+    //   : dayjs(meetingData.dueDate)
+
+    const payload = {
+      _id: editingTask?._id,
+      title: meetingData.title,
+      venue: meetingData.venue,
+      location: meetingData.location,
+      link: meetingData.link,
+      host: meetingData.host,
+      fromDate: meetingData.fromDate,
+      fromTime: meetingData.fromTime,
+      toDate: meetingData.toDate,
+      toTime: meetingData.toTime,
+      createdAt: new Date().toISOString(),
+      createdBy: user_id
+    }
+
+    console.log(payload, '<<< PAYLOADDDD')
+
+    try {
+      setLoaderMeeting(true)
+      const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken}` },
+        body: JSON.stringify({
+          values: {
+            Activity: [{ meeting: [payload] }]
+          },
+          lead_touch: 'touch'
+        })
+      })
+      const result = await res.json()
+
+      setLoaderMeeting(false)
+      if (!res.ok || !result.success) throw new Error(result.message || 'Server Error')
+
+      const updatedMeetings = result.data.values?.Activity?.[0]?.meeting || []
+
+      const formattedMeeting = {
+        type: 'Meeting',
+        _id: payload._id || updatedMeetings[updatedMeetings.length - 1]?._id || '',
+        title: payload.title,
+        venue: payload.venue,
+        location: payload.location,
+        link: payload.link,
+        host: payload.host,
+        fromDate: payload.fromDate,
+        fromTime: payload.fromTime,
+        toDate: payload.toDate,
+        toTime: payload.toTime
+      }
+
+      if (editingMeeting) {
+        setMeetings(prev => prev.map(t => (t._id === formattedMeeting._id ? formattedMeeting : t)))
+        toast.success('Meeting Updated Successfully!', {
+          autoClose: 500,
+          position: 'bottom-center',
+          hideProgressBar: true
+        })
+      } else {
+        setMeetings(prev => [formattedMeeting, ...prev])
+        toast.success('Meeting Added Successfully!', {
+          autoClose: 500,
+          position: 'bottom-center',
+          hideProgressBar: true
+        })
+      }
+      fetchLeadFromId()
+      handleMeetingClose()
+    } catch (err) {
+      console.error(err)
+      toast.error('❌ Failed to save meeting')
+      setLoaderMeeting(false)
     }
   }
 
@@ -357,281 +693,160 @@ const upcomingTasks = useMemo(
             }}
           >
             <Tab label={`Task (${tasks.length})`} />
-            <Tab label='Meetings (0)' />
-            <Tab label='Calls (0)' />
+            <Tab label={`Meetings (${meetings.length})`} />
+            <Tab label={`Calls (${calls.length})`} />
           </Tabs>
 
-          <Button
-            variant='contained'
-            onClick={() => setOpenTaskDialog(true)}
-            sx={{ bgcolor: '#009cde', '&:hover': { bgcolor: '#007bb5' }, borderRadius: 2, textTransform: 'none' }}
-          >
-            + Create Task
-          </Button>
+          {tab === 0 && (
+            <Button
+              variant='contained'
+              onClick={() => setOpenTaskDialog(true)}
+              sx={{ bgcolor: '#009cde', '&:hover': { bgcolor: '#007bb5' }, borderRadius: 2, textTransform: 'none' }}
+            >
+              + Create Task
+            </Button>
+          )}
+
+          {tab === 1 && (
+            <Button
+              variant='contained'
+              onClick={() => setOpenMeetingDialog(true)}
+              sx={{ bgcolor: '#009cde', '&:hover': { bgcolor: '#007bb5' }, borderRadius: 2, textTransform: 'none' }}
+            >
+              + Create Meeting
+            </Button>
+          )}
+          {tab === 2 && (
+            <Button
+              variant='contained'
+              onClick={() => setOpenTaskDialog(true)}
+              sx={{ bgcolor: '#009cde', '&:hover': { bgcolor: '#007bb5' }, borderRadius: 2, textTransform: 'none' }}
+            >
+              + Create Call
+            </Button>
+          )}
         </Box>
 
         <Divider sx={{ my: 2 }} />
 
-        {tab === 0 ? (
-          tasks.length > 0 ? (
-
+        {tab === 0 &&
+          (Array.isArray(tasks) && tasks.length > 0 ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-  {/* Current Tasks */}
-  {currentTasks.length > 0 && (
-    <Card>
-      <Typography variant='subtitle2' sx={{ mt: 1, mb: 0.5, color: '#1976d2', fontWeight: 600 }}>
-        🟢 Today’s Tasks
-      </Typography>
-      {currentTasks.map(task => renderTaskCard(task))}
-    </Card>
-  )}
+              {/* Current Tasks */}
+              {currentTasks.length > 0 && (
+                <Card>
+                  <Typography variant='subtitle2' sx={{ mt: 1, mb: 0.5, color: '#1976d2', fontWeight: 600 }}>
+                    🟢 Today’s Tasks
+                  </Typography>
+                  {currentTasks.map(task => renderTaskCard(task))}
+                </Card>
+              )}
 
-  {/* Upcoming Tasks */}
-  {upcomingTasks.length > 0 && (
-    <Card>
-      <Typography variant='subtitle2' sx={{ mt: 2, mb: 0.5, color: '#27ae60', fontWeight: 600 }}>
-        🚀 Upcoming Tasks
-      </Typography>
-      {upcomingTasks.map(task => renderTaskCard(task))}
-    </Card>
-  )}
+              {/* Upcoming Tasks */}
+              {upcomingTasks.length > 0 && (
+                <Card>
+                  <Typography variant='subtitle2' sx={{ mt: 2, mb: 0.5, color: '#27ae60', fontWeight: 600 }}>
+                    🚀 Upcoming Tasks
+                  </Typography>
+                  {upcomingTasks.map(task => renderTaskCard(task))}
+                </Card>
+              )}
 
-  {/* Completed / Past Tasks */}
-  {completedTasks.length > 0 && (
-    <Card>
-      <Typography variant='subtitle2' sx={{ mt: 2, mb: 0.5, color: '#c0392b', fontWeight: 600 }}>
-        ✅ Completed / Past Tasks
-      </Typography>
-      {completedTasks.map(task => renderTaskCard(task))}
-    </Card>
-  )}
-</Box>
+              {/* Completed / Past Tasks */}
+              {completedTasks.length > 0 && (
+                <Card>
+                  <Typography variant='subtitle2' sx={{ mt: 2, mb: 0.5, color: '#c0392b', fontWeight: 600 }}>
+                    ✅ Completed / Past Tasks
+                  </Typography>
+                  {completedTasks.map(task => renderTaskCard(task))}
+                </Card>
+              )}
+            </Box>
           ) : (
             <Typography textAlign='center' color='text.secondary' sx={{ mt: 4 }}>
               🚫 No tasks found
             </Typography>
-          )
-        ) : (
-          <Typography textAlign='center' color='text.secondary' sx={{ mt: 4 }}>
-            No items found 🚫
-          </Typography>
-        )}
+          ))}
 
-        {/* Task Dialog */}
-        <Dialog
-          open={openTaskDialog}
-          onClose={handleClose}
-          maxWidth='sm'
-          fullWidth
-          PaperProps={{ sx: { borderRadius: 3, p: 1 } }}
-        >
-          <DialogTitle
-            sx={{
-              fontWeight: 'bold',
-              fontSize: '1.3rem',
-              textAlign: 'center',
-              borderBottom: '1px solid #f0f0f0',
-              pb: 2
-            }}
-          >
-            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
-              ✨ {editingTask ? 'Update Task' : 'Create Task'}
-              <Tooltip title='Close' arrow>
-                <IconButton onClick={handleClose}>
-                  <CloseIcon />
-                </IconButton>
-              </Tooltip>
-            </Box>
-          </DialogTitle>
-
-          <DialogContent dividers sx={{ p: 3 }}>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <TextField
-                  autoFocus
-                  fullWidth
-                  label={
-                    <span>
-                      Subject <span style={{ color: 'red' }}>*</span>
-                    </span>
-                  }
-                  value={taskData.subject}
-                  onChange={e => {
-                    handleChange('subject', e.target.value)
-                    setErrorTaskData(prev => ({ ...prev, subject: false }))
-                  }}
-                  placeholder='Enter Task'
-                  error={errorTaskData.subject}
-                  helperText={errorTaskData.subject ? 'Subject is required' : ''}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <DatePicker
-                  label={
-                    <span>
-                      Due Date <span style={{ color: 'red' }}>*</span>
-                    </span>
-                  }
-                  disablePast
-                  value={taskData.dueDate ? dayjs(taskData.dueDate) : null}
-                  onChange={newValue => {
-                    handleChange('dueDate', newValue ? dayjs(newValue).format('YYYY-MM-DD') : '')
-                    setErrorTaskData(prev => ({ ...prev, dueDate: false }))
-                  }}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      error: errorTaskData.dueDate,
-                      helperText: errorTaskData.dueDate ? 'Invalid due date' : ''
-                    }
-                  }}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth>
-                  <InputLabel>Priority</InputLabel>
-                  <Select value={taskData.priority} onChange={e => handleChange('priority', e.target.value)}>
-                    <MenuItem value='Low'>Low</MenuItem>
-                    <MenuItem value='Medium'>Medium</MenuItem>
-                    <MenuItem value='High'>High</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel>Status</InputLabel>
-                  <Select value={taskData.status} onChange={e => handleChange('status', e.target.value)}>
-                    <MenuItem value='Not Started'>Not Started</MenuItem>
-                    <MenuItem value='Deferred'>Deferred</MenuItem>
-                    <MenuItem value='In Progress'>In Progress</MenuItem>
-                    <MenuItem value='Completed'>Completed</MenuItem>
-                    <MenuItem value='Waiting for input'>Waiting for input</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={12}>
-                <TextField
-                  disabled
-                  label='Created By'
-                  defaultValue={user_name}
-                  fullWidth
-                  sx={{ bgcolor: '#fafafa', borderRadius: 2 }}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <Box sx={{ border: '1px solid #eee', p: 2.5, borderRadius: 2, bgcolor: '#f9f9f9' }}>
-                  <Typography fontWeight='bold' mb={2}>
-                    ⏰ Reminder
+        {tab === 1 &&
+          (Array.isArray(meetings) && meetings.length > 0 ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {/* Current Meetings */}
+              {currentMeetings.length > 0 && (
+                <Card>
+                  <Typography variant='subtitle2' sx={{ mt: 1, mb: 0.5, color: '#1976d2', fontWeight: 600 }}>
+                    🟢 Today’s Meetings
                   </Typography>
+                  {currentMeetings.map(task => renderMeetingCard(task))}
+                </Card>
+              )}
 
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={taskData.reminderEnabled}
-                        onChange={e => handleChange('reminderEnabled', e.target.checked)}
-                      />
-                    }
-                    label='Set Reminder'
-                  />
+              {/* Upcoming Meetings */}
+              {upcomingMeetings.length > 0 && (
+                <Card>
+                  <Typography variant='subtitle2' sx={{ mt: 2, mb: 0.5, color: '#27ae60', fontWeight: 600 }}>
+                    🚀 Upcoming Meetings
+                  </Typography>
+                  {upcomingMeetings.map(task => renderMeetingCard(task))}
+                </Card>
+              )}
 
-                  {taskData.reminderEnabled && (
-                    <Grid container spacing={2} mt={1}>
-                      <Grid item xs={12} sm={6}>
-                        <DatePicker
-                          label='Reminder Date'
-                          disablePast
-                          value={taskData.reminderDate ? dayjs(taskData.reminderDate) : null}
-                          onChange={newValue => {
-                            handleChange('reminderDate', newValue ? dayjs(newValue).format('YYYY-MM-DD') : '')
-                            setErrorTaskData(prev => ({ ...prev, reminderDate: false }))
-                          }}
-                          slotProps={{
-                            textField: {
-                              fullWidth: true,
-                              error: errorTaskData.reminderDate,
-                              helperText: errorTaskData.reminderDate ? 'Reminder Date required' : ''
-                            }
-                          }}
-                        />
-                      </Grid>
-
-                      <Grid item xs={12} sm={6}>
-                        <TimePicker
-                          label='Reminder Time'
-                          value={
-                            taskData.reminderTime ? dayjs(taskData.reminderTime, 'HH:mm') : dayjs().add(5, 'minute')
-                          }
-                          onChange={newValue => {
-                            const time = newValue ? newValue.format('HH:mm') : ''
-                            handleChange('reminderTime', time)
-                            setReminderTimeError(!validateReminderTime())
-                          }}
-                          minTime={
-                            taskData.reminderDate && dayjs(taskData.reminderDate).isSame(dayjs(), 'day')
-                              ? dayjs()
-                              : null
-                          }
-                          slotProps={{
-                            textField: {
-                              fullWidth: true,
-                              error: reminderTimeError,
-                              helperText: reminderTimeError ? 'Cannot be in the past' : ''
-                            }
-                          }}
-                        />
-                      </Grid>
-
-                      <Grid item xs={12}>
-                        <FormControl fullWidth>
-                          <InputLabel>Alert Type</InputLabel>
-                          <Select
-                            value={taskData.alertType || 'Both'}
-                            onChange={e => handleChange('alertType', e.target.value)}
-                          >
-                            <MenuItem value='Email'>Email</MenuItem>
-                            <MenuItem value='Popup'>Pop-up</MenuItem>
-                            <MenuItem value='Both'>Both</MenuItem>
-                          </Select>
-                        </FormControl>
-                      </Grid>
-                    </Grid>
-                  )}
-                </Box>
-              </Grid>
-            </Grid>
-          </DialogContent>
-
-          <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #f0f0f0', mt: 2 }}>
-            <Box display='flex' justifyContent='space-between' width='100%'>
-              <Button
-                onClick={handleClose}
-                variant='outlined'
-                sx={{ borderRadius: 2, textTransform: 'none', color: 'text.secondary', borderColor: '#ccc' }}
-              >
-                Close
-              </Button>
-              <Button
-                variant='contained'
-                disabled={loader || reminderTimeError || !taskData.subject || !taskData.dueDate}
-                onClick={saveTask}
-                sx={{
-                  borderRadius: 2,
-                  textTransform: 'none',
-                  px: 3,
-                  bgcolor: '#1976d2',
-                  '&:hover': { bgcolor: '#1565c0' }
-                }}
-              >
-                {loader ? 'Saving...' : editingTask ? 'Update' : 'Save'}
-              </Button>
+              {/* Completed / Past Meetings */}
+              {completedMeetings.length > 0 && (
+                <Card>
+                  <Typography variant='subtitle2' sx={{ mt: 2, mb: 0.5, color: '#c0392b', fontWeight: 600 }}>
+                    ✅ Completed / Past Meetings
+                  </Typography>
+                  {completedMeetings.map(task => renderMeetingCard(task))}
+                </Card>
+              )}
             </Box>
-          </DialogActions>
-        </Dialog>
+          ) : (
+            <Typography textAlign='center' color='text.secondary' sx={{ mt: 4 }}>
+              🚫 No meetings found
+            </Typography>
+          ))}
+
+        {tab === 2 &&
+          (Array.isArray(meetings) && meetings.length > 0 ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}></Box>
+          ) : (
+            <Typography textAlign='center' color='text.secondary' sx={{ mt: 4 }}>
+              🚫 No calls found
+            </Typography>
+          ))}
+
+        <TaskDialog
+          handleTaskChange={handleTaskChange}
+          openTaskDialog={openTaskDialog}
+          editingTask={editingTask}
+          handleTaskClose={handleTaskClose}
+          setErrorTaskData={setErrorTaskData}
+          errorTaskData={errorTaskData}
+          loaderTask={loaderTask}
+          taskData={taskData}
+          user_name={user_name}
+          setReminderTimeTaskError={setReminderTimeTaskError}
+          reminderTimeTaskError={reminderTimeTaskError}
+          saveTask={saveTask}
+        />
+
+        <MeetingDialog
+          handleMeetingChange={handleMeetingChange}
+          openMeetingDialog={openMeetingDialog}
+          editingMeeting={editingMeeting}
+          handleMeetingClose={handleMeetingClose}
+          setErrorMeetingData={setErrorMeetingData}
+          errorMeetingData={errorMeetingData}
+          loaderMeeting={loaderMeeting}
+          meetingData={meetingData}
+          user_name={user_name}
+          setReminderFromTimeMeetingError={setReminderFromTimeMeetingError}
+          setReminderToTimeMeetingError={setReminderToTimeMeetingError}
+          reminderFromTimeMeetingError={reminderFromTimeMeetingError}
+          reminderToTimeMeetingError={reminderToTimeMeetingError}
+          saveMeeting={saveMeeting}
+        />
       </Box>
     </LocalizationProvider>
   )
