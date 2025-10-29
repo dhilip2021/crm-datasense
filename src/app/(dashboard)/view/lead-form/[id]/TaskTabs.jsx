@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { Box, Card, Typography, Button, Divider, Tabs, Tab, Chip, IconButton, Tooltip, Stack } from '@mui/material'
 import dayjs from 'dayjs'
 import Cookies from 'js-cookie'
@@ -126,7 +126,7 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
 
     title: 'New Meeting',
     venue: 'Client Location',
-    location: 'CBE',
+    location: '',
     link: '',
     fromDate: null,
     fromTime: null,
@@ -220,77 +220,6 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
     </Card>
   )
 
-  const renderMeetingCard1 = meeting => (
-    <Card
-      key={meeting._id}
-      sx={{ p: 2, borderRadius: 2, boxShadow: '0px 2px 6px rgba(0,0,0,0.08)', position: 'relative' }}
-    >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-        <Typography variant='subtitle1' fontWeight={600}>
-          {meeting.title}
-        </Typography>
-      </Box>
-
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 14, color: 'text.secondary' }}>
-        Venue: {meeting.venue}
-      </Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 14, color: 'text.secondary' }}>
-        Location: {meeting.location}
-      </Box>
-
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 2,
-          fontSize: 14,
-          color: 'text.secondary'
-        }}
-      >
-        <Box display={'flex'} alignItems={'center'}>
-          From :
-          <CalendarMonthOutlinedIcon sx={{ fontSize: 18 }} />{' '}
-          <Typography variant='caption'>
-            {dayjs(meeting.fromDate).format('DD MMM YYYY')} .{' '}
-            {dayjs(meeting.fromTime, 'HH:mm').format('hh:mm A') || '—'}
-          </Typography>
-        </Box>
-        <Box display={'flex'} alignItems={'center'}>
-          To :
-          <CalendarMonthOutlinedIcon sx={{ fontSize: 18 }} />{' '}
-          <Typography variant='caption'>
-            {dayjs(meeting.toDate).format('DD MMM YYYY')} . {dayjs(meeting.toTime, 'HH:mm').format('hh:mm A') || '—'}
-          </Typography>
-        </Box>
-      </Box>
-
-      <Box>
-        <Typography variant='caption' sx={{ ml: 2 }}>
-          Created By <b>{meeting.host}</b>
-        </Typography>
-      </Box>
-
-      <IconButton
-        size='small'
-        sx={{
-          position: 'absolute',
-          top: 8,
-          right: 8,
-          bgcolor: '#f5f5f5',
-          '&:hover': { bgcolor: '#e0e0e0' }
-        }}
-        onClick={() => {
-          setEditingMeeting(meeting)
-          setMeetingData(meeting)
-          setOpenMeetingDialog(true)
-        }}
-      >
-        <EditOutlinedIcon fontSize='small' />
-      </IconButton>
-    </Card>
-  )
-
   const renderMeetingCard = meeting => (
     <Card
       key={meeting._id}
@@ -351,7 +280,6 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
             </Typography>
           </Box>
         )}
-
 
         {meeting.link && (
           <Box display='flex' alignItems='center' gap={1.2}>
@@ -431,7 +359,7 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
   const handleMeetingClose = () => {
     setOpenMeetingDialog(false)
     setEditingMeeting(null)
-    setMeetingData(initialTaskData)
+    setMeetingData(initialMeetingData)
     setErrorMeetingData({ title: false, link: false, fromDate: false, toDate: false, fromTime: false, toTime: false })
     setReminderFromTimeMeetingError(false)
     setReminderToTimeMeetingError(false)
@@ -605,7 +533,7 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
     //   : dayjs(meetingData.dueDate)
 
     const payload = {
-      _id: editingTask?._id,
+      _id: editingMeeting?._id,
       title: meetingData.title,
       venue: meetingData.venue,
       location: meetingData.location,
@@ -677,6 +605,14 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
       setLoaderMeeting(false)
     }
   }
+
+  useEffect(() => {
+    setTasks(sortedTasks)
+  }, [sortedTasks])
+
+  useEffect(() => {
+    setMeetings(sortedMeetings)
+  }, [sortedMeetings])
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>

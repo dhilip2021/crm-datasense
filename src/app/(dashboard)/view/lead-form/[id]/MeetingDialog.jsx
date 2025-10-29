@@ -200,39 +200,39 @@ useEffect(() => {
               placeholder='Paste Meeting Link or Create Link'
               error={errorMeetingData.link}
               helperText={errorMeetingData.link ? 'Meeting link is required' : ''}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position='end'>
-                    <Button
-                      onClick={handleCreateGoogleMeetLink}
-                      variant='contained'
-                      sx={{
-                        textTransform: 'none',
-                        background: 'linear-gradient(90deg, #009cde 0%, #00b8f4 100%)',
-                        color: '#fff',
-                        fontWeight: 600,
-                        borderRadius: '8px',
-                        px: 2,
-                        py: 0.8,
-                        boxShadow: '0px 2px 4px rgba(0,0,0,0.15)',
-                        '&:hover': {
-                          background: 'linear-gradient(90deg, #007fb3 0%, #00a6dc 100%)'
-                        }
-                      }}
-                    >
-                      <Box display='flex' alignItems='center' gap={1}>
-                        <img
-                          src='https://www.gstatic.com/images/branding/product/1x/meet_2020q4_48dp.png'
-                          alt='Google Meet'
-                          width={20}
-                          height={20}
-                        />
-                        Create Link
-                      </Box>
-                    </Button>
-                  </InputAdornment>
-                )
-              }}
+              // InputProps={{
+              //   endAdornment: (
+              //     <InputAdornment position='end'>
+              //       <Button
+              //         onClick={handleCreateGoogleMeetLink}
+              //         variant='contained'
+              //         sx={{
+              //           textTransform: 'none',
+              //           background: 'linear-gradient(90deg, #009cde 0%, #00b8f4 100%)',
+              //           color: '#fff',
+              //           fontWeight: 600,
+              //           borderRadius: '8px',
+              //           px: 2,
+              //           py: 0.8,
+              //           boxShadow: '0px 2px 4px rgba(0,0,0,0.15)',
+              //           '&:hover': {
+              //             background: 'linear-gradient(90deg, #007fb3 0%, #00a6dc 100%)'
+              //           }
+              //         }}
+              //       >
+              //         <Box display='flex' alignItems='center' gap={1}>
+              //           <img
+              //             src='https://www.gstatic.com/images/branding/product/1x/meet_2020q4_48dp.png'
+              //             alt='Google Meet'
+              //             width={20}
+              //             height={20}
+              //           />
+              //           Create Link
+              //         </Box>
+              //       </Button>
+              //     </InputAdornment>
+              //   )
+              // }}
             />
           </Grid>
 
