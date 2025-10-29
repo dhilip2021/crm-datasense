@@ -1,6 +1,20 @@
 'use client'
 import React, { useState, useMemo, useEffect } from 'react'
-import { Box, Card, Typography, Button, Divider, Tabs, Tab, Chip, IconButton, Tooltip, Stack } from '@mui/material'
+import {
+  Box,
+  Card,
+  Typography,
+  Button,
+  Divider,
+  Tabs,
+  Tab,
+  Chip,
+  IconButton,
+  Tooltip,
+  Stack,
+  Grid,
+  Avatar
+} from '@mui/material'
 import dayjs from 'dayjs'
 import Cookies from 'js-cookie'
 import { toast } from 'react-toastify'
@@ -64,14 +78,14 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
         _id: t._id || '',
         title: t.title || 'New Meeting',
         venue: t.venue || 'Client Location',
-        link: t.link || 'meeting link',
-        location: t.location || 'meeting location',
+        link: t.link || '',
+        location: t.location || '',
         fromDate: t.fromDate || new Date(),
         fromTime: t.fromTime,
         toDate: t.toDate,
         toTime: t.toTime,
         host: t.host || 'Unknown',
-        participants: t.participants
+        participants: t.participants || []
       }))
   }, [leadArrayMeetings])
 
@@ -132,7 +146,7 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
     fromTime: null,
     toDate: null,
     toTime: null,
-    participants: '',
+    participants: [],
     host: user_name
   }
 
@@ -150,7 +164,8 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
     fromDate: false,
     fromTime: false,
     toDate: false,
-    toTime: false
+    toTime: false,
+    participants: false
   })
 
   const renderTaskCard = task => (
@@ -220,130 +235,186 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
     </Card>
   )
 
-  const renderMeetingCard = meeting => (
-    <Card
-      key={meeting._id}
-      sx={{
-        p: 2.5,
-        borderRadius: 3,
-        boxShadow: '0 3px 8px rgba(0,0,0,0.08)',
-        position: 'relative',
-        transition: 'all 0.2s ease',
-        '&:hover': {
-          boxShadow: '0 6px 16px rgba(0,0,0,0.12)',
-          transform: 'translateY(-2px)'
-        }
-      }}
-    >
-      {/* Header Section */}
-      <Box display='flex' alignItems='center' justifyContent='space-between'>
-        <Typography variant='subtitle1' fontWeight={600}>
-          {meeting.title || 'Untitled Meeting'}
-        </Typography>
+const renderMeetingCard = meeting => (
+  <Card
+    key={meeting._id}
+    sx={{
+      p: 3,
+      borderRadius: 4,
+      boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+      position: 'relative',
+      transition: 'all 0.25s ease',
+      border: '1px solid #e0e0e0',
+      '&:hover': {
+        boxShadow: '0 6px 20px rgba(0,0,0,0.15)',
+        transform: 'translateY(-4px)'
+      }
+    }}
+  >
+    {/* --- Header --- */}
+    <Box display='flex' alignItems='center' justifyContent='space-between' mb={1}>
+      <Typography variant='h6' fontWeight={700} sx={{ color: '#1e293b' }}>
+        {meeting.title || 'Untitled Meeting'}
+      </Typography>
 
-        <Tooltip title='Edit Meeting'>
-          <IconButton
-            size='small'
-            sx={{
-              bgcolor: '#f5f5f5',
-              '&:hover': { bgcolor: '#e0e0e0' }
-            }}
-            onClick={() => {
-              setEditingMeeting(meeting)
-              setMeetingData(meeting)
-              setOpenMeetingDialog(true)
-            }}
-          >
-            <EditOutlinedIcon fontSize='small' />
-          </IconButton>
-        </Tooltip>
-      </Box>
+      <Tooltip title='Edit Meeting'>
+        <IconButton
+          size='small'
+          sx={{
+            bgcolor: '#f8fafc',
+            '&:hover': { bgcolor: '#e2e8f0' }
+          }}
+          onClick={() => {
+            setEditingMeeting(meeting)
+            setMeetingData(meeting)
+            setOpenMeetingDialog(true)
+          }}
+        >
+          <EditOutlinedIcon sx={{ fontSize: 18, color: '#475569' }} />
+        </IconButton>
+      </Tooltip>
+    </Box>
 
-      <Divider sx={{ my: 1.5 }} />
+    <Divider sx={{ mb: 2 }} />
 
-      {/* Details Section */}
-      <Stack spacing={1}>
-        {meeting.venue && (
-          <Box display='flex' alignItems='center' gap={1.2}>
-            <PlaceOutlinedIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+    {/* --- Meeting Details --- */}
+    <Grid container spacing={2}>
+      {/* Venue */}
+      {meeting.venue && (
+        <Grid item xs={12} sm={4}>
+          <Box display='flex' alignItems='center' gap={1}>
+            <PlaceOutlinedIcon sx={{ fontSize: 20, color: 'primary.main' }} />
             <Typography variant='body2' color='text.secondary'>
               <strong>Venue:</strong> {meeting.venue}
             </Typography>
           </Box>
-        )}
+        </Grid>
+      )}
 
-        {meeting.location && (
-          <Box display='flex' alignItems='center' gap={1.2}>
-            <LocationOnOutlinedIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+      {/* Location */}
+      {meeting.location && (
+        <Grid item xs={12} sm={4}>
+          <Box display='flex' alignItems='center' gap={1}>
+            <LocationOnOutlinedIcon sx={{ fontSize: 20, color: '#f59e0b' }} />
             <Typography variant='body2' color='text.secondary'>
               <strong>Location:</strong> {meeting.location}
             </Typography>
           </Box>
-        )}
+        </Grid>
+      )}
 
-        {meeting.link && (
-          <Box display='flex' alignItems='center' gap={1.2}>
-            <VideocamOutlinedIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+      {/* Link */}
+      {meeting.link && (
+        <Grid item xs={12} sm={4}>
+          <Box display='flex' alignItems='center' gap={1}>
+            <VideocamOutlinedIcon sx={{ fontSize: 20, color: '#0ea5e9' }} />
             <Chip
-              label={meeting.link}
+              label='Join Meeting'
               component='a'
               href={meeting.link}
               target='_blank'
-              rel='noopener noreferrer'
               clickable
-              color='primary'
-              variant='outlined'
               sx={{
-                fontSize: 12,
-                height: 28,
-                fontWeight: 500,
-                '&:hover': { bgcolor: 'primary.light', color: '#000' }
+                bgcolor: '#e0f2fe',
+                color: '#0369a1',
+                fontWeight: 600,
+                '&:hover': { bgcolor: '#bae6fd' }
               }}
             />
           </Box>
-        )}
+        </Grid>
+      )}
+    </Grid>
 
-        {/* Date and Time Section */}
-        <Box display='flex' alignItems='center' gap={3} mt={1}>
-          <Chip
-            icon={<CalendarMonthOutlinedIcon sx={{ fontSize: 18 }} />}
-            label={
-              <>
-                <b>From:</b>{' '}
-                {`${dayjs(meeting.fromDate).format('DD MMM YYYY')} — ${dayjs(meeting.fromTime, 'HH:mm').format(
-                  'hh:mm A'
-                )}`}
-              </>
-            }
-            variant='outlined'
-            sx={{ fontSize: 12, height: 28 }}
-          />
-
-          <Chip
-            icon={<CalendarMonthOutlinedIcon sx={{ fontSize: 18 }} />}
-            label={
-              <>
-                <b>To:</b>{' '}
-                {`${dayjs(meeting.toDate).format('DD MMM YYYY')} — ${dayjs(meeting.toTime, 'HH:mm').format('hh:mm A')}`}
-              </>
-            }
-            variant='outlined'
-            sx={{ fontSize: 12, height: 28 }}
-          />
+    {/* --- Participants --- */}
+    {meeting.participants?.length > 0 && (
+      <Box mt={2.5}>
+        <Typography
+          variant='subtitle2'
+          color='text.secondary'
+          sx={{ mb: 1, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}
+        >
+          Participants
+        </Typography>
+        <Box display='flex' flexWrap='wrap' gap={1}>
+          {meeting.participants.map((p, i) => (
+            <Chip
+              key={i}
+              label={p}
+              avatar={<Avatar sx={{ bgcolor: '#0ea5e9', width: 28, height: 28 }}>{p.charAt(0).toUpperCase()}</Avatar>}
+              sx={{
+                bgcolor: '#f1f5f9',
+                color: '#0f172a',
+                fontSize: 13,
+                fontWeight: 500
+              }}
+            />
+          ))}
         </Box>
-      </Stack>
+      </Box>
+    )}
 
-      <Divider sx={{ my: 1.5 }} />
+    {/* --- Date/Time --- */}
+    <Box
+      mt={3}
+      p={2}
+      borderRadius={3}
+      sx={{
+        bgcolor: '#f8fafc',
+        border: '1px solid #e2e8f0',
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: 1.5
+      }}
+    >
+      <Chip
+        icon={<CalendarMonthOutlinedIcon sx={{ fontSize: 18, color: '#0ea5e9' }} />}
+        label={
+          <>
+            <b>From:</b>{' '}
+            {`${dayjs(meeting.fromDate).format('DD MMM YYYY')} — ${dayjs(meeting.fromTime, 'HH:mm').format('hh:mm A')}`}
+          </>
+        }
+        sx={{ bgcolor: 'white', fontSize: 13, height: 30, fontWeight: 500 }}
+        variant='outlined'
+      />
+      <Chip
+        icon={<CalendarMonthOutlinedIcon sx={{ fontSize: 18, color: '#f59e0b' }} />}
+        label={
+          <>
+            <b>To:</b>{' '}
+            {`${dayjs(meeting.toDate).format('DD MMM YYYY')} — ${dayjs(meeting.toTime, 'HH:mm').format('hh:mm A')}`}
+          </>
+        }
+        sx={{ bgcolor: 'white', fontSize: 13, height: 30, fontWeight: 500 }}
+        variant='outlined'
+      />
+    </Box>
 
-      {/* Footer */}
-      <Box display='flex' alignItems='center' gap={1} mt={0.5}>
-        <PersonOutlineIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+    <Divider sx={{ my: 2 }} />
+
+    {/* --- Footer --- */}
+    <Box display='flex' alignItems='center' justifyContent='space-between'>
+      <Box display='flex' alignItems='center' gap={1}>
+        <PersonOutlineIcon sx={{ fontSize: 18, color: '#64748b' }} />
         <Typography variant='caption' color='text.secondary'>
           Created by <b>{meeting.host}</b>
         </Typography>
       </Box>
-    </Card>
-  )
+      <Chip
+        label='Meeting Scheduled'
+        size='small'
+        sx={{
+          bgcolor: '#ecfccb',
+          color: '#4d7c0f',
+          fontWeight: 600,
+          fontSize: 12
+        }}
+      />
+    </Box>
+  </Card>
+)
+
 
   const handleTaskChange = (field, value) => setTaskData(prev => ({ ...prev, [field]: value }))
   const handleMeetingChange = (field, value) => setMeetingData(prev => ({ ...prev, [field]: value }))
@@ -515,22 +586,26 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
       return
     }
 
-    // Flatten all tasks
-    // const allTasks = []
-    // const activity = leadData?.values?.Activity || {}
-    // for (const key in activity) {
-    //   if (activity[key]?.task) {
-    //     allTasks.push(...activity[key].task)
-    //   }
-    // }
+    const invalidEmails = meetingData.participants.some(email => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    if (invalidEmails) {
+      setErrorMeetingData(prev => ({ ...prev, participants: true }))
+      return
+    }
 
-    // const upcomingMeetings = allTasks
-    //   .map(t => dayjs(t.dueDate))
-    //   .filter(d => d.isAfter(dayjs(), 'day'))
+  if (invalidEmails) {
+      setErrorMeetingData(prev => ({ ...prev, participants: true }))
+      return
+    }
 
-    // const nextFollowUpDate = upcomingMeetings.length
-    //   ? upcomingMeetings.reduce((earliest, d) => (d.isBefore(earliest) ? d : earliest), upcomingMeetings[0])
-    //   : dayjs(meetingData.dueDate)
+
+     // 🌐 URL validation
+  const urlPattern = /^(https?:\/\/)?([^\s.]+\.[^\s]{2,}|localhost[:?\d]*)\S*$/i
+  if (meetingData.link && !urlPattern.test(meetingData.link)) {
+    setErrorMeetingData(prev => ({ ...prev, link: true }))
+    toast.error('Please enter a valid meeting link (e.g., https://example.com)')
+    return
+  }
+
 
     const payload = {
       _id: editingMeeting?._id,
@@ -543,11 +618,11 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
       fromTime: meetingData.fromTime,
       toDate: meetingData.toDate,
       toTime: meetingData.toTime,
+      participants: meetingData.participants,
       createdAt: new Date().toISOString(),
       createdBy: user_id
     }
 
-    console.log(payload, '<<< PAYLOADDDD')
 
     try {
       setLoaderMeeting(true)
@@ -606,13 +681,13 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
     }
   }
 
-  useEffect(() => {
-    setTasks(sortedTasks)
-  }, [sortedTasks])
+  // useEffect(() => {
+  //   setTasks(sortedTasks)
+  // }, [sortedTasks])
 
-  useEffect(() => {
-    setMeetings(sortedMeetings)
-  }, [sortedMeetings])
+  // useEffect(() => {
+  //   setMeetings(sortedMeetings)
+  // }, [sortedMeetings])
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -628,8 +703,8 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
               '& .Mui-selected': { color: '#9c27b0 !important', fontWeight: 600 }
             }}
           >
-            <Tab label={`Task (${tasks.length})`} />
-            <Tab label={`Meetings (${meetings.length})`} />
+            <Tab label={`Task (${leadArrayTasks.length})`} />
+            <Tab label={`Meetings (${leadArrayMeetings.length})`} />
             <Tab label={`Calls (${calls.length})`} />
           </Tabs>
 

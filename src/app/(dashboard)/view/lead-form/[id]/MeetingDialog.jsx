@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import {
+  Autocomplete,
   Box,
   Button,
   Dialog,
@@ -22,9 +23,6 @@ import { DatePicker, TimePicker } from '@mui/x-date-pickers'
 import CloseIcon from '@mui/icons-material/Close'
 import dayjs from 'dayjs'
 
-// ========================================================
-// Meeting Dialog Component
-// ========================================================
 function MeetingDialog({
   handleMeetingChange,
   openMeetingDialog,
@@ -41,54 +39,45 @@ function MeetingDialog({
   reminderToTimeMeetingError,
   saveMeeting
 }) {
-  // ✅ Auto-set default dates & times when creating a meeting
-//   useEffect(() => {
-//     if (openMeetingDialog && !editingMeeting) {
-//       const now = dayjs()
-//       const fromDate = now.format('YYYY-MM-DD')
-//       const fromTime = now.add(1, 'hour').format('HH:mm')
-//       const toDate = now.format('YYYY-MM-DD')
-//       const toTime = now.add(2, 'hour').format('HH:mm')
+  const initializedRef = useRef(false)
 
-//       handleMeetingChange('fromDate', fromDate)
-//       handleMeetingChange('fromTime', fromTime)
-//       handleMeetingChange('toDate', toDate)
-//       handleMeetingChange('toTime', toTime)
-//     }
-//   }, [openMeetingDialog, editingMeeting])
+  // ✅ Validate times
+  useEffect(() => {
+    if (!meetingData.fromDate || !meetingData.fromTime || !meetingData.toDate || !meetingData.toTime) return
 
-useEffect(() => {
-  if (openMeetingDialog && !editingMeeting) {
     const now = dayjs()
+    const from = dayjs(`${meetingData.fromDate} ${meetingData.fromTime}`)
+    const to = dayjs(`${meetingData.toDate} ${meetingData.toTime}`)
 
-    // Round up to the next full hour
-    const roundedStart = now.minute() === 0 ? now : now.add(2, 'hour').startOf('hour')
-    const roundedEnd = roundedStart.add(1, 'hour')
+    setReminderFromTimeMeetingError(from.isBefore(now))
+    setReminderToTimeMeetingError(to.isBefore(now))
+  }, [meetingData.fromDate, meetingData.fromTime, meetingData.toDate, meetingData.toTime])
 
-    const fromDate = roundedStart.format('YYYY-MM-DD')
-    const fromTime = roundedStart.format('HH:mm')
-    const toDate = roundedEnd.format('YYYY-MM-DD')
-    const toTime = roundedEnd.format('HH:mm')
+  // ✅ Initialize defaults safely (only once)
+  useEffect(() => {
+    if (
+      openMeetingDialog &&
+      !editingMeeting &&
+      !meetingData.fromDate &&
+      !meetingData.fromTime &&
+      !initializedRef.current
+    ) {
+      const now = dayjs()
+      const from = now.add(1, 'hour').startOf('hour')
+      const to = from.add(1, 'hour')
 
-    handleMeetingChange('fromDate', fromDate)
-    handleMeetingChange('fromTime', fromTime)
-    handleMeetingChange('toDate', toDate)
-    handleMeetingChange('toTime', toTime)
-  }
-}, [openMeetingDialog, editingMeeting])
+      handleMeetingChange('fromDate', from.format('YYYY-MM-DD'))
+      handleMeetingChange('fromTime', from.format('HH:mm'))
+      handleMeetingChange('toDate', to.format('YYYY-MM-DD'))
+      handleMeetingChange('toTime', to.format('HH:mm'))
 
-  // ✅ Time Validation
-  const validateReminderTime = () => {
-    const now = dayjs()
-    const from =
-      meetingData.fromDate && meetingData.fromTime ? dayjs(`${meetingData.fromDate} ${meetingData.fromTime}`) : null
-    const to = meetingData.toDate && meetingData.toTime ? dayjs(`${meetingData.toDate} ${meetingData.toTime}`) : null
-    return (from && from.isBefore(now)) || (to && to.isBefore(now))
-  }
+      initializedRef.current = true // 🔥 Prevent further runs
+    }
 
-  const handleCreateGoogleMeetLink = () => {
-    console.log('Generate Google Meet link clicked')
-  }
+    if (!openMeetingDialog) {
+      initializedRef.current = false // Reset when dialog closes
+    }
+  }, [openMeetingDialog])
 
   return (
     <Dialog
@@ -162,11 +151,7 @@ useEffect(() => {
             <TextField
               autoComplete='off'
               fullWidth
-              label={
-                <span>
-                  Meeting Location
-                </span>
-              }
+              label={<span>Meeting Location</span>}
               value={meetingData.location || ''}
               onChange={e => {
                 const value = e.target.value
@@ -181,7 +166,43 @@ useEffect(() => {
           </Grid>
 
           {/* Meeting Link */}
-          <Grid item xs={12}>
+
+          {meetingData.venue === 'Online' && (
+            <Grid item xs={12}>
+              <TextField
+                autoComplete='off'
+                fullWidth
+                label={
+                  <span>
+                    Meeting Link <span style={{ color: 'red' }}>*</span>
+                  </span>
+                }
+                value={meetingData.link || ''}
+                onChange={e => {
+                  const value = e.target.value
+                  handleMeetingChange('link', value)
+                  setErrorMeetingData(prev => ({ ...prev, link: false }))
+                }}
+                placeholder='Paste Meeting Link'
+                error={errorMeetingData.link}
+                helperText={errorMeetingData.link ? 'Meeting link is required' : ''}
+              />
+            </Grid>
+          )}
+
+          {meetingData.venue !== 'Online' && (
+            <Grid item xs={12}>
+              <TextField
+                autoComplete='off'
+                fullWidth
+                label='Meeting Link (Optional)'
+                value={meetingData.link || ''}
+                onChange={e => handleMeetingChange('link', e.target.value)}
+                placeholder='Paste Meeting Link (if any)'
+              />
+            </Grid>
+          )}
+          {/* <Grid item xs={12}>
             <TextField
               autoComplete='off'
               fullWidth
@@ -200,39 +221,66 @@ useEffect(() => {
               placeholder='Paste Meeting Link or Create Link'
               error={errorMeetingData.link}
               helperText={errorMeetingData.link ? 'Meeting link is required' : ''}
-              // InputProps={{
-              //   endAdornment: (
-              //     <InputAdornment position='end'>
-              //       <Button
-              //         onClick={handleCreateGoogleMeetLink}
-              //         variant='contained'
-              //         sx={{
-              //           textTransform: 'none',
-              //           background: 'linear-gradient(90deg, #009cde 0%, #00b8f4 100%)',
-              //           color: '#fff',
-              //           fontWeight: 600,
-              //           borderRadius: '8px',
-              //           px: 2,
-              //           py: 0.8,
-              //           boxShadow: '0px 2px 4px rgba(0,0,0,0.15)',
-              //           '&:hover': {
-              //             background: 'linear-gradient(90deg, #007fb3 0%, #00a6dc 100%)'
-              //           }
-              //         }}
-              //       >
-              //         <Box display='flex' alignItems='center' gap={1}>
-              //           <img
-              //             src='https://www.gstatic.com/images/branding/product/1x/meet_2020q4_48dp.png'
-              //             alt='Google Meet'
-              //             width={20}
-              //             height={20}
-              //           />
-              //           Create Link
-              //         </Box>
-              //       </Button>
-              //     </InputAdornment>
-              //   )
-              // }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position='end'>
+                    <Button
+                      onClick={handleCreateGoogleMeetLink}
+                      variant='contained'
+                      sx={{
+                        textTransform: 'none',
+                        background: 'linear-gradient(90deg, #009cde 0%, #00b8f4 100%)',
+                        color: '#fff',
+                        fontWeight: 600,
+                        borderRadius: '8px',
+                        px: 2,
+                        py: 0.8,
+                        boxShadow: '0px 2px 4px rgba(0,0,0,0.15)',
+                        '&:hover': {
+                          background: 'linear-gradient(90deg, #007fb3 0%, #00a6dc 100%)'
+                        }
+                      }}
+                    >
+                      <Box display='flex' alignItems='center' gap={1}>
+                        <img
+                          src='https://www.gstatic.com/images/branding/product/1x/meet_2020q4_48dp.png'
+                          alt='Google Meet'
+                          width={20}
+                          height={20}
+                        />
+                        Create Link
+                      </Box>
+                    </Button>
+                  </InputAdornment>
+                )
+              }}
+            />
+          </Grid> */}
+
+          {/* Participants */}
+          <Grid item xs={12} sm={12}>
+            <Autocomplete
+              multiple
+              freeSolo
+              options={[]} // optional: can map your user list here
+              value={meetingData.participants || []}
+              onChange={(e, newValue) => {
+                handleMeetingChange('participants', newValue)
+                setErrorMeetingData(prev => ({ ...prev, participants: false }))
+              }}
+              renderInput={params => (
+                <TextField
+                  {...params}
+                  label={
+                    <span>
+                      Participants <span style={{ color: 'red' }}>*</span>
+                    </span>
+                  }
+                  placeholder='Enter participant emails'
+                  error={errorMeetingData.participants}
+                  helperText={errorMeetingData.participants ? 'At least one participant is required' : ''}
+                />
+              )}
             />
           </Grid>
 
@@ -267,8 +315,6 @@ useEffect(() => {
               onChange={newValue => {
                 const time = newValue ? newValue.format('HH:mm') : ''
                 handleMeetingChange('fromTime', time)
-                const invalid = validateReminderTime()
-                setReminderFromTimeMeetingError(invalid)
               }}
               slotProps={{
                 textField: {
@@ -307,14 +353,10 @@ useEffect(() => {
           <Grid item xs={12} sm={6}>
             <TimePicker
               label='To Time'
-              value={
-                meetingData.toTime ? dayjs(meetingData.toTime, 'HH:mm') : dayjs().add(2, 'hour') 
-              }
+              value={meetingData.toTime ? dayjs(meetingData.toTime, 'HH:mm') : dayjs().add(2, 'hour')}
               onChange={newValue => {
                 const time = newValue ? newValue.format('HH:mm') : ''
                 handleMeetingChange('toTime', time)
-                const invalid = validateReminderTime()
-                setReminderToTimeMeetingError(invalid)
               }}
               slotProps={{
                 textField: {
@@ -356,9 +398,11 @@ useEffect(() => {
               reminderFromTimeMeetingError ||
               reminderToTimeMeetingError ||
               !meetingData.title ||
-              !meetingData.link ||
               !meetingData.fromDate ||
-              !meetingData.toDate
+              !meetingData.toDate ||
+              (meetingData.venue === 'Online' && !meetingData.link) || // 🔥 Only required when Online
+              !meetingData.participants ||
+              meetingData.participants.length === 0 // 👈 Added
             }
             onClick={saveMeeting}
             sx={{

@@ -589,6 +589,7 @@ export async function PATCH(req, { params }) {
           fromTime: meetingFromBody.fromTime || null,
           toDate: meetingFromBody.toDate ? new Date(meetingFromBody.toDate) : null,
           toTime: meetingFromBody.toTime || null,
+           participants: meetingFromBody.participants || [],
           createdAt: new Date()
         }
       } else {
@@ -603,6 +604,8 @@ export async function PATCH(req, { params }) {
           fromTime: meetingFromBody.fromTime || null,
           toDate: meetingFromBody.toDate ? new Date(meetingFromBody.toDate) : null,
           toTime: meetingFromBody.toTime || null,
+          participants: meetingFromBody.participants || [],
+          
           createdAt: new Date()
         }
       }
@@ -715,6 +718,7 @@ export async function PATCH(req, { params }) {
         'values.Activity.0.meeting.$[t].fromTime': updateMeeting.fromTime,
         'values.Activity.0.meeting.$[t].toDate': updateMeeting.toDate,
         'values.Activity.0.meeting.$[t].toTime': updateMeeting.toTime,
+        'values.Activity.0.meeting.$[t].participants': updateMeeting.participants,
         'values.Activity.0.meeting.$[t].createdAt': updateMeeting.createdAt,
         lead_touch: body.lead_touch,
         updatedAt: new Date()
