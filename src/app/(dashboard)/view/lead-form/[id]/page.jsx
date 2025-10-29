@@ -44,11 +44,33 @@ const fieldValidators = {
     if (!/\S+@\S+\.\S+/.test(val)) return 'Invalid email format'
     return null
   },
-  Phone: val => {
-    if (!val) return 'Phone is required'
-    if (!/^\d{10}$/.test(val)) return 'Phone must be 10 digits'
-    return null
-  },
+  // Phone: val => {
+  //   if (!val) return 'Phone is required'
+  //   if (!/^\d{10}$/.test(val)) return 'Phone must be 10 digits'
+  //   return null
+  // },
+
+Phone: val => {
+  if (!val) return 'Phone is required'
+
+  // ✅ Accepts:
+  // - 8012005747
+  // - +918012005747
+  // - +447912345678
+  // - +971501234567
+  // ❌ Rejects:
+  // - +91 8012005747 (spaces)
+  // - +91-8012005747 (special chars)
+  // - alphabets or symbols
+
+  const phoneRegex = /^\+?\d{10,15}$/
+
+  if (!phoneRegex.test(val)) {
+    return 'Enter a valid phone number (10–15 digits, optional +country code)'
+  }
+
+  return null
+},
   'First Name': val => (!val ? 'First Name is required' : null),
   'Last Name': val => (!val ? 'Last Name is required' : null),
   Company: val => (!val ? 'Company name is required' : null),
@@ -212,7 +234,7 @@ const LeadDetailView = () => {
           Authorization: `Bearer ${getToken}`
         }
       })
-       setLoader(false)
+      setLoader(false)
       const data = await res.json()
       if (data.success) setLeadData(data.data)
     } catch (err) {
@@ -313,12 +335,11 @@ const LeadDetailView = () => {
     setConfirm(false)
     setCreateDeal(false)
     setDealData({
-       amount: '',
-    dealName: leadData?.values?.Company || accountName || '',
-    closingDate: null,
-    stage: leadData?.values?.['Lead Status'] || 'Qualification'
+      amount: '',
+      dealName: leadData?.values?.Company || accountName || '',
+      closingDate: null,
+      stage: leadData?.values?.['Lead Status'] || 'Qualification'
     })
-    
   }
 
   const handleConvert = () => {
@@ -327,8 +348,6 @@ const LeadDetailView = () => {
   }
 
   const convertLeadFn = async (leadData, createDeal, dealData) => {
-  
-
     try {
       const id = leadData?._id
       const organization_id = leadData?.organization_id
@@ -353,7 +372,6 @@ const LeadDetailView = () => {
         lower: true,
         locale: 'en'
       })
-
 
       // 💡 Lead Status update logic
       const values = {
@@ -389,12 +407,11 @@ const LeadDetailView = () => {
 
       const result = await res.json()
       if (result.success) {
-        toast.success(
-          createDeal
-            ? 'Lead successfully converted to Opportunity'
-            : 'Lead updated successfully',
-          { autoClose: 1000, position: 'bottom-center', hideProgressBar: true }
-        )
+        toast.success(createDeal ? 'Lead successfully converted to Opportunity' : 'Lead updated successfully', {
+          autoClose: 1000,
+          position: 'bottom-center',
+          hideProgressBar: true
+        })
         router.push(createDeal ? '/app/opportunity' : '/app/leads')
       } else {
         toast.error('Update failed, please try again!')
@@ -450,7 +467,7 @@ const LeadDetailView = () => {
 
       const result = await res.json()
 
-      console.log(result,"<<<responseeee")
+      console.log(result, '<<<responseeee')
 
       if (!result.success) {
         toast.error('Failed to update field')
@@ -492,9 +509,7 @@ const LeadDetailView = () => {
 
   if (!leadData && !loader) {
     return (
-      <>
-      
-      </>
+      <></>
       // <Card sx={{ p: 4, textAlign: 'center', mt: 3 }}>
       //   <Typography variant='h6'>📝 No lead found</Typography>
       //   <Link href='/app/lead-form'>
@@ -606,14 +621,13 @@ const LeadDetailView = () => {
             pr: 1 // scrollbar overlap avoid
           }}
         >
-          <LeadCard 
-          fields={fields} 
-          leadId={leadId} 
-          leadData={leadData} 
-          onToggleFlag={onToggleFlag}
-          sections={sections} 
-          handleFieldSave={handleFieldSave}
-          
+          <LeadCard
+            fields={fields}
+            leadId={leadId}
+            leadData={leadData}
+            onToggleFlag={onToggleFlag}
+            sections={sections}
+            handleFieldSave={handleFieldSave}
           />
 
           {/* 🔹 Dynamic Sections */}

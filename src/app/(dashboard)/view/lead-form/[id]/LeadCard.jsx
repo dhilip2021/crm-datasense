@@ -5,7 +5,6 @@ import { useState } from 'react'
 
 export default function LeadCard({ fields, leadId, leadData, onToggleFlag, sections, handleFieldSave }) {
 
-    console.log(fields,"<<< FILELDSSSS")
 
     const [editing, setEditing] = useState(false)
     const [leadStatus, setLeadStatus] = useState(fields['Lead Status'] || '')
@@ -77,16 +76,6 @@ export default function LeadCard({ fields, leadId, leadData, onToggleFlag, secti
               />
             </IconButton>
           </Box>
-
-          {/* <Typography variant='body1'>
-            <Chip
-              label={fields['Lead Status']}
-              color='primary'
-              variant='outlined'
-              size='small'
-              sx={{ fontWeight: 'medium' }}
-            />
-          </Typography> */}
            {editing ? (
           <TextField
             select

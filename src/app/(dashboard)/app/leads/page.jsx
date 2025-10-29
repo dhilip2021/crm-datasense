@@ -399,10 +399,6 @@ const LeadTable = () => {
   }
 
   useEffect(() => {
-
-    console.log(page,"<<< PAGEEEE")
-    console.log(limit,"<<< LIMITTTTT")
-    console.log(fetched,"<<< FETCHED")
     if (!fetched && sections) {
       console.log('calling 3333')
       fetchData()
