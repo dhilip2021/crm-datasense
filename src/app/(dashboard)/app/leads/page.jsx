@@ -72,7 +72,7 @@ const LeadTable = () => {
   const [selectedUsers, setSelectedUsers] = useState([])
   const [anchorPdfEl, setAnchorPdfEl] = useState(null)
   const [selectedPdfFields, setSelectedPdfFields] = useState([])
-  const [fetched, setFetched] = useState(false)
+  const [fetched, setFetched] = useState(true)
 
   // const dynamicPdfFields = data.length > 0 ? Object.keys(data[0].values) : []
   // const fieldsPdf = [...new Set([...dynamicPdfFields])]
@@ -399,16 +399,23 @@ const LeadTable = () => {
   }
 
   useEffect(() => {
-    if (!fetched) {
+
+    console.log(page,"<<< PAGEEEE")
+    console.log(limit,"<<< LIMITTTTT")
+    console.log(fetched,"<<< FETCHED")
+    if (!fetched && sections) {
       console.log('calling 3333')
       fetchData()
       setFetched(true)
     }
-  }, [sections])
+  }, [page, limit])
+
+
 
   useEffect(() => {
     fetchFormTemplate()
     getUserListFn()
+    setFetched(false)
   }, [page, limit])
 
   useEffect(() => {
