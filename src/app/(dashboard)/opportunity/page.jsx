@@ -29,6 +29,8 @@ const Opportunity = () => {
   const [loader, setLoader] = useState(false)
   const [funnelData, setFunnelData] = useState([])
   const [topAccounts, setTopAccounts] = useState([])
+  const [dealsAging, setDealsAging] = useState([])
+
   const [fieldStatus, setFieldStatus] = useState({})
   const [filters, setFilters] = useState({
     status: '',
@@ -246,8 +248,37 @@ const Opportunity = () => {
       }))
 
       setTopAccounts(topAccountsArr)
+
+      const today = new Date() // or new Date() in real use
+
+      const deals = data.map(item => {
+        const company = item?.values?.['Company'] || 'Unknown'
+        const link = item?.lead_id || ''
+        const amount = item?.values?.['Expected Revenue'] || 0
+        const closingDate = new Date(item?.values?.['Closing Date'])
+        const diffTime = Math.abs(today - closingDate)
+        const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+        return {
+          company,
+          amount: `₹${Number(amount).toLocaleString('en-IN')}`,
+          days,
+          link
+        }
+      })
+
+
+
+
+
+      
+
+      const sortedDeals = deals.sort((a, b) => Number(a.days) - Number(b.days))
+
+      setDealsAging(sortedDeals)
     } else {
       setTopAccounts([])
+      setDealsAging([])
     }
 
     if (Array.isArray(data) && data.length > 0) {
@@ -277,49 +308,45 @@ const Opportunity = () => {
           return found || { stage, value: 0, count: 0 }
         })
       }
-
-      console.log(finalFunnelData,"<<< funnel DAta")
       setFunnelData(finalFunnelData)
     } else {
-
       const emtyRes = [
-    {
-        "stage": "New Opportunity",
-        "value": 0,
-        "count": 0
-    },
-    {
-        "stage": "Proposal Sent",
-        "value": 0,
-        "count": 0
-    },
-    {
-        "stage": "Negotiation",
-        "value": 0,
-        "count": 0
-    },
-    {
-        "stage": "Decision Pending",
-        "value": 0,
-        "count": 0
-    },
-    {
-        "stage": "Ready to Close",
-        "value": 0,
-        "count": 0
-    },
-    {
-        "stage": "Closed Won",
-        "value": 0,
-        "count": 0
-    },
-    {
-        "stage": "Closed Lost",
-        "value": 0,
-        "count": 0
-    }
-]
-
+        {
+          stage: 'New Opportunity',
+          value: 0,
+          count: 0
+        },
+        {
+          stage: 'Proposal Sent',
+          value: 0,
+          count: 0
+        },
+        {
+          stage: 'Negotiation',
+          value: 0,
+          count: 0
+        },
+        {
+          stage: 'Decision Pending',
+          value: 0,
+          count: 0
+        },
+        {
+          stage: 'Ready to Close',
+          value: 0,
+          count: 0
+        },
+        {
+          stage: 'Closed Won',
+          value: 0,
+          count: 0
+        },
+        {
+          stage: 'Closed Lost',
+          value: 0,
+          count: 0
+        }
+      ]
 
       setFunnelData(emtyRes)
     }
@@ -351,33 +378,15 @@ const Opportunity = () => {
         {/* <StageBarChart funnelData={funnelData} /> */}
         {/* <SalesPipelinePieChart data={funnelData} /> */}
 
-        <SalesPipelineBarChart
-          data={funnelData}
-          view={view}
-          viewType={viewType}
-          anchorViewEl={anchorViewEl}
-          handleViewClose={handleViewClose}
-          handleChange={handleChange}
-          handleViewClick={handleViewClick}
-          loader={loader}
-        />
+        <SalesPipelineBarChart data={funnelData} loader={loader} />
       </Grid>
 
       <Grid item xs={6}>
-        <TopAccountsCard
-          data={topAccounts}
-          view={view}
-          viewType={viewType}
-          anchorViewEl={anchorViewEl}
-          handleViewClose={handleViewClose}
-          handleChange={handleChange}
-          handleViewClick={handleViewClick}
-          loader={loader}
-        />
+        <TopAccountsCard data={topAccounts} loader={loader} />
       </Grid>
 
       <Grid item xs={6}>
-        <DealAgingAnalysis />
+        <DealAgingAnalysis deals={dealsAging} loader={loader} />
       </Grid>
 
       <Grid item xs={6}>

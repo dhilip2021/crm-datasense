@@ -81,24 +81,6 @@ export async function GET(req) {
         ]
       }
     }
-    // // 🔍 Search
-    // if (search) {
-    //   const searchFilter = {
-    //     $or: [
-    //       { lead_id: { $regex: search, $options: 'i' } },
-    //       { 'values.First Name': { $regex: search, $options: 'i' } },
-    //       { 'values.Last Name': { $regex: search, $options: 'i' } },
-    //       { 'values.Company': { $regex: search, $options: 'i' } },
-    //       { 'values.Email': { $regex: search, $options: 'i' } },
-    //       { 'values.Phone': { $regex: search, $options: 'i' } },
-    //       { 'values.City': { $regex: search, $options: 'i' } },
-    //       { 'values.Job Title': { $regex: search, $options: 'i' } }
-    //     ]
-    //   }
-
-    //   query.$and = query.$and || []
-    //   query.$and.push(searchFilter)
-    // }
 
     // 🔍 Search
     if (search) {
