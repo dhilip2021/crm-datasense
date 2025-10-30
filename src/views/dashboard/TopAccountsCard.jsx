@@ -1,24 +1,49 @@
 'use client'
-import React from 'react'
-import { Card, Typography, Box, Avatar, Divider } from '@mui/material'
+import React, { useState } from 'react'
+import { Card, Typography, Box, Avatar } from '@mui/material'
 
-const topAccounts = [
-  { id: 1, name: 'Finance Corp', value: '₹3,30,000' },
-  { id: 2, name: 'TechCorp Industries', value: '₹3,30,000' },
-  { id: 3, name: 'Global Manufacturing', value: '₹3,30,000' },
-  { id: 4, name: 'StartupCo', value: '₹3,30,000' },
-  { id: 5, name: 'Retail Solutions Ltd', value: '₹3,30,000' }
-]
+export default function TopAccountsCard({
+  data
+}) {
 
-export default function TopAccountsCard() {
+
+  const isEmpty =
+    !data ||
+    data.length === 0 ||
+    data.every(item => (!item.value || item.value === 0) && (!item.count || item.count === 0))
+
   return (
-     <Card sx={{ p: 3 }}>
-       <Typography variant='h6' fontWeight={600} mb={2}>
-              Top Accounts by Value
-            </Typography>
+    <Card 
+    
+      sx={{
+        borderRadius: '20px',
+        overflow: 'hidden',
+        background: 'linear-gradient(135deg, #e8f0ff 0%, #ffffff 40%, #fff9f0 100%)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08), inset 0 0 8px rgba(255,255,255,0.2)',
+        p: 3,
+        height:430
+      }}
+    >
+      <Box display={'flex'} justifyContent={'space-between'}>
+        <Typography variant='h6' fontWeight='bold' mb={2}>
+          Top Accounts by Value
+        </Typography>
+      </Box>
 
       <Box display='flex' flexDirection='column' gap={1.5}>
-        {topAccounts.map((account, index) => (
+
+         {isEmpty ? (
+            <Box textAlign='center' mt={30}>
+              <Typography variant='body1' color='text.secondary' fontWeight={500}>
+                📉 No records found
+              </Typography>
+              <Typography variant='caption' color='text.disabled'>
+                Try changing filters or date range
+              </Typography>
+            </Box>
+          ) : (
+
+            data.map((account, index) => (
           <Box
             key={account.id}
             display='flex'
@@ -26,8 +51,7 @@ export default function TopAccountsCard() {
             justifyContent='space-between'
             sx={{
               py: 0.8,
-              borderBottom:
-                index !== topAccounts.length - 1 ? '1px solid #f0f0f0' : 'none'
+              borderBottom: index !== data.length - 1 ? '1px solid #f0f0f0' : 'none'
             }}
           >
             <Box display='flex' alignItems='center' gap={1.5}>
@@ -46,14 +70,16 @@ export default function TopAccountsCard() {
                 {account.name}
               </Typography>
             </Box>
-            <Typography
-              variant='body2'
-              sx={{ fontWeight: 500, color: 'text.primary' }}
-            >
+            <Typography variant='body2' sx={{ fontWeight: 500, color: 'text.primary' }}>
               {account.value}
             </Typography>
           </Box>
-        ))}
+        ))
+
+          )}
+
+
+        
       </Box>
     </Card>
   )

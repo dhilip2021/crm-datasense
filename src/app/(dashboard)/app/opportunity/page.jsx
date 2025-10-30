@@ -199,7 +199,7 @@ const OpportunityTable = () => {
 
   // 🔹 Fetch template
   const fetchFormTemplate = async () => {
-    const lead_form = 'opportunity-form'
+    const lead_form = 'opportunities-form'  // opportunity-form
     // setLoader(true)
     try {
       console.log('cal2')
@@ -904,9 +904,9 @@ const OpportunityTable = () => {
                           minWidth: 250
                         }}
                       >
-                        Deal Name
+                        Deal Name 
                       </TableCell>
-                      <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>First Name</TableCell>
+                      {/* <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>First Name</TableCell> */}
                       <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Company</TableCell>
                       <TableCell sx={{ minWidth: 50, maxWidth: 80, whiteSpace: 'nowrap' }}>Flag</TableCell>
                       <TableCell>City</TableCell>
@@ -914,10 +914,11 @@ const OpportunityTable = () => {
                       <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
                         Expected Revenue
                       </TableCell>
+                       <TableCell>Status</TableCell>
                       <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Closing Date</TableCell>
                       <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Next Follow-up</TableCell>
                       <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Timeline to Buy</TableCell>
-                      <TableCell>Status</TableCell>
+                     
 
                       <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Assigned To</TableCell>
                       <TableCell>Source</TableCell>
@@ -969,7 +970,7 @@ const OpportunityTable = () => {
                                 <strong> {row.values['Deal Name'] || ''}</strong>
                               </Link>
                             </TableCell>
-                            <TableCell
+                            {/* <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200,
@@ -981,7 +982,7 @@ const OpportunityTable = () => {
                               <Tooltip title={row.values['First Name'] || ''} arrow>
                                 {row.values['First Name'] || ''}
                               </Tooltip>
-                            </TableCell>
+                            </TableCell> */}
                             <TableCell
                               sx={{
                                 minWidth: 180,
@@ -1019,6 +1020,28 @@ const OpportunityTable = () => {
                             <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
                               {row.values['Expected Revenue']}
                             </TableCell>
+                             <TableCell>
+                              <Chip
+                                label={row.values['Lead Status'] || 'Unknown'}
+                                color={
+                                  row.values['Lead Status'] === 'New Opportunity'
+                                    ? 'primary'
+                                    : row.values['Lead Status'] === 'Proposal Sent'
+                                      ? 'info'
+                                      : row.values['Lead Status'] === 'Negotiation'
+                                        ? 'success'
+                                        : row.values['Lead Status'] === 'Decision Pending'
+                                          ? 'secondary'
+                                          : row.values['Lead Status'] === 'Ready to Close'
+                                            ? 'default'
+                                            : row.values['Lead Status'] === 'Closed Lost'
+                                              ? 'warning'
+                                              : row.values['Lead Status'] === 'Closed Won'
+                                                ? 'success' : 'default'
+                                }
+                                size='small'
+                              />
+                            </TableCell>
                             <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
                               {row.values['Closing Date']}
                             </TableCell>
@@ -1043,47 +1066,7 @@ const OpportunityTable = () => {
                                 size='small'
                               />
                             </TableCell>
-                            <TableCell>
-                              <Chip
-                                label={row.values['Lead Status'] || 'Unknown'}
-                                color={
-                                  row.values['Lead Status'] === 'New'
-                                    ? 'primary'
-                                    : row.values['Lead Status'] === 'Contacted'
-                                      ? 'info'
-                                      : row.values['Lead Status'] === 'Qualified'
-                                        ? 'success'
-                                        : row.values['Lead Status'] === 'Proposal Sent'
-                                          ? 'secondary'
-                                          : row.values['Lead Status'] === 'Negotiation'
-                                            ? 'default'
-                                            : row.values['Lead Status'] === 'Closed Lost'
-                                              ? 'warning'
-                                              : row.values['Lead Status'] === 'Closed Won'
-                                                ? 'success'
-                                                : row.values['Lead Status'] === 'Attempted to Contact'
-                                                  ? 'warning'
-                                                  : row.values['Lead Status'] === 'Lost Lead - No Requirements'
-                                                    ? 'error'
-                                                    : row.values['Lead Status'] === 'No Response/Busy'
-                                                      ? 'warning'
-                                                      : row.values['Lead Status'] === 'Lost Lead - Already Using'
-                                                        ? 'error'
-                                                        : row.values['Lead Status'] === 'Interested'
-                                                          ? 'warning'
-                                                          : row.values['Lead Status'] === 'Demo Scheduled'
-                                                            ? 'warning'
-                                                            : row.values['Lead Status'] === 'Need to Schedule Demo'
-                                                              ? 'warning'
-                                                              : row.values['Lead Status'] === 'Demo Completed'
-                                                                ? 'warning'
-                                                                : row.values['Lead Status'] === 'Call Back'
-                                                                  ? 'warning'
-                                                                  : 'default'
-                                }
-                                size='small'
-                              />
-                            </TableCell>
+                           
 
                             <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
                               {row.assignedTo}
