@@ -18,10 +18,11 @@ import {
   Skeleton,
   useTheme
 } from '@mui/material'
+import { formatCurrency } from '@/helper/frontendHelper'
 
 const SalesPipelineBarChart = ({ data, loader }) => {
   const theme = useTheme()
-  const formatCurrency = val => `₹${val.toLocaleString('en-IN')}`
+  // const formatCurrency = val => `₹${val.toLocaleString('en-IN')}`
 
   const isEmpty =
     !data ||

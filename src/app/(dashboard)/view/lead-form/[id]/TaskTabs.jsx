@@ -422,7 +422,7 @@ const renderMeetingCard = meeting => (
   const handleTaskClose = () => {
     setOpenTaskDialog(false)
     setEditingTask(null)
-    setTaskData(initialTaskData)
+    // setTaskData(initialTaskData)
     setErrorTaskData({ subject: false, dueDate: false, reminderDate: false })
     setReminderTimeTaskError(false)
   }
@@ -430,7 +430,7 @@ const renderMeetingCard = meeting => (
   const handleMeetingClose = () => {
     setOpenMeetingDialog(false)
     setEditingMeeting(null)
-    setMeetingData(initialMeetingData)
+    // setMeetingData(initialMeetingData)
     setErrorMeetingData({ title: false, link: false, fromDate: false, toDate: false, fromTime: false, toTime: false })
     setReminderFromTimeMeetingError(false)
     setReminderToTimeMeetingError(false)

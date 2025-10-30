@@ -14,10 +14,10 @@ import {
 } from '@mui/material'
 import Cookies from 'js-cookie'
 import { toast } from 'react-toastify'
+import { formatCurrency } from '@/helper/frontendHelper'
 
 // ✅ Utility for currency
-const formatCurrency = value =>
-  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value)
+// const formatCurrency = value => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value)
 
 const EditProductDialog = ({ open, onClose, productRef, leadId, fetchLeadFromId }) => {
 

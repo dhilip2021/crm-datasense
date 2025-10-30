@@ -4,12 +4,12 @@ import { Box, Card, Typography, CircularProgress, Chip, IconButton, Select, Menu
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import Cookies from 'js-cookie'
 import { toast } from 'react-toastify'
-import { encryptCryptoRes } from '@/helper/frontendHelper'
+import { encryptCryptoRes, formatCurrency } from '@/helper/frontendHelper'
 import Link from 'next/link'
 import { ArrowBackIosNew, ArrowForwardIos } from '@mui/icons-material'
 
 // 💰 Format currency (INR)
-const formatCurrency = value => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value)
+// const formatCurrency = value => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value)
 
 // 🎨 Generate consistent colors dynamically for statuses
 const generateStatusColors = statuses => {

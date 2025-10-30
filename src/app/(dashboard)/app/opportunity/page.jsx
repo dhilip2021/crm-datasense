@@ -35,7 +35,7 @@ import * as XLSX from 'xlsx'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import Cookies from 'js-cookie'
-import { converDayJsDate, encryptCryptoRes, encryptCryptoResponse, formatDateShort } from '@/helper/frontendHelper'
+import { converDayJsDate, encryptCryptoRes, encryptCryptoResponse, formatCurrency, formatDateShort } from '@/helper/frontendHelper'
 import Link from 'next/link'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import GridOnIcon from '@mui/icons-material/GridOn'
@@ -906,7 +906,6 @@ const OpportunityTable = () => {
                       >
                         Deal Name 
                       </TableCell>
-                      {/* <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>First Name</TableCell> */}
                       <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Company</TableCell>
                       <TableCell sx={{ minWidth: 50, maxWidth: 80, whiteSpace: 'nowrap' }}>Flag</TableCell>
                       <TableCell>City</TableCell>
@@ -919,7 +918,6 @@ const OpportunityTable = () => {
                       <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Next Follow-up</TableCell>
                       <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Timeline to Buy</TableCell>
                      
-
                       <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Assigned To</TableCell>
                       <TableCell>Source</TableCell>
                       <TableCell>Score</TableCell>
@@ -970,19 +968,6 @@ const OpportunityTable = () => {
                                 <strong> {row.values['Deal Name'] || ''}</strong>
                               </Link>
                             </TableCell>
-                            {/* <TableCell
-                              sx={{
-                                minWidth: 180,
-                                maxWidth: 200,
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis'
-                              }}
-                            >
-                              <Tooltip title={row.values['First Name'] || ''} arrow>
-                                {row.values['First Name'] || ''}
-                              </Tooltip>
-                            </TableCell> */}
                             <TableCell
                               sx={{
                                 minWidth: 180,
@@ -1018,7 +1003,7 @@ const OpportunityTable = () => {
 
                             <TableCell>{row.values['City']}</TableCell>
                             <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>
-                              {row.values['Expected Revenue']}
+                              {formatCurrency(row.values['Expected Revenue'])}
                             </TableCell>
                              <TableCell>
                               <Chip

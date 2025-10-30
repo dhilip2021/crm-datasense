@@ -22,8 +22,9 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete'
 import Cookies from 'js-cookie'
 import { toast } from 'react-toastify'
+import { formatCurrency } from '@/helper/frontendHelper'
 
-const formatCurrency = value => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value)
+// const formatCurrency = value => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value)
 
 
 const ProductSelectorDialog = ({ itemsData, open, onClose, leadId, fetchLeadFromId }) => {

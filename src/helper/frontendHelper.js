@@ -120,3 +120,11 @@ export function toE164(number, defaultCountry = "IN") {
     return null
   }
 }
+
+// ✅ Utility for currency
+export function formatCurrency(value) {
+
+  const currency = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value)
+
+  return currency;
+}

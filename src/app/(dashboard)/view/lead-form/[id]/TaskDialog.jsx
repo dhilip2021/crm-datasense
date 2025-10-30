@@ -220,7 +220,13 @@ function TaskDialog({
               </Button>
               <Button
                 variant='contained'
-                disabled={loaderTask || reminderTimeTaskError || !taskData.subject || !taskData.dueDate}
+                disabled={
+                  loaderTask || 
+                  reminderTimeTaskError || 
+                  !taskData.subject || 
+                  !taskData.dueDate|| 
+                  (taskData.reminderEnabled && !taskData.reminderDate)
+                }
                 onClick={saveTask}
                 sx={{
                   borderRadius: 2,

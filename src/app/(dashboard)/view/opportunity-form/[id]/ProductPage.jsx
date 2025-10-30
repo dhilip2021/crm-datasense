@@ -21,9 +21,10 @@ import {
 import ProductSelectorDialog from './ProductSelectorDialog'
 import ProductBulkEditDialog from './ProductBulkEditDialog'
 import { toast } from 'react-toastify'
+import { formatCurrency } from '@/helper/frontendHelper'
 
 // ✅ Utility for currency
-const formatCurrency = value => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value)
+// const formatCurrency = value => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value)
 
 function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData, dealFnCall }) {
   const [openDialog, setOpenDialog] = useState(false)
