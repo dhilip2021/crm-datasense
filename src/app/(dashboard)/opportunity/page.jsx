@@ -26,7 +26,6 @@ const Opportunity = () => {
   const [page, setPage] = useState(0)
   const [limit, setLimit] = useState(10)
   const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(false)
   const [loader, setLoader] = useState(false)
   const [funnelData, setFunnelData] = useState([])
   const [topAccounts, setTopAccounts] = useState([])
@@ -105,7 +104,7 @@ const Opportunity = () => {
   }
 
   const fetchData = async () => {
-    setLoading(true)
+    setLoader(true)
 
     const form_name = 'opportunity-form'
 
@@ -132,7 +131,7 @@ const Opportunity = () => {
     }
 
     try {
-      const res = await fetch(`/api/v1/admin/lead-form/list?${query}`, {
+      const res = await fetch(`/api/v1/admin/opportunity-form/list?${query}`, {
         method: 'GET',
         headers: header
       })
@@ -148,7 +147,7 @@ const Opportunity = () => {
     } catch (err) {
       console.error(err)
     } finally {
-      setLoading(false)
+      setLoader(false)
     }
   }
 
@@ -360,6 +359,7 @@ const Opportunity = () => {
           handleViewClose={handleViewClose}
           handleChange={handleChange}
           handleViewClick={handleViewClick}
+          loader={loader}
         />
       </Grid>
 
@@ -372,6 +372,7 @@ const Opportunity = () => {
           handleViewClose={handleViewClose}
           handleChange={handleChange}
           handleViewClick={handleViewClick}
+          loader={loader}
         />
       </Grid>
 
