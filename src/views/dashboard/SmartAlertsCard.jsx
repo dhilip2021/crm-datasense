@@ -24,8 +24,43 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import CloseIcon from '@mui/icons-material/Close'
 import { encryptCryptoRes } from '@/helper/frontendHelper'
 
+// 🔹 Calculate win/loss reason percentages
+const calculateReasonStats = deals => {
+  const winReasons = []
+  const lossReasons = []
+
+  deals.forEach(d => {
+    if (d.status === 'Closed Won' && d.won_reasons?.length) {
+      winReasons.push(...d.won_reasons)
+    } else if (d.status === 'Closed Lost' && d.loss_reasons?.length) {
+      lossReasons.push(...d.loss_reasons)
+    }
+  })
+
+  // helper to count + convert to percentage
+  const calcPercent = arr => {
+    if (arr.length === 0) return []
+    const total = arr.length
+    const counts = arr.reduce((acc, r) => {
+      acc[r] = (acc[r] || 0) + 1
+      return acc
+    }, {})
+    return Object.entries(counts).map(([reason, count]) => ({
+      reason,
+      percentage: ((count / total) * 100).toFixed(1) + '%'
+    }))
+  }
+
+  return {
+    win: calcPercent(winReasons),
+    loss: calcPercent(lossReasons)
+  }
+}
+
 export default function SmartAlertsCard({ deals = [], loader }) {
-  console.log(deals, '<<< deals')
+  console.log(deals, '<<< SmartAlertsCard deals')
+
+  const { win, loss } = calculateReasonStats(deals)
 
   const [openDialog, setOpenDialog] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState('')
@@ -158,19 +193,27 @@ export default function SmartAlertsCard({ deals = [], loader }) {
               <Typography variant='subtitle1' sx={{ fontWeight: 700, color: '#111827', mb: 1 }}>
                 Top Win Reasons
               </Typography>
-
               <Stack spacing={1}>
-                <ReasonItem label='Feature fit' value='28%' color='green' />
-                <ReasonItem label='Timeline match' value='16%' color='green' />
+                {win.length === 0 ? (
+                  <Typography variant='body2' color='text.secondary'>
+                    No win reasons found
+                  </Typography>
+                ) : (
+                  win.map((r, i) => <ReasonItem key={i} label={r.reason} value={r.percentage} color='green' />)
+                )}
               </Stack>
 
               <Typography variant='subtitle1' sx={{ fontWeight: 700, color: '#111827', mt: 2, mb: 1 }}>
                 Top Loss Reasons
               </Typography>
-
               <Stack spacing={1}>
-                <ReasonItem label='Budget constraints' value='32%' color='red' />
-                <ReasonItem label='Competitor pricing' value='24%' color='red' />
+                {loss.length === 0 ? (
+                  <Typography variant='body2' color='text.secondary'>
+                    No loss reasons found
+                  </Typography>
+                ) : (
+                  loss.map((r, i) => <ReasonItem key={i} label={r.reason} value={r.percentage} color='red' />)
+                )}
               </Stack>
             </>
           )}

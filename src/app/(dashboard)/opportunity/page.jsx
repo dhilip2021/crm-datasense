@@ -278,6 +278,8 @@ const Opportunity = () => {
         const company = item?.values?.['Company'] || 'Unknown'
         const link = item?.lead_id || ''
         const amount = item?.values?.['Expected Revenue'] || 0
+        const loss_reasons = item?.values?.['Loss Reasons'] || []
+        const won_reasons = item?.values?.['Win Reasons'] || []
         const status = item?.values?.['Lead Status'] || 'unknown'
         const closingDate = new Date(item?.values?.['Closing Date'])
         const diffTime = Math.abs(today - closingDate)
@@ -288,12 +290,11 @@ const Opportunity = () => {
           amount: `₹${Number(amount).toLocaleString('en-IN')}`,
           days,
           link,
-          status
+          status,
+          loss_reasons,
+          won_reasons
         }
       })
-
-      
-     
 
       const sortedDeals = deals.sort((a, b) => Number(a.days) - Number(b.days))
 
