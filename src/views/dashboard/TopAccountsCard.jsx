@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { Card, Typography, Box, Avatar, Skeleton } from '@mui/material'
+import { Card, Typography, Box, Avatar, Skeleton, CardContent } from '@mui/material'
 import Link from '@/components/Link'
 import { encryptCryptoRes } from '@/helper/frontendHelper'
 
@@ -27,8 +27,25 @@ export default function TopAccountsCard({ data, loader }) {
         </Typography>
       </Box>
 
-      <Box display='flex' flexDirection='column' gap={1.5}>
-        {/* ⏳ LOADING STATE */}
+      <CardContent
+        sx={{
+          p: 0,
+          flexGrow: 1,
+          overflowY: 'auto',
+          pr: 1,
+          '&::-webkit-scrollbar': {
+            width: '6px'
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: 'rgba(0,0,0,0.2)',
+            borderRadius: '6px'
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            backgroundColor: 'rgba(0,0,0,0.3)'
+          }
+        }}
+      >
+         {/* ⏳ LOADING STATE */}
         {loader ? (
           Array.from({ length: 6 }).map((_, index) => (
             <Box
@@ -98,7 +115,11 @@ export default function TopAccountsCard({ data, loader }) {
             </Box>
           ))
         )}
-      </Box>
+      </CardContent>
+
+      {/* <Box display='flex' flexDirection='column' gap={1.5}>
+       
+      </Box> */}
     </Card>
   )
 }
