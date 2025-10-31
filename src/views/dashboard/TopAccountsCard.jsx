@@ -1,6 +1,8 @@
 'use client'
 import React from 'react'
 import { Card, Typography, Box, Avatar, Skeleton } from '@mui/material'
+import Link from '@/components/Link'
+import { encryptCryptoRes } from '@/helper/frontendHelper'
 
 export default function TopAccountsCard({ data, loader }) {
   const isEmpty =
@@ -81,9 +83,14 @@ export default function TopAccountsCard({ data, loader }) {
                 >
                   {account.id?.toString()?.slice(0, 2)?.toUpperCase() || 'A'}
                 </Avatar>
-                <Typography variant='body2' color='text.primary'>
-                  {account.name}
-                </Typography>
+                <Link
+                  href={`/view/opportunity-form/${encodeURIComponent(encryptCryptoRes(account.link))}`}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <Typography variant='body2' color='text.primary'>
+                    {account.name}
+                  </Typography>
+                </Link>
               </Box>
               <Typography variant='body2' sx={{ fontWeight: 500, color: 'text.primary' }}>
                 {account.value?.toLocaleString('en-IN')}

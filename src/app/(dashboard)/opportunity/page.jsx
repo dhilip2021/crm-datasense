@@ -218,36 +218,59 @@ const Opportunity = () => {
 
   useEffect(() => {
     if (Array.isArray(data) && data.length > 0) {
-      const accountMap = {}
 
-      data.forEach(item => {
-        const companyName = item.values?.['Company'] || 'Unknown Company'
+     
+    const accountMap = {}
 
-        // 🔹 Sum all finalPrice values across all items for this lead
-        const totalItemValue = (item.items || []).reduce((leadSum, itemBlock) => {
-          const itemTotal = (itemBlock.item_ref || []).reduce((sum, ref) => sum + Number(ref.finalPrice || 0), 0)
-          return leadSum + itemTotal
-        }, 0)
+    data.forEach(item => {
+      const companyName = item.values?.['Company'] || 'Unknown Company'
 
-        if (!accountMap[companyName]) {
-          accountMap[companyName] = { name: companyName, value: 0, count: 0 }
+      // 🔹 Sum all finalPrice values across all items for this lead
+      const totalItemValue = (item.items || []).reduce((leadSum, itemBlock) => {
+        const itemTotal = (itemBlock.item_ref || []).reduce(
+          (sum, ref) => sum + Number(ref.finalPrice || 0),
+          0
+        )
+        return leadSum + itemTotal
+      }, 0)
+
+      // 🔹 Create or update company entry
+      if (!accountMap[companyName]) {
+        accountMap[companyName] = {
+          name: companyName,
+          value: 0,
+          count: 0,
+          link: item.lead_id, // default link
+          latestDate: new Date(item.updatedAt) // track latest update
         }
+      }
 
-        accountMap[companyName].value += totalItemValue
-        accountMap[companyName].count += 1
-      })
+      accountMap[companyName].value += totalItemValue
+      accountMap[companyName].count += 1
 
-      // 🔹 Convert to array and sort descending by total value
-      let topAccountsArr = Object.values(accountMap).sort((a, b) => b.value - a.value)
+      // 🔹 If this item is newer, update link
+      const itemUpdatedAt = new Date(item.updatedAt)
+      if (itemUpdatedAt > accountMap[companyName].latestDate) {
+        accountMap[companyName].link = item.lead_id
+        accountMap[companyName].latestDate = itemUpdatedAt
+      }
+    })
 
-      // 🔹 Format currency and limit to top 5
-      topAccountsArr = topAccountsArr.slice(0, 10).map((acc, index) => ({
-        id: index + 1,
-        name: acc.name,
-        value: `₹${acc.value.toLocaleString('en-IN')}`
-      }))
+    // 🔹 Convert to array and sort by total value
+    let topAccountsArr = Object.values(accountMap).sort((a, b) => b.value - a.value)
 
-      setTopAccounts(topAccountsArr)
+    // 🔹 Format and limit to top 10
+    topAccountsArr = topAccountsArr.slice(0, 10).map((acc, index) => ({
+      id: index + 1,
+      name: acc.name,
+      value: `₹ ${acc.value.toLocaleString('en-IN')}`,
+      link: acc.link // ✅ include lead_id as link
+    }))
+ 
+    setTopAccounts(topAccountsArr)
+
+
+       console.log(data,"<<< dataaaaaaaaaaaa")
 
       const today = new Date() // or new Date() in real use
 
@@ -255,6 +278,7 @@ const Opportunity = () => {
         const company = item?.values?.['Company'] || 'Unknown'
         const link = item?.lead_id || ''
         const amount = item?.values?.['Expected Revenue'] || 0
+        const status = item?.values?.['Lead Status'] || 'unknown'
         const closingDate = new Date(item?.values?.['Closing Date'])
         const diffTime = Math.abs(today - closingDate)
         const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
@@ -263,15 +287,13 @@ const Opportunity = () => {
           company,
           amount: `₹${Number(amount).toLocaleString('en-IN')}`,
           days,
-          link
+          link,
+          status
         }
       })
 
-
-
-
-
       
+     
 
       const sortedDeals = deals.sort((a, b) => Number(a.days) - Number(b.days))
 
@@ -280,6 +302,12 @@ const Opportunity = () => {
       setTopAccounts([])
       setDealsAging([])
     }
+
+
+
+
+
+
 
     if (Array.isArray(data) && data.length > 0) {
       const funnelMap = {}
@@ -293,11 +321,12 @@ const Opportunity = () => {
           0
         )
 
+
         if (!funnelMap[status]) {
           funnelMap[status] = { stage: status, value: 0, count: 0 }
         }
 
-        funnelMap[status].value += totalItemValue
+        funnelMap[status].value += totalItemValue 
         funnelMap[status].count += 1
       })
       // 🔹 Maintain Lead Status order based on fieldStatus
@@ -308,6 +337,7 @@ const Opportunity = () => {
           return found || { stage, value: 0, count: 0 }
         })
       }
+
       setFunnelData(finalFunnelData)
     } else {
       const emtyRes = [
@@ -390,7 +420,7 @@ const Opportunity = () => {
       </Grid>
 
       <Grid item xs={6}>
-        <SmartAlertsCard />
+        <SmartAlertsCard deals={dealsAging} loader={loader} />
       </Grid>
     </Grid>
   )
