@@ -47,7 +47,6 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import SearchIcon from '@mui/icons-material/Search'
 // import { DateRangePicker, MultiInputDateRangeField } from '@mui/x-date-pickers-pro/DateRangePicker'
 
-import { DemoContainer } from '@mui/x-date-pickers/internals/demo'
 import { LocalizationProvider } from '@mui/x-date-pickers-pro/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers-pro/AdapterDayjs'
 import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker'
@@ -105,16 +104,10 @@ const OpportunityTable = () => {
   const [sections, setSections] = useState([])
   const [fieldConfig, setFieldConfig] = useState({})
   const [userList, setUserList] = useState([])
-  // const dynamicExcelFields = data.length > 0 ? Object.keys(data[0].values) : []
-  // const fieldsExcel = [...new Set([...dynamicPdfFields])]
 
-  // const dynamicPdfFields = data.length > 0 && data[0].values ? Object.keys(data[0].values) : []
   const dynamicPdfFields = data.length > 0 && data[0]?.values ? Object.keys(data[0].values) : []
 
-  const fieldsPdf = [...new Set([...dynamicPdfFields])]
-
-  const dynamicExcelFields = data.length > 0 && data[0].values ? Object.keys(data[0].values) : []
-  const fieldsExcel = [...new Set([...dynamicExcelFields])]
+ 
 
   const [filters, setFilters] = useState({
     status: '',
@@ -290,17 +283,9 @@ const OpportunityTable = () => {
     setAnchorPdfEl(event.currentTarget)
   }
 
-  const handlePdfClose = () => {
-    setAnchorPdfEl(null)
-  }
+  
 
-  const handlePdfToggle = field => {
-    if (selectedPdfFields.includes(field)) {
-      setSelectedPdfFields(prev => prev.filter(f => f !== field))
-    } else {
-      setSelectedPdfFields(prev => [...prev, field])
-    }
-  }
+ 
 
   const handleExcelClick = event => {
     setAnchorExcelEl(event.currentTarget)
@@ -365,139 +350,9 @@ const OpportunityTable = () => {
     }
   }
 
-  const exportToExcel = () => {
-    if (selectedExcelFields.length === 0) {
-      toast.error('Please select at least one field to export', {
-        autoClose: 500, // 1 second la close
-        position: 'bottom-center',
-        hideProgressBar: true, // progress bar venam na
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: false,
-        progress: undefined
-      })
-      return
-    }
+ 
 
-    // Columns → selected fields
-    const columns = selectedExcelFields
-
-    // Rows → map each lead values to only selected fields
-    const rows = data.map(d => {
-      const row = {}
-      selectedExcelFields.forEach(field => {
-        switch (field) {
-          case 'Lead ID':
-            row[field] = d.lead_id
-            break
-          case 'Name':
-            row[field] = d.values['First Name'] || ''
-            break
-          case 'Company':
-            row[field] = d.values['Company'] || ''
-            break
-          case 'Status':
-            row[field] = d.values['Lead Status'] || ''
-            break
-          case 'Assigned To':
-            row[field] = d.values['Assigned To'] || ''
-            break
-          case 'Phone':
-            row[field] = d.values['Phone'] || ''
-            break
-          case 'Email':
-            row[field] = d.values['Email'] || ''
-            break
-          case 'City':
-            row[field] = d.values['City'] || ''
-            break
-          case 'Country':
-            row[field] = d.values['Country'] || ''
-            break
-          case 'Next Follow-up Date':
-            row[field] = d.values['Next Follow-up Date'] ? formatDateShort(d.values['Next Follow-up Date']) : ''
-            break
-          case 'Last Contact Date':
-            row[field] = converDayJsDate(d.updatedAt)
-            break
-          case 'Score':
-            row[field] = d.values['Score'] || 0
-            break
-          default:
-            row[field] = d.values[field] || '' // fallback for dynamic fields
-        }
-      })
-      return row
-    })
-
-    // Convert to sheet
-    const sheet = XLSX.utils.json_to_sheet(rows, { header: columns })
-    const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, sheet, 'Leads')
-    XLSX.writeFile(wb, 'leads_export.xlsx')
-
-    handleExcelClose()
-  }
-
-  // Replace your existing exportToPDF function with this:
-  const exportToPDF = () => {
-    if (selectedPdfFields.length === 0) {
-      toast.error('Please select at least one field to export', {
-        autoClose: 500, // 1 second la close
-        position: 'bottom-center',
-        hideProgressBar: true, // progress bar venam na
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: false,
-        progress: undefined
-      })
-      return
-    }
-
-    const doc = new jsPDF()
-
-    // PDF columns → selectedPdfFields la irukkara names
-    const columns = selectedPdfFields
-
-    // PDF rows → dynamic mapping from data
-    const rows = data.map(d =>
-      selectedPdfFields.map(field => {
-        switch (field) {
-          case 'Lead ID':
-            return d.lead_id
-          case 'Name':
-            return d.values['First Name'] || ''
-          case 'Company':
-            return d.values['Company'] || ''
-          case 'Status':
-            return d.values['Lead Status'] || ''
-          case 'Assigned To':
-            return d.values['Assigned To'] || ''
-          case 'Phone':
-            return d.values['Phone'] || ''
-          case 'Email':
-            return d.values['Email'] || ''
-          case 'City':
-            return d.values['City'] || ''
-          case 'Country':
-            return d.values['Country'] || ''
-          case 'Next Follow-up Date':
-            return d.values['Next Follow-up Date'] ? formatDateShort(d.values['Next Follow-up Date']) : ''
-          case 'Last Contact Date':
-            return converDayJsDate(d.updatedAt)
-          case 'Score':
-            return d.values['Score'] || 0
-          default:
-            return d.values[field] || '' // fallback
-        }
-      })
-    )
-
-    autoTable(doc, { head: [columns], body: rows })
-    doc.save('leads_export.pdf')
-
-    handlePdfClose()
-  }
+  
 
   const getUserListFn = async () => {
     try {

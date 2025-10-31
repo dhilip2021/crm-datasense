@@ -165,15 +165,11 @@ export default function LeadStatus() {
   }, [dataFilter])
 
   const fetchFilteredLeads = async que => {
-    // const query = new URLSearchParams(filters).toString()
-    // const res = await fetch(`/api/v1/admin/lead-form/dashboard-list?${que}`)
-    // const data = await res.json()
-    // console.log('Filtered Leads:', data)
+
 
      try {
       const res = await fetch(`/api/v1/admin/lead-form/dashboard-list?${que}`)
       const json = await res.json()
-      console.log('Filtered Leads:', json)
 
       if (json.success) {
         setStats(json.stats) 
@@ -211,7 +207,12 @@ export default function LeadStatus() {
       const res = await fetch(`/api/v1/admin/lead-form/dashboard-list?${query}`)
       const json = await res.json()
 
+
       if (json.success) {
+
+
+
+
         setStats(json.stats) // 👈 save stats
         setDataFilter(json.data)
       }
