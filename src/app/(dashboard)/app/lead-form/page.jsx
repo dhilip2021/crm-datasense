@@ -192,50 +192,46 @@ function LeadFormAppPage() {
   }
 
   // Handle blur
-  const handleBlur = (e, field) => {
-    if (field.type === 'Email') {
-      if (typeof value === 'string') {
-        // ❌ block leading space
-        if (/^\s/.test(value)) {
-          return `${field.label} cannot start with space`
-        }
-        // ❌ block ANY space in email
-        if (/\s/.test(value)) {
-          return 'Email cannot contain spaces'
-        }
+ const handleBlur = (e, field) => {
+  const value = values[field.id]; // ✅ define value at the top
 
-        value = value.trim()
+  if (field.type === 'Email') {
+    if (typeof value === 'string') {
+      // ❌ block leading space
+      if (/^\s/.test(value)) {
+        return `${field.label} cannot start with space`
+      }
+      // ❌ block ANY space in email
+      if (/\s/.test(value)) {
+        return 'Email cannot contain spaces'
       }
 
-      if (field.required && !value) return `${field.label} is required`
-      if (value && !isValidEmailPragmatic(value)) return 'Invalid email address'
+      // ✅ trim before validation
+      const trimmedValue = value.trim()
+
+      if (field.required && !trimmedValue)
+        return `${field.label} is required`
+
+      if (trimmedValue && !isValidEmailPragmatic(trimmedValue))
+        return 'Invalid email address'
+
       return ''
-    } else if (field.type === 'Phone') {
-      const valueForValidation = values[`${field.id}_number`]
-      const error = validateField(field, valueForValidation)
-      if (error) {
-        setErrors(prev => ({ ...prev, [field.id]: error }))
-      } else {
-        setErrors(prev => ({ ...prev, [field.id]: '' }))
-      }
-    } else if (field.type === 'Currency') {
-      const valueForValidation = values[field.id]
-      const error = validateField(field, valueForValidation)
-      if (error) {
-        setErrors(prev => ({ ...prev, [field.id]: error }))
-      } else {
-        setErrors(prev => ({ ...prev, [field.id]: '' }))
-      }
-    } else {
-      const valueForValidation = values[field.id]
-      const error = validateField(field, valueForValidation)
-      if (error) {
-        setErrors(prev => ({ ...prev, [field.id]: error }))
-      } else {
-        setErrors(prev => ({ ...prev, [field.id]: '' }))
-      }
     }
+  } else if (field.type === 'Phone') {
+    const valueForValidation = values[`${field.id}_number`]
+    const error = validateField(field, valueForValidation)
+    setErrors(prev => ({ ...prev, [field.id]: error || '' }))
+  } else if (field.type === 'Currency') {
+    const valueForValidation = values[field.id]
+    const error = validateField(field, valueForValidation)
+    setErrors(prev => ({ ...prev, [field.id]: error || '' }))
+  } else {
+    const valueForValidation = values[field.id]
+    const error = validateField(field, valueForValidation)
+    setErrors(prev => ({ ...prev, [field.id]: error || '' }))
   }
+}
+
 
   // ---- handleSubmit ----
   const handleSubmit = async () => {

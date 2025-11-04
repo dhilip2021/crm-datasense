@@ -62,19 +62,35 @@ const ConvertDealDialog = ({
 
   // 📅 Handle DatePicker change
   const handleDateChange = newValue => {
-    setDealData(prev => ({ ...prev, closingDate: dayjs(newValue)}))
+    setDealData(prev => ({ ...prev, closingDate: dayjs(newValue) }))
     setErrors(prev => ({ ...prev, closingDate: '' }))
   }
 
   // ⚙️ Validation logic
   const validateForm = () => {
     const newErrors = {}
+
     if (createDeal) {
       if (!dealData.dealName?.trim()) newErrors.dealName = 'Deal name is required.'
-      if (!dealData.closingDate) newErrors.closingDate = 'Closing date is required.'
+      if (!dealData.closingDate) {
+        newErrors.closingDate = 'Closing date is required.'
+      } else {
+        const today = new Date()
+        const closing = new Date(dealData.closingDate)
+
+        // 🧠 Clear the time part for accurate date-only comparison
+        today.setHours(0, 0, 0, 0)
+        closing.setHours(0, 0, 0, 0)
+
+        if (closing < today) {
+          newErrors.closingDate = 'Closing date cannot be in the past.'
+        }
+      }
+
       if (!dealData.stage?.trim()) newErrors.stage = 'Please select a stage.'
       if (dealData.amount !== '' && Number(dealData.amount) < 0) newErrors.amount = 'Amount cannot be negative.'
     }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -128,7 +144,7 @@ const ConvertDealDialog = ({
         {/* 💼 Create Deal Checkbox */}
         <FormControlLabel
           control={<Checkbox checked={createDeal} onChange={e => setCreateDeal(e.target.checked)} />}
-          label='Create a new Opportunity for this Account'
+          label='Create a new Opportunity for this Accountt'
           sx={{ mt: 1 }}
         />
 
@@ -149,7 +165,7 @@ const ConvertDealDialog = ({
                 Amount
               </Typography>
               <TextField
-              autoComplete='off'
+                autoComplete='off'
                 name='amount'
                 value={
                   dealData.amount
