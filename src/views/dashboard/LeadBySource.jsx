@@ -24,6 +24,7 @@ const LeadBySource = () => {
   const [opportunitySourceData, setOpportunitySourceData] = useState([])
   const [data, setData] = useState([])
   const [loader, setLoader] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [fetched, setFetched] = useState(true)
   const [sections, setSections] = useState([])
   const [leadSource, setLeadSource] = useState([])
@@ -102,6 +103,7 @@ const LeadBySource = () => {
         }
       )
       const json = await res.json()
+      setLoading(true)
       if (json?.success && json.data?.sections?.length > 0) {
         setSections(json.data.sections)
         const flattened = flattenFields(json.data.sections)
@@ -146,6 +148,9 @@ const LeadBySource = () => {
           return acc
         }, {})
 
+        console.log(leads,"<<< leads")
+        console.log(leadSource,"<<< leadSource")
+
         const updatedLeadsData = (leadSource.length > 0 ? leadSource : Object.keys(sourceCounts)).map(source => ({
           title: source,
           subtitle: `${source} Leads`,
@@ -160,6 +165,9 @@ const LeadBySource = () => {
                   ? '/images/social/cold_call.png'
                   : '/images/social/advertisement.png'
         }))
+
+        console.log(updatedLeadsData,"<<< updatedLeadsData")
+
         setLeadSourceData(updatedLeadsData)
       }
     } catch (err) {
@@ -213,10 +221,11 @@ const LeadBySource = () => {
   }
 
   useEffect(() => {
-    if (!fetched && sections) {
+    if (!fetched && sections && loading) {
       fetchData()
       fetchOpportunityData()
       setFetched(true)
+      // setLoading(false)
     }
   }, [filters])
 
