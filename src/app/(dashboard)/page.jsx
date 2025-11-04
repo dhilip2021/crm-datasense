@@ -56,13 +56,13 @@ const DashboardAnalytics = () => {
         <DashboardWidgets />
       </Grid>
 
-      <Grid item xs={12} md={6} lg={6}>
+      {/* <Grid item xs={12} md={6} lg={6}>
         <HighValueLeads />
       </Grid>
 
       <Grid item xs={12} md={12} lg={6}>
         <ConversionFunnel />
-      </Grid>
+      </Grid> */}
 
 
 
