@@ -187,21 +187,15 @@ export default function LeadWeekly() {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${getToken}`
     }
-
+    
     try {
-
       const res = await fetch(`/api/v1/admin/lead-form/list?${query}`, {
         method: 'GET',
         headers: header
       })
       const json = await res.json()
 
-    
-
       if (json.success) {
-
-        console.log(json.data,"<<< JSON dataaa")
-
         setData(json.data)
       }
     } catch (err) {
