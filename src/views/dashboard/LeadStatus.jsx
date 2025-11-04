@@ -70,9 +70,8 @@ export default function LeadStatus() {
     next_followup_date: ''
   })
 
-    const [sections, setSections] = useState([])
-    const [fieldConfig, setFieldConfig] = useState({})
-
+  const [sections, setSections] = useState([])
+  const [fieldConfig, setFieldConfig] = useState({})
 
   //  🔹 Flatten helper
   const flattenFields = sections => {
@@ -124,9 +123,6 @@ export default function LeadStatus() {
     }
   }
 
-
-
-
   const cardConfig = [
     { title: 'Total Leads', count: stats.totalLeads || 0, color: 'primary', icon: 'ri-calendar-todo-line' },
     { title: 'Hot Leads', count: stats.hotLeads || 0, color: 'error', icon: 'ri-fire-line' },
@@ -141,16 +137,12 @@ export default function LeadStatus() {
     { title: 'Closed Lost', count: stats.closedLostLeads || 0, color: 'error', icon: 'ri-close-circle-line' }
   ]
 
-
-
-      const uniqueSources = useMemo(() => {
-        if (fieldConfig && Array.isArray(fieldConfig['Lead Source'])) {
-          return [...fieldConfig['Lead Source']]
-        }
-        return [] // fallback empty array
-      }, [fieldConfig])
-
-
+  const uniqueSources = useMemo(() => {
+    if (fieldConfig && Array.isArray(fieldConfig['Lead Source'])) {
+      return [...fieldConfig['Lead Source']]
+    }
+    return [] // fallback empty array
+  }, [fieldConfig])
 
   const uniqueCities = useMemo(() => {
     return [...new Set(dataFilter.map(item => item.values['City']))].filter(Boolean)
@@ -165,14 +157,13 @@ export default function LeadStatus() {
   }, [dataFilter])
 
   const fetchFilteredLeads = async que => {
-
-
-     try {
+    try {
       const res = await fetch(`/api/v1/admin/lead-form/dashboard-list?${que}`)
       const json = await res.json()
 
       if (json.success) {
-        setStats(json.stats) 
+        console.log(json.data, '<<< SSSSSSSSSSSSSSSSS')
+        setStats(json.stats)
         // setDataFilter(json.data)
       }
     } catch (err) {
@@ -180,9 +171,6 @@ export default function LeadStatus() {
     } finally {
       setLoading(false)
     }
-
-
-
   }
 
   const fetchData = async () => {
@@ -207,12 +195,7 @@ export default function LeadStatus() {
       const res = await fetch(`/api/v1/admin/lead-form/dashboard-list?${query}`)
       const json = await res.json()
 
-
       if (json.success) {
-
-
-
-
         setStats(json.stats) // 👈 save stats
         setDataFilter(json.data)
       }
@@ -248,9 +231,8 @@ export default function LeadStatus() {
   }, [followUpDate])
 
   useEffect(() => {
-   console.log(uniqueSources,"<<< uniqueSources")
+    console.log(uniqueSources, '<<< uniqueSources')
   }, [uniqueSources])
-  
 
   // Quick Range
   useEffect(() => {
@@ -270,7 +252,7 @@ export default function LeadStatus() {
 
     if (allEmpty) {
       console.log('All fields are empty')
-       fetchData()
+      fetchData()
     } else {
       setLoading(true)
 
@@ -296,8 +278,6 @@ export default function LeadStatus() {
   useEffect(() => {
     fetchFormTemplate()
   }, [])
-  
-
 
   return (
     <>
@@ -316,37 +296,24 @@ export default function LeadStatus() {
           mb: 3
         }}
       >
-        {/* <FormControl size='small' sx={{ minWidth: 180 }}>
-          <InputLabel>Lead Source</InputLabel>
-          <Select value={leadSource} onChange={e => setLeadSource(e.target.value)}>
+        <Grid item xs={12} sm={2}>
+          <TextField
+            select
+            size='small'
+            fullWidth
+            label='Source'
+            value={filters.source}
+            onChange={e => setFilters({ ...filters, source: e.target.value })}
+            // onChange={e => setLeadSource(e.target.value)}
+          >
             <MenuItem value=''>All</MenuItem>
-            {uniqueSources.map(src => (
-              <MenuItem key={src} value={src}>
-                {src}
+            {uniqueSources.map(source => (
+              <MenuItem key={source} value={source}>
+                {source}
               </MenuItem>
             ))}
-          </Select>
-        </FormControl> */}
-
-
-         <Grid item xs={12} sm={2}>
-                      <TextField
-                        select
-                        size='small'
-                        fullWidth
-                        label='Source'
-                         value={filters.source}
-                        onChange={e => setFilters({ ...filters, source: e.target.value })}
-                        // onChange={e => setLeadSource(e.target.value)}
-                      >
-                        <MenuItem value=''>All</MenuItem>
-                        {uniqueSources.map(source => (
-                          <MenuItem key={source} value={source}>
-                            {source}
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                    </Grid>
+          </TextField>
+        </Grid>
 
         <FormControl size='small' sx={{ minWidth: 180 }}>
           <InputLabel>City</InputLabel>
@@ -400,38 +367,38 @@ export default function LeadStatus() {
         </FormControl>
       </Box>
 
-     <Grid container spacing={2} p={2}>
-  {loading
-    ? [...Array(11)].map((_, i) => (
-        <Grid item xs={12} sm={6} md={4} lg={2} key={i}>
-          <StatSkeleton />
-        </Grid>
-      ))
-    : cardConfig.map((item, index) => (
-        <Grid item xs={12} sm={6} md={4} lg={2} key={index}>
-          <StatCard>
-            <CardContent className='flex items-center gap-2'>
-              <CustomAvatar
-                variant='rounded'
-                color={item.color}
-                className='shadow-md'
-                sx={{ width: 40, height: 40, fontSize: 16 }}
-              >
-                <i className={item.icon}></i>
-              </CustomAvatar>
-              <Box>
-                <Typography variant='body2' sx={{ color: 'text.secondary' }}>
-                  {item.title}
-                </Typography>
-                <Typography variant='h6' sx={{ fontWeight: 600 }}>
-                  {item.count}
-                </Typography>
-              </Box>
-            </CardContent>
-          </StatCard>
-        </Grid>
-      ))}
-</Grid>
+      <Grid container spacing={2} p={2}>
+        {loading
+          ? [...Array(11)].map((_, i) => (
+              <Grid item xs={12} sm={6} md={4} lg={2} key={i}>
+                <StatSkeleton />
+              </Grid>
+            ))
+          : cardConfig.map((item, index) => (
+              <Grid item xs={12} sm={6} md={4} lg={2} key={index}>
+                <StatCard>
+                  <CardContent className='flex items-center gap-2'>
+                    <CustomAvatar
+                      variant='rounded'
+                      color={item.color}
+                      className='shadow-md'
+                      sx={{ width: 40, height: 40, fontSize: 16 }}
+                    >
+                      <i className={item.icon}></i>
+                    </CustomAvatar>
+                    <Box>
+                      <Typography variant='body2' sx={{ color: 'text.secondary' }}>
+                        {item.title}
+                      </Typography>
+                      <Typography variant='h6' sx={{ fontWeight: 600 }}>
+                        {item.count}
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </StatCard>
+              </Grid>
+            ))}
+      </Grid>
     </>
   )
 }
