@@ -266,7 +266,7 @@ const LeadBySource = () => {
         <Grid item xs={12} md={6} className='border-be md:border-be-0 md:border-ie'>
           <CardHeader
             title='Leads'
-            action={<Typography component={Link} className='font-medium' color='primary'>View All</Typography>}
+            // action={<Typography component={Link} className='font-medium' color='primary'>View All</Typography>}
           />
           <CardContent className='flex flex-col gap-5'>
             {loader
@@ -294,7 +294,7 @@ const LeadBySource = () => {
         <Grid item xs={12} md={6}>
           <CardHeader
             title='Opportunity'
-            action={<Typography component={Link} className='font-medium' color='primary'>View All</Typography>}
+            // action={<Typography component={Link} className='font-medium' color='primary'>View All</Typography>}
           />
           <CardContent className='flex flex-col gap-5'>
             {loader
