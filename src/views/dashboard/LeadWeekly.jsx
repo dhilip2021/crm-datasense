@@ -215,20 +215,7 @@ export default function LeadWeekly() {
 
 
 
-    const getUserListFn = async userId => {
-    const header = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getToken}`
-    }
-    try {
-      const results = await getUserListApi(userId, header)
-      if (results?.payloadJson[0]?.n_status === 0) {
-        removeCredentials()
-      }
-    } catch (err) {
-      console.log(err)
-    }
-  }
+
 
 
 
@@ -245,11 +232,7 @@ export default function LeadWeekly() {
   }, [])
 
 
-  useEffect(() => {
-    if (user_id !== undefined) {
-      getUserListFn(user_id)
-    }
-  }, [user_id])
+
 
 
 

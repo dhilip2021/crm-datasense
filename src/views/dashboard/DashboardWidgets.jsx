@@ -1,6 +1,18 @@
 'use client'
 
-import { Grid, Card, CardContent, Typography, Box, Avatar, LinearProgress, Button, Menu, MenuItem, Skeleton } from '@mui/material'
+import {
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  Avatar,
+  LinearProgress,
+  Button,
+  Menu,
+  MenuItem,
+  Skeleton
+} from '@mui/material'
 import PeopleIcon from '@mui/icons-material/People'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import EventAvailableIcon from '@mui/icons-material/EventAvailable'
@@ -49,19 +61,10 @@ export default function DashboardWidgets() {
 
   const followUpsToday = useMemo(() => {
     const today = dayjs().format('YYYY-MM-DD')
-
-console.log(today,"<<< today")
-
     return data.filter(lead => {
       const followDate = lead.values?.['Next Follow-up Date']
-
-      console.log(followDate,"<<< followDate")
-
-
       return followDate && dayjs(followDate).isSame(today, 'day')
     }).length
-
-
   }, [data])
 
   const [filters, setFilters] = useState({
@@ -259,13 +262,7 @@ console.log(today,"<<< today")
     return Number(avg.toFixed(2)) // round to 2 decimals
   }, [data])
 
-
-
-
-    useEffect(() => {
-      console.log(fetched,"<<< fetched")
-      console.log(sections,"<<< sections")
-
+  useEffect(() => {
     if (!fetched && sections) {
       fetchData()
       setFetched(true)
@@ -278,7 +275,6 @@ console.log(today,"<<< today")
     }
   }, [user_id])
 
-  
   useEffect(() => {
     fetchFormTemplate()
     setFetched(false)
@@ -291,180 +287,176 @@ console.log(today,"<<< today")
   }, [viewType])
 
   return (
-  <>
-    <Box display='flex' justifyContent='flex-end'>
-      <Button
-        variant='outlined'
-        size='small'
-        endIcon={<KeyboardArrowDownIcon />}
-        onClick={handleViewClick}
-      >
-        {viewType}
-      </Button>
+    <>
+      <Box display='flex' justifyContent='flex-end'>
+        <Button variant='outlined' size='small' endIcon={<KeyboardArrowDownIcon />} onClick={handleViewClick}>
+          {viewType}
+        </Button>
 
-      <Menu anchorEl={anchorViewEl} open={view} onClose={handleViewClose}>
-        <MenuItem
-          onClick={() => {
-            setViewType('This Week')
-            handleViewClose()
-          }}
-        >
-          This Week
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setViewType('This Month')
-            handleViewClose()
-          }}
-        >
-          This Month
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setViewType('Last Month')
-            handleViewClose()
-          }}
-        >
-          Last Month
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setViewType('Last 6 Months')
-            handleViewClose()
-          }}
-        >
-          Last 6 Months
-        </MenuItem>
-      </Menu>
-    </Box>
+        <Menu anchorEl={anchorViewEl} open={view} onClose={handleViewClose}>
+          <MenuItem
+            onClick={() => {
+              setViewType('Today')
+              handleViewClose()
+            }}
+          >
+            Today
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setViewType('This Week')
+              handleViewClose()
+            }}
+          >
+            This Week
+          </MenuItem>
 
-    {/* 🧠 Loader State */}
-    {loader ? (
-      <Grid container spacing={2} sx={{ mt: 1 }}>
-        {[1, 2, 3].map(i => (
-          <Grid item xs={12} md={4} key={i}>
-            <Card sx={{ height: '100%' }}>
+          <MenuItem
+            onClick={() => {
+              setViewType('This Month')
+              handleViewClose()
+            }}
+          >
+            This Month
+          </MenuItem>
+
+          <MenuItem
+            onClick={() => {
+              setViewType('Last Month')
+              handleViewClose()
+            }}
+          >
+            Last Month
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setViewType('Last 6 Months')
+              handleViewClose()
+            }}
+          >
+            Last 6 Months
+          </MenuItem>
+        </Menu>
+      </Box>
+
+      {/* 🧠 Loader State */}
+      {loader ? (
+        <Grid container spacing={2} sx={{ mt: 1 }}>
+          {[1, 2, 3].map(i => (
+            <Grid item xs={12} md={4} key={i}>
+              <Card sx={{ height: '100%' }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <Skeleton variant='circular' width={40} height={40} sx={{ mr: 2 }} />
+                    <Skeleton variant='text' width='60%' height={30} />
+                  </Box>
+
+                  <Skeleton variant='text' width='80%' height={20} sx={{ mb: 1 }} />
+                  <Skeleton variant='rectangular' width='100%' height={80} sx={{ borderRadius: 2 }} />
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      ) : (
+        <Grid container spacing={2} sx={{ mt: 1 }}>
+          {/* Assigned vs Unassigned */}
+          <Grid item xs={12} md={4}>
+            <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => router('/leads/assignment')}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Skeleton variant='circular' width={40} height={40} sx={{ mr: 2 }} />
-                  <Skeleton variant='text' width='60%' height={30} />
+                  <Avatar sx={{ bgcolor: 'primary.main', mr: 2 }}>
+                    <PeopleIcon />
+                  </Avatar>
+                  <Typography variant='h6' fontWeight='bold'>
+                    Assigned vs Unassigned
+                  </Typography>
                 </Box>
-
-                <Skeleton variant='text' width='80%' height={20} sx={{ mb: 1 }} />
-                <Skeleton variant='rectangular' width='100%' height={80} sx={{ borderRadius: 2 }} />
+                <Typography variant='body2' color='text.secondary' gutterBottom>
+                  Shows if auto-assignment is working
+                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                  <Typography variant='h5' color='success.main'>
+                    {assignedLeads} Assigned
+                  </Typography>
+                  <Typography variant='h5' color='error.main'>
+                    {unassignedLeads} Unassignedd
+                  </Typography>
+                </Box>
               </CardContent>
             </Card>
           </Grid>
-        ))}
-      </Grid>
-    ) : (
-      <Grid container spacing={2} sx={{ mt: 1 }}>
-        {/* Assigned vs Unassigned */}
-        <Grid item xs={12} md={4}>
-          <Card
-            sx={{ height: '100%', cursor: 'pointer' }}
-            onClick={() => router('/leads/assignment')}
-          >
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Avatar sx={{ bgcolor: 'primary.main', mr: 2 }}>
-                  <PeopleIcon />
-                </Avatar>
-                <Typography variant='h6' fontWeight='bold'>
-                  Assigned vs Unassigned
+
+          {/* Response Time Tracker */}
+          <Grid item xs={12} md={4}>
+            <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => router.push('/leads/response-time')}>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Avatar sx={{ bgcolor: 'secondary.main', mr: 2 }}>
+                    <AccessTimeIcon />
+                  </Avatar>
+                  <Typography variant='h6' fontWeight='bold'>
+                    Response Time Tracker ({viewType})
+                  </Typography>
+                </Box>
+
+                <Typography variant='body2' color='text.secondary' gutterBottom>
+                  Avg time taken to respond to new leads
                 </Typography>
-              </Box>
-              <Typography variant='body2' color='text.secondary' gutterBottom>
-                Shows if auto-assignment is working
-              </Typography>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-                <Typography variant='h5' color='success.main'>
-                  {assignedLeads} Assigned
+
+                <Typography variant='h4' fontWeight='bold' sx={{ mb: 1 }}>
+                  {avgHours} hrs
                 </Typography>
-                <Typography variant='h5' color='error.main'>
-                  {unassignedLeads} Unassigned
+
+                <LinearProgress
+                  variant='determinate'
+                  value={Math.min((avgHours / targetHours) * 100, 100)}
+                  sx={{
+                    height: 8,
+                    borderRadius: 5,
+                    '& .MuiLinearProgress-bar': {
+                      backgroundColor: avgHours <= targetHours ? 'success.main' : 'error.main'
+                    }
+                  }}
+                />
+
+                <Typography variant='caption' color='text.secondary'>
+                  Target: {targetHours} hours
                 </Typography>
-              </Box>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Follow-ups Due Today */}
+          <Grid item xs={12} md={4}>
+            <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => router('/leads/follow-ups')}>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Avatar sx={{ bgcolor: 'info.main', mr: 2 }}>
+                    <EventAvailableIcon />
+                  </Avatar>
+                  <Typography variant='h6' fontWeight='bold'>
+                    Follow-ups Due Today
+                  </Typography>
+                </Box>
+                <Typography variant='body2' color='text.secondary' gutterBottom>
+                  Number of leads needing action/follow-up today
+                </Typography>
+                <Typography
+                  variant='h2'
+                  fontWeight='bold'
+                  sx={{ color: followUpsToday > 0 ? 'error.main' : 'success.main' }}
+                >
+                  {followUpsToday}
+                </Typography>
+                <Typography variant='body2' sx={{ color: followUpsToday > 0 ? 'error.main' : 'success.main' }}>
+                  {followUpsToday > 0 ? 'Action Required' : 'All Caught Up'}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
-
-        {/* Response Time Tracker */}
-        <Grid item xs={12} md={4}>
-          <Card
-            sx={{ height: '100%', cursor: 'pointer' }}
-            onClick={() => router.push('/leads/response-time')}
-          >
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Avatar sx={{ bgcolor: 'secondary.main', mr: 2 }}>
-                  <AccessTimeIcon />
-                </Avatar>
-                <Typography variant='h6' fontWeight='bold'>
-                  Response Time Tracker ({viewType})
-                </Typography>
-              </Box>
-
-              <Typography variant='body2' color='text.secondary' gutterBottom>
-                Avg time taken to respond to new leads
-              </Typography>
-
-              <Typography variant='h4' fontWeight='bold' sx={{ mb: 1 }}>
-                {avgHours} hrs
-              </Typography>
-
-              <LinearProgress
-                variant='determinate'
-                value={Math.min((avgHours / targetHours) * 100, 100)}
-                sx={{
-                  height: 8,
-                  borderRadius: 5,
-                  '& .MuiLinearProgress-bar': {
-                    backgroundColor: avgHours <= targetHours ? 'success.main' : 'error.main'
-                  }
-                }}
-              />
-
-              <Typography variant='caption' color='text.secondary'>
-                Target: {targetHours} hours
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Follow-ups Due Today */}
-        <Grid item xs={12} md={4}>
-          <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => router('/leads/follow-ups')}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Avatar sx={{ bgcolor: 'info.main', mr: 2 }}>
-                  <EventAvailableIcon />
-                </Avatar>
-                <Typography variant='h6' fontWeight='bold'>
-                  Follow-ups Due Today
-                </Typography>
-              </Box>
-              <Typography variant='body2' color='text.secondary' gutterBottom>
-                Number of leads needing action/follow-up today
-              </Typography>
-              <Typography
-                variant='h2'
-                fontWeight='bold'
-                sx={{ color: followUpsToday > 0 ? 'error.main' : 'success.main' }}
-              >
-                {followUpsToday}
-              </Typography>
-              <Typography
-                variant='body2'
-                sx={{ color: followUpsToday > 0 ? 'error.main' : 'success.main' }}
-              >
-                {followUpsToday > 0 ? 'Action Required' : 'All Caught Up'}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-    )}
-  </>
-)
+      )}
+    </>
+  )
 }
