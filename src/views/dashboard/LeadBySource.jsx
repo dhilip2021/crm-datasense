@@ -39,7 +39,7 @@ const LeadBySource = () => {
     sections.forEach(section => {
       const fieldsObj = section.fields || {}
       Object.values(fieldsObj).forEach(fieldGroup => {
-        (fieldGroup || []).forEach(field => {
+        ;(fieldGroup || []).forEach(field => {
           flat.push({
             sectionName: section.title || section.sectionName || '',
             ...field
@@ -104,13 +104,34 @@ const LeadBySource = () => {
   const fetchData = async () => {
     setLoading(true)
     const form_name = 'lead-form'
+
+    const query = new URLSearchParams({
+      organization_id,
+      form_name,
+      ...(filters.search && { search: filters.search }),
+      ...(filters.status && { status: filters.status }),
+      ...(filters.touch && { touch: filters.touch }),
+      ...(filters.source && { source: filters.source }),
+      ...(filters.region && { region: filters.region }),
+      ...(filters.assign && { assign: filters.assign }),
+      ...(filters.rep && { rep: filters.rep }),
+      ...(filters.value && { value: filters.value }),
+      ...(filters.fromDate && { from: dayjs(filters.fromDate).format('YYYY-MM-DD') }),
+      ...(filters.toDate && { to: dayjs(filters.toDate).format('YYYY-MM-DD') }),
+      ...(filters.fromFollowDate && { from: dayjs(filters.fromFollowDate).format('YYYY-MM-DD') }),
+      ...(filters.toFollowDate && { to: dayjs(filters.toFollowDate).format('YYYY-MM-DD') })
+    })
+
+    const header = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken}`
+    }
     try {
-      const res = await fetch(
-        `/api/v1/admin/lead-form/list?organization_id=${organization_id}&form_name=${form_name}`,
-        {
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken}` }
-        }
-      )
+      const res = await fetch(`/api/v1/admin/lead-form/list?${query}`, {
+        method: 'GET',
+        headers: header
+      })
+
       const json = await res.json()
       if (json.success) {
         const leads = json.data || []
@@ -150,13 +171,34 @@ const LeadBySource = () => {
   const fetchOpportunityData = async () => {
     setLoading(true)
     const form_name = 'opportunity-form'
+
+    const query = new URLSearchParams({
+      organization_id,
+      form_name,
+      ...(filters.search && { search: filters.search }),
+      ...(filters.status && { status: filters.status }),
+      ...(filters.touch && { touch: filters.touch }),
+      ...(filters.source && { source: filters.source }),
+      ...(filters.region && { region: filters.region }),
+      ...(filters.assign && { assign: filters.assign }),
+      ...(filters.rep && { rep: filters.rep }),
+      ...(filters.value && { value: filters.value }),
+      ...(filters.fromDate && { from: dayjs(filters.fromDate).format('YYYY-MM-DD') }),
+      ...(filters.toDate && { to: dayjs(filters.toDate).format('YYYY-MM-DD') }),
+      ...(filters.fromFollowDate && { from: dayjs(filters.fromFollowDate).format('YYYY-MM-DD') }),
+      ...(filters.toFollowDate && { to: dayjs(filters.toFollowDate).format('YYYY-MM-DD') })
+    })
+
+    const header = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken}`
+    }
+
     try {
-      const res = await fetch(
-        `/api/v1/admin/lead-form/list?organization_id=${organization_id}&form_name=${form_name}`,
-        {
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken}` }
-        }
-      )
+      const res = await fetch(`/api/v1/admin/lead-form/list?${query}`, {
+        method: 'GET',
+        headers: header
+      })
       const json = await res.json()
       if (json.success) {
         const leads = json.data || []
@@ -230,7 +272,13 @@ const LeadBySource = () => {
         </Button>
         <Menu anchorEl={anchorViewEl} open={view} onClose={handleViewClose}>
           {['Today', 'This Week', 'This Month', 'Last Month', 'Last 6 Months'].map(opt => (
-            <MenuItem key={opt} onClick={() => { setViewType(opt); handleViewClose() }}>
+            <MenuItem
+              key={opt}
+              onClick={() => {
+                setViewType(opt)
+                handleViewClose()
+              }}
+            >
               {opt}
             </MenuItem>
           ))}
@@ -242,26 +290,28 @@ const LeadBySource = () => {
         <Grid item xs={12} md={6} className='border-be md:border-be-0 md:border-ie'>
           <CardHeader title='Leads' />
           <CardContent className='flex flex-col gap-5'>
-            {loading
-              ? renderSkeletons(5)
-              : leadSourceData.length > 0
-                ? leadSourceData.map((item, index) => (
-                    <div key={index} className='flex items-center gap-4'>
-                      <img src={item.logo} alt={item.title} width={30} />
-                      <div className='flex justify-between items-center is-full flex-wrap gap-x-4 gap-y-2'>
-                        <div className='flex flex-col gap-0.5'>
-                          <Typography color='text.primary' className='font-medium'>
-                            {item.title}
-                          </Typography>
-                          <Typography>{item.subtitle}</Typography>
-                        </div>
-                        <Typography color='success.main' className='font-medium'>
-                          {item.leads}
-                        </Typography>
-                      </div>
+            {loading ? (
+              renderSkeletons(5)
+            ) : leadSourceData.length > 0 ? (
+              leadSourceData.map((item, index) => (
+                <div key={index} className='flex items-center gap-4'>
+                  <img src={item.logo} alt={item.title} width={30} />
+                  <div className='flex justify-between items-center is-full flex-wrap gap-x-4 gap-y-2'>
+                    <div className='flex flex-col gap-0.5'>
+                      <Typography color='text.primary' className='font-medium'>
+                        {item.title}
+                      </Typography>
+                      <Typography>{item.subtitle}</Typography>
                     </div>
-                  ))
-                : <Typography color='text.secondary'>No lead data available.</Typography>}
+                    <Typography color='success.main' className='font-medium'>
+                      {item.leads}
+                    </Typography>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <Typography color='text.secondary'>No lead data available.</Typography>
+            )}
           </CardContent>
         </Grid>
 
@@ -269,26 +319,28 @@ const LeadBySource = () => {
         <Grid item xs={12} md={6}>
           <CardHeader title='Opportunity' />
           <CardContent className='flex flex-col gap-5'>
-            {loading
-              ? renderSkeletons(5)
-              : opportunitySourceData.length > 0
-                ? opportunitySourceData.map((item, index) => (
-                    <div key={index} className='flex items-center gap-4'>
-                      <img src={item.logo} alt={item.title} width={30} />
-                      <div className='flex justify-between items-center is-full flex-wrap gap-x-4 gap-y-2'>
-                        <div className='flex flex-col gap-0.5'>
-                          <Typography color='text.primary' className='font-medium'>
-                            {item.title}
-                          </Typography>
-                          <Typography>{item.subtitle}</Typography>
-                        </div>
-                        <Typography color='error.main' className='font-medium'>
-                          {item.leads}
-                        </Typography>
-                      </div>
+            {loading ? (
+              renderSkeletons(5)
+            ) : opportunitySourceData.length > 0 ? (
+              opportunitySourceData.map((item, index) => (
+                <div key={index} className='flex items-center gap-4'>
+                  <img src={item.logo} alt={item.title} width={30} />
+                  <div className='flex justify-between items-center is-full flex-wrap gap-x-4 gap-y-2'>
+                    <div className='flex flex-col gap-0.5'>
+                      <Typography color='text.primary' className='font-medium'>
+                        {item.title}
+                      </Typography>
+                      <Typography>{item.subtitle}</Typography>
                     </div>
-                  ))
-                : <Typography color='text.secondary'>No opportunity data available.</Typography>}
+                    <Typography color='error.main' className='font-medium'>
+                      {item.leads}
+                    </Typography>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <Typography color='text.secondary'>No opportunity data available.</Typography>
+            )}
           </CardContent>
         </Grid>
       </Grid>
