@@ -13,19 +13,20 @@ export async function GET(req) {
     const search = searchParams.get('search')?.trim() || ''
     const status = searchParams.get('status')?.trim() || ''
     const source = searchParams.get('source')?.trim() || ''
-    const page = Math.max(parseInt(searchParams.get('page') || '1', 10), 1)
-    const limit = Math.max(parseInt(searchParams.get('limit') || '10', 10), 1)
-    const from = searchParams.get('from') // YYYY-MM-DD
-    const to = searchParams.get('to') // YYYY-MM-DD
+    const from = searchParams.get('from')
+    const to = searchParams.get('to')
 
     if (!organization_id || !form_name) {
-      return NextResponse.json({ success: false, message: 'Missing organization_id or form_name' }, { status: 400 })
+      return NextResponse.json(
+        { success: false, message: 'Missing organization_id or form_name' },
+        { status: 400 }
+      )
     }
 
-    // Base query
+    // 🔹 Base query
     const query = { organization_id, form_name }
 
-    // Search by multiple fields
+    // 🔹 Search filter (multiple fields)
     if (search) {
       query.$or = [
         { lead_id: { $regex: search, $options: 'i' } },
@@ -39,19 +40,18 @@ export async function GET(req) {
       ]
     }
 
+    // 🔹 Filters
     if (status) query['values.Lead Status'] = { $regex: status, $options: 'i' }
     if (source) query['values.Lead Source'] = { $regex: source, $options: 'i' }
 
-    // Date range filter
+    // 🔹 Date Range Filter
     if (from || to) {
       query.submittedAt = {}
       if (from) query.submittedAt.$gte = new Date(from)
       if (to) query.submittedAt.$lte = new Date(to + 'T23:59:59')
     }
 
-    const skip = (page - 1) * limit
-
-    // Aggregate stats
+    // 🔹 Stats aggregation
     const statsPipeline = [
       { $match: query },
       {
@@ -61,29 +61,82 @@ export async function GET(req) {
           hotLeads: { $sum: { $cond: [{ $eq: ['$values.Label', 'Hot Lead'] }, 1, 0] } },
           warmLeads: { $sum: { $cond: [{ $eq: ['$values.Label', 'Warm Lead'] }, 1, 0] } },
           coldLeads: { $sum: { $cond: [{ $eq: ['$values.Label', 'Cold Lead'] }, 1, 0] } },
-          newLeads: { $sum: { $cond: [{ $regexMatch: { input: '$values.Lead Status', regex: 'New', options: 'i' } }, 1, 0] } },
-          contactedLeads: { $sum: { $cond: [{ $regexMatch: { input: '$values.Lead Status', regex: 'Contacted', options: 'i' } }, 1, 0] } },
-          qualifiedLeads: { $sum: { $cond: [{ $regexMatch: { input: '$values.Lead Status', regex: 'Qualified', options: 'i' } }, 1, 0] } },
-          proposalsentLeads: { $sum: { $cond: [{ $regexMatch: { input: '$values.Lead Status', regex: 'Proposal Sent', options: 'i' } }, 1, 0] } },
-          negotiationLeads: { $sum: { $cond: [{ $regexMatch: { input: '$values.Lead Status', regex: 'Negotiation', options: 'i' } }, 1, 0] } },
-          closedWonLeads: { $sum: { $cond: [{ $regexMatch: { input: '$values.Lead Status', regex: 'Closed Won', options: 'i' } }, 1, 0] } },
-          closedLostLeads: { $sum: { $cond: [{ $regexMatch: { input: '$values.Lead Status', regex: 'Closed Lost', options: 'i' } }, 1, 0] } },
-        },
-      },
+          newLeads: {
+            $sum: {
+              $cond: [
+                { $regexMatch: { input: '$values.Lead Status', regex: 'New', options: 'i' } },
+                1,
+                0
+              ]
+            }
+          },
+          contactedLeads: {
+            $sum: {
+              $cond: [
+                { $regexMatch: { input: '$values.Lead Status', regex: 'Contacted', options: 'i' } },
+                1,
+                0
+              ]
+            }
+          },
+          qualifiedLeads: {
+            $sum: {
+              $cond: [
+                { $regexMatch: { input: '$values.Lead Status', regex: 'Qualified', options: 'i' } },
+                1,
+                0
+              ]
+            }
+          },
+          proposalsentLeads: {
+            $sum: {
+              $cond: [
+                { $regexMatch: { input: '$values.Lead Status', regex: 'Proposal Sent', options: 'i' } },
+                1,
+                0
+              ]
+            }
+          },
+          negotiationLeads: {
+            $sum: {
+              $cond: [
+                { $regexMatch: { input: '$values.Lead Status', regex: 'Negotiation', options: 'i' } },
+                1,
+                0
+              ]
+            }
+          },
+          closedWonLeads: {
+            $sum: {
+              $cond: [
+                { $regexMatch: { input: '$values.Lead Status', regex: 'Closed Won', options: 'i' } },
+                1,
+                0
+              ]
+            }
+          },
+          closedLostLeads: {
+            $sum: {
+              $cond: [
+                { $regexMatch: { input: '$values.Lead Status', regex: 'Closed Lost', options: 'i' } },
+                1,
+                0
+              ]
+            }
+          }
+        }
+      }
     ]
 
-    const [data, total, statsResult] = await Promise.all([
-      Leadform.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).select('-__v').lean(),
-      Leadform.countDocuments(query),
+    // 🔹 Fetch data & stats in parallel (no pagination)
+    const [data, statsResult] = await Promise.all([
+      Leadform.find(query).sort({ createdAt: -1 }).lean(),
       Leadform.aggregate(statsPipeline)
     ])
 
     return NextResponse.json({
       success: true,
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
+      total: data.length,
       stats: statsResult[0] || {
         totalLeads: 0,
         hotLeads: 0,
@@ -95,11 +148,10 @@ export async function GET(req) {
         proposalsentLeads: 0,
         negotiationLeads: 0,
         closedWonLeads: 0,
-        closedLostLeads: 0,
+        closedLostLeads: 0
       },
       data
     })
-
   } catch (error) {
     console.error('⨯ Lead form list error:', error)
     return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })

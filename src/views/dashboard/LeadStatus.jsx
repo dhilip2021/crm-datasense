@@ -11,12 +11,9 @@ import {
   FormControl,
   InputLabel,
   Box,
-  Button,
-  Menu,
   Skeleton,
   useTheme,
   Fade,
-  Divider,
   TextField
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
@@ -24,10 +21,9 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs from 'dayjs'
 import CustomAvatar from '@core/components/mui/Avatar'
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import Cookies from 'js-cookie'
 
-// 🔹 Card Style — Elevated Gradient Look
+// 🔹 Stat Card Style
 const StatCard = styled(Card)(({ theme }) => ({
   borderRadius: 16,
   background: 'linear-gradient(145deg, #ffffff, #f9f9f9)',
@@ -52,16 +48,10 @@ const StatSkeleton = () => (
   </StatCard>
 )
 
-const quickRanges = [
-  { label: 'Today', days: 0 },
-  { label: 'Last 7 Days', days: 7 },
-  { label: 'Last 30 Days', days: 30 },
-  { label: 'Last 60 Days', days: 60 }
-]
-
 export default function LeadStatus() {
   const theme = useTheme()
   const organization_id = Cookies.get('organization_id')
+
   const [filters, setFilters] = useState({
     source: '',
     city: '',
@@ -71,98 +61,28 @@ export default function LeadStatus() {
     toDate: null
   })
   const [viewType, setViewType] = useState('This Month')
-  const [anchorViewEl, setAnchorViewEl] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [quickRange, setQuickRange] = useState(null)
   const [stats, setStats] = useState({})
   const [dataFilter, setDataFilter] = useState([])
   const [fieldConfig, setFieldConfig] = useState({})
   const [sections, setSections] = useState([])
 
-  const view = Boolean(anchorViewEl)
-  const handleViewClick = event => setAnchorViewEl(event.currentTarget)
-  const handleViewClose = () => setAnchorViewEl(null)
-
-  const getDateRange = viewType => {
+  // 🔹 Date Range Logic
+  const getDateRange = type => {
     const today = dayjs()
-
-    if (viewType === 'Today') return { fromDate: today.format('YYYY-MM-DD'), toDate: today.format('YYYY-MM-DD') }
-
-    if (viewType === 'This Week') {
-      const startOfWeek = today.startOf('week').add(1, 'day')
-      return { fromDate: startOfWeek.format('YYYY-MM-DD'), toDate: today.format('YYYY-MM-DD') }
-    }
-
-    if (viewType === 'This Month')
-      return { fromDate: today.startOf('month').format('YYYY-MM-DD'), toDate: today.format('YYYY-MM-DD') }
-
-    if (viewType === 'Last Month') {
-      const start = today.subtract(1, 'month').startOf('month')
-      const end = today.subtract(1, 'month').endOf('month')
-      return { fromDate: start.format('YYYY-MM-DD'), toDate: end.format('YYYY-MM-DD') }
-    }
-
-    if (viewType === 'Last 6 Months')
+    if (type === 'Today') return { fromDate: today, toDate: today }
+    if (type === 'This Week') return { fromDate: today.startOf('week').add(1, 'day'), toDate: today }
+    if (type === 'This Month') return { fromDate: today.startOf('month'), toDate: today }
+    if (type === 'Last Month')
       return {
-        fromDate: today.subtract(6, 'month').startOf('month').format('YYYY-MM-DD'),
-        toDate: today.format('YYYY-MM-DD')
+        fromDate: today.subtract(1, 'month').startOf('month'),
+        toDate: today.subtract(1, 'month').endOf('month')
       }
-
-    return { fromDate: today.subtract(7, 'day').format('YYYY-MM-DD'), toDate: today.format('YYYY-MM-DD') }
+    if (type === 'Last 6 Months') return { fromDate: today.subtract(6, 'month').startOf('month'), toDate: today }
+    return { fromDate: today.subtract(7, 'day'), toDate: today }
   }
 
-  // 🔹 Card Config
-  const cardConfig = [
-    { title: 'Total Leads', count: stats.totalLeads || 0, color: 'primary', icon: 'ri-calendar-todo-line' },
-    { title: 'Hot Leads', count: stats.hotLeads || 0, color: 'error', icon: 'ri-fire-line' },
-    { title: 'Warm Leads', count: stats.warmLeads || 0, color: 'warning', icon: 'ri-sun-line' },
-    { title: 'Cold Leads', count: stats.coldLeads || 0, color: 'info', icon: 'ri-snowflake-line' },
-    { title: 'New', count: stats.newLeads || 0, color: 'primary', icon: 'ri-add-line' },
-    { title: 'Contacted', count: stats.contactedLeads || 0, color: 'info', icon: 'ri-phone-line' },
-    { title: 'Qualified', count: stats.qualifiedLeads || 0, color: 'success', icon: 'ri-check-double-line' },
-    { title: 'Proposal Sent', count: stats.proposalsentLeads || 0, color: 'success', icon: 'ri-send-plane-line' },
-    { title: 'Negotiation', count: stats.negotiationLeads || 0, color: 'warning', icon: 'ri-exchange-dollar-line' },
-    { title: 'Closed Won', count: stats.closedWonLeads || 0, color: 'success', icon: 'ri-checkbox-circle-line' },
-    { title: 'Closed Lost', count: stats.closedLostLeads || 0, color: 'error', icon: 'ri-close-circle-line' }
-  ]
-
-  const flattenFields = sections => {
-    const flat = []
-    sections.forEach(section => {
-      Object.values(section.fields).forEach(fieldGroup => {
-        fieldGroup.forEach(field => {
-          flat.push({
-            sectionName: section.title || section.sectionName || '',
-            ...field
-          })
-        })
-      })
-    })
-    return flat
-  }
-
-  const fetchFormTemplate = async () => {
-    try {
-      const res = await fetch(
-        `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=lead-form`
-      )
-      const json = await res.json()
-      if (json?.success && json.data?.sections?.length > 0) {
-        setSections(json.data.sections)
-        const flattened = flattenFields(json.data.sections)
-        const config = {}
-        flattened.forEach(field => {
-          if (field.type === 'Dropdown' && field.options?.length > 0) {
-            config[field.label] = field.options
-          }
-        })
-        setFieldConfig(config)
-      }
-    } catch (err) {
-      console.error('fetchFormTemplate error:', err)
-    }
-  }
-
+  // 🔹 Fetch Data
   const fetchData = async () => {
     setLoading(true)
     const query = new URLSearchParams({
@@ -179,6 +99,8 @@ export default function LeadStatus() {
       const res = await fetch(`/api/v1/admin/lead-form/dashboard-list?${query}`)
       const json = await res.json()
       if (json.success) {
+
+
         setStats(json.stats)
         setDataFilter(json.data)
       }
@@ -189,48 +111,182 @@ export default function LeadStatus() {
     }
   }
 
+  // 🔹 Flatten Fields Safely
+  const flattenFields = sections => {
+    const flat = []
+    sections.forEach(section => {
+      if (!section.fields) return
+      Object.values(section.fields || {}).forEach(fieldGroup => {
+        if (!Array.isArray(fieldGroup)) return
+        fieldGroup.forEach(field => flat.push({ sectionName: section.title || '', ...field }))
+      })
+    })
+    return flat
+  }
+
+  // 🔹 Fetch Form Template
+  const fetchFormTemplate = async () => {
+    try {
+      const res = await fetch(
+        `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=lead-form`
+      )
+      const json = await res.json()
+      if (json.success && json.data?.sections?.length) {
+        setSections(json.data.sections)
+        const flat = flattenFields(json.data.sections)
+        const config = {}
+        flat.forEach(f => {
+          if (f.type === 'Dropdown' && f.options?.length) config[f.label] = f.options
+        })
+
+        console.log(config,"<<< CONFIGGGG")
+        setFieldConfig(config)
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  // 🔹 Initialize
+  useEffect(() => {
+    fetchFormTemplate()
+    const { fromDate, toDate } = getDateRange('This Month')
+    setFilters(prev => ({ ...prev, fromDate, toDate }))
+  }, [])
+
+  useEffect(() => {
+    if (filters.fromDate && filters.toDate) fetchData()
+  }, [filters])
+
   useEffect(() => {
     const { fromDate, toDate } = getDateRange(viewType)
     setFilters(prev => ({ ...prev, fromDate, toDate }))
   }, [viewType])
 
-  useEffect(() => {
-    if (quickRange) {
-      setFilters(prev => ({
-        ...prev,
-        fromDate: dayjs().subtract(quickRange.days, 'day'),
-        toDate: dayjs()
-      }))
+  // 🔹 Lead Status Counts
+  const leadStatusCounts = useMemo(() => {
+    const counts = {}
+    const allStatuses = fieldConfig['Lead Status'] || []
+    allStatuses.forEach(status => {
+      counts[status] = dataFilter.filter(l => l.values && l.values['Lead Status'] === status).length
+    })
+    return {
+      ...counts,
+      totalLeads: dataFilter.length,
+      hotLeads: counts['Hot'] || 0,
+      warmLeads: counts['Warm'] || 0,
+      coldLeads: counts['Cold'] || 0
     }
-  }, [quickRange])
+  }, [dataFilter, fieldConfig])
 
-  useEffect(() => {
-    fetchData()
-  }, [filters])
+  // 🔹 Lead Status Counts
+// const leadStatusCounts = useMemo(() => {
+//   const counts = {}
 
-  useEffect(() => {
-    fetchFormTemplate()
-  }, [])
+//   dataFilter.forEach(lead => {
+//     const label = lead.values?.Label || ''
 
-  const uniqueSources = useMemo(() => fieldConfig['Lead Source'] || [], [fieldConfig])
-  const uniqueCities = useMemo(
-    () => [...new Set(dataFilter.map(item => item.values['City']))].filter(Boolean),
-    [dataFilter]
-  )
+//         const status = fieldConfig['Lead Status'] || []
+//     status.forEach(status => {
+//       counts[status] = dataFilter.filter(l => l.values && l.values['Lead Status'] === status).length
+//     })
+
+//     // Hot/Warm/Cold based on Label
+//     if (label.includes('Hot')) counts['Hot'] = (counts['Hot'] || 0) + 1
+//     else if (label.includes('Warm')) counts['Warm'] = (counts['Warm'] || 0) + 1
+//     else if (label.includes('Cold')) counts['Cold'] = (counts['Cold'] || 0) + 1
+//     else {
+//       // For anything else, use Lead Status
+//       counts[status] = (counts[status] || 0) + 1
+//     }
+//   })
+
+//   return {
+//     ...counts,
+//     totalLeads: dataFilter.length,
+//     hotLeads: counts['Hot'] || 0,
+//     warmLeads: counts['Warm'] || 0,
+//     coldLeads: counts['Cold'] || 0
+//   }
+// }, [dataFilter, fieldConfig])
+
+const statusMeta = {
+  Hot: { color: 'error', icon: '🔥' },
+  Warm: { color: 'warning', icon: '☀️' },
+  Cold: { color: 'info', icon: '❄️' },
+  'In Progress': { color: 'info', icon: '⏳' },
+  New: { color: 'primary', icon: '🆕' },
+  Contacted: { color: 'secondary', icon: '📞' },
+  Qualified: { color: 'success', icon: '✅' },
+  'Proposal Sent': { color: 'warning', icon: '📩' },
+  Unqualified: { color: 'error', icon: '❌' },
+  Junk: { color: 'secondary', icon: '🗑️' },
+  Qualification: { color: 'info', icon: '📝' },
+  Quotation: { color: 'warning', icon: '💰' },
+  Negatiation: { color: 'warning', icon: '🤝' },
+  'Ready to close': { color: 'success', icon: '🏁' },
+  'Closed Won': { color: 'success', icon: '🏆' },
+  'Closed Lost': { color: 'error', icon: '💔' },
+  'Attempted to Contact': { color: 'info', icon: '📲' },
+  'Lost Lead - No Requirements': { color: 'secondary', icon: '⚠️' },
+  'No Response/Busy': { color: 'secondary', icon: '⏱️' },
+  'Lost Lead - Already Using': { color: 'secondary', icon: '🔒' },
+  Interested: { color: 'success', icon: '✨' },
+  'Demo Scheduled': { color: 'info', icon: '📅' },
+  'Need to Schedule Demo': { color: 'warning', icon: '🗓️' },
+  'Demo Completed': { color: 'success', icon: '🎯' },
+  'Call Back': { color: 'info', icon: '📱' },
+  'Invalid Number': { color: 'error', icon: '❌' },
+  'Lost Lead - Small scale': { color: 'secondary', icon: '⚠️' },
+  'Converted To Deal': { color: 'success', icon: '💼' },
+  Total: { color: 'primary', icon: '👥' }
+}
+
+
+  // 🔹 Card Config
+  const cardConfig = useMemo(() => {
+    const cards = []
+
+    cards
+      .push({
+        title: 'Total Leads',
+        count: leadStatusCounts.totalLeads,
+        color: statusMeta.Total.color,
+        icon: statusMeta.Total.icon
+      });
+
+      ['Hot', 'Warm', 'Cold'].forEach(status => {
+        const count = leadStatusCounts[status] || 0
+        if (count > 0) {
+          const meta = statusMeta[status]
+          cards.push({ title: `${status} Leads`, count, color: meta.color, icon: meta.icon })
+        }
+      })
+
+    Object.entries(leadStatusCounts).forEach(([status, count]) => {
+      if (!['totalLeads', 'Hot', 'Warm', 'Cold'].includes(status) && count > 0) {
+        const meta = statusMeta[status] || { color: 'info', icon: 'ri-checkbox-circle-line' }
+        cards.push({ title: status, count, color: meta.color, icon: meta.icon })
+      }
+    })
+
+    return cards
+  }, [leadStatusCounts])
+
+  const uniqueSources = useMemo(() => [...new Set(dataFilter.map(d => d.values?.Source).filter(Boolean))], [dataFilter])
+  const uniqueCities = useMemo(() => [...new Set(dataFilter.map(d => d.values?.City).filter(Boolean))], [dataFilter])
   const uniqueTimelines = useMemo(
-    () => [...new Set(dataFilter.map(item => item.values['Timeline to Buy']))].filter(Boolean),
+    () => [...new Set(dataFilter.map(d => d.values?.Timeline).filter(Boolean))],
     [dataFilter]
   )
-
   return (
     <>
-      {/* 🔹 FILTER BAR */}
+      {/* FILTER BAR */}
       <Card sx={{ borderRadius: 3, mb: 4, boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
         <CardContent>
           <Typography variant='h6' sx={{ fontWeight: 700, mb: 2, color: theme.palette.primary.main }}>
             🎯 Filter Leads
           </Typography>
-
           <Grid container spacing={2}>
             <Grid item xs={12} sm={2.4}>
               <TextField
@@ -239,12 +295,12 @@ export default function LeadStatus() {
                 size='small'
                 label='Source'
                 value={filters.source}
-                onChange={e => setFilters({ ...filters, source: e.target.value })}
+                onChange={e => setFilters(prev => ({ ...prev, source: e.target.value }))}
               >
                 <MenuItem value=''>All</MenuItem>
-                {uniqueSources.map(src => (
-                  <MenuItem key={src} value={src}>
-                    {src}
+                {uniqueSources.map(s => (
+                  <MenuItem key={s} value={s}>
+                    {s}
                   </MenuItem>
                 ))}
               </TextField>
@@ -253,9 +309,9 @@ export default function LeadStatus() {
               <FormControl size='small' fullWidth>
                 <InputLabel>City</InputLabel>
                 <Select
-                  label='City'
                   value={filters.city}
-                  onChange={e => setFilters({ ...filters, city: e.target.value })}
+                  onChange={e => setFilters(prev => ({ ...prev, city: e.target.value }))}
+                  label='City'
                 >
                   <MenuItem value=''>All</MenuItem>
                   {uniqueCities.map(c => (
@@ -268,11 +324,11 @@ export default function LeadStatus() {
             </Grid>
             <Grid item xs={12} sm={2.4}>
               <FormControl size='small' fullWidth>
-                <InputLabel>Timeline to Buy</InputLabel>
+                <InputLabel>Timeline</InputLabel>
                 <Select
-                  label='Timeline to Buy'
                   value={filters.timeline}
-                  onChange={e => setFilters({ ...filters, timeline: e.target.value })}
+                  onChange={e => setFilters(prev => ({ ...prev, timeline: e.target.value }))}
+                  label='Timeline'
                 >
                   <MenuItem value=''>All</MenuItem>
                   {uniqueTimelines.map(t => (
@@ -288,7 +344,7 @@ export default function LeadStatus() {
                 <DatePicker
                   label='Next Follow-up'
                   value={filters.nextFollowup}
-                  onChange={newDate => setFilters({ ...filters, nextFollowup: newDate })}
+                  onChange={d => setFilters({ ...filters, nextFollowup: d })}
                   slotProps={{ textField: { size: 'small', fullWidth: true } }}
                 />
               </LocalizationProvider>
@@ -296,27 +352,20 @@ export default function LeadStatus() {
             <Grid item xs={12} sm={2.4}>
               <FormControl fullWidth size='small'>
                 <InputLabel id='view-type-label'>Date Range</InputLabel>
-                <Select
-                  labelId='view-type-label'
-                  label='Date Range'
-                  value={viewType}
-                  onChange={e => setViewType(e.target.value)}
-                >
-                  {['Today', 'This Week', 'This Month', 'Last Month', 'Last 6 Months'].map(label => (
-                    <MenuItem key={label} value={label}>
-                      {label}
+                <Select labelId='view-type-label' value={viewType} onChange={e => setViewType(e.target.value)}>
+                  {['Today', 'This Week', 'This Month', 'Last Month', 'Last 6 Months'].map(l => (
+                    <MenuItem key={l} value={l}>
+                      {l}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
           </Grid>
-
-          {/* <Divider sx={{ my: 2 }} /> */}
         </CardContent>
       </Card>
 
-      {/* 🔹 STAT CARDS */}
+      {/* STAT CARDS */}
       <Grid container spacing={2}>
         {loading
           ? [...Array(11)].map((_, i) => (
@@ -341,7 +390,8 @@ export default function LeadStatus() {
                           color: '#fff'
                         }}
                       >
-                        <i className={item.icon}></i>
+                        {/* <i className={item.icon}></i> */}
+                        {item.icon}
                       </CustomAvatar>
                       <Box>
                         <Typography variant='body2' sx={{ color: 'text.secondary' }}>
