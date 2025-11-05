@@ -380,7 +380,7 @@ export default function DashboardWidgets() {
                     {assignedLeads} Assigned
                   </Typography>
                   <Typography variant='h5' color='error.main'>
-                    {unassignedLeads} Unassignedd
+                    {unassignedLeads} Unassigned
                   </Typography>
                 </Box>
               </CardContent>

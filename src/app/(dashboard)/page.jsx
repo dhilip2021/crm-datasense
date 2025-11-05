@@ -1,59 +1,30 @@
 'use client'
 
 import React, { useEffect, useMemo, useState } from 'react'
-
 import Cookies from 'js-cookie'
-
 // MUI Imports
 import Grid from '@mui/material/Grid'
-
 // Components Imports
-import Award from '@views/dashboard/Award'
-import Transactions from '@views/dashboard/Transactions'
-import WeeklyOverview from '@views/dashboard/WeeklyOverview'
-import TotalEarning from '@views/dashboard/TotalEarning'
 import LineChart from '@views/dashboard/LineChart'
 import DistributedColumnChart from '@views/dashboard/DistributedColumnChart'
-import DepositWithdraw from '@views/dashboard/DepositWithdraw'
-import SalesByCountries from '@views/dashboard/SalesByCountries'
 import CardStatVertical from '@components/card-statistics/Vertical'
-import Table from '@views/dashboard/Table'
-
-
-import { removeCredentials } from '@/helper/frontendHelper'
 import LeadStatus from '@/views/dashboard/LeadStatus'
 import LeadWeekly from '@/views/dashboard/LeadWeekly'
 import LeadByLocation from '@/views/dashboard/LeadByLocation'
 import LeadBySource from '@/views/dashboard/LeadBySource'
-import HighValueLeads from '@/views/dashboard/HighValueLeads'
-import LeadStatusSummary from '@/views/dashboard/LeadStatusSummary'
-import AssignedStatusCard from '@/views/dashboard/AssignedStatusCard'
 import DashboardWidgets from '@/views/dashboard/DashboardWidgets'
-import ConversionFunnel from '@/views/dashboard/ConversionFunnel'
 import SalesRepSummary from '@/views/dashboard/SalesRepSummary'
-import KanbanView from '@/views/dashboard/KanbanView'
-import SalesFunnelChart from '@/views/dashboard/SalesFunnelChart'
-import TopAccountsCard from '@/views/dashboard/TopAccountsCard'
-import DealAgingAnalysis from '@/views/dashboard/DealAgingAnalysis'
-import SmartAlertsCard from '@/views/dashboard/SmartAlertsCard'
+
 import dayjs from 'dayjs'
-import { useTheme } from '@mui/material'
 
 const DashboardAnalytics = () => {
-
-
-
   const organization_id = Cookies.get('organization_id')
-   const getToken = Cookies.get('_token')
+  const getToken = Cookies.get('_token')
 
   const [openStatus, setOpenStatus] = useState(false)
   const [selectedStatus, setSelectedStatus] = useState('')
 
   const handleOpenStatus = status => {
-
-    console.log(status,"<<< handleOpenStatus")
-
-
     setSelectedStatus(status)
     setOpenStatus(true)
   }
@@ -107,11 +78,10 @@ const DashboardAnalytics = () => {
       ...(filters.toDate && { to: dayjs(filters.toDate).format('YYYY-MM-DD') })
     })
     try {
-   
-       const header = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getToken}`
-    }
+      const header = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getToken}`
+      }
 
       const res = await fetch(`/api/v1/admin/lead-form/dashboard-list?${query}`, {
         method: 'GET',
@@ -170,18 +140,14 @@ const DashboardAnalytics = () => {
   // }, [selectedStatus, dataFilter])
 
   const leadsForStatus = useMemo(() => {
-  console.log(dataFilter, "<<< data Filter")
+    console.log(dataFilter, '<<< data Filter')
 
-  // 🧠 If "Total" is selected → return everything
-  if (selectedStatus === 'Total') return dataFilter || []
+    // 🧠 If "Total" is selected → return everything
+    if (selectedStatus === 'Total') return dataFilter || []
 
-  // 🧹 Otherwise, filter by specific Lead Status
-  return (dataFilter || []).filter(
-    l => l?.values?.['Lead Status'] === selectedStatus
-  )
-}, [selectedStatus, dataFilter])
-
-
+    // 🧹 Otherwise, filter by specific Lead Status
+    return (dataFilter || []).filter(l => l?.values?.['Lead Status'] === selectedStatus)
+  }, [selectedStatus, dataFilter])
 
   // 🔹 Initialize
   useEffect(() => {
@@ -282,37 +248,29 @@ const DashboardAnalytics = () => {
     [dataFilter]
   )
 
-
-
-
-
   return (
     <Grid container spacing={6}>
       <Grid item xs={12} md={12} lg={12}>
-        <LeadStatus 
-        uniqueSources={uniqueSources}
-        uniqueCities={uniqueCities}
-        uniqueTimelines={uniqueTimelines}
-        filters={filters}
-        setFilters={setFilters} 
-        handleOpenStatus={handleOpenStatus}
-        handleCloseStatus={handleCloseStatus} 
-        leadsForStatus={leadsForStatus}
-        viewType={viewType}
-        setViewType={setViewType}
-        loading={loading}
-        cardConfig={cardConfig}
-        openStatus={openStatus}
-        selectedStatus={selectedStatus}
+        <LeadStatus
+          uniqueSources={uniqueSources}
+          uniqueCities={uniqueCities}
+          uniqueTimelines={uniqueTimelines}
+          filters={filters}
+          setFilters={setFilters}
+          handleOpenStatus={handleOpenStatus}
+          handleCloseStatus={handleCloseStatus}
+          leadsForStatus={leadsForStatus}
+          viewType={viewType}
+          setViewType={setViewType}
+          loading={loading}
+          cardConfig={cardConfig}
+          openStatus={openStatus}
+          selectedStatus={selectedStatus}
         />
       </Grid>
 
       <Grid item xs={12} md={6} lg={6}>
-        <LeadByLocation 
-        viewType={viewType}
-        dataFilter={dataFilter}
-        loading={loading}
-        />
+        <LeadByLocation viewType={viewType} dataFilter={dataFilter} loading={loading} />
       </Grid>
       <Grid item xs={12} md={6} lg={6}>
         <LeadWeekly />
@@ -329,9 +287,6 @@ const DashboardAnalytics = () => {
       <Grid item xs={12} md={12} lg={6}>
         <ConversionFunnel />
       </Grid> */}
-
-
-
 
       <Grid item xs={12} md={12} lg={12}>
         <LeadBySource />
