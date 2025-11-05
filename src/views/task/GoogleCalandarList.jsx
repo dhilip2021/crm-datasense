@@ -17,21 +17,26 @@ import {
   Button,
   Grid,
   Box,
-  Chip
+  Chip,
+  Divider,
+  Tooltip
 } from '@mui/material'
 import Link from 'next/link'
 import { encryptCryptoRes } from '@/helper/frontendHelper'
+import WorkIcon from '@mui/icons-material/Work'
+import BusinessIcon from '@mui/icons-material/Business'
+import AccessTimeIcon from '@mui/icons-material/AccessTime'
+import PhoneIcon from '@mui/icons-material/Phone'
+import PriorityHighIcon from '@mui/icons-material/PriorityHigh'
 
 export default function GoogleCalandarList({ tasks, fetchTasks }) {
-
-
   const [open, setOpen] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState(null)
 
   // 🔹 Map tasks to FullCalendar events
   const events = tasks.map(task => ({
     id: task._id,
-    title: `${task.subject} (${task.priority})`,
+    title: task.subject || 'Untitled Task',
     start: task.dueDate,
     extendedProps: {
       status: task.status,
@@ -41,65 +46,116 @@ export default function GoogleCalandarList({ tasks, fetchTasks }) {
       priority: task.priority,
       lead_id: task.lead_id
     },
-    color: task.priority === 'High' ? '#e53935' : task.priority === 'Medium' ? '#fb8c00' : '#43a047'
+    backgroundColor:
+      task.status === 'Completed'
+        ? '#43a047'
+        : task.status === 'In Progress'
+        ? '#fb8c00'
+        : '#9e9e9e',
+    borderColor:
+      task.priority === 'High'
+        ? '#e53935'
+        : task.priority === 'Medium'
+        ? '#fdd835'
+        : '#43a047',
+    textColor: '#fff'
   }))
 
-  // 🔹 Custom renderer so text won’t cut off
-  const renderEventContent = eventInfo => (
-    <div
-      style={{
-        whiteSpace: 'normal',
-        fontSize: '0.8rem',
-        lineHeight: 1.2,
-        fontWeight: 500
-      }}
-    >
-      <span>{eventInfo.event.title}</span>
-    </div>
-  )
-
-  // 🔹 API call function when date range changes
-// 🔹 API call function when date range changes
-const fetchTasksForRange = async (dateInfo) => {
-  const formatDate = (date) => {
-    const d = new Date(date)
-    const year = d.getFullYear()
-    const month = String(d.getMonth() + 1).padStart(2, '0')
-    const day = String(d.getDate()).padStart(2, '0')
-    return `${year}-${month}-${day}`
+  // 🔹 Custom renderer for event content
+  const renderEventContent = eventInfo => {
+    const { company, status, priority } = eventInfo.event.extendedProps
+    return (
+      <Box
+        sx={{
+          whiteSpace: 'normal',
+          fontSize: '0.8rem',
+          lineHeight: 1.4,
+          fontWeight: 500,
+          p: 0.3
+        }}
+      >
+        <Typography variant='body2' sx={{ fontWeight: 600 }}>
+          {eventInfo.event.title}
+        </Typography>
+        <Typography variant='caption' sx={{ display: 'block', opacity: 0.9 }}>
+          {company || 'No Company'}
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 0.6, mt: 0.3 }}>
+          <Chip
+            label={status}
+            size='small'
+            sx={{
+              height: 18,
+              fontSize: '0.65rem',
+              bgcolor:
+                status === 'Completed'
+                  ? '#388e3c'
+                  : status === 'In Progress'
+                  ? '#ffa726'
+                  : '#9e9e9e',
+              color: '#fff'
+            }}
+          />
+          <Chip
+            label={priority}
+            size='small'
+            sx={{
+              height: 18,
+              fontSize: '0.65rem',
+              bgcolor:
+                priority === 'High'
+                  ? '#d32f2f'
+                  : priority === 'Medium'
+                  ? '#f9a825'
+                  : '#2e7d32',
+              color: '#fff'
+            }}
+          />
+        </Box>
+      </Box>
+    )
   }
 
-  // ✅ Correct month range from FullCalendar view
-  const firstDay = dateInfo.view.currentStart   // always 1st of visible month
-  const lastDay = dateInfo.view.currentEnd      // always last of visible month + 1 day
+  // 🔹 Fetch tasks by date range
+  const fetchTasksForRange = async dateInfo => {
+    const formatDate = date => {
+      const d = new Date(date)
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+        d.getDate()
+      ).padStart(2, '0')}`
+    }
 
-  // ⚠️ currentEnd points to next month's 1st date, so adjust back one day
-  const adjustedLastDay = new Date(lastDay)
-  adjustedLastDay.setDate(adjustedLastDay.getDate() - 1)
+    const firstDay = dateInfo.view.currentStart
+    const lastDay = new Date(dateInfo.view.currentEnd)
+    lastDay.setDate(lastDay.getDate() - 1)
 
-  const startDate = formatDate(firstDay)
-  const endDate = formatDate(adjustedLastDay)
-
-  console.log("<<< START", startDate)
-  console.log("<<< END", endDate)
-
-  fetchTasks({ from: startDate, to: endDate })
-}
-
+    fetchTasks({ from: formatDate(firstDay), to: formatDate(lastDay) })
+  }
 
   return (
     <Card
-      elevation={3}
+      elevation={4}
       sx={{
         width: '100%',
         p: 2,
         borderRadius: 3,
-        boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+        bgcolor: '#fafafa',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.08)'
       }}
     >
       <CardContent>
-        <Typography variant='h6' sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
-          📅 Task Calendar
+        <Typography
+          variant='h6'
+          sx={{
+            mb: 2,
+            fontWeight: 700,
+            color: 'primary.main',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
+          }}
+        >
+          📅 Task Calendar Overview
         </Typography>
 
         <Box sx={{ width: '100%', overflow: 'hidden' }}>
@@ -112,7 +168,7 @@ const fetchTasksForRange = async (dateInfo) => {
               right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
             }}
             events={events}
-            eventContent={renderEventContent} // ✅ Fix text cutoff
+            eventContent={renderEventContent}
             eventClick={info => {
               setSelectedEvent({
                 title: info.event.title,
@@ -127,54 +183,46 @@ const fetchTasksForRange = async (dateInfo) => {
               hour12: true
             }}
             height='calc(100vh - 260px)'
-            contentHeight='auto'
             aspectRatio={1.5}
-            expandRows={true}
-            datesSet={(dateInfo) => fetchTasksForRange(dateInfo)}  // ✅ FIX
+            expandRows
+            datesSet={dateInfo => fetchTasksForRange(dateInfo)}
           />
         </Box>
       </CardContent>
 
-      {/* 🔹 Popup Dialog */}
+      {/* 🔹 Dialog Popup */}
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth='sm' fullWidth>
-        <DialogTitle sx={{ fontWeight: 600, color: 'primary.main' }}>📌 Task Details</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 700, color: 'primary.main' }}>📌 Task Details</DialogTitle>
         <DialogContent dividers>
           {selectedEvent && (
             <Grid container spacing={2}>
               <Grid item xs={12}>
-                <Typography variant='subtitle1' fontWeight={600} gutterBottom sx={{ color: 'text.primary' }}>
+                <Typography variant='subtitle1' fontWeight={700} sx={{ color: 'text.primary' }}>
                   {selectedEvent.title}
                 </Typography>
               </Grid>
 
+              <Grid item xs={12}>
+                <Divider sx={{ my: 1 }} />
+              </Grid>
+
               <Grid item xs={6}>
-                <Typography variant='body2' fontWeight={500}>
-                  Owner:
+                <Typography variant='body2' sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <WorkIcon fontSize='small' /> Owner
                 </Typography>
                 <Typography variant='body2'>{selectedEvent.owner}</Typography>
               </Grid>
 
               <Grid item xs={6}>
-                <Typography variant='body2' fontWeight={500}>
-                  Status:
+                <Typography variant='body2' sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <BusinessIcon fontSize='small' /> Company
                 </Typography>
-                <Chip
-                  label={selectedEvent.status}
-                  size='small'
-                  color={
-                    selectedEvent.status === 'Completed'
-                      ? 'success'
-                      : selectedEvent.status === 'In Progress'
-                        ? 'warning'
-                        : 'default'
-                  }
-                  sx={{ mt: 0.5 }}
-                />
+                <Typography variant='body2'>{selectedEvent.company || '-'}</Typography>
               </Grid>
 
               <Grid item xs={6}>
-                <Typography variant='body2' fontWeight={500}>
-                  Priority:
+                <Typography variant='body2' sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <PriorityHighIcon fontSize='small' /> Priority
                 </Typography>
                 <Chip
                   label={selectedEvent.priority}
@@ -185,30 +233,41 @@ const fetchTasksForRange = async (dateInfo) => {
                       selectedEvent.priority === 'High'
                         ? '#e53935'
                         : selectedEvent.priority === 'Medium'
-                          ? '#fb8c00'
-                          : '#43a047',
+                        ? '#fbc02d'
+                        : '#43a047',
                     color: '#fff'
                   }}
                 />
               </Grid>
 
               <Grid item xs={6}>
-                <Typography variant='body2' fontWeight={500}>
-                  Company:
+                <Typography variant='body2' sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <AccessTimeIcon fontSize='small' /> Status
                 </Typography>
-                <Typography variant='body2'>{selectedEvent.company || '-'}</Typography>
+                <Chip
+                  label={selectedEvent.status}
+                  size='small'
+                  color={
+                    selectedEvent.status === 'Completed'
+                      ? 'success'
+                      : selectedEvent.status === 'In Progress'
+                      ? 'warning'
+                      : 'default'
+                  }
+                  sx={{ mt: 0.5 }}
+                />
               </Grid>
 
               <Grid item xs={6}>
-                <Typography variant='body2' fontWeight={500}>
-                  Phone:
+                <Typography variant='body2' sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <PhoneIcon fontSize='small' /> Phone
                 </Typography>
                 <Typography variant='body2'>{selectedEvent.phone || '-'}</Typography>
               </Grid>
 
               <Grid item xs={6}>
-                <Typography variant='body2' fontWeight={500}>
-                  Due Date:
+                <Typography variant='body2' fontWeight={600}>
+                  Due Date
                 </Typography>
                 <Typography variant='body2'>
                   {selectedEvent.date ? new Date(selectedEvent.date).toLocaleDateString() : '-'}
@@ -217,23 +276,20 @@ const fetchTasksForRange = async (dateInfo) => {
             </Grid>
           )}
         </DialogContent>
-        <DialogActions>
-          <Box display='flex' justifyContent='space-between' width='100%' mt={5}>
-            <Button onClick={() => setOpen(false)} variant='contained' color='primary'>
-              Close
-            </Button>
-
-            {selectedEvent && (
-              <Link
-                href={`/view/lead-form/${encodeURIComponent(encryptCryptoRes(selectedEvent.lead_id))}`}
-                style={{ textDecoration: 'none' }}
-              >
-                <Button onClick={() => setOpen(false)} variant='contained' color='success'>
-                  Open
-                </Button>
-              </Link>
-            )}
-          </Box>
+        <DialogActions sx={{ justifyContent: 'space-between', px: 3, py: 2 }}>
+          <Button onClick={() => setOpen(false)} variant='outlined' color='primary'>
+            Close
+          </Button>
+          {selectedEvent && (
+            <Link
+              href={`/view/lead-form/${encodeURIComponent(encryptCryptoRes(selectedEvent.lead_id))}`}
+              style={{ textDecoration: 'none' }}
+            >
+              <Button variant='contained' color='success'>
+                Open Lead
+              </Button>
+            </Link>
+          )}
         </DialogActions>
       </Dialog>
     </Card>
