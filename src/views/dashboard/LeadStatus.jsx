@@ -14,7 +14,9 @@ import {
   Skeleton,
   useTheme,
   Fade,
-  TextField
+  TextField,
+  Dialog,
+  IconButton
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
@@ -22,6 +24,9 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs from 'dayjs'
 import CustomAvatar from '@core/components/mui/Avatar'
 import Cookies from 'js-cookie'
+import CloseIcon from '@mui/icons-material/Close'
+import { encryptCryptoRes } from '@/helper/frontendHelper'
+import Link from 'next/link'
 
 // 🔹 Stat Card Style
 const StatCard = styled(Card)(({ theme }) => ({
@@ -51,6 +56,19 @@ const StatSkeleton = () => (
 export default function LeadStatus() {
   const theme = useTheme()
   const organization_id = Cookies.get('organization_id')
+
+  const [openStatus, setOpenStatus] = useState(false)
+  const [selectedStatus, setSelectedStatus] = useState('')
+
+  const handleOpenStatus = status => {
+    setSelectedStatus(status)
+    setOpenStatus(true)
+  }
+
+  const handleCloseStatus = () => {
+    setOpenStatus(false)
+    setSelectedStatus('')
+  }
 
   const [filters, setFilters] = useState({
     source: '',
@@ -99,8 +117,6 @@ export default function LeadStatus() {
       const res = await fetch(`/api/v1/admin/lead-form/dashboard-list?${query}`)
       const json = await res.json()
       if (json.success) {
-
-
         setStats(json.stats)
         setDataFilter(json.data)
       }
@@ -139,13 +155,20 @@ export default function LeadStatus() {
           if (f.type === 'Dropdown' && f.options?.length) config[f.label] = f.options
         })
 
-        console.log(config,"<<< CONFIGGGG")
+        console.log(config, '<<< CONFIGGGG')
         setFieldConfig(config)
       }
     } catch (err) {
       console.error(err)
     }
   }
+
+  const leadsForStatus = useMemo(() => {
+    if (!selectedStatus) return []
+    return dataFilter.filter(l => l.values && l.values['Lead Status'] === selectedStatus)
+  }, [selectedStatus, dataFilter])
+
+  console.log(leadsForStatus, '<<<  leadsForStatus')
 
   // 🔹 Initialize
   useEffect(() => {
@@ -179,89 +202,55 @@ export default function LeadStatus() {
     }
   }, [dataFilter, fieldConfig])
 
-  // 🔹 Lead Status Counts
-// const leadStatusCounts = useMemo(() => {
-//   const counts = {}
-
-//   dataFilter.forEach(lead => {
-//     const label = lead.values?.Label || ''
-
-//         const status = fieldConfig['Lead Status'] || []
-//     status.forEach(status => {
-//       counts[status] = dataFilter.filter(l => l.values && l.values['Lead Status'] === status).length
-//     })
-
-//     // Hot/Warm/Cold based on Label
-//     if (label.includes('Hot')) counts['Hot'] = (counts['Hot'] || 0) + 1
-//     else if (label.includes('Warm')) counts['Warm'] = (counts['Warm'] || 0) + 1
-//     else if (label.includes('Cold')) counts['Cold'] = (counts['Cold'] || 0) + 1
-//     else {
-//       // For anything else, use Lead Status
-//       counts[status] = (counts[status] || 0) + 1
-//     }
-//   })
-
-//   return {
-//     ...counts,
-//     totalLeads: dataFilter.length,
-//     hotLeads: counts['Hot'] || 0,
-//     warmLeads: counts['Warm'] || 0,
-//     coldLeads: counts['Cold'] || 0
-//   }
-// }, [dataFilter, fieldConfig])
-
-const statusMeta = {
-  Hot: { color: 'error', icon: '🔥' },
-  Warm: { color: 'warning', icon: '☀️' },
-  Cold: { color: 'info', icon: '❄️' },
-  'In Progress': { color: 'info', icon: '⏳' },
-  New: { color: 'primary', icon: '🆕' },
-  Contacted: { color: 'secondary', icon: '📞' },
-  Qualified: { color: 'success', icon: '✅' },
-  'Proposal Sent': { color: 'warning', icon: '📩' },
-  Unqualified: { color: 'error', icon: '❌' },
-  Junk: { color: 'secondary', icon: '🗑️' },
-  Qualification: { color: 'info', icon: '📝' },
-  Quotation: { color: 'warning', icon: '💰' },
-  Negatiation: { color: 'warning', icon: '🤝' },
-  'Ready to close': { color: 'success', icon: '🏁' },
-  'Closed Won': { color: 'success', icon: '🏆' },
-  'Closed Lost': { color: 'error', icon: '💔' },
-  'Attempted to Contact': { color: 'info', icon: '📲' },
-  'Lost Lead - No Requirements': { color: 'secondary', icon: '⚠️' },
-  'No Response/Busy': { color: 'secondary', icon: '⏱️' },
-  'Lost Lead - Already Using': { color: 'secondary', icon: '🔒' },
-  Interested: { color: 'success', icon: '✨' },
-  'Demo Scheduled': { color: 'info', icon: '📅' },
-  'Need to Schedule Demo': { color: 'warning', icon: '🗓️' },
-  'Demo Completed': { color: 'success', icon: '🎯' },
-  'Call Back': { color: 'info', icon: '📱' },
-  'Invalid Number': { color: 'error', icon: '❌' },
-  'Lost Lead - Small scale': { color: 'secondary', icon: '⚠️' },
-  'Converted To Deal': { color: 'success', icon: '💼' },
-  Total: { color: 'primary', icon: '👥' }
-}
-
+  const statusMeta = {
+    Hot: { color: 'error', icon: '🔥' },
+    Warm: { color: 'warning', icon: '☀️' },
+    Cold: { color: 'info', icon: '❄️' },
+    'In Progress': { color: 'info', icon: '⏳' },
+    New: { color: 'primary', icon: '🆕' },
+    Contacted: { color: 'secondary', icon: '📞' },
+    Qualified: { color: 'success', icon: '✅' },
+    'Proposal Sent': { color: 'warning', icon: '📩' },
+    Unqualified: { color: 'error', icon: '❌' },
+    Junk: { color: 'secondary', icon: '🗑️' },
+    Qualification: { color: 'info', icon: '📝' },
+    Quotation: { color: 'warning', icon: '💰' },
+    Negatiation: { color: 'warning', icon: '🤝' },
+    'Ready to close': { color: 'success', icon: '🏁' },
+    'Closed Won': { color: 'success', icon: '🏆' },
+    'Closed Lost': { color: 'error', icon: '💔' },
+    'Attempted to Contact': { color: 'info', icon: '📲' },
+    'Lost Lead - No Requirements': { color: 'secondary', icon: '⚠️' },
+    'No Response/Busy': { color: 'secondary', icon: '⏱️' },
+    'Lost Lead - Already Using': { color: 'secondary', icon: '🔒' },
+    Interested: { color: 'success', icon: '✨' },
+    'Demo Scheduled': { color: 'info', icon: '📅' },
+    'Need to Schedule Demo': { color: 'warning', icon: '🗓️' },
+    'Demo Completed': { color: 'success', icon: '🎯' },
+    'Call Back': { color: 'info', icon: '📱' },
+    'Invalid Number': { color: 'error', icon: '❌' },
+    'Lost Lead - Small scale': { color: 'secondary', icon: '⚠️' },
+    'Converted To Deal': { color: 'success', icon: '💼' },
+    Total: { color: 'primary', icon: '👥' }
+  }
 
   // 🔹 Card Config
   const cardConfig = useMemo(() => {
     const cards = []
 
-    cards
-      .push({
-        title: 'Total Leads',
-        count: leadStatusCounts.totalLeads,
-        color: statusMeta.Total.color,
-        icon: statusMeta.Total.icon
-      });
-
-      ['Hot', 'Warm', 'Cold'].forEach(status => {
-        const count = leadStatusCounts[status] || 0
-        if (count > 0) {
-          const meta = statusMeta[status]
-          cards.push({ title: `${status} Leads`, count, color: meta.color, icon: meta.icon })
-        }
-      })
+    cards.push({
+      title: 'Total Leads',
+      count: leadStatusCounts.totalLeads,
+      color: statusMeta.Total.color,
+      icon: statusMeta.Total.icon
+    })
+    ;['Hot', 'Warm', 'Cold'].forEach(status => {
+      const count = leadStatusCounts[status] || 0
+      if (count > 0) {
+        const meta = statusMeta[status]
+        cards.push({ title: `${status} Leads`, count, color: meta.color, icon: meta.icon })
+      }
+    })
 
     Object.entries(leadStatusCounts).forEach(([status, count]) => {
       if (!['totalLeads', 'Hot', 'Warm', 'Cold'].includes(status) && count > 0) {
@@ -376,7 +365,12 @@ const statusMeta = {
           : cardConfig.map((item, i) => (
               <Fade in timeout={400 + i * 50} key={i}>
                 <Grid item xs={12} sm={6} md={4} lg={2}>
-                  <StatCard>
+                  <StatCard
+                    onClick={() =>
+                      handleOpenStatus(item.title.includes(' Leads') ? item.title.replace(' Leads', '') : item.title)
+                    }
+                    sx={{ cursor: 'pointer' }}
+                  >
                     <CardContent className='flex items-center gap-2'>
                       <CustomAvatar
                         variant='rounded'
@@ -403,6 +397,64 @@ const statusMeta = {
                       </Box>
                     </CardContent>
                   </StatCard>
+
+                  <Dialog open={openStatus} onClose={handleCloseStatus} maxWidth='sm' fullWidth>
+                    <Box sx={{ p: 3, position: 'relative' }}>
+                      {/* Close Icon */}
+                      <IconButton onClick={handleCloseStatus} sx={{ position: 'absolute', right: 16, top: 16 }}>
+                        <CloseIcon />
+                      </IconButton>
+
+                      <Typography variant='h6' sx={{ mb: 3, fontWeight: 600 }}>
+                        {selectedStatus} Leads ({leadsForStatus.length})
+                      </Typography>
+
+                      {leadsForStatus.length === 0 ? (
+                        <Typography sx={{ color: 'text.secondary' }}>No leads found.</Typography>
+                      ) : (
+                        <Box sx={{ maxHeight: '400px', overflowY: 'auto' }}>
+                          {leadsForStatus.map((lead, index) => (
+                            <Link
+                              href={`/view/lead-form/${encodeURIComponent(encryptCryptoRes(lead.lead_id))}`}
+                              style={{ textDecoration: 'none' }}
+                            >
+                              <Box
+                                key={index}
+                                sx={{
+                                  borderRadius: 2,
+                                  border: '1px solid #eee',
+                                  p: 2,
+                                  mb: 1,
+                                  transition: '0.3s',
+                                  '&:hover': {
+                                    boxShadow: 3,
+                                    backgroundColor: '#f9f9f9'
+                                  }
+                                }}
+                              >
+                                <Typography variant='subtitle1' sx={{ fontWeight: 600 }}>
+                                  {lead.values?.Company || 'Unnamed Company'}
+                                </Typography>
+                                <Typography variant='body2' color='text.secondary' sx={{ mt: 0.5 }}>
+                                  {lead.values?.City ? `City: ${lead.values.City}` : 'City: N/A'}
+                                </Typography>
+                                {lead.values?.Phone && (
+                                  <Typography variant='body2' color='text.secondary' sx={{ mt: 0.5 }}>
+                                    Phone: {lead.values.Phone}
+                                  </Typography>
+                                )}
+                                {lead.values?.Email && (
+                                  <Typography variant='body2' color='text.secondary' sx={{ mt: 0.5 }}>
+                                    Email: {lead.values.Email}
+                                  </Typography>
+                                )}
+                              </Box>
+                            </Link>
+                          ))}
+                        </Box>
+                      )}
+                    </Box>
+                  </Dialog>
                 </Grid>
               </Fade>
             ))}
