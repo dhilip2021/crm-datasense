@@ -150,12 +150,18 @@ const LeadBySource = () => {
           linkedin: '/images/social/linkedin.png',
           whatsapp: '/images/social/whatsapp.png',
           referral: '/images/social/employee_referel.png',
+          apollo: '/images/social/apollo.png',
           cold: '/images/social/cold_call.png'
         }
 
         // Step 3: Prepare final list
         const knownSources = Object.keys(sourceCounts).filter(
-          src => src.toLowerCase() === 'facebook' || src.toLowerCase() === 'linkedin'
+          src =>
+            src.toLowerCase() === 'facebook' ||
+            src.toLowerCase() === 'linkedin' ||
+            src.toLowerCase() === 'whatsapp' ||
+            src.toLowerCase() === 'referral' ||
+            src.toLowerCase() === 'apollo'
         )
 
         const updatedLeadsData = []
@@ -229,61 +235,64 @@ const LeadBySource = () => {
       const json = await res.json()
 
       if (json.success) {
-  const leads = json.data || []
+        const leads = json.data || []
 
-  // Step 1: Count leads by source
-  const sourceCounts = leads.reduce((acc, lead) => {
-    const src = lead?.values?.['Lead Source']?.trim() || 'Unknown'
-    acc[src] = (acc[src] || 0) + 1
-    return acc
-  }, {})
+        // Step 1: Count leads by source
+        const sourceCounts = leads.reduce((acc, lead) => {
+          const src = lead?.values?.['Lead Source']?.trim() || 'Unknown'
+          acc[src] = (acc[src] || 0) + 1
+          return acc
+        }, {})
 
-  // Step 2: Define known sources with custom logos
-  const logoMap = {
-    facebook: '/images/social/facebook.png',
-    linkedin: '/images/social/linkedin.png',
-    whatsapp: '/images/social/whatsapp.png',
-    referral: '/images/social/employee_referel.png',
-    cold: '/images/social/cold_call.png'
-  }
+        // Step 2: Define known sources with custom logos
+        const logoMap = {
+          facebook: '/images/social/facebook.png',
+          linkedin: '/images/social/linkedin.png',
+          whatsapp: '/images/social/whatsapp.png',
+          referral: '/images/social/employee_referel.png',
+          apollo: '/images/social/apollo.png',
+          cold: '/images/social/cold_call.png'
+        }
 
-  // Step 3: Prepare final list
-  const knownSources = Object.keys(sourceCounts).filter(
-    src => src.toLowerCase() === 'facebook' || src.toLowerCase() === 'linkedin'
-  )
+        // Step 3: Prepare final list
+        const knownSources = Object.keys(sourceCounts).filter(
+          src =>
+            src.toLowerCase() === 'facebook' ||
+            src.toLowerCase() === 'linkedin' ||
+            src.toLowerCase() === 'whatsapp' ||
+            src.toLowerCase() === 'referral' ||
+            src.toLowerCase() === 'apollo'
+        )
 
-  const updatedOpportunityData = []
+        const updatedOpportunityData = []
 
-  // Add known sources first
-  knownSources.forEach(source => {
-    updatedOpportunityData.push({
-      title: source,
-      subtitle: `${source} Leads`,
-      leads: sourceCounts[source],
-      logo: logoMap[source.toLowerCase()] || '/images/social/advertisement.png'
-    })
-  })
+        // Add known sources first
+        knownSources.forEach(source => {
+          updatedOpportunityData.push({
+            title: source,
+            subtitle: `${source} Leads`,
+            leads: sourceCounts[source],
+            logo: logoMap[source.toLowerCase()] || '/images/social/advertisement.png'
+          })
+        })
 
-  // Step 4: Count "Others" = all remaining or unknown sources
-  const otherLeadsCount = Object.keys(sourceCounts)
-    .filter(src => !knownSources.includes(src))
-    .reduce((sum, src) => sum + sourceCounts[src], 0)
+        // Step 4: Count "Others" = all remaining or unknown sources
+        const otherLeadsCount = Object.keys(sourceCounts)
+          .filter(src => !knownSources.includes(src))
+          .reduce((sum, src) => sum + sourceCounts[src], 0)
 
-  if (otherLeadsCount > 0) {
-    updatedOpportunityData.push({
-      title: 'Others',
-      subtitle: 'Others Leads',
-      leads: otherLeadsCount,
-      logo: '/images/social/advertisement.png'
-    })
-  }
+        if (otherLeadsCount > 0) {
+          updatedOpportunityData.push({
+            title: 'Others',
+            subtitle: 'Others Leads',
+            leads: otherLeadsCount,
+            logo: '/images/social/advertisement.png'
+          })
+        }
 
-  console.log(updatedOpportunityData, "updatedOpportunityData")
-  setOpportunitySourceData(updatedOpportunityData)
-}
-
-
-      
+        console.log(updatedOpportunityData, 'updatedOpportunityData')
+        setOpportunitySourceData(updatedOpportunityData)
+      }
     } catch (err) {
       console.error(err)
     } finally {
