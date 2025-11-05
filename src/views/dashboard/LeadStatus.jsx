@@ -53,221 +53,23 @@ const StatSkeleton = () => (
   </StatCard>
 )
 
-export default function LeadStatus() {
-  const theme = useTheme()
-  const organization_id = Cookies.get('organization_id')
-
-  const [openStatus, setOpenStatus] = useState(false)
-  const [selectedStatus, setSelectedStatus] = useState('')
-
-  const handleOpenStatus = status => {
-    setSelectedStatus(status)
-    setOpenStatus(true)
-  }
-
-  const handleCloseStatus = () => {
-    setOpenStatus(false)
-    setSelectedStatus('')
-  }
-
-  const [filters, setFilters] = useState({
-    source: '',
-    city: '',
-    timeline: '',
-    nextFollowup: null,
-    fromDate: null,
-    toDate: null
-  })
-  const [viewType, setViewType] = useState('This Month')
-  const [loading, setLoading] = useState(false)
-  const [stats, setStats] = useState({})
-  const [dataFilter, setDataFilter] = useState([])
-  const [fieldConfig, setFieldConfig] = useState({})
-  const [sections, setSections] = useState([])
-
-  // 🔹 Date Range Logic
-  const getDateRange = type => {
-    const today = dayjs()
-    if (type === 'Today') return { fromDate: today, toDate: today }
-    if (type === 'This Week') return { fromDate: today.startOf('week').add(1, 'day'), toDate: today }
-    if (type === 'This Month') return { fromDate: today.startOf('month'), toDate: today }
-    if (type === 'Last Month')
-      return {
-        fromDate: today.subtract(1, 'month').startOf('month'),
-        toDate: today.subtract(1, 'month').endOf('month')
-      }
-    if (type === 'Last 6 Months') return { fromDate: today.subtract(6, 'month').startOf('month'), toDate: today }
-    return { fromDate: today.subtract(7, 'day'), toDate: today }
-  }
-
-  // 🔹 Fetch Data
-  const fetchData = async () => {
-    setLoading(true)
-    const query = new URLSearchParams({
-      organization_id,
-      form_name: 'lead-form',
-      ...(filters.source && { source: filters.source }),
-      ...(filters.city && { city: filters.city }),
-      ...(filters.timeline && { timeline: filters.timeline }),
-      ...(filters.nextFollowup && { nextFollowup: dayjs(filters.nextFollowup).format('YYYY-MM-DD') }),
-      ...(filters.fromDate && { from: dayjs(filters.fromDate).format('YYYY-MM-DD') }),
-      ...(filters.toDate && { to: dayjs(filters.toDate).format('YYYY-MM-DD') })
-    })
-    try {
-      const res = await fetch(`/api/v1/admin/lead-form/dashboard-list?${query}`)
-      const json = await res.json()
-      if (json.success) {
-        setStats(json.stats)
-        setDataFilter(json.data)
-      }
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // 🔹 Flatten Fields Safely
-  const flattenFields = sections => {
-    const flat = []
-    sections.forEach(section => {
-      if (!section.fields) return
-      Object.values(section.fields || {}).forEach(fieldGroup => {
-        if (!Array.isArray(fieldGroup)) return
-        fieldGroup.forEach(field => flat.push({ sectionName: section.title || '', ...field }))
-      })
-    })
-    return flat
-  }
-
-  // 🔹 Fetch Form Template
-  const fetchFormTemplate = async () => {
-    try {
-      const res = await fetch(
-        `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=lead-form`
-      )
-      const json = await res.json()
-      if (json.success && json.data?.sections?.length) {
-        setSections(json.data.sections)
-        const flat = flattenFields(json.data.sections)
-        const config = {}
-        flat.forEach(f => {
-          if (f.type === 'Dropdown' && f.options?.length) config[f.label] = f.options
-        })
-
-        console.log(config, '<<< CONFIGGGG')
-        setFieldConfig(config)
-      }
-    } catch (err) {
-      console.error(err)
-    }
-  }
-
-  const leadsForStatus = useMemo(() => {
-    if (!selectedStatus) return []
-    return dataFilter.filter(l => l.values && l.values['Lead Status'] === selectedStatus)
-  }, [selectedStatus, dataFilter])
-
-  console.log(leadsForStatus, '<<<  leadsForStatus')
-
-  // 🔹 Initialize
-  useEffect(() => {
-    fetchFormTemplate()
-    const { fromDate, toDate } = getDateRange('This Month')
-    setFilters(prev => ({ ...prev, fromDate, toDate }))
-  }, [])
-
-  useEffect(() => {
-    if (filters.fromDate && filters.toDate) fetchData()
-  }, [filters])
-
-  useEffect(() => {
-    const { fromDate, toDate } = getDateRange(viewType)
-    setFilters(prev => ({ ...prev, fromDate, toDate }))
-  }, [viewType])
-
-  // 🔹 Lead Status Counts
-  const leadStatusCounts = useMemo(() => {
-    const counts = {}
-    const allStatuses = fieldConfig['Lead Status'] || []
-    allStatuses.forEach(status => {
-      counts[status] = dataFilter.filter(l => l.values && l.values['Lead Status'] === status).length
-    })
-    return {
-      ...counts,
-      totalLeads: dataFilter.length,
-      hotLeads: counts['Hot'] || 0,
-      warmLeads: counts['Warm'] || 0,
-      coldLeads: counts['Cold'] || 0
-    }
-  }, [dataFilter, fieldConfig])
-
-  const statusMeta = {
-    Hot: { color: 'error', icon: '🔥' },
-    Warm: { color: 'warning', icon: '☀️' },
-    Cold: { color: 'info', icon: '❄️' },
-    'In Progress': { color: 'info', icon: '⏳' },
-    New: { color: 'primary', icon: '🆕' },
-    Contacted: { color: 'secondary', icon: '📞' },
-    Qualified: { color: 'success', icon: '✅' },
-    'Proposal Sent': { color: 'warning', icon: '📩' },
-    Unqualified: { color: 'error', icon: '❌' },
-    Junk: { color: 'secondary', icon: '🗑️' },
-    Qualification: { color: 'info', icon: '📝' },
-    Quotation: { color: 'warning', icon: '💰' },
-    Negatiation: { color: 'warning', icon: '🤝' },
-    'Ready to close': { color: 'success', icon: '🏁' },
-    'Closed Won': { color: 'success', icon: '🏆' },
-    'Closed Lost': { color: 'error', icon: '💔' },
-    'Attempted to Contact': { color: 'info', icon: '📲' },
-    'Lost Lead - No Requirements': { color: 'secondary', icon: '⚠️' },
-    'No Response/Busy': { color: 'secondary', icon: '⏱️' },
-    'Lost Lead - Already Using': { color: 'secondary', icon: '🔒' },
-    Interested: { color: 'success', icon: '✨' },
-    'Demo Scheduled': { color: 'info', icon: '📅' },
-    'Need to Schedule Demo': { color: 'warning', icon: '🗓️' },
-    'Demo Completed': { color: 'success', icon: '🎯' },
-    'Call Back': { color: 'info', icon: '📱' },
-    'Invalid Number': { color: 'error', icon: '❌' },
-    'Lost Lead - Small scale': { color: 'secondary', icon: '⚠️' },
-    'Converted To Deal': { color: 'success', icon: '💼' },
-    Total: { color: 'primary', icon: '👥' }
-  }
-
-  // 🔹 Card Config
-  const cardConfig = useMemo(() => {
-    const cards = []
-
-    cards.push({
-      title: 'Total Leads',
-      count: leadStatusCounts.totalLeads,
-      color: statusMeta.Total.color,
-      icon: statusMeta.Total.icon
-    })
-    ;['Hot', 'Warm', 'Cold'].forEach(status => {
-      const count = leadStatusCounts[status] || 0
-      if (count > 0) {
-        const meta = statusMeta[status]
-        cards.push({ title: `${status} Leads`, count, color: meta.color, icon: meta.icon })
-      }
-    })
-
-    Object.entries(leadStatusCounts).forEach(([status, count]) => {
-      if (!['totalLeads', 'Hot', 'Warm', 'Cold'].includes(status) && count > 0) {
-        const meta = statusMeta[status] || { color: 'info', icon: 'ri-checkbox-circle-line' }
-        cards.push({ title: status, count, color: meta.color, icon: meta.icon })
-      }
-    })
-
-    return cards
-  }, [leadStatusCounts])
-
-  const uniqueSources = useMemo(() => [...new Set(dataFilter.map(d => d.values?.Source).filter(Boolean))], [dataFilter])
-  const uniqueCities = useMemo(() => [...new Set(dataFilter.map(d => d.values?.City).filter(Boolean))], [dataFilter])
-  const uniqueTimelines = useMemo(
-    () => [...new Set(dataFilter.map(d => d.values?.Timeline).filter(Boolean))],
-    [dataFilter]
-  )
+export default function LeadStatus({
+  uniqueSources,
+  uniqueCities,
+  uniqueTimelines,
+  filters,
+  setFilters, 
+  handleOpenStatus,
+  handleCloseStatus, 
+  leadsForStatus,
+  viewType,
+  setViewType,
+  loading,
+  cardConfig,
+  openStatus,
+  selectedStatus
+}) {
+    const theme = useTheme()
   return (
     <>
       {/* FILTER BAR */}
