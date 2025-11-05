@@ -44,6 +44,7 @@ const DashboardAnalytics = () => {
 
 
   const organization_id = Cookies.get('organization_id')
+   const getToken = Cookies.get('_token')
 
   const [openStatus, setOpenStatus] = useState(false)
   const [selectedStatus, setSelectedStatus] = useState('')
@@ -106,7 +107,16 @@ const DashboardAnalytics = () => {
       ...(filters.toDate && { to: dayjs(filters.toDate).format('YYYY-MM-DD') })
     })
     try {
-      const res = await fetch(`/api/v1/admin/lead-form/dashboard-list?${query}`)
+   
+       const header = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken}`
+    }
+
+      const res = await fetch(`/api/v1/admin/lead-form/dashboard-list?${query}`, {
+        method: 'GET',
+        headers: header
+      })
       const json = await res.json()
       if (json.success) {
         setStats(json.stats)
