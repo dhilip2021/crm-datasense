@@ -49,6 +49,10 @@ const DashboardAnalytics = () => {
   const [selectedStatus, setSelectedStatus] = useState('')
 
   const handleOpenStatus = status => {
+
+    console.log(status,"<<< handleOpenStatus")
+
+
     setSelectedStatus(status)
     setOpenStatus(true)
   }
@@ -149,10 +153,23 @@ const DashboardAnalytics = () => {
     }
   }
 
+  // const leadsForStatus = useMemo(() => {
+  //   console.log(dataFilter,"<<< data Filter")
+  //   if (!selectedStatus) return []
+  //   return dataFilter.filter(l => l.values && l.values['Lead Status'] === selectedStatus)
+  // }, [selectedStatus, dataFilter])
+
   const leadsForStatus = useMemo(() => {
-    if (!selectedStatus) return []
-    return dataFilter.filter(l => l.values && l.values['Lead Status'] === selectedStatus)
-  }, [selectedStatus, dataFilter])
+  console.log(dataFilter, "<<< data Filter")
+
+  // 🧠 If "Total" is selected → return everything
+  if (selectedStatus === 'Total') return dataFilter || []
+
+  // 🧹 Otherwise, filter by specific Lead Status
+  return (dataFilter || []).filter(
+    l => l?.values?.['Lead Status'] === selectedStatus
+  )
+}, [selectedStatus, dataFilter])
 
 
 

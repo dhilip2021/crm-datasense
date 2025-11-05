@@ -58,9 +58,9 @@ export default function LeadStatus({
   uniqueCities,
   uniqueTimelines,
   filters,
-  setFilters, 
+  setFilters,
   handleOpenStatus,
-  handleCloseStatus, 
+  handleCloseStatus,
   leadsForStatus,
   viewType,
   setViewType,
@@ -69,7 +69,11 @@ export default function LeadStatus({
   openStatus,
   selectedStatus
 }) {
-    const theme = useTheme()
+
+  console.log(leadsForStatus,"<<< leadsForStatus")
+
+
+  const theme = useTheme()
   return (
     <>
       {/* FILTER BAR */}
@@ -199,68 +203,68 @@ export default function LeadStatus({
                       </Box>
                     </CardContent>
                   </StatCard>
-
-                  <Dialog open={openStatus} onClose={handleCloseStatus} maxWidth='sm' fullWidth>
-                    <Box sx={{ p: 3, position: 'relative' }}>
-                      {/* Close Icon */}
-                      <IconButton onClick={handleCloseStatus} sx={{ position: 'absolute', right: 16, top: 16 }}>
-                        <CloseIcon />
-                      </IconButton>
-
-                      <Typography variant='h6' sx={{ mb: 3, fontWeight: 600 }}>
-                        {selectedStatus} Leads ({leadsForStatus.length})
-                      </Typography>
-
-                      {leadsForStatus.length === 0 ? (
-                        <Typography sx={{ color: 'text.secondary' }}>No leads found.</Typography>
-                      ) : (
-                        <Box sx={{ maxHeight: '400px', overflowY: 'auto' }}>
-                          {leadsForStatus.map((lead, index) => (
-                            <Link
-                              href={`/view/lead-form/${encodeURIComponent(encryptCryptoRes(lead.lead_id))}`}
-                              style={{ textDecoration: 'none' }}
-                            >
-                              <Box
-                                key={index}
-                                sx={{
-                                  borderRadius: 2,
-                                  border: '1px solid #eee',
-                                  p: 2,
-                                  mb: 1,
-                                  transition: '0.3s',
-                                  '&:hover': {
-                                    boxShadow: 3,
-                                    backgroundColor: '#f9f9f9'
-                                  }
-                                }}
-                              >
-                                <Typography variant='subtitle1' sx={{ fontWeight: 600 }}>
-                                  {lead.values?.Company || 'Unnamed Company'}
-                                </Typography>
-                                <Typography variant='body2' color='text.secondary' sx={{ mt: 0.5 }}>
-                                  {lead.values?.City ? `City: ${lead.values.City}` : 'City: N/A'}
-                                </Typography>
-                                {lead.values?.Phone && (
-                                  <Typography variant='body2' color='text.secondary' sx={{ mt: 0.5 }}>
-                                    Phone: {lead.values.Phone}
-                                  </Typography>
-                                )}
-                                {lead.values?.Email && (
-                                  <Typography variant='body2' color='text.secondary' sx={{ mt: 0.5 }}>
-                                    Email: {lead.values.Email}
-                                  </Typography>
-                                )}
-                              </Box>
-                            </Link>
-                          ))}
-                        </Box>
-                      )}
-                    </Box>
-                  </Dialog>
                 </Grid>
               </Fade>
             ))}
       </Grid>
+
+      <Dialog open={openStatus} onClose={handleCloseStatus} maxWidth='sm' fullWidth>
+        <Box sx={{ p: 3, position: 'relative' }}>
+          {/* Close Icon */}
+          <IconButton onClick={handleCloseStatus} sx={{ position: 'absolute', right: 16, top: 16 }}>
+            <CloseIcon />
+          </IconButton>
+
+          <Typography variant='h6' sx={{ mb: 3, fontWeight: 600 }}>
+            {selectedStatus} Leads ({leadsForStatus.length})
+          </Typography>
+
+          {leadsForStatus.length === 0 ? (
+            <Typography sx={{ color: 'text.secondary' }}>No leads found.</Typography>
+          ) : (
+            <Box sx={{ maxHeight: '400px', overflowY: 'auto' }}>
+              {leadsForStatus.map((lead, index) => (
+                <Link
+                  href={`/view/lead-form/${encodeURIComponent(encryptCryptoRes(lead.lead_id))}`}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <Box
+                    key={index}
+                    sx={{
+                      borderRadius: 2,
+                      border: '1px solid #eee',
+                      p: 2,
+                      mb: 1,
+                      transition: '0.3s',
+                      '&:hover': {
+                        boxShadow: 3,
+                        backgroundColor: '#f9f9f9'
+                      }
+                    }}
+                  >
+                    <Typography variant='subtitle1' sx={{ fontWeight: 600 }}>
+                      {lead.values?.Company || 'Unnamed Company'}
+                    </Typography>
+                    <Typography variant='body2' color='text.secondary' sx={{ mt: 0.5 }}>
+                      {lead.values?.City ? `City: ${lead.values.City}` : 'City: N/A'}
+                    </Typography>
+                    {lead.values?.Phone && (
+                      <Typography variant='body2' color='text.secondary' sx={{ mt: 0.5 }}>
+                        Phone: {lead.values.Phone}
+                      </Typography>
+                    )}
+                    {lead.values?.Email && (
+                      <Typography variant='body2' color='text.secondary' sx={{ mt: 0.5 }}>
+                        Email: {lead.values.Email}
+                      </Typography>
+                    )}
+                  </Box>
+                </Link>
+              ))}
+            </Box>
+          )}
+        </Box>
+      </Dialog>
     </>
   )
 }
