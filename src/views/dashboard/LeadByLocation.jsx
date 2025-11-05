@@ -40,11 +40,11 @@ const LeadByLocation = ({ viewType, dataFilter, loading }) => {
     sales: info.count,
     leads: info.leads, // save leads for click
     trend: 'up',
-    trendPercentage: '0%',
+    trendPercentage: '0%'
   }))
 
   const handleOpenDialog = (state, leads) => {
-    console.log(leads,"<<< LLLLLL")
+    console.log(leads, '<<< LLLLLL')
     setSelectedState(state)
     setSelectedLeads(leads)
     setOpenDialog(true)
@@ -67,7 +67,7 @@ const LeadByLocation = ({ viewType, dataFilter, loading }) => {
             flexDirection: 'column',
             gap: 1,
             maxHeight: 350,
-            overflowY: 'auto',
+            overflowY: 'auto'
           }}
         >
           {loading ? (
@@ -134,25 +134,26 @@ const LeadByLocation = ({ viewType, dataFilter, loading }) => {
       {/* Dialog for selected leads */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth='sm' fullWidth>
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span>{selectedState} Leads ({selectedLeads.length})</span>
+          <span>
+            {selectedState} Leads ({selectedLeads.length})
+          </span>
           <IconButton onClick={handleCloseDialog}>
             <CloseIcon />
           </IconButton>
         </DialogTitle>
         <DialogContent dividers sx={{ maxHeight: 400, overflowY: 'auto' }}>
           {selectedLeads.map((lead, idx) => (
-            <Link 
-            href={`/view/lead-form/${encodeURIComponent(encryptCryptoRes(lead.lead_id))}`}
-                                        style={{ textDecoration: 'none' }}
+            <Link
+              href={`/view/lead-form/${encodeURIComponent(encryptCryptoRes(lead.lead_id))}`}
+              style={{ textDecoration: 'none' }}
             >
-               <div key={idx} className='border-b border-gray-200 py-2'>
-              <Typography variant='subtitle2'>{lead.values?.Company || 'Unnamed Company'}</Typography>
-              <Typography variant='caption' color='text.secondary'>
-                {lead.values?.City ? `City: ${lead.values.City}` : ''}
-              </Typography>
-            </div>
+              <div key={idx} className='border-b border-gray-200 py-2'>
+                <Typography variant='subtitle2'>{lead.values?.Company || 'Unnamed Company'}</Typography>
+                <Typography variant='caption' color='text.secondary'>
+                  {lead.values?.City ? `City: ${lead.values.City}` : ''}
+                </Typography>
+              </div>
             </Link>
-           
           ))}
         </DialogContent>
       </Dialog>

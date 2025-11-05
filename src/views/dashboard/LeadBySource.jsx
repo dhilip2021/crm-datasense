@@ -135,29 +135,56 @@ const LeadBySource = () => {
       const json = await res.json()
       if (json.success) {
         const leads = json.data || []
+        console.log(leads, 'leads')
+
+        // Step 1: Count leads by source
         const sourceCounts = leads.reduce((acc, lead) => {
-          const src = lead?.values?.['Lead Source'] || 'Unknown'
+          const src = lead?.values?.['Lead Source']?.trim() || 'Unknown'
           acc[src] = (acc[src] || 0) + 1
           return acc
         }, {})
 
-        const updatedLeadsData = (leadSource.length > 0 ? leadSource : Object.keys(sourceCounts))
-          .map(source => ({
+        // Step 2: Define known sources with custom logos
+        const logoMap = {
+          facebook: '/images/social/facebook.png',
+          linkedin: '/images/social/linkedin.png',
+          whatsapp: '/images/social/whatsapp.png',
+          referral: '/images/social/employee_referel.png',
+          cold: '/images/social/cold_call.png'
+        }
+
+        // Step 3: Prepare final list
+        const knownSources = Object.keys(sourceCounts).filter(
+          src => src.toLowerCase() === 'facebook' || src.toLowerCase() === 'linkedin'
+        )
+
+        const updatedLeadsData = []
+
+        // Add known sources first
+        knownSources.forEach(source => {
+          updatedLeadsData.push({
             title: source,
             subtitle: `${source} Leads`,
-            leads: sourceCounts[source] || 0,
-            logo: source.toLowerCase().includes('whatsapp')
-              ? '/images/social/whatsapp.png'
-              : source.toLowerCase().includes('linkedin')
-                ? '/images/social/linkedin.png'
-                : source.toLowerCase().includes('referral')
-                  ? '/images/social/employee_referel.png'
-                  : source.toLowerCase().includes('cold')
-                    ? '/images/social/cold_call.png'
-                    : '/images/social/advertisement.png'
-          }))
-          .filter(item => item.leads > 0)
+            leads: sourceCounts[source],
+            logo: logoMap[source.toLowerCase()] || '/images/social/advertisement.png'
+          })
+        })
 
+        // Step 4: Count "Others" = all remaining or unknown sources
+        const otherLeadsCount = Object.keys(sourceCounts)
+          .filter(src => !knownSources.includes(src))
+          .reduce((sum, src) => sum + sourceCounts[src], 0)
+
+        if (otherLeadsCount > 0) {
+          updatedLeadsData.push({
+            title: 'Others',
+            subtitle: 'Others Leads',
+            leads: otherLeadsCount,
+            logo: '/images/social/advertisement.png'
+          })
+        }
+
+        console.log(updatedLeadsData, 'updatedLeadsData')
         setLeadSourceData(updatedLeadsData)
       }
     } catch (err) {
@@ -200,33 +227,63 @@ const LeadBySource = () => {
         headers: header
       })
       const json = await res.json()
+
       if (json.success) {
-        const leads = json.data || []
-        const sourceCounts = leads.reduce((acc, lead) => {
-          const src = lead?.values?.['Lead Source'] || 'Unknown'
-          acc[src] = (acc[src] || 0) + 1
-          return acc
-        }, {})
+  const leads = json.data || []
 
-        const updatedLeadsData = (leadSource.length > 0 ? leadSource : Object.keys(sourceCounts))
-          .map(source => ({
-            title: source,
-            subtitle: `${source} Opportunity`,
-            leads: sourceCounts[source] || 0,
-            logo: source.toLowerCase().includes('whatsapp')
-              ? '/images/social/whatsapp.png'
-              : source.toLowerCase().includes('linkedin')
-                ? '/images/social/linkedin.png'
-                : source.toLowerCase().includes('referral')
-                  ? '/images/social/employee_referel.png'
-                  : source.toLowerCase().includes('cold')
-                    ? '/images/social/cold_call.png'
-                    : '/images/social/advertisement.png'
-          }))
-          .filter(item => item.leads > 0)
+  // Step 1: Count leads by source
+  const sourceCounts = leads.reduce((acc, lead) => {
+    const src = lead?.values?.['Lead Source']?.trim() || 'Unknown'
+    acc[src] = (acc[src] || 0) + 1
+    return acc
+  }, {})
 
-        setOpportunitySourceData(updatedLeadsData)
-      }
+  // Step 2: Define known sources with custom logos
+  const logoMap = {
+    facebook: '/images/social/facebook.png',
+    linkedin: '/images/social/linkedin.png',
+    whatsapp: '/images/social/whatsapp.png',
+    referral: '/images/social/employee_referel.png',
+    cold: '/images/social/cold_call.png'
+  }
+
+  // Step 3: Prepare final list
+  const knownSources = Object.keys(sourceCounts).filter(
+    src => src.toLowerCase() === 'facebook' || src.toLowerCase() === 'linkedin'
+  )
+
+  const updatedOpportunityData = []
+
+  // Add known sources first
+  knownSources.forEach(source => {
+    updatedOpportunityData.push({
+      title: source,
+      subtitle: `${source} Leads`,
+      leads: sourceCounts[source],
+      logo: logoMap[source.toLowerCase()] || '/images/social/advertisement.png'
+    })
+  })
+
+  // Step 4: Count "Others" = all remaining or unknown sources
+  const otherLeadsCount = Object.keys(sourceCounts)
+    .filter(src => !knownSources.includes(src))
+    .reduce((sum, src) => sum + sourceCounts[src], 0)
+
+  if (otherLeadsCount > 0) {
+    updatedOpportunityData.push({
+      title: 'Others',
+      subtitle: 'Others Leads',
+      leads: otherLeadsCount,
+      logo: '/images/social/advertisement.png'
+    })
+  }
+
+  console.log(updatedOpportunityData, "updatedOpportunityData")
+  setOpportunitySourceData(updatedOpportunityData)
+}
+
+
+      
     } catch (err) {
       console.error(err)
     } finally {
@@ -288,7 +345,7 @@ const LeadBySource = () => {
       <Grid container>
         {/* 🔹 LEADS SECTION */}
         <Grid item xs={12} md={6} className='border-be md:border-be-0 md:border-ie'>
-          <CardHeader title='Leads' />
+          <CardHeader title='Leads By Source' />
           <CardContent className='flex flex-col gap-5'>
             {loading ? (
               renderSkeletons(5)
@@ -317,7 +374,7 @@ const LeadBySource = () => {
 
         {/* 🔹 OPPORTUNITY SECTION */}
         <Grid item xs={12} md={6}>
-          <CardHeader title='Opportunity' />
+          <CardHeader title='Opportunities By Source' />
           <CardContent className='flex flex-col gap-5'>
             {loading ? (
               renderSkeletons(5)
