@@ -58,6 +58,7 @@ export default function TaskList() {
     try {
       const payload = {
         organization_id,
+        form_name: 'lead-form',
         c_createdBy: selectedUsers.length > 0 ? selectedUsers : [loggedInUserId],
         priority: priority || undefined,
         status: status || undefined,
@@ -80,6 +81,9 @@ export default function TaskList() {
       const data = await res.json()
       if (data.success) {
         setTasks(data.data)
+
+        
+
       } else {
         setTasks([])
       }
@@ -228,7 +232,7 @@ export default function TaskList() {
 
         {/* 🔹 Task Views */}
         <Grid container>
-          {view === 'normal' && <NormalList loading={loading} tasks={tasks} />}
+          {view === 'normal' && <NormalList loading={loading} tasks={tasks} loggedInUserName ={loggedInUserName}/>}
           {view === 'table' && <TableTaskList loading={loading} tasks={tasks} />}
           {view === 'calendar' && (
             <CalenderList

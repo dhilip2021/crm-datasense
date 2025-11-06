@@ -19,9 +19,52 @@ import dayjs from 'dayjs'
 import Link from 'next/link'
 import { encryptCryptoRes } from '@/helper/frontendHelper'
 
+
+function extractTasksFromLeads(leads) {
+  const taskData = []
+
+  leads.forEach(lead => {
+    const leadId = lead.lead_id
+    const company = lead.values?.Company || '-'
+    const phone = lead.values?.Phone || '-'
+
+    // Check if Activity exists
+    const activities = lead.values?.Activity || []
+    activities.forEach(activityObj => {
+      const tasks = activityObj.task || []
+      tasks.forEach(task => {
+        taskData.push({
+          _id: task._id,
+          subject: task.subject,
+          dueDate: task.dueDate,
+          status: task.status || 'Unknown',
+          owner: task.owner || lead.assignedTo || '-',
+          Company: company,
+          Phone: phone,
+          priority: task.priority || '-',
+          lead_id: leadId,
+          reminderDate: task.reminderDate || '-',
+          reminderTime: task.reminderTime || '-'
+        })
+      })
+    })
+  })
+
+  return taskData
+}
+
 function TableTaskList({ loading, tasks }) {
+
+   const taskData = extractTasksFromLeads(tasks)
+
+
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(5)
+
+
+
+
+
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage)
@@ -58,7 +101,7 @@ function TableTaskList({ loading, tasks }) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {tasks
+          {taskData
             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
             .map((task, idx) => (
               <TableRow key={task._id || idx}>
@@ -120,7 +163,7 @@ function TableTaskList({ loading, tasks }) {
       {/* Pagination */}
       <TablePagination
         component="div"
-        count={tasks.length}
+        count={taskData.length}
         page={page}
         onPageChange={handleChangePage}
         rowsPerPage={rowsPerPage}

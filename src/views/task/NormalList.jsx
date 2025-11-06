@@ -37,7 +37,51 @@ const IconEnum = {
 }
 
 
-function NormalList({loading, tasks}) {
+
+function extractTasksFromLeads(leads) {
+  const taskData = []
+
+  leads.forEach(lead => {
+    const leadId = lead.lead_id
+    const company = lead.values?.Company || '-'
+    const phone = lead.values?.Phone || '-'
+     const firstName = lead.values?.['First Name'] || ''
+     const lastName = lead.values?.['Last Name'] || ''
+
+
+    // Check if Activity exists
+    const activities = lead.values?.Activity || []
+    activities.forEach(activityObj => {
+      const tasks = activityObj.task || []
+      tasks.forEach(task => {
+        taskData.push({
+          _id: task._id,
+          subject: task.subject,
+          dueDate: task.dueDate,
+          status: task.status || 'Unknown',
+          owner: task.owner || lead.assignedTo || '-',
+          Company: company,
+          firstName: firstName,
+          lastName: lastName,
+          Phone: phone,
+          priority: task.priority || '-',
+          lead_id: leadId,
+          reminderDate: task.reminderDate || '-',
+          reminderTime: task.reminderTime || '-'
+          
+          
+        })
+      })
+    })
+  })
+
+  return taskData
+}
+
+function NormalList({loading, tasks, loggedInUserName}) {
+
+  const taskData = extractTasksFromLeads(tasks)
+
   return (
             <>
           {/* 📋 Tasks */}
@@ -46,48 +90,13 @@ function NormalList({loading, tasks}) {
               <Box textAlign='center' py={4}>
                 <CircularProgress />
               </Box>
-            ) : tasks.length === 0 ? (
+            ) : taskData.length === 0 ? (
               <Typography textAlign={'center'}>No tasks found 🚫</Typography>
 
-//               <Box
-//   display="flex"
-//   flexDirection="column"
-//   alignItems="center"
-//   justifyContent="center"
-//   py={8}
-//   sx={{
-//     backgroundColor: '#ffffff',
-//     borderRadius: 3,
-//     boxShadow: 1,
-//     minHeight: 200
-//   }}
-// >
-//   <Box
-//     component="img"
-//     src="/no-tasks.svg" // Optional: an illustration image
-//     alt="No Tasks"
-//     sx={{ width: 120, mb: 2 }}
-//   />
-//   <Typography variant="h6" color="textSecondary" gutterBottom>
-//     No tasks found
-//   </Typography>
-//   <Typography variant="body2" color="textSecondary" textAlign="center">
-//     You don’t have any tasks for the selected filters or date range.
-//     <br />
-//     Try changing the filters or adding a new task.
-//   </Typography>
-//   <Button
-//     variant="contained"
-//     color="primary"
-//     sx={{ mt: 3 }}
-//     onClick={() => console.log('Open add task modal')}
-//   >
-//     + Add New Task
-//   </Button>
-// </Box>
+
             ) : (
               <Grid container spacing={2}>
-  {tasks.map((task, idx) => (
+  {taskData.map((task, idx) => (
     <Grid item xs={12} key={idx} md={4}>
        <Link
                                   href={`/view/lead-form/${encodeURIComponent(encryptCryptoRes(task['lead_id']))}`}
@@ -134,7 +143,7 @@ function NormalList({loading, tasks}) {
           </Typography>
           <Typography variant='body2' sx={{ mt: 0.5 }}>
            
-            <b>User Name:</b> {task['First Name'] }{" "}{task['Last Name']}
+            <b>User Name:</b> {task['firstName'] }{" "}{task['lastName']}
           </Typography> 
           <Typography variant='body2' sx={{ mt: 0.5 }}>
             <b>Phone:</b> {task['Phone'] || '-'}

@@ -29,12 +29,48 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import PhoneIcon from '@mui/icons-material/Phone'
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh'
 
+function extractTasksFromLeads(leads) {
+  const taskData = []
+
+  leads.forEach(lead => {
+    const leadId = lead.lead_id
+    const company = lead.values?.Company || '-'
+    const phone = lead.values?.Phone || '-'
+
+    // Check if Activity exists
+    const activities = lead.values?.Activity || []
+    activities.forEach(activityObj => {
+      const tasks = activityObj.task || []
+      tasks.forEach(task => {
+        taskData.push({
+          _id: task._id,
+          subject: task.subject,
+          dueDate: task.dueDate,
+          status: task.status || 'Unknown',
+          owner: task.owner || lead.assignedTo || '-',
+          Company: company,
+          Phone: phone,
+          priority: task.priority || '-',
+          lead_id: leadId,
+          reminderDate: task.reminderDate || '-',
+          reminderTime: task.reminderTime || '-'
+        })
+      })
+    })
+  })
+
+  return taskData
+}
+
 export default function GoogleCalandarList({ tasks, fetchTasks }) {
+  const taskData = extractTasksFromLeads(tasks)
+
   const [open, setOpen] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState(null)
 
   // 🔹 Map tasks to FullCalendar events
-  const events = tasks.map(task => ({
+
+  const events = taskData.map(task => ({
     id: task._id,
     title: task.subject || 'Untitled Task',
     start: task.dueDate,
@@ -46,18 +82,8 @@ export default function GoogleCalandarList({ tasks, fetchTasks }) {
       priority: task.priority,
       lead_id: task.lead_id
     },
-    backgroundColor:
-      task.status === 'Completed'
-        ? '#43a047'
-        : task.status === 'In Progress'
-        ? '#fb8c00'
-        : '#9e9e9e',
-    borderColor:
-      task.priority === 'High'
-        ? '#e53935'
-        : task.priority === 'Medium'
-        ? '#fdd835'
-        : '#43a047',
+    backgroundColor: task.status === 'Completed' ? '#43a047' : task.status === 'In Progress' ? '#fb8c00' : '#9e9e9e',
+    borderColor: task.priority === 'High' ? '#e53935' : task.priority === 'Medium' ? '#fdd835' : '#43a047',
     textColor: '#fff'
   }))
 
@@ -87,12 +113,7 @@ export default function GoogleCalandarList({ tasks, fetchTasks }) {
             sx={{
               height: 18,
               fontSize: '0.65rem',
-              bgcolor:
-                status === 'Completed'
-                  ? '#388e3c'
-                  : status === 'In Progress'
-                  ? '#ffa726'
-                  : '#9e9e9e',
+              bgcolor: status === 'Completed' ? '#388e3c' : status === 'In Progress' ? '#ffa726' : '#9e9e9e',
               color: '#fff'
             }}
           />
@@ -102,12 +123,7 @@ export default function GoogleCalandarList({ tasks, fetchTasks }) {
             sx={{
               height: 18,
               fontSize: '0.65rem',
-              bgcolor:
-                priority === 'High'
-                  ? '#d32f2f'
-                  : priority === 'Medium'
-                  ? '#f9a825'
-                  : '#2e7d32',
+              bgcolor: priority === 'High' ? '#d32f2f' : priority === 'Medium' ? '#f9a825' : '#2e7d32',
               color: '#fff'
             }}
           />
@@ -120,9 +136,7 @@ export default function GoogleCalandarList({ tasks, fetchTasks }) {
   const fetchTasksForRange = async dateInfo => {
     const formatDate = date => {
       const d = new Date(date)
-      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
-        d.getDate()
-      ).padStart(2, '0')}`
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
     }
 
     const firstDay = dateInfo.view.currentStart
@@ -233,8 +247,8 @@ export default function GoogleCalandarList({ tasks, fetchTasks }) {
                       selectedEvent.priority === 'High'
                         ? '#e53935'
                         : selectedEvent.priority === 'Medium'
-                        ? '#fbc02d'
-                        : '#43a047',
+                          ? '#fbc02d'
+                          : '#43a047',
                     color: '#fff'
                   }}
                 />
@@ -251,8 +265,8 @@ export default function GoogleCalandarList({ tasks, fetchTasks }) {
                     selectedEvent.status === 'Completed'
                       ? 'success'
                       : selectedEvent.status === 'In Progress'
-                      ? 'warning'
-                      : 'default'
+                        ? 'warning'
+                        : 'default'
                   }
                   sx={{ mt: 0.5 }}
                 />
