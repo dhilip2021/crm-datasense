@@ -230,16 +230,18 @@ const LeadTable = () => {
     }
   }
 
+  
+
   const fetchData = async () => {
     setLoading(true)
 
     const form_name = 'lead-form'
 
-    const query = new URLSearchParams({
-      organization_id,
-      form_name,
+    const payload = {
       page: page + 1,
       limit,
+      organization_id,
+      form_name,
       ...(filters.search && { search: filters.search }),
       ...(filters.status && { status: filters.status }),
       ...(filters.touch && { touch: filters.touch }),
@@ -250,9 +252,9 @@ const LeadTable = () => {
       ...(filters.value && { value: filters.value }),
       ...(filters.fromDate && { from: dayjs(filters.fromDate).format('YYYY-MM-DD') }),
       ...(filters.toDate && { to: dayjs(filters.toDate).format('YYYY-MM-DD') }),
-      ...(filters.fromFollowDate && { from: dayjs(filters.fromFollowDate).format('YYYY-MM-DD') }),
-      ...(filters.toFollowDate && { to: dayjs(filters.toFollowDate).format('YYYY-MM-DD') })
-    })
+      ...(filters.fromFollowDate && { fromFollow: dayjs(filters.fromFollowDate).format('YYYY-MM-DD') }),
+      ...(filters.toFollowDate && { toFollow: dayjs(filters.toFollowDate).format('YYYY-MM-DD') })
+    }
 
     const header = {
       'Content-Type': 'application/json',
@@ -260,10 +262,12 @@ const LeadTable = () => {
     }
 
     try {
-      const res = await fetch(`/api/v1/admin/lead-form/list?${query}`, {
-        method: 'GET',
-        headers: header
+      const res = await fetch(`/api/v1/admin/lead-form/list`, {
+        method: 'POST',
+        headers: header,
+        body: JSON.stringify(payload)
       })
+
       const json = await res.json()
       if (json.success) {
         setData(json.data)
@@ -277,50 +281,9 @@ const LeadTable = () => {
     }
   }
 
-  const fetchFilterData = async () => {
-    setLoading(true)
-    const organization_id = Cookies.get('organization_id')
-    const form_name = 'lead-form'
+ 
 
-    const query = new URLSearchParams({
-      organization_id,
-      form_name,
-      page: page + 1,
-      limit,
-      ...(filters.search && { search: filters.search }),
-      ...(filters.status && { status: filters.status }),
-      ...(filters.touch && { touch: filters.touch }),
-      ...(filters.source && { source: filters.source }),
-      ...(filters.assign && { assign: filters.assign }),
-      ...(filters.region && { region: filters.region }),
-      ...(filters.rep && { rep: filters.rep }),
-      ...(filters.value && { value: filters.value }),
-      ...(filters.fromDate && { from: dayjs(filters.fromDate).format('YYYY-MM-DD') }),
-      ...(filters.toDate && { to: dayjs(filters.toDate).format('YYYY-MM-DD') }),
-      ...(filters.fromFollowDate && { fromFollowDate: dayjs(filters.fromFollowDate).format('YYYY-MM-DD') }),
-      ...(filters.toFollowDate && { toFollowDate: dayjs(filters.toFollowDate).format('YYYY-MM-DD') })
-    })
-
-    try {
-      const header = {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken}`
-      }
-      const res = await fetch(`/api/v1/admin/lead-form/list?${query}`, {
-        method: 'GET',
-        headers: header
-      })
-      const json = await res.json()
-      if (json.success) {
-        setData(json.data)
-        setTotal(json.total)
-      }
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
-  }
+ 
 
   const handlePDFClick = event => {
     setAnchorPdfEl(event.currentTarget)
@@ -398,20 +361,16 @@ const LeadTable = () => {
     }
   }
 
-  useEffect(() => {
-    if (!fetched && sections) {
-      console.log('calling 3333')
-      fetchData()
-      setFetched(true)
-    }
-  }, [page, limit])
-
 
 
   useEffect(() => {
     fetchFormTemplate()
     getUserListFn()
     setFetched(false)
+    if (!fetched && sections) {
+      fetchData()
+      setFetched(true)
+    }
   }, [page, limit])
 
   useEffect(() => {
@@ -425,11 +384,10 @@ const LeadTable = () => {
     // ✅ Debounced API call — fires only once after 500ms
     const handler = setTimeout(() => {
       if (hasOtherFilters || hasDateRange || hasSearch || hasDateFollowRange) {
-      
-        fetchFilterData()
+        fetchData()
       } else {
         if (!fromDate && !toDate && !fromFollowDate && !toFollowDate) {
-          fetchFilterData()
+          fetchData()
         }
       }
     }, 500)
@@ -442,107 +400,101 @@ const LeadTable = () => {
     <Box px={2} py={2}>
       {/* 🔹 Header */}
 
-     <Grid container alignItems="center" justifyContent="space-between" mb={3}>
-  {/* Left: Title */}
-  <Grid item>
-    <Typography variant="h6" fontWeight="bold">
-      Leads
-    </Typography>
-  </Grid>
+      <Grid container alignItems='center' justifyContent='space-between' mb={3}>
+        {/* Left: Title */}
+        <Grid item>
+          <Typography variant='h6' fontWeight='bold'>
+            Leads
+          </Typography>
+        </Grid>
 
-  {/* Right: Actions */}
-  <Grid item>
-    <Stack direction="row" alignItems="center" spacing={1.5}>
-      {/* Export */}
-      <Button
-        variant="outlined"
-        size="small"
-        endIcon={<KeyboardArrowDownIcon />}
-        onClick={handleClick}
-      >
-        Export
-      </Button>
-      <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-        <MenuItem
-          onClick={() => {
-            handleExcelClick()
-            handleClose()
-          }}
-        >
-          Export Excel
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            handlePDFClick()
-            handleClose()
-          }}
-        >
-          Export PDF
-        </MenuItem>
-      </Menu>
+        {/* Right: Actions */}
+        <Grid item>
+          <Stack direction='row' alignItems='center' spacing={1.5}>
+            {/* Export */}
+            <Button variant='outlined' size='small' endIcon={<KeyboardArrowDownIcon />} onClick={handleClick}>
+              Export
+            </Button>
+            <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+              <MenuItem
+                onClick={() => {
+                  handleExcelClick()
+                  handleClose()
+                }}
+              >
+                Export Excel
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  handlePDFClick()
+                  handleClose()
+                }}
+              >
+                Export PDF
+              </MenuItem>
+            </Menu>
 
-      {/* Import */}
-      <Button
-        variant="outlined"
-        size="small"
-        startIcon={<CloudUploadIcon />}
-        component="label"
-        sx={{
-          color: '#1976d2',
-          borderColor: '#E0E0E0',
-          bgcolor: '#fff',
-          '&:hover': { bgcolor: '#f5f5f5' }
-        }}
-      >
-        Import
-        <input
-          type="file"
-          hidden
-          accept=".csv,.xlsx"
-          onChange={e => {
-            const file = e.target.files[0]
-            if (file) handleUpload(file)
-          }}
-        />
-      </Button>
+            {/* Import */}
+            <Button
+              variant='outlined'
+              size='small'
+              startIcon={<CloudUploadIcon />}
+              component='label'
+              sx={{
+                color: '#1976d2',
+                borderColor: '#E0E0E0',
+                bgcolor: '#fff',
+                '&:hover': { bgcolor: '#f5f5f5' }
+              }}
+            >
+              Import
+              <input
+                type='file'
+                hidden
+                accept='.csv,.xlsx'
+                onChange={e => {
+                  const file = e.target.files[0]
+                  if (file) handleUpload(file)
+                }}
+              />
+            </Button>
 
-      {/* Sample Data */}
-      <Button
-        variant="outlined"
-        size="small"
-        startIcon={<CloudDownloadIcon />}
-        sx={{
-          color: '#388e3c',
-          borderColor: '#E0E0E0',
-          bgcolor: '#fff',
-          '&:hover': { bgcolor: '#f1f8e9' }
-        }}
-        href="/sample/sample_lead_data.xlsx"
-        download
-      >
-         Sample Data
-      </Button>
+            {/* Sample Data */}
+            <Button
+              variant='outlined'
+              size='small'
+              startIcon={<CloudDownloadIcon />}
+              sx={{
+                color: '#388e3c',
+                borderColor: '#E0E0E0',
+                bgcolor: '#fff',
+                '&:hover': { bgcolor: '#f1f8e9' }
+              }}
+              href='/sample/sample_lead_data.xlsx'
+              download
+            >
+              Sample Data
+            </Button>
 
-      {/* New Lead */}
-      <Button
-        href="/app/lead-form"
-        variant="contained"
-        size="small"
-        sx={{
-          bgcolor: '#009cde',
-          color: '#fff',
-          fontWeight: 500,
-          borderRadius: '6px',
-          '&:hover': { bgcolor: '#007bb5' }
-        }}
-        disabled={loader}
-      >
-        + New Lead
-      </Button>
-    </Stack>
-  </Grid>
-</Grid>
-
+            {/* New Lead */}
+            <Button
+              href='/app/lead-form'
+              variant='contained'
+              size='small'
+              sx={{
+                bgcolor: '#009cde',
+                color: '#fff',
+                fontWeight: 500,
+                borderRadius: '6px',
+                '&:hover': { bgcolor: '#007bb5' }
+              }}
+              disabled={loader}
+            >
+              + New Lead
+            </Button>
+          </Stack>
+        </Grid>
+      </Grid>
 
       <Grid container spacing={2}>
         {/* 🔹 Left Column: Filters */}
@@ -556,7 +508,7 @@ const LeadTable = () => {
               placeholder='Search'
               value={filters.search}
               onChange={e => setFilters({ ...filters, search: e.target.value })}
-              onKeyDown={e => e.key === 'Enter' && fetchFilterData()}
+              onKeyDown={e => e.key === 'Enter' && fetchData()}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position='start'>
@@ -574,6 +526,16 @@ const LeadTable = () => {
               value={filters.status}
               onChange={e => setFilters({ ...filters, status: e.target.value })}
               sx={{ minWidth: 120, maxWidth: 150, bgcolor: 'white' }}
+                SelectProps={{
+    MenuProps: {
+      PaperProps: {
+        style: {
+          maxHeight: 250, // 👈 Fixed dropdown height (you can adjust this)
+          overflowY: 'auto' // 👈 Enables vertical scrolling
+        }
+      }
+    }
+  }}
             >
               <MenuItem value=''>All</MenuItem>
               {uniqueStatus.map(status => (
@@ -593,6 +555,16 @@ const LeadTable = () => {
               value={filters.touch}
               onChange={e => setFilters({ ...filters, touch: e.target.value })}
               sx={{ minWidth: 120, maxWidth: 150, bgcolor: 'white' }}
+                SelectProps={{
+    MenuProps: {
+      PaperProps: {
+        style: {
+          maxHeight: 250, // 👈 Fixed dropdown height (you can adjust this)
+          overflowY: 'auto' // 👈 Enables vertical scrolling
+        }
+      }
+    }
+  }}
             >
               <MenuItem value=''>All</MenuItem>
               {['touch', 'untouch'].map(touch => (
@@ -611,6 +583,16 @@ const LeadTable = () => {
               value={filters.assign}
               onChange={e => setFilters({ ...filters, assign: e.target.value })}
               sx={{ minWidth: 140, maxWidth: 160, bgcolor: 'white' }}
+                SelectProps={{
+    MenuProps: {
+      PaperProps: {
+        style: {
+          maxHeight: 250, // 👈 Fixed dropdown height (you can adjust this)
+          overflowY: 'auto' // 👈 Enables vertical scrolling
+        }
+      }
+    }
+  }}
             >
               <MenuItem value=''>All</MenuItem>
               {userList.map(u => (
@@ -628,6 +610,16 @@ const LeadTable = () => {
               value={filters.source}
               onChange={e => setFilters({ ...filters, source: e.target.value })}
               sx={{ minWidth: 120, maxWidth: 150, bgcolor: 'white' }}
+                SelectProps={{
+    MenuProps: {
+      PaperProps: {
+        style: {
+          maxHeight: 250, // 👈 Fixed dropdown height (you can adjust this)
+          overflowY: 'auto' // 👈 Enables vertical scrolling
+        }
+      }
+    }
+  }}
             >
               <MenuItem value=''>All</MenuItem>
               {uniqueSources.map(source => (

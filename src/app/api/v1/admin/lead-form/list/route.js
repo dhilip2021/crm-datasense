@@ -182,107 +182,185 @@ export async function POST(req) {
 
   try {
     const body = await req.json()
-    const { organization_id, c_createdBy, from, to, priority, status, page = 1, limit = 10 } = body
+    const {
+      organization_id,
+      form_name,
+      search = '',
+      status = '',
+      touch = '',
+      assign = '',
+      source = '',
+      region = '',
+      from,
+      to,
+      fromFollow,
+      toFollow,
+      page = 1,
+      limit = 10
+    } = body
 
-    // 🟢 STEP 1: Base query
-    const matchQuery = {}
-    if (organization_id) matchQuery.organization_id = organization_id
-
-    if (Array.isArray(c_createdBy) && c_createdBy.length > 0) {
-      matchQuery.c_createdBy = { $in: c_createdBy }
-    } else if (c_createdBy) {
-      matchQuery.c_createdBy = c_createdBy
+    // 🟢 STEP 1: Find current user role
+    const userRole = await UserRole.findOne({ c_role_id: verified.data.c_role_id }).lean()
+    if (!userRole) {
+      return NextResponse.json({ success: false, message: 'Invalid role' }, { status: 403 })
     }
 
-    // 🟢 STEP 2: Aggregation
-    const pipeline = [
-      { $match: matchQuery },
-      { $unwind: '$values.Activity' },
-      { $unwind: '$values.Activity.task' },
+    const currentPriority = userRole.c_role_priority
 
-      // 🔥 Ensure dueDate is always a Date
-      {
-        $addFields: {
-          'values.Activity.task.dueDate': {
-            $cond: {
-              if: { $eq: [{ $type: '$values.Activity.task.dueDate' }, 'date'] },
-              then: '$values.Activity.task.dueDate',
-              else: { $toDate: '$values.Activity.task.dueDate' }
-            }
-          }
-        }
-      },
+    // 🟢 STEP 2: Build base query
+    let query = {}
 
-      // Flatten structure
-      {
-        $replaceRoot: {
-          newRoot: {
-            $mergeObjects: [
-              '$values.Activity.task',
-              {
-                organization_id: '$organization_id',
-                lead_id: '$lead_id',
-                lead_name: '$lead_name',
-                form_name: '$form_name',
-                c_createdBy: '$c_createdBy',
-                'First Name': '$values.First Name',
-                'Last Name': '$values.Last Name',
-                Company: '$values.Company',
-                Phone: '$values.Phone'
-              }
-            ]
-          }
-        }
+    if (userRole.c_role_name === 'Super Admin') {
+      if (form_name) query.form_name = form_name
+    } else {
+      if (!organization_id || !form_name) {
+        return NextResponse.json({ success: false, message: 'Missing organization_id or form_name' }, { status: 400 })
       }
-    ]
 
-    // 🟢 STEP 3: Filters
-    const taskFilters = []
-    if (priority) taskFilters.push({ priority })
-    if (status) taskFilters.push({ status })
+      query.organization_id = organization_id
+      query.form_name = form_name
+
+      const lowerRoles = await UserRole.find({ c_role_priority: { $gt: currentPriority } })
+        .select('c_role_id')
+        .lean()
+
+      let lowerRoleIds = lowerRoles.map(r => r.c_role_id)
+
+      query.$or = [
+        { c_createdBy: verified.data.user_id },
+        { c_role_id: { $in: lowerRoleIds } },
+        { 'values.Assigned To': String(verified.data.user_id) }
+      ]
+    }
+
+    // 🔍 Filters
+    if (search) {
+      const searchFilter = {
+        $or: [
+          { lead_id: { $regex: search, $options: 'i' } },
+          { 'values.First Name': { $regex: search, $options: 'i' } },
+          { 'values.Last Name': { $regex: search, $options: 'i' } },
+          { 'values.Company': { $regex: search, $options: 'i' } },
+          { 'values.Email': { $regex: search, $options: 'i' } },
+          { 'values.Phone': { $regex: search, $options: 'i' } },
+          { 'values.City': { $regex: search, $options: 'i' } },
+          { 'values.Job Title': { $regex: search, $options: 'i' } },
+          { 'values.Notes.note': { $regex: search, $options: 'i' } },
+          { 'values.Notes.title': { $regex: search, $options: 'i' } }
+        ]
+      }
+      query.$and = query.$and || []
+      query.$and.push(searchFilter)
+    }
+
+    if (status) {
+      query.$and = query.$and || []
+      query.$and.push({ 'values.Lead Status': { $regex: status, $options: 'i' } })
+    }
+
+    if (touch) {
+      query.$and = query.$and || []
+      query.$and.push({ lead_touch: touch })
+    }
+
+    if (source) {
+      query.$and = query.$and || []
+      query.$and.push({ 'values.Lead Source': { $regex: source, $options: 'i' } })
+    }
+
+    if (assign) {
+      query.$and = query.$and || []
+      query.$and.push({ 'values.Assigned To': { $regex: assign, $options: 'i' } })
+    }
+
+    if (region) {
+      query.$and = query.$and || []
+      query.$and.push({ 'values.Region': { $regex: region, $options: 'i' } })
+    }
+
     if (from || to) {
       const dateFilter = {}
-      if (from) {
-        const start = new Date(from)
-        start.setUTCHours(0, 0, 0, 0)
-        dateFilter.$gte = start
-      }
-      if (to) {
-        const end = new Date(to)
-        end.setUTCHours(23, 59, 59, 999)
-        dateFilter.$lte = end
-      }
-      taskFilters.push({ dueDate: dateFilter })
+      if (from) dateFilter.$gte = new Date(from)
+      if (to) dateFilter.$lte = new Date(to + 'T23:59:59')
+      query.$and = query.$and || []
+      query.$and.push({ createdAt: dateFilter })
     }
 
-    if (taskFilters.length > 0) {
-      pipeline.push({ $match: { $and: taskFilters } })
+    if (fromFollow || toFollow) {
+      const fromDate = fromFollow ? new Date(fromFollow) : null
+      const toDate = toFollow ? new Date(toFollow + 'T23:59:59') : null
+
+      query.$and = query.$and || []
+      query.$and.push({
+        $expr: {
+          $and: [
+            fromDate ? { $gte: [{ $toDate: '$values.Next Follow-up Date' }, fromDate] } : {},
+            toDate ? { $lte: [{ $toDate: '$values.Next Follow-up Date' }, toDate] } : {}
+          ].filter(Boolean)
+        }
+      })
     }
 
-    // 🟢 STEP 4: Pagination + Sorting
-    pipeline.push({ $sort: { dueDate: 1 } })
-    pipeline.push({ $skip: (page - 1) * limit })
-    pipeline.push({ $limit: limit })
+    // 🟢 STEP 3: Main Aggregation (same as GET)
+    const pipeline = [
+      { $match: query },
+      { $sort: { lead_flag: -1, updatedAt: -1, createdAt: -1 } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'c_createdBy',
+          foreignField: 'user_id',
+          as: 'createdUser'
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          let: { assignedId: '$values.Assigned To' },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$user_id', '$$assignedId'] } } },
+            { $project: { user_name: 1, user_id: 1, _id: 0 } }
+          ],
+          as: 'assignedTo'
+        }
+      },
+      {
+        $addFields: {
+          createdByName: { $arrayElemAt: ['$createdUser.user_name', 0] },
+          assignedTo: { $arrayElemAt: ['$assignedTo.user_name', 0] }
+        }
+      },
+      {
+        $project: {
+          __v: 0,
+          createdUser: 0
+        }
+      },
+      { $skip: (page - 1) * limit },
+      { $limit: limit }
+    ]
 
-    // 🟢 STEP 5: Execute main query
-    const tasks = await Leadform.aggregate(pipeline)
+    const data = await Leadform.aggregate(pipeline)
 
-    // 🟢 STEP 6: Count total (without skip/limit/sort)
-    const countPipeline = pipeline.filter(stage => !('$skip' in stage || '$limit' in stage || '$sort' in stage))
-    countPipeline.push({ $count: 'total' })
+    // 🟢 Count total
+    const countPipeline = [
+      { $match: query },
+      { $count: 'total' }
+    ]
     const countResult = await Leadform.aggregate(countPipeline)
     const total = countResult[0]?.total || 0
 
     return NextResponse.json({
       success: true,
+      total,
       page,
       limit,
-      total,
       totalPages: Math.ceil(total / limit),
-      data: tasks
+      data
     })
   } catch (error) {
-    console.error('⨯ Task list error:', error)
+    console.error('⨯ Lead form list POST error:', error)
     return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
   }
 }
+
