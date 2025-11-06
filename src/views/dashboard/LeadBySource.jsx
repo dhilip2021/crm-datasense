@@ -68,6 +68,14 @@ const LeadBySource = () => {
         fromDate: today.subtract(6, 'month').startOf('month').format('YYYY-MM-DD'),
         toDate: today.format('YYYY-MM-DD')
       }
+    
+    if (viewType === 'Last 1 Year') {
+    const fromDate = today.subtract(1, 'year').startOf('month') // 1 year ago
+    return {
+      fromDate: fromDate.format('YYYY-MM-DD'),
+      toDate: today.format('YYYY-MM-DD')
+    }
+  }
     return { fromDate: today.subtract(7, 'day').format('YYYY-MM-DD'), toDate: today.format('YYYY-MM-DD') }
   }
 
@@ -337,7 +345,7 @@ const LeadBySource = () => {
           {viewType}
         </Button>
         <Menu anchorEl={anchorViewEl} open={view} onClose={handleViewClose}>
-          {['Today', 'This Week', 'This Month', 'Last Month', 'Last 6 Months'].map(opt => (
+          {['Today', 'This Week', 'This Month', 'Last Month', 'Last 6 Months', 'Last 1 Year'].map(opt => (
             <MenuItem
               key={opt}
               onClick={() => {

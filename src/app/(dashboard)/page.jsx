@@ -64,6 +64,14 @@ const DashboardAnalytics = () => {
         toDate: today.subtract(1, 'month').endOf('month')
       }
     if (type === 'Last 6 Months') return { fromDate: today.subtract(6, 'month').startOf('month'), toDate: today }
+   
+    if (type === 'Last 1 Year') {
+    const fromDate = today.subtract(1, 'year').startOf('month') // 1 year ago
+    return {
+      fromDate: fromDate.format('YYYY-MM-DD'),
+      toDate: today.format('YYYY-MM-DD')
+    }
+  }
     return { fromDate: today.subtract(7, 'day'), toDate: today }
   }
 

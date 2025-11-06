@@ -196,6 +196,14 @@ const Opportunity = () => {
       }
     }
 
+     if (viewType === 'Last 1 Year') {
+    const fromDate = today.subtract(1, 'year').startOf('month') // 1 year ago
+    return {
+      fromDate: fromDate.format('YYYY-MM-DD'),
+      toDate: today.format('YYYY-MM-DD')
+    }
+  }
+
     // fallback (last 7 days)
     return {
       fromDate: today.subtract(7, 'day').format('YYYY-MM-DD'),
@@ -400,6 +408,7 @@ const Opportunity = () => {
             <MenuItem onClick={() => handleChange('This Month')}>This Month</MenuItem>
             <MenuItem onClick={() => handleChange('Last Month')}>Last Month</MenuItem>
             <MenuItem onClick={() => handleChange('Last 6 Months')}>Last 6 Months</MenuItem>
+            <MenuItem onClick={() => handleChange('Last 1 Year')}>Last 1 Year</MenuItem>
           </Menu>
         </Box>
       </Grid>

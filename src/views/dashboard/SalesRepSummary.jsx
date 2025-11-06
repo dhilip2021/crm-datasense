@@ -42,7 +42,7 @@ export default function SalesRepSummary({
   const [filteredLeads, setFilteredLeads] = useState([])
 
   const leadStatusList = fieldConfig?.['Lead Status'] || []
-  const dateRangeOptions = ['Today', 'This Week', 'This Month', 'Last Month', 'Last 6 Months']
+  const dateRangeOptions = ['Today', 'This Week', 'This Month', 'Last Month', 'Last 6 Months','Last 1 Year']
 
   // 🧮 Compute summary dynamically for each Sales Rep
   const repSummary = useMemo(() => {

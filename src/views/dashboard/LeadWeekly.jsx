@@ -119,6 +119,14 @@ export default function LeadWeekly() {
           toDate: today.format('YYYY-MM-DD')
         }
       }
+
+       if (viewType === 'Last 1 Year') {
+    const fromDate = today.subtract(1, 'year').startOf('month') // 1 year ago
+    return {
+      fromDate: fromDate.format('YYYY-MM-DD'),
+      toDate: today.format('YYYY-MM-DD')
+    }
+  }
   
       // fallback (last 7 days)
       return {

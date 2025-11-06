@@ -38,9 +38,8 @@ const CustomTooltip = ({ active, payload }) => {
 }
 
 export default function SalesFunnelChart({ funnelData }) {
+  console.log(funnelData, '<< FUNNEL DATA')
 
-  console.log(funnelData,"<< FUNNEL DATA")
-  
   const [anchorViewEl, setAnchorViewEl] = useState(null)
   const [viewType, setViewType] = useState('This Month')
   const view = Boolean(anchorViewEl)
@@ -101,6 +100,15 @@ export default function SalesFunnelChart({ funnelData }) {
             }}
           >
             Last 6 Months
+          </MenuItem>
+
+          <MenuItem
+            onClick={() => {
+              setViewType('Last 1 Year')
+              handleViewClose()
+            }}
+          >
+            Last 1 Year
           </MenuItem>
         </Menu>
       </Box>

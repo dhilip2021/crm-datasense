@@ -147,7 +147,7 @@ export default function LeadStatus({
               <FormControl fullWidth size='small'>
                 <InputLabel id='view-type-label'>Date Range</InputLabel>
                 <Select labelId='view-type-label' value={viewType} onChange={e => setViewType(e.target.value)}>
-                  {['Today', 'This Week', 'This Month', 'Last Month', 'Last 6 Months'].map(l => (
+                  {['Today', 'This Week', 'This Month', 'Last Month', 'Last 6 Months', 'Last 1 Year'].map(l => (
                     <MenuItem key={l} value={l}>
                       {l}
                     </MenuItem>
