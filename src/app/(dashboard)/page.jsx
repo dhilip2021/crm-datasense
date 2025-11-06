@@ -16,10 +16,12 @@ import DashboardWidgets from '@/views/dashboard/DashboardWidgets'
 import SalesRepSummary from '@/views/dashboard/SalesRepSummary'
 
 import dayjs from 'dayjs'
+import {  getHierarchyUserListApi} from '@/apiFunctions/ApiAction'
 
 const DashboardAnalytics = () => {
   const organization_id = Cookies.get('organization_id')
   const getToken = Cookies.get('_token')
+   const user_id = Cookies.get('user_id')
 
   const [openStatus, setOpenStatus] = useState(false)
   const [selectedStatus, setSelectedStatus] = useState('')
@@ -48,6 +50,7 @@ const DashboardAnalytics = () => {
   const [dataFilter, setDataFilter] = useState([])
   const [fieldConfig, setFieldConfig] = useState({})
   const [sections, setSections] = useState([])
+   const [userList, setUserList] = useState([])
 
   // 🔹 Date Range Logic
   const getDateRange = type => {
@@ -99,6 +102,27 @@ const DashboardAnalytics = () => {
     }
   }
 
+    // ✅ Fetch user list
+    const getUserListFn = async () => {
+
+      // const header = {
+      //   'Content-Type': 'application/json',
+      //   Authorization: `Bearer ${getToken}`
+      // }
+      try {
+
+        const results = await getHierarchyUserListApi()
+        if (results?.appStatusCode === 0 && Array.isArray(results.payloadJson)) {
+          setUserList(results.payloadJson)
+        } else {
+          setUserList([])
+        }
+      } catch (err) {
+        console.error('User list error:', err)
+        setUserList([])
+      }
+    }
+
   // 🔹 Flatten Fields Safely
   const flattenFields = sections => {
     const flat = []
@@ -133,11 +157,6 @@ const DashboardAnalytics = () => {
     }
   }
 
-  // const leadsForStatus = useMemo(() => {
-  //   console.log(dataFilter,"<<< data Filter")
-  //   if (!selectedStatus) return []
-  //   return dataFilter.filter(l => l.values && l.values['Lead Status'] === selectedStatus)
-  // }, [selectedStatus, dataFilter])
 
   const leadsForStatus = useMemo(() => {
     console.log(dataFilter, '<<< data Filter')
@@ -151,7 +170,9 @@ const DashboardAnalytics = () => {
 
   // 🔹 Initialize
   useEffect(() => {
+
     fetchFormTemplate()
+    getUserListFn()
     const { fromDate, toDate } = getDateRange('This Month')
     setFilters(prev => ({ ...prev, fromDate, toDate }))
   }, [])
@@ -292,7 +313,7 @@ const DashboardAnalytics = () => {
         <LeadBySource />
       </Grid>
 
-      <Grid item xs={12} md={12} lg={12}>
+      {/* <Grid item xs={12} md={12} lg={12}>
         <Grid container spacing={6}>
           <Grid item xs={12} sm={6} lg={3}>
             <LineChart />
@@ -323,15 +344,20 @@ const DashboardAnalytics = () => {
             <DistributedColumnChart />
           </Grid>
         </Grid>
-      </Grid>
+      </Grid> */}
 
       <Grid item xs={12} sm={12} lg={12}>
-        <SalesRepSummary />
+        <SalesRepSummary 
+        fieldConfig={fieldConfig} 
+        dataFilter={dataFilter} 
+        loading={loading} 
+        userList={userList} 
+        viewType={viewType}
+        setViewType={setViewType}
+        />
       </Grid>
 
-      {/* <Grid item xs={12}>
-        <LeadStatusSummary />
-      </Grid> */}
+   
     </Grid>
   )
 }

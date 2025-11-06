@@ -73,6 +73,17 @@ export const craeteUserApi = async (body) => {
       });
   };
 
+     export const getHierarchyUserListApi = async () => {
+    return await axios
+      .get(`/api/v1/admin/list_hierarchy`,{ headers: AppHeader })
+      .then((res) => {
+        return res.data;
+      })
+      .catch((err) => {
+        return err;
+      });
+  };
+
       export const getUserAllListApi = async () => {
     return await axios
       .get(`/api/v1/admin/list_all_user`,{ headers: AppHeader })

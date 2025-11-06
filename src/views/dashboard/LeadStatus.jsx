@@ -70,7 +70,6 @@ export default function LeadStatus({
   selectedStatus
 }) {
 
-  console.log(leadsForStatus,"<<< leadsForStatus")
 
 
   const theme = useTheme()
