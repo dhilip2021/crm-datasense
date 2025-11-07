@@ -4,6 +4,24 @@ import { DatePicker, TimePicker } from '@mui/x-date-pickers'
 import CloseIcon from '@mui/icons-material/Close'
 import dayjs from 'dayjs'
 
+
+ const validateReminderTime = () => {
+    if (!taskData.reminderEnabled || !taskData.reminderTime || !taskData.reminderDate) return true
+
+    const reminderDateTime = dayjs(
+      `${dayjs(taskData.reminderDate).format('YYYY-MM-DD')} ${taskData.reminderTime}`,
+      'YYYY-MM-DD HH:mm'
+    )
+    const now = dayjs()
+
+    // If reminder is set for today, time must be >= current time
+    if (dayjs(taskData.reminderDate).isSame(now, 'day') && reminderDateTime.isBefore(now)) {
+      return false
+    }
+    return true
+  }
+
+
 function TaskDialog({
     handleTaskChange,
     openTaskDialog,
