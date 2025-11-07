@@ -7,8 +7,8 @@ import '@/app/globals.css'
 // Generated Icon CSS Imports
 // import '@assets/iconify-icons/generated-icons.css'
 
-import '@assets/iconify-icons/icon.css'
-import 'remixicon/fonts/remixicon.css'
+// import '@assets/iconify-icons/icon.css'
+// import 'remixicon/fonts/remixicon.css'
 
 //react-toastify
 import 'react-toastify/dist/ReactToastify.css';
@@ -17,9 +17,8 @@ import { ToastContainer } from 'react-toastify';
 import ReminderAlert from './(dashboard)/view/lead-form/[id]/ReminderAlert';
 
 export const metadata = {
-  title: 'CRM Admin - Datasense Technologies',
-  description:
-    'CRM admin dashboard'
+  title: 'Lumivo CRM Admin - Datasense Technologies',
+  description: 'Manage leads, tasks, and analytics with Lumivo CRM — a powerful admin dashboard by Datasense Technologies for smarter business insights and team performance.'
 }
 
 const RootLayout = ({ children }) => {
