@@ -107,18 +107,23 @@ const ForgotPassword = ({ mode }) => {
 
     let results = await checkMailApi(body)
 
+  
+
     if (results?.appStatusCode !== 4) {
-      setLoaderEmail(false)
-      setCheckFlag(false)
-      toast.error('This email is not registered with us', {
-              autoClose: 500, // 1 second la close
+
+       toast.error('This email is not registered with us', {
+              autoClose: 1500, // 1 second la close
               position: 'bottom-center',
               hideProgressBar: true, // progress bar venam na
               closeOnClick: true,
               pauseOnHover: false,
               draggable: false,
-              progress: undefined
+              progress: true
             })
+      setEmail("")    
+      setLoaderEmail(false)
+      setCheckFlag(false)
+     
       setToastFlag(true)
       setstatusCode(results?.appStatusCode)
     } else {
@@ -202,7 +207,7 @@ const ForgotPassword = ({ mode }) => {
                 }}
               />
 
-              <Button disabled={loaderEmail} fullWidth variant='contained' type='submit' onClick={formSubmitHandle}>
+              <Button disabled={(loaderEmail || email === '')} fullWidth variant='contained' type='submit' onClick={formSubmitHandle}>
                 Send reset link
               </Button>
               <Typography className='flex justify-center items-center' color='primary'>

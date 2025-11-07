@@ -18,10 +18,6 @@ let sendResponse = {
   error: ''
 }
 
-
-
-
-
 function emailSend(mailData) {
   return new Promise(async (resolve, reject) => {
     await transporter.sendMail(mailData, function async(err, data) {
@@ -128,11 +124,6 @@ export async function POST(request) {
     } else {
       const encEmail = encryptCryptoResponse(dData?.email)
 
-
- 
-
-
-
       const checkUserEmail = await User.findOne({
         organization_id: dData?.organization_id,
         email: encEmail
@@ -182,7 +173,6 @@ export async function POST(request) {
           trim: true
         })
 
-
         if (dData?.role !== 'admin' || dData?.role === undefined || dData?.role === '') {
           if (dData?.role === undefined || dData?.role === null || dData?.role === '') {
             let data = {
@@ -210,26 +200,71 @@ export async function POST(request) {
                 n_status: dData?.n_status ? dData?.n_status : 1
               })
 
-              await userdata.save().then(result => {
+              await userdata.save().then(async result => {
                 let mailData = {
-                  from: '"No Reply" <dhilipbeece001@gmail.com>', // sender address
-                  to: `${dData?.email}`, // list of receivers
-                  subject: 'CRM Datasense Login Credential',
-                  text: 'Login Credential',
-                  html: ``
+                  from: '"CRM Datasense" <dhilipbeece001@gmail.com>', // sender address
+                  to: `${dData?.email}`, // recipient
+                  subject: 'Your CRM Datasense Login Credentials',
+                  html: `
+      <div style="
+        font-family: Arial, Helvetica, sans-serif;
+        background-color: #f5f7fa;
+        padding: 30px;
+        color: #333;
+      ">
+        <div style="
+          max-width: 600px;
+          margin: auto;
+          background: #ffffff;
+          border-radius: 10px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          overflow: hidden;
+        ">
+          <div style="background-color: #1976d2; padding: 20px; text-align: center;">
+            <h2 style="color: #fff; margin: 0;">CRM Datasense</h2>
+            <p style="color: #e0e0e0; margin: 5px 0 0;">Your trusted CRM partner</p>
+          </div>
+
+          <div style="padding: 25px;">
+            <p style="font-size: 16px;">Hai <b>${user_name}</b>,</p>
+            <p style="font-size: 15px; color: #444;">
+              Welcome to <b>CRM Datasense</b>! Below are your login credentials:
+            </p>
+
+            <div style="
+              background-color: #f1f5fb;
+              border-radius: 8px;
+              padding: 15px 20px;
+              margin: 15px 0;
+              font-size: 14px;
+              line-height: 1.6;
+            ">
+              <p><b>Login URL:</b> <a href="https://crm-datasense-bj4n.vercel.app/login" style="color: #1976d2;">https://crm-datasense-bj4n.vercel.app/login</a></p>
+              <p><b>Email:</b> ${dData?.email}</p>
+              <p><b>Password:</b> ${passwordCheck}</p>
+            </div>
+
+            <p style="font-size: 14px; color: #555;">
+              Please keep your credentials safe. You can change your password after login for security.
+            </p>
+
+            <p style="font-size: 14px; margin-top: 25px;">
+              <b>Thank you,</b><br />
+              The <b>CRM Datasense</b> Team
+            </p>
+          </div>
+
+          <div style="background-color: #f9fafb; padding: 10px; text-align: center; font-size: 12px; color: #777;">
+            © ${new Date().getFullYear()} Datasense Technologies. All rights reserved.
+          </div>
+        </div>
+      </div>
+    `
                 }
 
-                mailData['html'] = `
-              <b>Hai ${user_name},</b>
-              <h4>Your Login Credentials</h4>
-               <h4>url: https://crm-datasense-bj4n.vercel.app/login</h4>
-              <h4>your email : <b>${dData?.email} </b></h4>
-              <h4>your password : <b>${passwordCheck} </b></h4>
-              <h5><b>Thank you, </b> <br /> CRM Datasense</h5>
-            `
-                const emailRes = emailSend(mailData)
+                const emailRes = await emailSend(mailData)
                 sendResponse['appStatusCode'] = 0
-                sendResponse['message'] = 'User added Successfully'
+                sendResponse['message'] = 'User added successfully'
                 sendResponse['payloadJson'] = result
                 sendResponse['error'] = ''
                 return NextResponse.json(sendResponse, { status: 200 })

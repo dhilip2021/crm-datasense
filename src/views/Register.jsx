@@ -3,21 +3,16 @@
 
 // React Imports
 import { useEffect, useState } from 'react'
-
 // Next Imports
 import Link from 'next/link'
-
 import { useRouter } from 'next/navigation'
-
 // MUI Imports
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
-
 import { ToastContainer, toast } from 'react-toastify'
-
 // Component Imports
 import Illustrations from '@components/Illustrations'
 import Logo from '@components/layout/shared/Logo'
@@ -30,7 +25,8 @@ import {
   checkMailApi,
   craeteUserApi,
   getOrganizationApi,
-  sendOtpApi
+  sendOtpApi,
+  verifyOtpApi
 } from '@/apiFunctions/ApiAction'
 import { Box, IconButton, InputAdornment } from '@mui/material'
 import { encryptCryptoResponse } from '@/helper/frontendHelper'
@@ -99,6 +95,7 @@ const Register = ({ mode }) => {
   const [errMobile, setErrMobile] = useState('')
   const [errOtp, setErrOtp] = useState('')
   const [otpCheck, setOtpCheck] = useState(false)
+  const [otpVerify, setOtpVerify] = useState(false)
 
   const [errEmail, setErrEmail] = useState('')
   const [errEmailCheck, setErrEmailCheck] = useState('')
@@ -217,13 +214,49 @@ const Register = ({ mode }) => {
       //   setInputs({ ...inputs, [name]: normalizeEmail(value.toLowerCase()) })
       // }
     } else if (name === 'otp') {
-      
       const res = isValidOTPStrict(value)
-     
+
       if (value === '' || res) {
         setErrorInputs({ ...errorInputs, otp: false })
         setInputs({ ...inputs, [name]: value })
       }
+    }
+  }
+
+  const verrifyOtpfn = async (email, otp) => {
+    const body = {
+      email: email,
+      otp: otp
+    }
+    const header = {
+      'Content-Type': 'application/json'
+    }
+    setOtpVerify(true)
+    const otpRes = await verifyOtpApi(body, header)
+    if (otpRes?.appStatusCode === 0) {
+      setOtpVerify(false)
+      toast.success('OTP verified Successfully', {
+        autoClose: 1500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
+    } else {
+      setErrorInputs({ ...errorInputs, otp: true })
+      toast.error(otpRes?.message, {
+        autoClose: 1500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
+
+      setOtpVerify(false)
     }
   }
 
@@ -238,15 +271,14 @@ const Register = ({ mode }) => {
     if (otpRes?.appStatusCode === 0) {
       setOtpCheck(true)
       toast.success('OTP send your mail', {
-                      autoClose: 500, // 1 second la close
-                      position: 'bottom-center',
-                      hideProgressBar: true, // progress bar venam na
-                      closeOnClick: true,
-                      pauseOnHover: false,
-                      draggable: false,
-                      progress: undefined
-                    })
-
+        autoClose: 1500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
     } else {
       setOtpCheck(false)
     }
@@ -280,73 +312,65 @@ const Register = ({ mode }) => {
           mobile: inputs?.mobile,
           role: '',
           c_role_id: '16f01165898b',
-          c_user_img_url: '',
+          c_user_img_url: ''
         }
         setLoader(true)
 
+        const body = {
+          organization_id: result?.payloadJson?.organization_id,
+          first_name: inputs?.first_name,
+          last_name: inputs?.last_name,
+          c_about_user: 'Admin',
+          email: inputs?.email,
+          mobile: inputs?.mobile,
+          role: '',
+          c_user_img_url: '',
+          c_role_id: '16f01165898b'
+          // n_status: inputs?.n_status
+        }
 
-         const body = {
-                organization_id: result?.payloadJson?.organization_id,
-                first_name: inputs?.first_name,
-                last_name: inputs?.last_name,
-                c_about_user: 'Admin',
-                email: inputs?.email,
-                mobile: inputs?.mobile,
-                role: '',
-                c_user_img_url: '',
-                c_role_id: '16f01165898b',
-                // n_status: inputs?.n_status
-              }
-        
-               const enycryptDAta = encryptCryptoResponse(body) 
+        const enycryptDAta = encryptCryptoResponse(body)
 
-
-
-
-
-
-          const dataValue= {
-        data : enycryptDAta
-      }
-
-
+        const dataValue = {
+          data: enycryptDAta
+        }
 
         const resultData = await craeteUserApi(dataValue)
 
         if (resultData?.appStatusCode === 0) {
           toast.success('Please check your email.. your password send your mail!', {
-                          autoClose: 500, // 1 second la close
-                          position: 'bottom-center',
-                          hideProgressBar: true, // progress bar venam na
-                          closeOnClick: true,
-                          pauseOnHover: false,
-                          draggable: false,
-                          progress: undefined
-                        })
+            autoClose: 500, // 1 second la close
+            position: 'bottom-center',
+            hideProgressBar: true, // progress bar venam na
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: false,
+            progress: undefined
+          })
           router.push('/login')
           setLoader(false)
         } else {
           toast.error('Something Went wrong, Please try after some time', {
-                          autoClose: 500, // 1 second la close
-                          position: 'bottom-center',
-                          hideProgressBar: true, // progress bar venam na
-                          closeOnClick: true,
-                          pauseOnHover: false,
-                          draggable: false,
-                          progress: undefined
-                        })
+            autoClose: 500, // 1 second la close
+            position: 'bottom-center',
+            hideProgressBar: true, // progress bar venam na
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: false,
+            progress: undefined
+          })
           setLoader(false)
         }
       } else {
         toast.error('Something Went wrong, Please try after some time', {
-                        autoClose: 500, // 1 second la close
-                        position: 'bottom-center',
-                        hideProgressBar: true, // progress bar venam na
-                        closeOnClick: true,
-                        pauseOnHover: false,
-                        draggable: false,
-                        progress: undefined
-                      })
+          autoClose: 500, // 1 second la close
+          position: 'bottom-center',
+          hideProgressBar: true, // progress bar venam na
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined
+        })
       }
     }
   }
@@ -373,6 +397,13 @@ const Register = ({ mode }) => {
   }
 
   useEffect(() => {
+    if (inputs.otp.length === 4) {
+      setOtpVerify(true)
+      verrifyOtpfn(inputs.email, inputs.otp)
+    }
+  }, [inputs.otp])
+
+  useEffect(() => {
     const delayDebounce = setTimeout(async () => {
       if (inputs?.email?.length > 0 && isEmail(inputs?.email)) {
         checkMail(inputs?.email)
@@ -391,250 +422,300 @@ const Register = ({ mode }) => {
               <Logo />
             </Link>
             <Typography variant='h5'>Adventure starts here 🚀</Typography>
+
+            {/* <div className='flex flex-col gap-5'>
+              
+            <Typography className='mbs-2'>{otpCheck ? ' Enter the One time password send to your email': 'Get started with your 14-day free trail'}</Typography>
+            </div> */}
+
             <div className='flex flex-col gap-5'>
-              <Typography className='mbs-1'>Make your app management easy</Typography>
+              <Typography className='mbs-1'>
+                <span>{otpCheck ? 'Verify your sign-up' : 'Make your app management easy'}</span>
+                <br />
+                <span>
+                  {otpCheck
+                    ? ' Enter the One time password send to your email'
+                    : 'Get started with your 14-day free trail'}
+                </span>
+              </Typography>
+
               <form noValidate autoComplete='off' onSubmit={e => e.preventDefault()} className='flex flex-col gap-5'>
-                <TextField
-                  fullWidth
-                  onBlur={handleBlur}
-                  autoComplete='off'
-                  id='outlined-basic'
-                  label='Organaization Name *'
-                  variant='outlined'
-                  type='text'
-                  name='organaization_name'
-                  size='small'
-                  rows={2}
-                  value={inputs?.organaization_name}
-                  onChange={handleChange}
-                  error={errorInputs?.organaization_name}
-                  helperText={errorInputs?.organaization_name && errOrgName}
-                  sx={{
-                    // Target the root of the input element
-                    '& .MuiOutlinedInput-root': {
-                      position: 'relative', // anchor for the ::before strip
+                {!otpCheck && (
+                  <>
+                    <TextField
+                      fullWidth
+                      onBlur={handleBlur}
+                      autoComplete='off'
+                      id='outlined-basic'
+                      label='Organaization Name *'
+                      variant='outlined'
+                      type='text'
+                      name='organaization_name'
+                      size='small'
+                      rows={2}
+                      value={inputs?.organaization_name}
+                      onChange={handleChange}
+                      error={errorInputs?.organaization_name}
+                      helperText={errorInputs?.organaization_name && errOrgName}
+                      sx={{
+                        // Target the root of the input element
+                        '& .MuiOutlinedInput-root': {
+                          position: 'relative', // anchor for the ::before strip
 
-                      // Red strip
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        left: 0,
-                        top: 0,
-                        bottom: 0,
-                        width: '4px', // thickness of the strip
-                        backgroundColor: 'error.main',
-                        borderTopLeftRadius: '4px', // match the TextField’s rounded corners
-                        borderBottomLeftRadius: '4px'
-                      }
-                    }
-                  }}
-                />
+                          // Red strip
+                          '&::before': {
+                            content: '""',
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            width: '4px', // thickness of the strip
+                            backgroundColor: 'error.main',
+                            borderTopLeftRadius: '4px', // match the TextField’s rounded corners
+                            borderBottomLeftRadius: '4px'
+                          }
+                        }
+                      }}
+                    />
 
-                <TextField
-                  fullWidth
-                  onBlur={handleBlur}
-                  autoComplete='off'
-                  id='outlined-basic'
-                  label='First Name *'
-                  variant='outlined'
-                  type='text'
-                  name='first_name'
-                  size='small'
-                  rows={2}
-                  value={inputs?.first_name}
-                  onChange={handleChange}
-                  error={errorInputs?.first_name}
-                  helperText={errorInputs?.first_name && errFname}
-                  sx={{
-                    // Target the root of the input element
-                    '& .MuiOutlinedInput-root': {
-                      position: 'relative', // anchor for the ::before strip
+                    <TextField
+                      fullWidth
+                      onBlur={handleBlur}
+                      autoComplete='off'
+                      id='outlined-basic'
+                      label='First Name *'
+                      variant='outlined'
+                      type='text'
+                      name='first_name'
+                      size='small'
+                      rows={2}
+                      value={inputs?.first_name}
+                      onChange={handleChange}
+                      error={errorInputs?.first_name}
+                      helperText={errorInputs?.first_name && errFname}
+                      sx={{
+                        // Target the root of the input element
+                        '& .MuiOutlinedInput-root': {
+                          position: 'relative', // anchor for the ::before strip
 
-                      // Red strip
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        left: 0,
-                        top: 0,
-                        bottom: 0,
-                        width: '4px', // thickness of the strip
-                        backgroundColor: 'error.main',
-                        borderTopLeftRadius: '4px', // match the TextField’s rounded corners
-                        borderBottomLeftRadius: '4px'
-                      }
-                    }
-                  }}
-                  inputProps={{
-                    minLength: 3,
-                    maxLength: 40
-                  }}
-                />
+                          // Red strip
+                          '&::before': {
+                            content: '""',
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            width: '4px', // thickness of the strip
+                            backgroundColor: 'error.main',
+                            borderTopLeftRadius: '4px', // match the TextField’s rounded corners
+                            borderBottomLeftRadius: '4px'
+                          }
+                        }
+                      }}
+                      inputProps={{
+                        minLength: 3,
+                        maxLength: 40
+                      }}
+                    />
 
-                <TextField
-                  fullWidth
-                  onBlur={handleBlur}
-                  autoComplete='off'
-                  id='outlined-basic'
-                  label='Last Name'
-                  variant='outlined'
-                  type='text'
-                  name='last_name'
-                  size='small'
-                  rows={2}
-                  value={inputs?.last_name}
-                  onChange={handleChange}
-                  error={errorInputs?.last_name}
-                  helperText={errorInputs?.last_name && errLname}
-                  sx={{
-                    '.MuiFormHelperText-root': {
-                      ml: 0
-                    }
-                  }}
-                  inputProps={{
-                    minLength: 1,
-                    maxLength: 40
-                  }}
-                />
+                    <TextField
+                      fullWidth
+                      onBlur={handleBlur}
+                      autoComplete='off'
+                      id='outlined-basic'
+                      label='Last Name'
+                      variant='outlined'
+                      type='text'
+                      name='last_name'
+                      size='small'
+                      rows={2}
+                      value={inputs?.last_name}
+                      onChange={handleChange}
+                      error={errorInputs?.last_name}
+                      helperText={errorInputs?.last_name && errLname}
+                      sx={{
+                        '.MuiFormHelperText-root': {
+                          ml: 0
+                        }
+                      }}
+                      inputProps={{
+                        minLength: 1,
+                        maxLength: 40
+                      }}
+                    />
 
-                <TextField
-                  fullWidth
-                  onBlur={handleBlur}
-                  autoComplete='off'
-                  id='outlined-basic'
-                  label='Mobile'
-                  variant='outlined'
-                  type='text'
-                  name='mobile'
-                  size='small'
-                  rows={2}
-                  value={inputs?.mobile}
-                  onChange={handleChange}
-                  error={errorInputs?.mobile}
-                  helperText={errorInputs?.mobile ? errMobile : ''}
-                  sx={{
-                    '.MuiFormHelperText-root': {
-                      ml: 0
-                    }
-                  }}
-                  inputProps={{
-                    minLength: 10,
-                    maxLength: 10
-                  }}
-                />
+                    <TextField
+                      fullWidth
+                      onBlur={handleBlur}
+                      autoComplete='off'
+                      id='outlined-basic'
+                      label='Mobile'
+                      variant='outlined'
+                      type='text'
+                      name='mobile'
+                      size='small'
+                      rows={2}
+                      value={inputs?.mobile}
+                      onChange={handleChange}
+                      error={errorInputs?.mobile}
+                      helperText={errorInputs?.mobile ? errMobile : ''}
+                      sx={{
+                        '.MuiFormHelperText-root': {
+                          ml: 0
+                        }
+                      }}
+                      inputProps={{
+                        minLength: 10,
+                        maxLength: 10
+                      }}
+                    />
 
-                <TextField
-                  fullWidth
-                  onBlur={handleBlur}
-                  autoComplete='off'
-                  id='outlined-basic'
-                  label='Email *'
-                  variant='outlined'
-                  type='text'
-                  name='email'
-                  size='small'
-                  rows={2}
-                  value={inputs?.email}
-                  onChange={handleChange}
-                  error={errorInputs?.email}
-                  helperText={errorInputs?.email ? errEmail : ''}
-                  sx={{
-                    // Target the root of the input element
-                    '& .MuiOutlinedInput-root': {
-                      position: 'relative', // anchor for the ::before strip
+                    <TextField
+                      fullWidth
+                      onBlur={handleBlur}
+                      autoComplete='off'
+                      id='outlined-basic'
+                      label='Email *'
+                      variant='outlined'
+                      type='text'
+                      name='email'
+                      size='small'
+                      rows={2}
+                      value={inputs?.email}
+                      onChange={handleChange}
+                      error={errorInputs?.email}
+                      helperText={errorInputs?.email ? errEmail : ''}
+                      sx={{
+                        // Target the root of the input element
+                        '& .MuiOutlinedInput-root': {
+                          position: 'relative', // anchor for the ::before strip
 
-                      // Red strip
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        left: 0,
-                        top: 0,
-                        bottom: 0,
-                        width: '4px', // thickness of the strip
-                        backgroundColor: 'error.main',
-                        borderTopLeftRadius: '4px', // match the TextField’s rounded corners
-                        borderBottomLeftRadius: '4px'
-                      }
-                    }
-                  }}
-                  InputProps={{
-                    endAdornment:
-                      errEmailCheck === 'success' ? (
-                        <i className='ri-check-double-fill' style={{ color: '#4caf50' }}></i>
-                      ) : (
-                        ''
-                      )
-                  }}
-                />
+                          // Red strip
+                          '&::before': {
+                            content: '""',
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            width: '4px', // thickness of the strip
+                            backgroundColor: 'error.main',
+                            borderTopLeftRadius: '4px', // match the TextField’s rounded corners
+                            borderBottomLeftRadius: '4px'
+                          }
+                        }
+                      }}
+                      InputProps={{
+                        endAdornment:
+                          errEmailCheck === 'success' ? (
+                            <i className='ri-check-double-fill' style={{ color: '#4caf50' }}></i>
+                          ) : (
+                            ''
+                          )
+                      }}
+                    />
+                  </>
+                )}
+
                 {otpCheck && (
-                  <TextField
-                    fullWidth
-                    onBlur={handleBlur}
-                    autoComplete='off'
-                    id='outlined-basic'
-                    label='OTP'
-                    variant='outlined'
-                    type='text'
-                    name='otp'
-                    size='small'
-                    rows={2}
-                    value={inputs?.otp}
-                    onChange={handleChange}
-                    error={errorInputs?.otp}
-                    helperText={errorInputs?.otp ? errOtp : ''}
-                    sx={{
-                      '.MuiFormHelperText-root': {
-                        ml: 0
-                      }
-                    }}
-                    inputProps={{
-                      minLength: 4,
-                      maxLength: 4
-                    }}
-                  />
+                  <>
+                    <Box display={'flex'} justifyContent={'space-between'}>
+                      <Typography variant='body2' fontWeight='bold'>
+                        {inputs.email}
+                      </Typography>
+                      <Typography sx={{ cursor: 'pointer' }} onClick={() => setOtpCheck(false)}>
+                        Change
+                      </Typography>
+                    </Box>
+                    <TextField
+                      fullWidth
+                      onBlur={handleBlur}
+                      autoComplete='off'
+                      id='outlined-basic'
+                      label='OTP'
+                      variant='outlined'
+                      type='text'
+                      name='otp'
+                      size='small'
+                      rows={2}
+                      value={inputs?.otp}
+                      onChange={handleChange}
+                      error={errorInputs?.otp}
+                      helperText={errorInputs?.otp ? errOtp : ''}
+                      sx={{
+                        '.MuiFormHelperText-root': {
+                          ml: 0
+                        }
+                      }}
+                      inputProps={{
+                        minLength: 4,
+                        maxLength: 4
+                      }}
+                    />
+                  </>
                 )}
 
                 {otpCheck ? (
-                  <Button
-                    fullWidth
-                    variant='contained'
-                    type='submit'
-                    disabled={
-                      errorInputs?.organaization_name ||
-                      errorInputs?.email ||
-                      errorInputs?.first_name ||
-                      errorInputs?.last_name ||
-                      errorInputs?.mobile ||
-                      errorInputs?.otp ||
-                      inputs?.first_name === '' ||
-                      errEmailCheck === 'success'
-                        ? false
-                        : true
-                    }
-                    onClick={handleSubmit}
-
-                    
-                  >
-                    Register
-                  </Button>
+                  <>
+                    <Button
+                      fullWidth
+                      variant='contained'
+                      type='submit'
+                      // disabled={
+                      //   errorInputs?.organaization_name ||
+                      //   errorInputs?.email ||
+                      //   errorInputs?.first_name ||
+                      //   errorInputs?.last_name ||
+                      //   errorInputs?.mobile ||
+                      //   errorInputs?.otp ||
+                      //   inputs?.first_name === '' ||
+                      //   errEmailCheck === 'success'
+                      //     ? false
+                      //     : true
+                      // }
+                      disabled={inputs.otp === '' || 
+                        inputs.otp.length < 4 ||
+                        otpVerify ||
+                        errorInputs?.otp
+                      
+                      }
+                      onClick={handleSubmit}
+                    >
+                      {otpVerify ? "Verifying" : "Register"}
+                    </Button>
+                    <Typography variant='body2' fontWeight='bold'>
+                      OTP send to {inputs.email}
+                    </Typography>
+                  </>
                 ) : (
                   <Button
                     fullWidth
                     variant='contained'
                     type='submit'
+                    // disabled={
+                    //   inputs.organaization_name !== '' ||
+                    //   errorInputs?.organaization_name ||
+                    //   errorInputs?.email ||
+                    //   errorInputs?.first_name ||
+                    //   errorInputs?.last_name ||
+                    //   errorInputs?.mobile ||
+                    //   inputs?.first_name === ''
+                    //   // errEmailCheck === 'success'
+                    //     ? true
+                    //     : false
+                    // }
                     disabled={
+                      inputs.organaization_name === '' ||
+                      inputs.first_name === '' ||
+                      inputs.email === '' ||
                       errorInputs?.organaization_name ||
-                      errorInputs?.email ||
                       errorInputs?.first_name ||
                       errorInputs?.last_name ||
-                      errorInputs?.mobile ||
-                      inputs?.first_name === '' ||
-                      errEmailCheck === 'success'
-                        ? false
-                        : true
+                      errorInputs?.email ||
+                      errorInputs?.mobile
                     }
                     onClick={handleOTPSubmit}
                   >
-                    Send OTP
+                    Get Started
                   </Button>
                 )}
 

@@ -329,6 +329,17 @@ export const sendOtpApi = async (body,header) => {
     });
 };
 
+export const verifyOtpApi = async (body,header) => {
+  return await axios
+    .post(`/api/v1/admin/otp/verify`, body,{ headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
 
 // Customer model api's
   
