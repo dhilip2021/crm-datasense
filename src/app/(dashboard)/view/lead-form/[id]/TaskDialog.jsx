@@ -76,6 +76,7 @@ function TaskDialog({
                       Due Date <span style={{ color: 'red' }}>*</span>
                     </span>
                   }
+                  format="DD/MM/YYYY"
                   disablePast
                   value={taskData.dueDate ? dayjs(taskData.dueDate) : null}
                   onChange={newValue => {
@@ -147,6 +148,7 @@ function TaskDialog({
                       <Grid item xs={12} sm={6}>
                         <DatePicker
                           label='Reminder Date'
+                          format="DD/MM/YYYY"
                           disablePast
                           value={taskData.reminderDate ? dayjs(taskData.reminderDate) : null}
                           onChange={newValue => {
