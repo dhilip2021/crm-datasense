@@ -376,6 +376,7 @@ const CustomersTable = () => {
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   label='From Date'
+                  format="DD/MM/YYYY"
                   value={filters.fromDate}
                   onChange={val => setFilters({ ...filters, fromDate: val })}
                   slotProps={{ textField: { size: 'small', fullWidth: true } }}
@@ -386,6 +387,7 @@ const CustomersTable = () => {
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   label='To Date'
+                  format="DD/MM/YYYY"
                   value={filters.toDate}
                   onChange={val => setFilters({ ...filters, toDate: val })}
                   slotProps={{ textField: { size: 'small', fullWidth: true } }}

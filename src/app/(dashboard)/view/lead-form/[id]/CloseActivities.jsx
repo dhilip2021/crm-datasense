@@ -526,6 +526,7 @@ export default function CloseActivities({ leadId, leadData }) {
                           Due Date <span style={{ color: 'red' }}>*</span>
                         </span>
                       }
+                      format="DD/MM/YYYY"
                       disablePast // 🚀 past date select panna mudiyadhu
                       value={taskData.dueDate ? dayjs(taskData.dueDate) : null}
                       onChange={newValue => {
@@ -617,6 +618,7 @@ export default function CloseActivities({ leadId, leadData }) {
                           <Grid item xs={12} sm={6}>
                             <DatePicker
                               label='Reminder Date'
+                              format="DD/MM/YYYY"
                               disablePast // 🚀 past date select panna mudiyadhu
                               value={taskData.reminderDate ? dayjs(taskData.reminderDate) : null}
                               onChange={newValue => {

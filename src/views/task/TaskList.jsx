@@ -208,6 +208,7 @@ export default function TaskList() {
           <Grid item>
             <DatePicker
               label='From'
+              format="DD/MM/YYYY"
               value={from}
               onChange={newValue => setFrom(newValue)}
               slotProps={{ textField: { size: 'small' } }}
@@ -217,6 +218,7 @@ export default function TaskList() {
           <Grid item>
             <DatePicker
               label='To'
+              format="DD/MM/YYYY"
               value={to}
               onChange={newValue => setTo(newValue)}
               slotProps={{ textField: { size: 'small' } }}

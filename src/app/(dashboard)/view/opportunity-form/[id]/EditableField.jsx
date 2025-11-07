@@ -170,6 +170,7 @@ const EditableField = ({ label, field = {}, value: initialValue, type = 'text', 
                 <DatePicker
                   value={value ? dayjs(value) : null}
                   onChange={handleDateChange}
+                  format="DD/MM/YYYY"
                   minDate={dayjs()}
                   slotProps={{
                     textField: {

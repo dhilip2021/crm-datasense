@@ -232,6 +232,7 @@ const ConvertDealDialog = ({
                 <DatePicker
                   value={dealData.closingDate}
                   onChange={handleDateChange}
+                  format="DD/MM/YYYY"
                   disablePast
                   slotProps={{
                     textField: {

@@ -681,6 +681,7 @@ const OpportunityTable = () => {
                   <DateRangePicker
                     value={[filters.fromDate, filters.toDate]} // 🔹 filters la connect pannirukken
                     label='Date Range'
+                    format="DD/MM/YYYY"
                     onChange={newValue => {
                       setFilters({
                         ...filters,

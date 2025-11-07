@@ -292,6 +292,7 @@ function MeetingDialog({
                   From Date <span style={{ color: 'red' }}>*</span>
                 </span>
               }
+              format="DD/MM/YYYY"
               disablePast
               value={meetingData.fromDate ? dayjs(meetingData.fromDate) : dayjs()}
               onChange={newValue => {
@@ -334,6 +335,7 @@ function MeetingDialog({
                   To Date <span style={{ color: 'red' }}>*</span>
                 </span>
               }
+              format="DD/MM/YYYY"
               disablePast
               value={meetingData.toDate ? dayjs(meetingData.toDate) : dayjs()}
               onChange={newValue => {

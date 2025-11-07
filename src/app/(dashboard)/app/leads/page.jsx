@@ -634,6 +634,7 @@ const LeadTable = () => {
               <DateRangePicker
                 value={[filters.fromDate, filters.toDate]} // 🔹 filters la connect pannirukken
                 label='Created Date Range'
+                format="DD/MM/YYYY"
                 onChange={newValue => {
                   setFilters({
                     ...filters,
@@ -658,6 +659,7 @@ const LeadTable = () => {
               <DateRangePicker
                 value={[filters.fromFollowDate, filters.toFollowDate]} // 🔹 filters la connect pannirukken
                 label='Follow-Up Date Range'
+                format="DD/MM/YYYY"
                 onChange={newValue => {
                   setFilters({
                     ...filters,

@@ -474,6 +474,7 @@ const upcomingTasks = useMemo(
                       Due Date <span style={{ color: 'red' }}>*</span>
                     </span>
                   }
+                  format="DD/MM/YYYY"
                   disablePast
                   value={taskData.dueDate ? dayjs(taskData.dueDate) : null}
                   onChange={newValue => {
@@ -546,6 +547,7 @@ const upcomingTasks = useMemo(
                         <DatePicker
                           label='Reminder Date'
                           disablePast
+                          format="DD/MM/YYYY"
                           value={taskData.reminderDate ? dayjs(taskData.reminderDate) : null}
                           onChange={newValue => {
                             handleChange('reminderDate', newValue ? dayjs(newValue).format('YYYY-MM-DD') : '')

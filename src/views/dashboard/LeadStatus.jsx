@@ -137,6 +137,7 @@ export default function LeadStatus({
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   label='Next Follow-up'
+                  format="DD/MM/YYYY"
                   value={filters.nextFollowup}
                   onChange={d => setFilters({ ...filters, nextFollowup: d })}
                   slotProps={{ textField: { size: 'small', fullWidth: true } }}
