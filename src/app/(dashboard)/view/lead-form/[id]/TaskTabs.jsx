@@ -741,7 +741,7 @@ const renderMeetingCard = meeting => (
         <Divider sx={{ my: 2 }} />
 
         {tab === 0 &&
-          (Array.isArray(tasks) && leadArrayTasks.length > 0 ? (
+          (Array.isArray(leadArrayTasks) && leadArrayTasks.length > 0 ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {/* Current Tasks */}
               {currentTasks.length > 0 && (
@@ -780,7 +780,7 @@ const renderMeetingCard = meeting => (
           ))}
 
         {tab === 1 &&
-          (Array.isArray(meetings) && meetings.length > 0 ? (
+          (Array.isArray(leadArrayMeetings) && leadArrayMeetings.length > 0 ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {/* Current Meetings */}
               {currentMeetings.length > 0 && (
