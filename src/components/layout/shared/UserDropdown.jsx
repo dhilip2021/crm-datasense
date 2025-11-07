@@ -160,18 +160,10 @@ const UserDropdown = () => {
                       color='error'
                       size='small'
                       endIcon={<i className='ri-logout-box-r-line' />}
-                      onClick={e => handleDropdownClose(e, '/login')}
-                      sx={{ '& .MuiButton-endIcon': { marginInlineStart: 1.5 } }}
-                    >
-                      Logout
-                    </Button> */}
-                    <Button
-                      fullWidth
-                      variant='contained'
-                      color='error'
-                      size='small'
-                      endIcon={<i className='ri-logout-box-r-line' />}
                       onClick={() => {
+
+                        // instant redirect
+                        router.replace('/login') // 🔥 instant without history back
                         // clear cookies immediately
                         Cookies.remove('riho_token')
                         Cookies.remove('_token')
@@ -186,8 +178,41 @@ const UserDropdown = () => {
                         Cookies.remove('c_version')
                         Cookies.remove('endedAt')
 
-                        // instant redirect
-                        router.replace('/login') // 🔥 instant without history back
+                        
+                      }}
+                      sx={{ '& .MuiButton-endIcon': { marginInlineStart: 1.5 } }}
+                    >
+                      Logout
+                    </Button> */}
+                    <Button
+                      fullWidth
+                      variant='contained'
+                      color='error'
+                      size='small'
+                      endIcon={<i className='ri-logout-box-r-line' />}
+                      onClick={() => {
+                        // 🔹 Close dropdown first
+                        setOpen(false)
+
+                        // 🔹 Clear all cookies immediately
+                        const cookiesToClear = [
+                          'riho_token',
+                          '_token',
+                          '_token_expiry',
+                          'privileges',
+                          'role_id',
+                          'role_name',
+                          'user_name',
+                          'organization_id',
+                          'organization_name',
+                          'user_id',
+                          'c_version',
+                          'endedAt'
+                        ]
+                        cookiesToClear.forEach(c => Cookies.remove(c))
+
+                        // 🔹 Instant page reload + redirect (no history)
+                        window.location.replace('/login')
                       }}
                       sx={{ '& .MuiButton-endIcon': { marginInlineStart: 1.5 } }}
                     >
