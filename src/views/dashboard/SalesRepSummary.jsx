@@ -208,7 +208,7 @@ export default function SalesRepSummary({
               </TableRow>
             </TableHead>
 
-            <TableBody>
+            {/* <TableBody>
               {loading
                 ? skeletonRows
                 : leadStatusList.map((status, i) => (
@@ -236,7 +236,39 @@ export default function SalesRepSummary({
                       ))}
                     </TableRow>
                   ))}
-            </TableBody>
+            </TableBody> */}
+
+            <TableBody>
+  {loading
+    ? skeletonRows
+    : leadStatusList.map((status, i) => (
+        <TableRow key={i} hover>
+          <TableCell sx={{ fontWeight: 600 }}>{status}</TableCell>
+          {repSummary.map((rep, j) => {
+            const count = rep[status] || 0
+            return (
+              <TableCell key={j} align='center'>
+                <Tooltip title={`${rep.name}: ${status} Leads`} arrow>
+                  <Typography
+                    onClick={() => count > 0 && handleChipClick(rep, status)}
+                    sx={{
+                      cursor: count > 0 ? 'pointer' : 'default',
+                      fontWeight: count > 0 ? 600 : 400,
+                      fontWeight: 600,
+                      fontSize: '0.8rem',
+                      color: count > 0 ? 'primary.main' : 'text.secondary'
+                      
+                    }}
+                  >
+                    {count}
+                  </Typography>
+                </Tooltip>
+              </TableCell>
+            )
+          })}
+        </TableRow>
+      ))}
+</TableBody>
           </Table>
         </TableContainer>
       </Card>
