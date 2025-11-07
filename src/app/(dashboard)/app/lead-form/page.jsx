@@ -29,6 +29,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import LoaderGif from '@assets/gif/loader.gif'
 import { getUserAllListApi } from '@/apiFunctions/ApiAction'
+import { encryptCryptoRes } from '@/helper/frontendHelper'
 
 // Short name (ORG)
 const shortName = fullName =>
@@ -312,12 +313,21 @@ function LeadFormAppPage() {
       }
 
       if (data.success) {
+
+        console.log(data,"<<< form submited Data")
+
         toast.success('Form submitted successfully', {
           autoClose: 1500,
           position: 'bottom-center',
           hideProgressBar: true
         })
-        router.push('/app/leads')
+        router.push(`/view/lead-form/${encodeURIComponent(encryptCryptoRes(data.data.lead_id))}`)
+        
+
+        // router.push('/app/leads')
+
+
+
       } else {
         toast.error(data.message, { autoClose: 1500, position: 'bottom-center' })
       }
@@ -672,7 +682,7 @@ function LeadFormAppPage() {
               Cancel
             </Button>
             <Button variant='contained' color='primary' onClick={handleSubmit}>
-              Submit
+              Submit 
             </Button>
           </Box>
         </>

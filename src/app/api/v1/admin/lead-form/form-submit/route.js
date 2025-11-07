@@ -180,7 +180,9 @@ export async function POST(req) {
       submittedAt: new Date()
     })
 
-    await leadformData.save()
+    const result = await leadformData.save()
+
+    console.log(result,"<<< resulttt")
 
     return NextResponse.json({
       success: true,
@@ -189,6 +191,7 @@ export async function POST(req) {
         organization_id,
         auto_inc_id: nextAutoId,
         lead_name,
+        lead_id: result.lead_id,
         lead_slug_name,
         form_name,
         values: leadformData.values,
