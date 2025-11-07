@@ -235,6 +235,7 @@ const Register = ({ mode }) => {
     const otpRes = await verifyOtpApi(body, header)
     if (otpRes?.appStatusCode === 0) {
       setOtpVerify(false)
+      setErrorInputs({ ...errorInputs, otp: false })
       toast.success('OTP verified Successfully', {
         autoClose: 1500, // 1 second la close
         position: 'bottom-center',
