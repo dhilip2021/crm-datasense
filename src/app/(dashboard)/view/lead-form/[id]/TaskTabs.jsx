@@ -557,7 +557,7 @@ const renderMeetingCard = meeting => (
         toast.success('Task Added Successfully!', { autoClose: 500, position: 'bottom-center', hideProgressBar: true })
       }
       fetchLeadFromId()
-      handleTaskClose()
+      // handleTaskClose()
     } catch (err) {
       console.error(err)
       toast.error('❌ Failed to save task')
@@ -741,7 +741,7 @@ const renderMeetingCard = meeting => (
         <Divider sx={{ my: 2 }} />
 
         {tab === 0 &&
-          (Array.isArray(tasks) && tasks.length > 0 ? (
+          (Array.isArray(tasks) && leadArrayTasks.length > 0 ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {/* Current Tasks */}
               {currentTasks.length > 0 && (
