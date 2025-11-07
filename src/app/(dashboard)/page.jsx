@@ -16,12 +16,12 @@ import DashboardWidgets from '@/views/dashboard/DashboardWidgets'
 import SalesRepSummary from '@/views/dashboard/SalesRepSummary'
 
 import dayjs from 'dayjs'
-import {  getHierarchyUserListApi} from '@/apiFunctions/ApiAction'
+import { getHierarchyUserListApi } from '@/apiFunctions/ApiAction'
 
 const DashboardAnalytics = () => {
   const organization_id = Cookies.get('organization_id')
   const getToken = Cookies.get('_token')
-   const user_id = Cookies.get('user_id')
+  const user_id = Cookies.get('user_id')
 
   const [openStatus, setOpenStatus] = useState(false)
   const [selectedStatus, setSelectedStatus] = useState('')
@@ -50,7 +50,7 @@ const DashboardAnalytics = () => {
   const [dataFilter, setDataFilter] = useState([])
   const [fieldConfig, setFieldConfig] = useState({})
   const [sections, setSections] = useState([])
-   const [userList, setUserList] = useState([])
+  const [userList, setUserList] = useState([])
 
   // 🔹 Date Range Logic
   const getDateRange = type => {
@@ -64,14 +64,14 @@ const DashboardAnalytics = () => {
         toDate: today.subtract(1, 'month').endOf('month')
       }
     if (type === 'Last 6 Months') return { fromDate: today.subtract(6, 'month').startOf('month'), toDate: today }
-   
+
     if (type === 'Last 1 Year') {
-    const fromDate = today.subtract(1, 'year').startOf('month') // 1 year ago
-    return {
-      fromDate: fromDate.format('YYYY-MM-DD'),
-      toDate: today.format('YYYY-MM-DD')
+      const fromDate = today.subtract(1, 'year').startOf('month') // 1 year ago
+      return {
+        fromDate: fromDate.format('YYYY-MM-DD'),
+        toDate: today.format('YYYY-MM-DD')
+      }
     }
-  }
     return { fromDate: today.subtract(7, 'day'), toDate: today }
   }
 
@@ -110,26 +110,24 @@ const DashboardAnalytics = () => {
     }
   }
 
-    // ✅ Fetch user list
-    const getUserListFn = async () => {
-
-      // const header = {
-      //   'Content-Type': 'application/json',
-      //   Authorization: `Bearer ${getToken}`
-      // }
-      try {
-
-        const results = await getHierarchyUserListApi()
-        if (results?.appStatusCode === 0 && Array.isArray(results.payloadJson)) {
-          setUserList(results.payloadJson)
-        } else {
-          setUserList([])
-        }
-      } catch (err) {
-        console.error('User list error:', err)
+  // ✅ Fetch user list
+  const getUserListFn = async () => {
+    // const header = {
+    //   'Content-Type': 'application/json',
+    //   Authorization: `Bearer ${getToken}`
+    // }
+    try {
+      const results = await getHierarchyUserListApi()
+      if (results?.appStatusCode === 0 && Array.isArray(results.payloadJson)) {
+        setUserList(results.payloadJson)
+      } else {
         setUserList([])
       }
+    } catch (err) {
+      console.error('User list error:', err)
+      setUserList([])
     }
+  }
 
   // 🔹 Flatten Fields Safely
   const flattenFields = sections => {
@@ -165,7 +163,6 @@ const DashboardAnalytics = () => {
     }
   }
 
-
   const leadsForStatus = useMemo(() => {
     console.log(dataFilter, '<<< data Filter')
 
@@ -178,7 +175,6 @@ const DashboardAnalytics = () => {
 
   // 🔹 Initialize
   useEffect(() => {
-
     fetchFormTemplate()
     getUserListFn()
     const { fromDate, toDate } = getDateRange('This Month')
@@ -262,7 +258,7 @@ const DashboardAnalytics = () => {
 
     Object.entries(leadStatusCounts).forEach(([status, count]) => {
       if (!['totalLeads', 'Hot', 'Warm', 'Cold'].includes(status) && count > 0) {
-        const meta = statusMeta[status] || { color: 'info', icon: 'ri-checkbox-circle-line' }
+        const meta = statusMeta[status] || { color: 'info', icon: '⚙️' }
         cards.push({ title: status, count, color: meta.color, icon: meta.icon })
       }
     })
@@ -355,17 +351,15 @@ const DashboardAnalytics = () => {
       </Grid> */}
 
       <Grid item xs={12} sm={12} lg={12}>
-        <SalesRepSummary 
-        fieldConfig={fieldConfig} 
-        dataFilter={dataFilter} 
-        loading={loading} 
-        userList={userList} 
-        viewType={viewType}
-        setViewType={setViewType}
+        <SalesRepSummary
+          fieldConfig={fieldConfig}
+          dataFilter={dataFilter}
+          loading={loading}
+          userList={userList}
+          viewType={viewType}
+          setViewType={setViewType}
         />
       </Grid>
-
-   
     </Grid>
   )
 }
