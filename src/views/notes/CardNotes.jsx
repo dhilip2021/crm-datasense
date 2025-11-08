@@ -39,17 +39,15 @@ const CardNotes = () => {
   const [search, setSearch] = useState('')
   const [priority, setPriority] = useState('')
   const [status, setStatus] = useState('')
-  const [from, setFrom] = useState(dayjs().startOf('month'))
-  const [to, setTo] = useState(dayjs().endOf('month'))
+  const [from, setFrom] = useState(dayjs().startOf('Today'))
+  const [to, setTo] = useState(dayjs().endOf('Today'))
 
   const [userList, setUserList] = useState([])
   const [selectedUsers, setSelectedUsers] = useState([])
 
   const [selectedDate, setSelectedDate] = useState(dayjs())
 
-  const priorities = ['Low', 'Medium', 'High']
-  const statuses = ['Not Started', 'Deferred', 'In Progress', 'Completed', 'Waiting for input']
-
+ 
   const getUserListFn = async () => {
     try {
       const results = await getAllUserListApi()
@@ -71,8 +69,6 @@ const CardNotes = () => {
         search,
         form_name: 'lead-form',
         c_createdBy: selectedUsers.length > 0 ? selectedUsers : [loggedInUserId],
-        priority: priority || undefined,
-        status: status || undefined,
         from: dateRange ? dayjs(dateRange.from).format('YYYY-MM-DD') : dayjs(from).format('YYYY-MM-DD'),
         to: dateRange ? dayjs(dateRange.to).format('YYYY-MM-DD') : dayjs(to).format('YYYY-MM-DD'),
         limit: 50
@@ -131,7 +127,7 @@ useEffect(() => {
       >
         <Grid container spacing={2} alignItems='center'>
           {/* 🔍 Search Field */}
-          <Grid item xs={12} sm={6} md={4}>
+          <Grid item xs={12} sm={6} md={3}>
             <TextField
               fullWidth
               autoComplete='off'
@@ -208,7 +204,7 @@ useEffect(() => {
           </Grid>
 
           {/* 🔘 Apply Button */}
-          <Grid item xs={12} sm={12} md={2}>
+          <Grid item xs={12} sm={12} md={1.5}>
             <Button
               variant='contained'
               fullWidth
@@ -222,6 +218,33 @@ useEffect(() => {
             >
               Apply
             </Button>
+            
+          </Grid>
+          <Grid item xs={12} sm={12} md={1.5}>
+              <Button
+    variant='outlined'
+    fullWidth
+    onClick={() => {
+      // Reset all filters
+      setSearch('')
+      setPriority('')
+      setStatus('')
+      setSelectedUsers([])
+      setFrom(dayjs().startOf('Today'))
+      setTo(dayjs().endOf('Today'))
+
+      // Refetch notes
+      fetchNotes({ from: dayjs().startOf('Today'), to: dayjs().endOf('Today') })
+    }}
+    sx={{
+      height: '40px',
+      textTransform: 'none',
+      fontWeight: 600,
+      borderRadius: 2
+    }}
+  >
+    Clear
+  </Button>
           </Grid>
         </Grid>
       </Box>
