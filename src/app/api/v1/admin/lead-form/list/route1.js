@@ -185,6 +185,7 @@ export async function POST(req) {
     const {
       organization_id,
       form_name,
+      c_createdBy,
       search = '',
       status = '',
       touch = '',
@@ -227,9 +228,9 @@ export async function POST(req) {
       let lowerRoleIds = lowerRoles.map(r => r.c_role_id)
 
       query.$or = [
-        { c_createdBy: verified.data.user_id },
+        { c_createdBy: c_createdBy },
         { c_role_id: { $in: lowerRoleIds } },
-        { 'values.Assigned To': String(verified.data.user_id) }
+        { 'values.Assigned To': String(c_createdBy) }
       ]
     }
 
