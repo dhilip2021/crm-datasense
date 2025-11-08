@@ -225,8 +225,7 @@ export default function DashboardWidgets() {
       const json = await res.json()
 
       if (json.success) {
-        console.log(json.data, '<<< JSON dataaa123456')
-
+        console.log(json.data,"<<< DHILIP LEADss")
         setData(json.data)
       }
     } catch (err) {

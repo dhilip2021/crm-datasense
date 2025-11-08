@@ -227,10 +227,18 @@ export async function POST(req) {
 
       let lowerRoleIds = lowerRoles.map(r => r.c_role_id)
 
+      // Step: check c_createdBy filter
+      let createdByFilter = {}
+      if (Array.isArray(c_createdBy) && c_createdBy.length > 0) {
+        createdByFilter = { c_createdBy: { $in: c_createdBy } } // use $in for array
+      } else if (c_createdBy) {
+        createdByFilter = { c_createdBy } // single value fallback
+      }
+
       query.$or = [
-        { c_createdBy: c_createdBy },
+        createdByFilter,
         { c_role_id: { $in: lowerRoleIds } },
-        { 'values.Assigned To': String(c_createdBy) }
+        { 'values.Assigned To': { $in: Array.isArray(c_createdBy) ? c_createdBy : [c_createdBy] } } // make sure array
       ]
     }
 
@@ -344,10 +352,7 @@ export async function POST(req) {
     const data = await Leadform.aggregate(pipeline)
 
     // 🟢 Count total
-    const countPipeline = [
-      { $match: query },
-      { $count: 'total' }
-    ]
+    const countPipeline = [{ $match: query }, { $count: 'total' }]
     const countResult = await Leadform.aggregate(countPipeline)
     const total = countResult[0]?.total || 0
 
@@ -364,4 +369,3 @@ export async function POST(req) {
     return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 })
   }
 }
-

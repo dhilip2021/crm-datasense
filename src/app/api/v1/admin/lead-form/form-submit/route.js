@@ -182,7 +182,6 @@ export async function POST(req) {
 
     const result = await leadformData.save()
 
-    console.log(result,"<<< resulttt")
 
     return NextResponse.json({
       success: true,

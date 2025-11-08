@@ -143,9 +143,9 @@ export const getLeadListApi = async (body) => {
     });
 };
 
-export const getAllLeadListApi = async (body) => {
+export const getAllLeadListApi = async (orgId,formName,from,to) => {
   return await axios
-    .get(`/api/v1/admin/lead/list?orgId=${body}`,{ headers: AppHeader })
+    .get(`/api/v1/admin/lead/list?orgId=${orgId}&formName=${formName}&from=${from}&to=${to}`,{ headers: AppHeader })
     .then((res) => {
       return res.data;
     })
