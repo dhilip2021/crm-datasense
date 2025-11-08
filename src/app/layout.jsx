@@ -7,8 +7,8 @@ import '@/app/globals.css'
 // Generated Icon CSS Imports
 // import '@assets/iconify-icons/generated-icons.css'
 
-// import '@assets/iconify-icons/icon.css'
-// import 'remixicon/fonts/remixicon.css'
+import '@assets/iconify-icons/icon.css'
+import 'remixicon/fonts/remixicon.css'
 
 //react-toastify
 import 'react-toastify/dist/ReactToastify.css';
