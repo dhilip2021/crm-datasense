@@ -69,9 +69,6 @@ export default function LeadStatus({
   openStatus,
   selectedStatus
 }) {
-
-
-
   const theme = useTheme()
   return (
     <>
@@ -137,7 +134,7 @@ export default function LeadStatus({
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   label='Next Follow-up'
-                  format="DD/MM/YYYY"
+                  format='DD/MM/YYYY'
                   value={filters.nextFollowup}
                   onChange={d => setFilters({ ...filters, nextFollowup: d })}
                   slotProps={{ textField: { size: 'small', fullWidth: true } }}
@@ -161,52 +158,101 @@ export default function LeadStatus({
       </Card>
 
       {/* STAT CARDS */}
-      <Grid container spacing={2}>
-        {loading
-          ? [...Array(11)].map((_, i) => (
-              <Grid item xs={12} sm={6} md={4} lg={2} key={i}>
-                <StatSkeleton />
-              </Grid>
-            ))
-          : cardConfig.map((item, i) => (
-              <Fade in timeout={400 + i * 50} key={i}>
-                <Grid item xs={12} sm={6} md={4} lg={2}>
-                  <StatCard
-                    onClick={() =>
-                      handleOpenStatus(item.title.includes(' Leads') ? item.title.replace(' Leads', '') : item.title)
-                    }
-                    sx={{ cursor: 'pointer' }}
-                  >
-                    <CardContent className='flex items-center gap-2'>
-                      <CustomAvatar
-                        variant='rounded'
-                        color={item.color}
-                        className='shadow-md'
-                        sx={{
-                          width: 44,
-                          height: 44,
-                          fontSize: 18,
-                          background: theme.palette[item.color].main,
-                          color: '#fff'
-                        }}
-                      >
-                        {/* <i className={item.icon}></i> */}
-                        {item.icon}
-                      </CustomAvatar>
-                      <Box>
-                        <Typography variant='body2' sx={{ color: 'text.secondary' }}>
-                          {item.title}
-                        </Typography>
-                        <Typography variant='h6' sx={{ fontWeight: 700, color: theme.palette[item.color].main }}>
-                          {item.count}
-                        </Typography>
-                      </Box>
-                    </CardContent>
-                  </StatCard>
-                </Grid>
-              </Fade>
-            ))}
-      </Grid>
+<Grid container spacing={3}>
+  {loading
+    ? [...Array(11)].map((_, i) => (
+        <Grid item xs={12} sm={6} md={4} lg={2} key={i}>
+          <StatSkeleton />
+        </Grid>
+      ))
+    : cardConfig.map((item, i) => (
+        <Fade in timeout={400 + i * 50} key={i}>
+          <Grid item xs={12} sm={6} md={4} lg={2}>
+            <StatCard
+              onClick={() =>
+                handleOpenStatus(
+                  item.title.includes(' Leads') ? item.title.replace(' Leads', '') : item.title
+                )
+              }
+              sx={{
+                cursor: 'pointer',
+                borderRadius: 2,
+                boxShadow: 3,
+                minHeight: 180, // ✅ fixed height
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center', // center content vertically
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: 6
+                }
+              }}
+            >
+              <CardContent
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                  gap: 1
+                }}
+              >
+                {/* Avatar */}
+                <CustomAvatar
+                  variant='rounded'
+                  sx={{
+                    width: 50,
+                    height: 50,
+                    fontSize: 28,
+                    backgroundColor: theme.palette[item.color].main,
+                    color: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                    lineHeight: 1,
+                    mb: 1
+                  }}
+                >
+                  {item.icon}
+                </CustomAvatar>
+
+                {/* Count */}
+                <Typography
+                  variant='h6'
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '28px',
+                    color: theme.palette[item.color].main,
+                    mb: 0.5
+                  }}
+                >
+                  {item.count}
+                </Typography>
+
+                {/* Title */}
+                <Typography
+                  variant='body2'
+                  sx={{
+                    color: 'text.secondary',
+                    fontWeight: 500,
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    textAlign: 'center'
+                  }}
+                >
+                  {item.title}
+                </Typography>
+              </CardContent>
+            </StatCard>
+          </Grid>
+        </Fade>
+      ))}
+</Grid>
+
 
       <Dialog open={openStatus} onClose={handleCloseStatus} maxWidth='sm' fullWidth>
         <Box sx={{ p: 3, position: 'relative' }}>
