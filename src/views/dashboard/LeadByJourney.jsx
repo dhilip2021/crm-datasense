@@ -1,0 +1,133 @@
+'use client'
+
+import React from 'react'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  LabelList,
+  Cell
+} from 'recharts'
+import { Card, CardContent, Typography, useTheme } from '@mui/material'
+
+const LeadJourneyStagesChart = ({ uniqueSources, dataFilter, loading }) => {
+  const theme = useTheme()
+
+  // Count leads by status dynamically
+  const data = uniqueSources.map(source => {
+    const count = dataFilter.filter(
+      lead => lead?.values?.['Lead Status'] === source
+    ).length
+
+    return {
+      name: source,
+      value: count
+    }
+  })
+
+  // Sort descending order for better visual (optional)
+  const sortedData = [...data].sort((a, b) => b.value - a.value)
+
+  // Add opacity fade for last bars
+  const styledData = sortedData.map((d, i) => ({
+    ...d,
+    opacity: i < 4 ? 1 : i === 4 ? 0.8 : i === 5 ? 0.6 : 0.4
+  }))
+
+  return (
+    <Card
+      sx={{
+        borderRadius: '16px',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.08)',
+        backgroundColor: '#fff',
+        p: 2
+      }}
+    >
+      <CardContent sx={{ pb: 0 }}>
+        <Typography
+          variant='h6'
+          sx={{
+            fontWeight: 600,
+            mb: 3,
+            color: '#111',
+            letterSpacing: 0.6
+          }}
+        >
+          Lead Journey Stages
+        </Typography>
+
+        <ResponsiveContainer width='100%' height={300}>
+          <BarChart
+            layout='vertical'
+            data={styledData}
+            margin={{ top: 10, right: 30, left: 100, bottom: 0 }} // Increased left margin for labels
+            barSize={36}
+          >
+            <defs>
+              <linearGradient id='barGradient' x1='0' y1='0' x2='1' y2='0'>
+                <stop offset='0%' stopColor='#03A9F4' />
+                <stop offset='100%' stopColor='#0288D1' />
+              </linearGradient>
+            </defs>
+
+            <XAxis type='number' hide />
+
+            <YAxis
+              dataKey='name'
+              type='category'
+              axisLine={false}
+              tickLine={false}
+              width={100} // gives proper space for labels
+              tick={({ x, y, payload }) => (
+                <text
+                  x={x - 10} // slight left shift for alignment
+                  y={y}
+                  textAnchor='end' // ✅ aligns text right to bar start
+                  dominantBaseline='middle'
+                  fill='#444'
+                  fontSize={14}
+                  fontWeight={500}
+                >
+                  {payload.value}
+                </text>
+              )}
+            />
+
+            <Tooltip
+              cursor={{ fill: 'rgba(0,0,0,0.03)' }}
+              contentStyle={{
+                borderRadius: 8,
+                border: 'none',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+              }}
+            />
+
+            <Bar dataKey='value' radius={[10, 10, 10, 10]}>
+              {styledData.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill='url(#barGradient)'
+                  opacity={entry.opacity}
+                />
+              ))}
+              <LabelList
+                dataKey='value'
+                position='right'
+                style={{
+                  fill: '#111',
+                  fontWeight: 600,
+                  fontSize: 14
+                }}
+              />
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
+  )
+}
+
+export default LeadJourneyStagesChart
