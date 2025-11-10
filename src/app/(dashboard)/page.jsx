@@ -211,13 +211,13 @@ const DashboardAnalytics = () => {
     'Hot': { color: 'error', icon: '🔥' },
     'Warm': { color: 'warning', icon: '☀️' },
     'Cold': { color: 'info', icon: '❄️' },
-    'New / Attempted Contact': { color: 'primary', icon: '🆕📲' }, // New + Attempted Contact
-    'Contacted / Qualification': { color: 'secondary', icon: '📞📝' }, // Contacted + Qualification
-    'Demo / Proposal Stage': { color: 'info', icon: '📅📩' }, // Demo Scheduled + Proposal Sent
-    'Negotiation / Ready to Close': { color: 'warning', icon: '🤝🏁' }, // Negotiation + Ready to close
+    'New / Attempted Contact': { color: 'primary', icon: '🆕' }, // New + Attempted Contact
+    'Contacted / Qualification': { color: 'secondary', icon: '📞' }, // Contacted + Qualification
+    'Demo / Proposal Stage': { color: 'info', icon: '📅' }, // Demo Scheduled + Proposal Sent
+    'Negotiation / Ready to Close': { color: 'warning', icon: '🤝' }, // Negotiation + Ready to close
     'Closed Won': { color: 'success', icon: '🏆' },
-    'Closed Lost': { color: 'error', icon: '💔' },
-    'Invalid / Junk / Wrong Contact': { color: 'error', icon: '❌🗑️' }, // Invalid Number + Junk
+    'Closed Lost': { color: 'error', icon: '❌' },
+    'Invalid / Junk / Wrong Contact': { color: 'error', icon: '🗑️' }, // Invalid Number + Junk
     'Call Back': { color: 'info', icon: '📱' },
      Total: { color: 'success', icon: '👥' }
   }
