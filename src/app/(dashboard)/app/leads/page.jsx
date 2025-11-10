@@ -355,6 +355,9 @@ const LeadTable = () => {
     }
   }
 
+
+
+
   useEffect(() => {
     if (!fetched && sections) {
       fetchData()
@@ -1068,11 +1071,13 @@ const LeadTable = () => {
             onPageChange={(e, newPage) => setPage(newPage)}
             rowsPerPage={limit}
             onRowsPerPageChange={e => {
-              setLimit(parseInt(e.target.value, limit))
-              setPage(page)
+              setLimit(parseInt(e.target.value))
+              setPage(0)
             }}
             rowsPerPageOptions={[10, 20, 50, 100]}
           />
+
+        
         </Grid>
       </Grid>
     </Box>
