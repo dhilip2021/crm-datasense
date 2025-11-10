@@ -230,8 +230,6 @@ const LeadTable = () => {
     }
   }
 
-  
-
   const fetchData = async () => {
     setLoading(true)
 
@@ -280,10 +278,6 @@ const LeadTable = () => {
       setLoading(false)
     }
   }
-
- 
-
- 
 
   const handlePDFClick = event => {
     setAnchorPdfEl(event.currentTarget)
@@ -361,17 +355,17 @@ const LeadTable = () => {
     }
   }
 
-
+  useEffect(() => {
+    if (!fetched && sections) {
+      fetchData()
+    }
+  }, [page, limit])
 
   useEffect(() => {
     fetchFormTemplate()
     getUserListFn()
     setFetched(false)
-    if (!fetched && sections) {
-      fetchData()
-      setFetched(true)
-    }
-  }, [page, limit])
+  }, [])
 
   useEffect(() => {
     const { search, fromDate, toDate, fromFollowDate, toFollowDate, ...otherFilters } = filters
@@ -526,16 +520,16 @@ const LeadTable = () => {
               value={filters.status}
               onChange={e => setFilters({ ...filters, status: e.target.value })}
               sx={{ minWidth: 120, maxWidth: 150, bgcolor: 'white' }}
-                SelectProps={{
-    MenuProps: {
-      PaperProps: {
-        style: {
-          maxHeight: 250, // 👈 Fixed dropdown height (you can adjust this)
-          overflowY: 'auto' // 👈 Enables vertical scrolling
-        }
-      }
-    }
-  }}
+              SelectProps={{
+                MenuProps: {
+                  PaperProps: {
+                    style: {
+                      maxHeight: 250, // 👈 Fixed dropdown height (you can adjust this)
+                      overflowY: 'auto' // 👈 Enables vertical scrolling
+                    }
+                  }
+                }
+              }}
             >
               <MenuItem value=''>All</MenuItem>
               {uniqueStatus.map(status => (
@@ -555,16 +549,16 @@ const LeadTable = () => {
               value={filters.touch}
               onChange={e => setFilters({ ...filters, touch: e.target.value })}
               sx={{ minWidth: 120, maxWidth: 150, bgcolor: 'white' }}
-                SelectProps={{
-    MenuProps: {
-      PaperProps: {
-        style: {
-          maxHeight: 250, // 👈 Fixed dropdown height (you can adjust this)
-          overflowY: 'auto' // 👈 Enables vertical scrolling
-        }
-      }
-    }
-  }}
+              SelectProps={{
+                MenuProps: {
+                  PaperProps: {
+                    style: {
+                      maxHeight: 250, // 👈 Fixed dropdown height (you can adjust this)
+                      overflowY: 'auto' // 👈 Enables vertical scrolling
+                    }
+                  }
+                }
+              }}
             >
               <MenuItem value=''>All</MenuItem>
               {['touch', 'untouch'].map(touch => (
@@ -583,16 +577,16 @@ const LeadTable = () => {
               value={filters.assign}
               onChange={e => setFilters({ ...filters, assign: e.target.value })}
               sx={{ minWidth: 140, maxWidth: 160, bgcolor: 'white' }}
-                SelectProps={{
-    MenuProps: {
-      PaperProps: {
-        style: {
-          maxHeight: 250, // 👈 Fixed dropdown height (you can adjust this)
-          overflowY: 'auto' // 👈 Enables vertical scrolling
-        }
-      }
-    }
-  }}
+              SelectProps={{
+                MenuProps: {
+                  PaperProps: {
+                    style: {
+                      maxHeight: 250, // 👈 Fixed dropdown height (you can adjust this)
+                      overflowY: 'auto' // 👈 Enables vertical scrolling
+                    }
+                  }
+                }
+              }}
             >
               <MenuItem value=''>All</MenuItem>
               {userList.map(u => (
@@ -610,16 +604,16 @@ const LeadTable = () => {
               value={filters.source}
               onChange={e => setFilters({ ...filters, source: e.target.value })}
               sx={{ minWidth: 120, maxWidth: 150, bgcolor: 'white' }}
-                SelectProps={{
-    MenuProps: {
-      PaperProps: {
-        style: {
-          maxHeight: 250, // 👈 Fixed dropdown height (you can adjust this)
-          overflowY: 'auto' // 👈 Enables vertical scrolling
-        }
-      }
-    }
-  }}
+              SelectProps={{
+                MenuProps: {
+                  PaperProps: {
+                    style: {
+                      maxHeight: 250, // 👈 Fixed dropdown height (you can adjust this)
+                      overflowY: 'auto' // 👈 Enables vertical scrolling
+                    }
+                  }
+                }
+              }}
             >
               <MenuItem value=''>All</MenuItem>
               {uniqueSources.map(source => (
@@ -634,7 +628,7 @@ const LeadTable = () => {
               <DateRangePicker
                 value={[filters.fromDate, filters.toDate]} // 🔹 filters la connect pannirukken
                 label='Created Date Range'
-                format="DD/MM/YYYY"
+                format='DD/MM/YYYY'
                 onChange={newValue => {
                   setFilters({
                     ...filters,
@@ -659,7 +653,7 @@ const LeadTable = () => {
               <DateRangePicker
                 value={[filters.fromFollowDate, filters.toFollowDate]} // 🔹 filters la connect pannirukken
                 label='Follow-Up Date Range'
-                format="DD/MM/YYYY"
+                format='DD/MM/YYYY'
                 onChange={newValue => {
                   setFilters({
                     ...filters,
@@ -1074,8 +1068,8 @@ const LeadTable = () => {
             onPageChange={(e, newPage) => setPage(newPage)}
             rowsPerPage={limit}
             onRowsPerPageChange={e => {
-              setLimit(parseInt(e.target.value, 10))
-              setPage(0)
+              setLimit(parseInt(e.target.value, limit))
+              setPage(page)
             }}
             rowsPerPageOptions={[10, 20, 50, 100]}
           />
