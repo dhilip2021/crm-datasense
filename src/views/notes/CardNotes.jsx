@@ -47,7 +47,6 @@ const CardNotes = () => {
 
   const [selectedDate, setSelectedDate] = useState(dayjs())
 
- 
   const getUserListFn = async () => {
     try {
       const results = await getAllUserListApi()
@@ -69,8 +68,8 @@ const CardNotes = () => {
         search,
         form_name: 'lead-form',
         c_createdBy: selectedUsers.length > 0 ? selectedUsers : [loggedInUserId],
-        from: dateRange ? dayjs(dateRange.from).format('YYYY-MM-DD') : dayjs(from).format('YYYY-MM-DD'),
-        to: dateRange ? dayjs(dateRange.to).format('YYYY-MM-DD') : dayjs(to).format('YYYY-MM-DD'),
+        from: dateRange ? dayjs(dateRange.from).format('YYYY-MM-DD') : null,
+        to: dateRange ? dayjs(dateRange.to).format('YYYY-MM-DD') : null,
         limit: 50
       }
 
@@ -99,14 +98,12 @@ const CardNotes = () => {
     }
   }
 
-
-// ✅ Automatically refetch notes when search is cleared
-useEffect(() => {
-  if (search === '') {
-    fetchNotes({ from, to })
-  }
-}, [search])
-
+  // ✅ Automatically refetch notes when search is cleared
+  useEffect(() => {
+    if (search === '') {
+      fetchNotes({ from, to })
+    }
+  }, [search])
 
   useEffect(() => {
     getUserListFn()
@@ -131,13 +128,13 @@ useEffect(() => {
             <TextField
               fullWidth
               autoComplete='off'
-              placeholder='Search Notes...'
+              placeholder='Search Notes....'
               name='search'
               value={search}
               onChange={e => setSearch(e.target.value)}
               onKeyDown={e => {
                 if (e.key === 'Enter') {
-                  fetchNotes({ from, to }) // ✅ call fetchNotes on Enter
+                  fetchNotes() // ✅ call fetchNotes on Enter
                 }
               }}
               InputProps={{
@@ -218,45 +215,44 @@ useEffect(() => {
             >
               Apply
             </Button>
-            
           </Grid>
           <Grid item xs={12} sm={12} md={1.5}>
-              <Button
-    variant='outlined'
-    fullWidth
-    onClick={() => {
-      // Reset all filters
-      setSearch('')
-      setPriority('')
-      setStatus('')
-      setSelectedUsers([])
-      setFrom(dayjs().startOf('Today'))
-      setTo(dayjs().endOf('Today'))
+            <Button
+              variant='outlined'
+              fullWidth
+              onClick={() => {
+                // Reset all filters
+                setSearch('')
+                setPriority('')
+                setStatus('')
+                setSelectedUsers([])
+                setFrom(dayjs().startOf('Today'))
+                setTo(dayjs().endOf('Today'))
 
-      // Refetch notes
-      fetchNotes({ from: dayjs().startOf('Today'), to: dayjs().endOf('Today') })
-    }}
-    sx={{
-      height: '40px',
-      textTransform: 'none',
-      fontWeight: 600,
-      borderRadius: 2
-    }}
-  >
-    Clear
-  </Button>
+                // Refetch notes
+                fetchNotes({ from: dayjs().startOf('Today'), to: dayjs().endOf('Today') })
+              }}
+              sx={{
+                height: '40px',
+                textTransform: 'none',
+                fontWeight: 600,
+                borderRadius: 2
+              }}
+            >
+              Clear
+            </Button>
           </Grid>
         </Grid>
       </Box>
 
       {/* 🗒️ Notes List Section */}
       <Box
-      sx={{
-    maxHeight: 'calc(100vh - 200px)', // adjust 200px based on your Filters section + padding
-    overflowY: 'auto',
-    px: 2, // optional padding
-    pb: 2 // optional padding
-  }}
+        sx={{
+          maxHeight: 'calc(100vh - 200px)', // adjust 200px based on your Filters section + padding
+          overflowY: 'auto',
+          px: 2, // optional padding
+          pb: 2 // optional padding
+        }}
       >
         {loading ? (
           <Box textAlign='center' py={5}>
@@ -273,7 +269,7 @@ useEffect(() => {
           </Box>
         ) : (
           <Grid container spacing={2}>
-            <NoteCard search ={search} notes={notes} onEdit={() => console.log('Edit note:', note)} />
+            <NoteCard search={search} notes={notes} onEdit={note => console.log('Edit note:', note)} />
           </Grid>
         )}
       </Box>
