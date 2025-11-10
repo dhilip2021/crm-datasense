@@ -190,26 +190,13 @@ const staticFiledForm = [
           tooltipMessage: '',
           tooltipType: 'icon',
           options: [
-            'New',
-            'Contacted',
-            'Qualified',
-            'Proposal Sent',
-            'Unqualified',
-            'Junk',
-            'Qualification',
-            'Quotation',
-            'Negatiation',
-            'Ready to close',
+            'New / Attempted Contact',
+            'Contacted / Qualification',
+            'Demo / Proposal Stage',
+            'Negotiation / Ready to Close',
             'Closed Won',
             'Closed Lost',
-            'Attempted to Contact',
-            'Lost Lead - No Requirements',
-            'No Response/Busy',
-            'Lost Lead - Already Using',
-            'Interested',
-            'Demo Scheduled',
-            'Need to Schedule Demo',
-            'Demo Completed',
+            'Invalid / Junk / Wrong Contact',
             'Call Back'
           ],
           defaultValue: 'New',
@@ -565,9 +552,7 @@ const Login = ({ mode }) => {
     } else if (results?.appStatusCode === 0) {
       const resultsPayloadJson = decrypCryptoRequest(results.payloadJson)
 
-      console.log(resultsPayloadJson,"<<< LOGIN RESULTSSS")
-
-
+      console.log(resultsPayloadJson, '<<< LOGIN RESULTSSS')
 
       const dispatchLogin = {
         appStatusCode: results?.appStatusCode,
@@ -677,7 +662,7 @@ const Login = ({ mode }) => {
         Cookies.set('_token', resultsPayloadJson?.tokenAccess)
         Cookies.set('_token_expiry', resultsPayloadJson?.tokenExpiry)
         Cookies.set('role_id', resultsPayloadJson?.c_role_id)
-         Cookies.set('email', resultsPayloadJson?.email)
+        Cookies.set('email', resultsPayloadJson?.email)
         Cookies.set('user_id', resultsPayloadJson?.user_id)
         Cookies.set('organization_id', resultsPayloadJson?.organization_id)
         Cookies.set('organization_name', resultsPayloadJson?.organization_name)
@@ -860,14 +845,14 @@ const Login = ({ mode }) => {
         <Illustrations maskImg={{ src: authBackground }} />
       </div>
       <ErrorPopup open={open} close={handlePopupClose} title={title} trailVal={trailVal} />
-       <ToastContainer
-              position='bottom-center'
-              autoClose={500} // all toasts auto close
-              hideProgressBar
-              closeOnClick
-              pauseOnHover={false}
-              draggable={false}
-            />
+      <ToastContainer
+        position='bottom-center'
+        autoClose={500} // all toasts auto close
+        hideProgressBar
+        closeOnClick
+        pauseOnHover={false}
+        draggable={false}
+      />
     </Box>
   )
 }

@@ -26,39 +26,7 @@ import LoaderGif from '@assets/gif/loader.gif'
 import { toast, ToastContainer } from 'react-toastify'
 import DeleteConformPopup from './DeleteConformPopup'
 
-function activeColor(value) {
-  switch (value) {
-    case 'New':
-      return '#9c27b0'
-    case 'Contacted':
-      return '#e91e63'
-    case 'Nurture':
-      return '#009688'
-    case 'Qualified':
-      return '#1976d2'
-    case 'Unqualified':
-      return '#f44336'
-    case 'Junk':
-      return '#009688'
-    case 'Qualification':
-      return '#001f3f'
-    case 'Demo/Making':
-      return '#00bfff'
-    case 'Proposal/Quotation':
-      return '#ffeb3b'
-    case 'Negotiation':
-      return '#ff9800'
-    case 'Ready to Close':
-      return '#009688'
-    case 'Won':
-      return '#4caf50'
-    case 'Lost':
-      return '#8B0000'
 
-    default:
-      return 'info'
-  }
-}
 
 const CustomerTable = () => {
   const organization_id = Cookies.get('organization_id')

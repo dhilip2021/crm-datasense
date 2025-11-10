@@ -875,46 +875,26 @@ const LeadTable = () => {
                           <Chip
                             label={row.values['Lead Status'] || 'Unknown'}
                             color={
-                              row.values['Lead Status'] === 'New'
+                              row.values['Lead Status'] === 'New / Attempted Contact'
                                 ? 'primary'
-                                : row.values['Lead Status'] === 'Contacted'
-                                  ? 'info'
-                                  : row.values['Lead Status'] === 'Qualified'
+                                  : row.values['Lead Status'] === 'Contacted / Qualification'
                                     ? 'success'
-                                    : row.values['Lead Status'] === 'Proposal Sent'
+                                    : row.values['Lead Status'] === 'Demo / Proposal Stage'
                                       ? 'secondary'
-                                      : row.values['Lead Status'] === 'Negotiation'
+                                      : row.values['Lead Status'] === 'Negotiation / Ready to Close'
                                         ? 'default'
                                         : row.values['Lead Status'] === 'Closed Lost'
                                           ? 'warning'
                                           : row.values['Lead Status'] === 'Closed Won'
                                             ? 'success'
-                                            : row.values['Lead Status'] === 'Attempted to Contact'
+                                            : row.values['Lead Status'] === 'Invalid / Junk / Wrong Contact'
                                               ? 'warning'
-                                              : row.values['Lead Status'] === 'Lost Lead - No Requirements'
-                                                ? 'error'
-                                                : row.values['Lead Status'] === 'No Response/Busy'
-                                                  ? 'warning'
-                                                  : row.values['Lead Status'] === 'Lost Lead - Already Using'
-                                                    ? 'error'
-                                                    : row.values['Lead Status'] === 'Interested'
-                                                      ? 'warning'
-                                                      : row.values['Lead Status'] === 'Demo Scheduled'
-                                                        ? 'warning'
-                                                        : row.values['Lead Status'] === 'Need to Schedule Demo'
-                                                          ? 'warning'
-                                                          : row.values['Lead Status'] === 'Demo Completed'
-                                                            ? 'warning'
-                                                            : row.values['Lead Status'] === 'Call Back'
-                                                              ? 'warning'
-                                                              : 'default'
+                                              : row.values['Lead Status'] === 'Call Back'
+                                                ? 'error' : 'default'
                             }
                             size='small'
                           />
                         </TableCell>
-                        {/* <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
-                          {formatDateShort(row.values['Next Follow-up Date'])}
-                        </TableCell> */}
                         <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
                           {row.values['Next Follow-up Date'] ? formatDateShort(row.values['Next Follow-up Date']) : '-'}
                         </TableCell>
