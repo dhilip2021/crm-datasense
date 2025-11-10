@@ -149,6 +149,8 @@ const DashboardAnalytics = () => {
         `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=lead-form`
       )
       const json = await res.json()
+
+      console.log(json, '<<< json')
       if (json.success && json.data?.sections?.length) {
         setSections(json.data.sections)
         const flat = flattenFields(json.data.sections)
@@ -156,6 +158,9 @@ const DashboardAnalytics = () => {
         flat.forEach(f => {
           if (f.type === 'Dropdown' && f.options?.length) config[f.label] = f.options
         })
+
+        console.log(config, '<<< configgggg')
+
         setFieldConfig(config)
       }
     } catch (err) {
@@ -206,11 +211,10 @@ const DashboardAnalytics = () => {
     }
   }, [dataFilter, fieldConfig])
 
-
   const statusMeta = {
-    'Hot': { color: 'error', icon: '🔥' },
-    'Warm': { color: 'warning', icon: '☀️' },
-    'Cold': { color: 'info', icon: '❄️' },
+    Hot: { color: 'error', icon: '🔥' },
+    Warm: { color: 'warning', icon: '☀️' },
+    Cold: { color: 'info', icon: '❄️' },
     'New / Attempted Contact': { color: 'primary', icon: '🆕' }, // New + Attempted Contact
     'Contacted / Qualification': { color: 'secondary', icon: '📞' }, // Contacted + Qualification
     'Demo / Proposal Stage': { color: 'info', icon: '📅' }, // Demo Scheduled + Proposal Sent
@@ -219,7 +223,7 @@ const DashboardAnalytics = () => {
     'Closed Lost': { color: 'error', icon: '❌' },
     'Invalid / Junk / Wrong Contact': { color: 'error', icon: '🗑️' }, // Invalid Number + Junk
     'Call Back': { color: 'info', icon: '📱' },
-     Total: { color: 'success', icon: '👥' }
+    Total: { color: 'success', icon: '👥' }
   }
 
   // 🔹 Card Config
@@ -249,12 +253,20 @@ const DashboardAnalytics = () => {
     return cards
   }, [leadStatusCounts])
 
-  const uniqueSources = useMemo(() => [...new Set(dataFilter.map(d => d.values?.Source).filter(Boolean))], [dataFilter])
+  // const uniqueSources = useMemo(() => [...new Set(fieldConfig.map(d => d.values?.Source).filter(Boolean))], [fieldConfig])
   const uniqueCities = useMemo(() => [...new Set(dataFilter.map(d => d.values?.City).filter(Boolean))], [dataFilter])
-  const uniqueTimelines = useMemo(
-    () => [...new Set(dataFilter.map(d => d.values?.Timeline).filter(Boolean))],
-    [dataFilter]
-  )
+  // const uniqueTimelines = useMemo(() => [...new Set(fieldConfig.map(d => d.values?.Timeline).filter(Boolean))],[fieldConfig])
+
+  const uniqueSources = useMemo(() => fieldConfig['Lead Status'] || [], [fieldConfig])
+  const uniqueTimelines = useMemo(() => fieldConfig['Timeline to Buy'] || [], [fieldConfig])
+
+  const uniqueIndustries = useMemo(() => fieldConfig['Industry'] || [], [fieldConfig])
+
+  const uniqueLeadSources = useMemo(() => fieldConfig['Lead Source'] || [], [fieldConfig])
+
+  const uniqueEmployeeSizes = useMemo(() => fieldConfig['Employees Size'] || [], [fieldConfig])
+
+  const uniqueAssignedTo = useMemo(() => fieldConfig['Assigned To'] || [], [fieldConfig])
 
   return (
     <Grid container spacing={6}>
