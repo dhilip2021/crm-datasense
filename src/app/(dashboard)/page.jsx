@@ -206,42 +206,11 @@ const DashboardAnalytics = () => {
     }
   }, [dataFilter, fieldConfig])
 
-  const statusMetaOld = {
-    Hot: { color: 'error', icon: '🔥' },
-    Warm: { color: 'warning', icon: '☀️' },
-    Cold: { color: 'info', icon: '❄️' },
-    'In Progress': { color: 'info', icon: '⏳' },
-    New: { color: 'primary', icon: '🆕' },
-    Contacted: { color: 'secondary', icon: '📞' },
-    Qualified: { color: 'success', icon: '✅' },
-    'Proposal Sent': { color: 'warning', icon: '📩' },
-    Unqualified: { color: 'error', icon: '❌' },
-    Junk: { color: 'secondary', icon: '🗑️' },
-    Qualification: { color: 'info', icon: '📝' },
-    Quotation: { color: 'warning', icon: '💰' },
-    Negatiation: { color: 'warning', icon: '🤝' },
-    'Ready to close': { color: 'success', icon: '🏁' },
-    'Closed Won': { color: 'success', icon: '🏆' },
-    'Closed Lost': { color: 'error', icon: '💔' },
-    'Attempted to Contact': { color: 'info', icon: '📲' },
-    'Lost Lead - No Requirements': { color: 'secondary', icon: '⚠️' },
-    'No Response/Busy': { color: 'secondary', icon: '⏱️' },
-    'Lost Lead - Already Using': { color: 'secondary', icon: '🔒' },
-    Interested: { color: 'success', icon: '✨' },
-    'Demo Scheduled': { color: 'info', icon: '📅' },
-    'Need to Schedule Demo': { color: 'warning', icon: '🗓️' },
-    'Demo Completed': { color: 'success', icon: '🎯' },
-    'Call Back': { color: 'info', icon: '📱' },
-    'Invalid Number': { color: 'error', icon: '❌' },
-    'Lost Lead - Small scale': { color: 'secondary', icon: '⚠️' },
-    'Converted To Deal': { color: 'success', icon: '💼' },
-    Total: { color: 'primary', icon: '👥' }
-  }
 
   const statusMeta = {
-    Hot: { color: 'error', icon: '🔥' },
-    Warm: { color: 'warning', icon: '☀️' },
-    Cold: { color: 'info', icon: '❄️' },
+    'Hot': { color: 'error', icon: '🔥' },
+    'Warm': { color: 'warning', icon: '☀️' },
+    'Cold': { color: 'info', icon: '❄️' },
     'New / Attempted Contact': { color: 'primary', icon: '🆕📲' }, // New + Attempted Contact
     'Contacted / Qualification': { color: 'secondary', icon: '📞📝' }, // Contacted + Qualification
     'Demo / Proposal Stage': { color: 'info', icon: '📅📩' }, // Demo Scheduled + Proposal Sent
@@ -249,13 +218,13 @@ const DashboardAnalytics = () => {
     'Closed Won': { color: 'success', icon: '🏆' },
     'Closed Lost': { color: 'error', icon: '💔' },
     'Invalid / Junk / Wrong Contact': { color: 'error', icon: '❌🗑️' }, // Invalid Number + Junk
-    'Call Back': { color: 'info', icon: '📱' }
+    'Call Back': { color: 'info', icon: '📱' },
+     Total: { color: 'success', icon: '👥' }
   }
 
   // 🔹 Card Config
   const cardConfig = useMemo(() => {
     const cards = []
-
     cards.push({
       title: 'Total Leads',
       count: leadStatusCounts.totalLeads,
