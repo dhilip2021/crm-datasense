@@ -63,8 +63,10 @@ const LeadJourneyStagesChart = ({ uniqueSources, dataFilter, loading }) => {
           <BarChart
             layout='vertical'
             data={styledData}
-            margin={{ top: 10, right: 30, left: 100, bottom: 0 }} // Increased left margin for labels
-            barSize={36}
+            margin={{ top: 10, right: 30, left: 110, bottom: 10 }} // extra left space
+            barSize={32} // slightly smaller bars
+            barCategoryGap={15} // 🔥 adds space between categories
+            barGap={8} // 🔥 small gap between stacked/grouped bars (even if single)
           >
             <defs>
               <linearGradient id='barGradient' x1='0' y1='0' x2='1' y2='0'>
@@ -80,12 +82,12 @@ const LeadJourneyStagesChart = ({ uniqueSources, dataFilter, loading }) => {
               type='category'
               axisLine={false}
               tickLine={false}
-              width={100} // gives proper space for labels
+              width={100}
               tick={({ x, y, payload }) => (
                 <text
-                  x={x - 10} // slight left shift for alignment
+                  x={x - 15} // added a bit more left gap
                   y={y}
-                  textAnchor='end' // ✅ aligns text right to bar start
+                  textAnchor='end'
                   dominantBaseline='middle'
                   fill='#444'
                   fontSize={14}
