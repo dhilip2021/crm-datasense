@@ -439,12 +439,28 @@ const renderMeetingCard = meeting => (
   const hasInitialTaskSpace = str => str?.[0] === ' '
   const hasInitialMeetingSpace = str => str?.[0] === ' '
 
-  const validateReminderTaskTime = () => {
-    if (!taskData.reminderEnabled || !taskData.reminderTime || !taskData.reminderDate) return true
-    const reminderDateTime = dayjs(`${taskData.reminderDate} ${taskData.reminderTime}`, 'YYYY-MM-DD HH:mm')
-    const now = dayjs()
-    return !(dayjs(taskData.reminderDate).isSame(now, 'day') && reminderDateTime.isBefore(now))
-  }
+  // const validateReminderTaskTime = () => {
+  //   if (!taskData.reminderEnabled || !taskData.reminderTime || !taskData.reminderDate) return true
+  //   const reminderDateTime = dayjs(`${taskData.reminderDate} ${taskData.reminderTime}`, 'YYYY-MM-DD HH:mm')
+  //   const now = dayjs()
+  //   return !(dayjs(taskData.reminderDate).isSame(now, 'day') && reminderDateTime.isBefore(now))
+  // }
+
+   const validateReminderTaskTime = () => {
+      if (!taskData.reminderEnabled || !taskData.reminderTime || !taskData.reminderDate) return true
+  
+      const reminderDateTime = dayjs(
+        `${dayjs(taskData.reminderDate).format('YYYY-MM-DD')} ${taskData.reminderTime}`,
+        'YYYY-MM-DD HH:mm'
+      )
+      const now = dayjs()
+  
+      // If reminder is set for today, time must be >= current time
+      if (dayjs(taskData.reminderDate).isSame(now, 'day') && reminderDateTime.isBefore(now)) {
+        return false
+      }
+      return true
+    }
 
   const validateReminderMeetingTime = () => {
     if (!meetingData.reminderEnabled || !meetingData.reminderTime || !meetingData.reminderDate) return true

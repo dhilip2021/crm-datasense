@@ -56,7 +56,7 @@ function TaskDialog({
             }}
           >
             <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
-              ✨ {editingTask ? 'Update Task' : 'Create Task'}
+              ✨✨ {editingTask ? 'Update Task' : 'Create Task'}
               <Tooltip title='Close' arrow>
                 <IconButton onClick={handleTaskClose}>
                   <CloseIcon />
