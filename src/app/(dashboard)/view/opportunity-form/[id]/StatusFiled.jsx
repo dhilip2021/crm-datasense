@@ -5,39 +5,20 @@ import { Box, FormControl, Select, MenuItem } from '@mui/material'
 
 const getLeadStatusColor = status => {
   switch (status) {
-    case 'New':
+    case 'New / Attempted Contact':
       return '#9C27B0' // Purple
-    case 'Contacted':
+    case 'Contacted / Qualification':
       return '#03A9F4' // Light Blue
-    case 'Qualified':
+    case 'Demo / Proposal Stage':
       return '#4CAF50' // Green
-    case 'Proposal Sent':
+    case 'Negotiation / Ready to Close':
       return '#757575' // Grey
-    case 'Negotiation':
-      return '#6D6D6D' // Dark Grey
-    case 'Closed Lost':
-      return '#FF9800' // Orange
     case 'Closed Won':
       return '#4CAF50' // Green
-    case 'Attempted to Contact':
-      return '#03A9F4' // Green
-    case 'Lost Lead - No Requirements':
-      return '#FF9800' // Green
-    case 'No Response/Busy':
-      return '#4CAF50' // Green
-    case 'Lost Lead - Already Using':
-      return '#4CAF50' // Green
-    case 'Interested':
-      return '#4CAF50' // Green
-    case 'Demo Scheduled':
-      return '#FF9800' // Green
-    case 'Need to Schedule Demo':
-      return '#4CAF50' // Green
-    case 'Demo Completed':
-      return '#4CAF50' // Green
+    case 'Closed Lost':
+      return '#FF9800' // Orange
     case 'Call Back':
-      return '#4CAF50' // Green
-
+      return '#6D6D6D' // Dark Grey
     default:
       return '#BDBDBD' // Default Grey
   }

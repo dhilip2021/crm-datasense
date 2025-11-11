@@ -108,7 +108,7 @@ if (source) {
           coldLeads: { $sum: { $cond: [{ $eq: ['$values.Label', 'Cold Lead'] }, 1, 0] } },
           newLeads: {
             $sum: {
-              $cond: [{ $regexMatch: { input: '$values.Lead Status', regex: 'New', options: 'i' } }, 1, 0]
+              $cond: [{ $regexMatch: { input: '$values.Lead Status', regex: 'New / Attempted Contact', options: 'i' } }, 1, 0]
             }
           },
           contactedLeads: {

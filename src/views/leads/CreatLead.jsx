@@ -311,7 +311,7 @@ const CreatLead = () => {
       const body = {
         organization_id,
         live_status: 'lead',
-        status: 'new',
+        status: 'New / Attempted Contact',
         ...rootFields,
         others: [othersFields],
         // ...inputObject

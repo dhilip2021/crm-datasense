@@ -28,7 +28,10 @@ const COLORS = [
   '#9ca3af', // Other
 ]
 
-export default function LostLeadAnalysis() {
+export default function LostLeadAnalysis({dataFilter, loading}) {
+
+  console.log(dataFilter,"<<< dataFileeee")
+
   return (
     <Card className='shadow-sm border border-gray-100'>
       <CardContent>

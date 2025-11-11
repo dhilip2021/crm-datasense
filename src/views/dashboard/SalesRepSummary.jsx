@@ -73,16 +73,22 @@ export default function SalesRepSummary({
   // 🎨 Status Color
   const getStatusColor = status => {
     switch (status) {
-      case 'New':
+      case 'New / Attempted Contact':
         return 'primary'
-      case 'Contacted':
+      case 'Contacted / Qualification':
         return 'info'
-      case 'Qualified':
-        return 'success'
-      case 'Unqualified':
-        return 'error'
-      case 'In Progress':
+      case 'Demo / Proposal Stage':
         return 'warning'
+      case 'Negotiation / Ready to Close':
+        return 'error'
+      case 'Closed Won':
+        return 'success'
+      case 'Closed Lost':
+        return 'success'
+      case 'Invalid / Junk / Wrong Contact':
+        return 'success'
+      case 'ICall Back':
+        return 'success'
       default:
         return 'default'
     }

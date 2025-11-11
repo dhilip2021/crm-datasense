@@ -294,7 +294,7 @@ const DashboardAnalytics = () => {
         <LeadJourneyStagesChart uniqueSources={uniqueSources} dataFilter={dataFilter} loading={loading} />
       </Grid>
       <Grid item xs={12} md={6} lg={6}>
-        <LostLeadAnalysis />
+        <LostLeadAnalysis dataFilter={dataFilter} loading={loading} />
       </Grid>
       <Grid item xs={12} md={6} lg={6}>
         <LeadByLocation viewType={viewType} dataFilter={dataFilter} loading={loading} />

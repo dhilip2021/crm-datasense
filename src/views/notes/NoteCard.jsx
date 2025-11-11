@@ -114,7 +114,7 @@ const NoteCard = ({ search, notes, onEdit, initialLimit = 4, loadMoreStep = 4 })
                     {lead.values?.Company || lead.lead_name}
                   </Typography>
                   <Chip
-                    label={lead.values?.['Lead Status'] || 'New'}
+                    label={lead.values?.['Lead Status'] || 'New / Attempted Contact'}
                     color='primary'
                     variant='outlined'
                     size='small'

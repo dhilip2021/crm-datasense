@@ -199,7 +199,7 @@ const staticFiledForm = [
             'Invalid / Junk / Wrong Contact',
             'Call Back'
           ],
-          defaultValue: 'New',
+          defaultValue: 'New / Attempted Contact',
           sortOrder: 'entered',
           trackHistory: false,
           enableColor: false,
