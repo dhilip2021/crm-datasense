@@ -233,6 +233,8 @@ function LeadFormAppPage() {
   }
 }
 
+ 
+
 
   // ---- handleSubmit ----
   const handleSubmit = async () => {
@@ -290,7 +292,7 @@ function LeadFormAppPage() {
     }
 
     setLoader(true)
-
+    
     try {
       const res = await fetch('/api/v1/admin/lead-form/form-submit', {
         method: 'POST',
@@ -682,7 +684,7 @@ function LeadFormAppPage() {
               Cancel
             </Button>
             <Button variant='contained' color='primary' onClick={handleSubmit}>
-              Submit 
+              Submit 1
             </Button>
           </Box>
         </>
