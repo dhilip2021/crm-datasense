@@ -58,7 +58,7 @@ const LeadByLocation = ({ viewType, dataFilter, loading }) => {
 
   return (
     <>
-      <Card>
+      <Card sx={{borderRadius: 3}}>
         <CardHeader title={`Lead By Location (${viewType})`} />
 
         <CardContent
@@ -67,7 +67,9 @@ const LeadByLocation = ({ viewType, dataFilter, loading }) => {
             flexDirection: 'column',
             gap: 1,
             maxHeight: 350,
-            overflowY: 'auto'
+            overflowY: 'auto',
+            height: 360,
+            
           }}
         >
           {loading ? (

@@ -51,7 +51,7 @@ const LeadJourneyStagesChart = ({ uniqueSources, dataFilter, loading }) => {
         borderRadius: '16px',
         boxShadow: '0 2px 10px rgba(0,0,0,0.08)',
         backgroundColor: '#fff',
-        p: 2
+        p: 0
       }}
     >
       <CardContent sx={{ pb: 0 }}>

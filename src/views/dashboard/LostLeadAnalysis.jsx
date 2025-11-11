@@ -49,17 +49,16 @@ export default function LostLeadAnalysis({ dataFilter = [], loading }) {
     }))
   }, [dataFilter])
 
-  console.log(dynamicData,"<<< dynamic DAta")
 
   return (
     <Card
       sx={{
         borderRadius: 3,
         boxShadow: '0 2px 10px rgba(0,0,0,0.08)',
-        backgroundColor: '#fff'
+        backgroundColor: '#fff',
       }}
     >
-      <CardContent>
+      <CardContent  sx={{ height: 370, display: 'flex', flexDirection: 'column' }}>
         <Typography
           variant='h6'
           sx={{ fontWeight: 600, mb: 3, color: '#111', letterSpacing: 0.5 }}
