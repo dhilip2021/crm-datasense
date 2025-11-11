@@ -27,6 +27,8 @@ import Cookies from 'js-cookie'
 import CloseIcon from '@mui/icons-material/Close'
 import { encryptCryptoRes } from '@/helper/frontendHelper'
 import Link from 'next/link'
+import LeadsOverview from './LeadsOverview'
+import LeadsOverviewFilters from './LeadsOverviewFilters'
 
 // 🔹 Stat Card Style
 const StatCard = styled(Card)(({ theme }) => ({
@@ -72,187 +74,19 @@ export default function LeadStatus({
   const theme = useTheme()
   return (
     <>
-      {/* FILTER BAR */}
-      <Card sx={{ borderRadius: 3, mb: 4, boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
-        <CardContent>
-          <Typography variant='h6' sx={{ fontWeight: 700, mb: 2, color: theme.palette.primary.main }}>
-            🎯 Filter Leads
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={2.4}>
-              <TextField
-                select
-                fullWidth
-                size='small'
-                label='Source'
-                value={filters.source}
-                onChange={e => setFilters(prev => ({ ...prev, source: e.target.value }))}
-              >
-                <MenuItem value=''>All</MenuItem>
-                {uniqueSources.map(s => (
-                  <MenuItem key={s} value={s}>
-                    {s}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-            <Grid item xs={12} sm={2.4}>
-              <FormControl size='small' fullWidth>
-                <InputLabel>City</InputLabel>
-                <Select
-                  value={filters.city}
-                  onChange={e => setFilters(prev => ({ ...prev, city: e.target.value }))}
-                  label='City'
-                >
-                  <MenuItem value=''>All</MenuItem>
-                  {uniqueCities.map(c => (
-                    <MenuItem key={c} value={c}>
-                      {c}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={2.4}>
-              <FormControl size='small' fullWidth>
-                <InputLabel>Timeline</InputLabel>
-                <Select
-                  value={filters.timeline}
-                  onChange={e => setFilters(prev => ({ ...prev, timeline: e.target.value }))}
-                  label='Timeline'
-                >
-                  <MenuItem value=''>All</MenuItem>
-                  {uniqueTimelines.map(t => (
-                    <MenuItem key={t} value={t}>
-                      {t}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={2.4}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  label='Next Follow-up'
-                  format='DD/MM/YYYY'
-                  value={filters.nextFollowup}
-                  onChange={d => setFilters({ ...filters, nextFollowup: d })}
-                  slotProps={{ textField: { size: 'small', fullWidth: true } }}
-                />
-              </LocalizationProvider>
-            </Grid>
-            <Grid item xs={12} sm={2.4}>
-              <FormControl fullWidth size='small'>
-                <InputLabel id='view-type-label'>Date Range</InputLabel>
-                <Select labelId='view-type-label' value={viewType} onChange={e => setViewType(e.target.value)}>
-                  {['Today', 'This Week', 'This Month', 'Last Month', 'Last 6 Months', 'Last 1 Year'].map(l => (
-                    <MenuItem key={l} value={l}>
-                      {l}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
+      {/* FILTER  */}
+      <LeadsOverviewFilters
+        filters={filters}
+        setFilters={setFilters}
+        viewType={viewType}
+        setViewType={setViewType}
+        uniqueSources={uniqueSources}
+        uniqueCities={uniqueCities}
+        uniqueTimelines={uniqueTimelines}
+      />
 
-      {/* STAT CARDS */}
-<Grid container spacing={3}>
-  {loading
-    ? [...Array(11)].map((_, i) => (
-        <Grid item xs={12} sm={6} md={4} lg={2} key={i}>
-          <StatSkeleton />
-        </Grid>
-      ))
-    : cardConfig.map((item, i) => (
-        <Fade in timeout={400 + i * 50} key={i}>
-          <Grid item xs={12} sm={6} md={4} lg={2}>
-            <StatCard
-              onClick={() =>
-                handleOpenStatus(
-                  item.title.includes(' Leads') ? item.title.replace(' Leads', '') : item.title
-                )
-              }
-              sx={{
-                cursor: 'pointer',
-                borderRadius: 2,
-                boxShadow: 3,
-                minHeight: 180, // ✅ fixed height
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center', // center content vertically
-                transition: 'transform 0.2s, box-shadow 0.2s',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: 6
-                }
-              }}
-            >
-              <CardContent
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                  gap: 1
-                }}
-              >
-                {/* Avatar */}
-                <CustomAvatar
-                  variant='rounded'
-                  sx={{
-                    width: 50,
-                    height: 50,
-                    fontSize: 28,
-                    backgroundColor: theme.palette[item.color].main,
-                    color: '#fff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-                    lineHeight: 1,
-                    mb: 1
-                  }}
-                >
-                  {item.icon}
-                </CustomAvatar>
-
-                {/* Count */}
-                <Typography
-                  variant='h6'
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: '28px',
-                    color: theme.palette[item.color].main,
-                    mb: 0.5
-                  }}
-                >
-                  {item.count}
-                </Typography>
-
-                {/* Title */}
-                <Typography
-                  variant='body2'
-                  sx={{
-                    color: 'text.secondary',
-                    fontWeight: 500,
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    textAlign: 'center'
-                  }}
-                >
-                  {item.title}
-                </Typography>
-              </CardContent>
-            </StatCard>
-          </Grid>
-        </Fade>
-      ))}
-</Grid>
-
+      {/* OVERVIEW  */}
+      <LeadsOverview cardConfig={cardConfig} />
 
       <Dialog open={openStatus} onClose={handleCloseStatus} maxWidth='sm' fullWidth>
         <Box sx={{ p: 3, position: 'relative' }}>

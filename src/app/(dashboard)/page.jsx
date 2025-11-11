@@ -218,7 +218,7 @@ const DashboardAnalytics = () => {
     Hot: { color: 'error', icon: '🔥' },
     Warm: { color: 'warning', icon: '☀️' },
     Cold: { color: 'info', icon: '❄️' },
-    'New / Attempted Contact': { color: 'primary', icon: '🆕' }, // New + Attempted Contact
+    'New / Attempted Contact': { color: '#009CDE', icon: '🆕' }, // New + Attempted Contact
     'Contacted / Qualification': { color: 'secondary', icon: '📞' }, // Contacted + Qualification
     'Demo / Proposal Stage': { color: 'info', icon: '📅' }, // Demo Scheduled + Proposal Sent
     'Negotiation / Ready to Close': { color: 'warning', icon: '🤝' }, // Negotiation + Ready to close
@@ -226,7 +226,7 @@ const DashboardAnalytics = () => {
     'Closed Lost': { color: 'error', icon: '❌' },
     'Invalid / Junk / Wrong Contact': { color: 'error', icon: '🗑️' }, // Invalid Number + Junk
     'Call Back': { color: 'info', icon: '📱' },
-    Total: { color: 'success', icon: '👥' }
+    Total: { color: '#60B527', icon: '👥' }
   }
 
   // 🔹 Card Config
@@ -256,6 +256,84 @@ const DashboardAnalytics = () => {
     return cards
   }, [leadStatusCounts])
 
+
+  // 🔹 Group Summary Counts
+const leadSummaryCounts = useMemo(() => {
+  const totalLeads = dataFilter.length
+
+  // Active = any lead that is not Closed Won, Closed Lost, or Invalid
+  const activeLeads = dataFilter.filter(
+    l =>
+      !['Closed Won', 'Closed Lost', 'Invalid / Junk / Wrong Contact','Demo / Proposal Stage'].includes(
+        l?.values?.['Lead Status']
+      )
+  ).length
+
+  // Demo Scheduled = Demo / Proposal Stage
+  const demoScheduled = dataFilter.filter(
+    l => l?.values?.['Lead Status'] === 'Demo / Proposal Stage'
+  ).length
+
+  // Closed Won
+  const closedWon = dataFilter.filter(
+    l => l?.values?.['Lead Status'] === 'Closed Won'
+  ).length
+
+  // Closed Lost
+    const closedLost = dataFilter.filter(
+    l =>
+      !['New / Attempted Contact', 'Contacted / Qualification', 'Demo / Proposal Stage', 'Negotiation / Ready to Close', 'Call Back', 'Closed Won'].includes(
+        l?.values?.['Lead Status']
+      )
+  ).length
+
+  return { totalLeads, activeLeads, demoScheduled, closedWon, closedLost }
+}, [dataFilter])
+
+const cardConfigOverView = useMemo(() => {
+  const cards = [
+    {
+      title: 'Total Leads',
+      count: leadSummaryCounts.totalLeads,
+      color: '#60B527', 
+      // icon: '👥'
+      icon: '/images/icons/icon-total.svg'
+    },
+    {
+      title: 'Active Leads',
+      count: leadSummaryCounts.activeLeads,
+      color: '#009CDE', 
+      // icon: '🔥'
+      icon: '/images/icons/icon-active.svg'
+    },
+    {
+      title: 'Demo Scheduled',
+      count: leadSummaryCounts.demoScheduled,
+      color: '#F71D09', 
+      // icon: '📅'
+      icon: '/images/icons/icon-demo.svg'
+    },
+    {
+      title: 'Closed Won',
+      count: leadSummaryCounts.closedWon,
+      color: '#AB09F7',
+      // icon: '🏆'
+      icon: '/images/icons/icon-won.svg'
+    },
+    {
+      title: 'Lost Leads',
+      count: leadSummaryCounts.closedLost,
+      color: '#B52781', 
+      // icon: '❌'
+      icon: '/images/icons/icon-loss.svg'
+    }
+  ]
+
+  return cards
+}, [leadSummaryCounts])
+
+
+
   // const uniqueSources = useMemo(() => [...new Set(fieldConfig.map(d => d.values?.Source).filter(Boolean))], [fieldConfig])
   const uniqueCities = useMemo(() => [...new Set(dataFilter.map(d => d.values?.City).filter(Boolean))], [dataFilter])
   // const uniqueTimelines = useMemo(() => [...new Set(fieldConfig.map(d => d.values?.Timeline).filter(Boolean))],[fieldConfig])
@@ -270,6 +348,11 @@ const DashboardAnalytics = () => {
   const uniqueEmployeeSizes = useMemo(() => fieldConfig['Employees Size'] || [], [fieldConfig])
 
   const uniqueAssignedTo = useMemo(() => fieldConfig['Assigned To'] || [], [fieldConfig])
+
+
+
+
+
 
   return (
     <Grid container spacing={6}>
@@ -286,7 +369,7 @@ const DashboardAnalytics = () => {
           viewType={viewType}
           setViewType={setViewType}
           loading={loading}
-          cardConfig={cardConfig}
+          cardConfig={cardConfigOverView}
           openStatus={openStatus}
           selectedStatus={selectedStatus}
         />
