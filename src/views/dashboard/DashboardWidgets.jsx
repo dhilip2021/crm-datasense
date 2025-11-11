@@ -380,7 +380,7 @@ export default function DashboardWidgets() {
             <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => router('/leads/assignment')}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Avatar sx={{ bgcolor: 'primary.main', mr: 2 }}>
+                  <Avatar sx={{ bgcolor: 'primary.main' ,color:"#fff", mr: 2 }}>
                     <PeopleIcon />
                   </Avatar>
                   <Typography variant='h6' fontWeight='bold'>
@@ -407,7 +407,7 @@ export default function DashboardWidgets() {
             <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => router.push('/leads/response-time')}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Avatar sx={{ bgcolor: 'secondary.main', mr: 2 }}>
+                  <Avatar sx={{ bgcolor: 'primary.main',color:"#fff", mr: 2 }}>
                     <AccessTimeIcon />
                   </Avatar>
                   <Typography variant='h6' fontWeight='bold'>
@@ -447,7 +447,7 @@ export default function DashboardWidgets() {
             <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => router('/leads/follow-ups')}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Avatar sx={{ bgcolor: 'info.main', mr: 2 }}>
+                  <Avatar sx={{ bgcolor: 'info.main',color:"#fff", mr: 2 }}>
                     <EventAvailableIcon />
                   </Avatar>
                   <Typography variant='h6' fontWeight='bold'>
