@@ -19,6 +19,7 @@ import dayjs from 'dayjs'
 import { getHierarchyUserListApi } from '@/apiFunctions/ApiAction'
 import LeadJourneyStagesChart from '@/views/dashboard/LeadByJourney'
 import LostLeadAnalysis from '@/views/dashboard/LostLeadAnalysis'
+import LeadProgress from '@/views/dashboard/LeadProgress'
 
 const DashboardAnalytics = () => {
   const organization_id = Cookies.get('organization_id')
@@ -296,11 +297,13 @@ const DashboardAnalytics = () => {
       <Grid item xs={12} md={6} lg={6}>
         <LostLeadAnalysis dataFilter={dataFilter} loading={loading} />
       </Grid>
+      
       <Grid item xs={12} md={6} lg={6}>
-        <LeadByLocation viewType={viewType} dataFilter={dataFilter} loading={loading} />
+        {/* <LeadWeekly /> */}
+        <LeadProgress />
       </Grid>
       <Grid item xs={12} md={6} lg={6}>
-        <LeadWeekly />
+        <LeadByLocation viewType={viewType} dataFilter={dataFilter} loading={loading} />
       </Grid>
 
       <Grid item xs={12} md={12} lg={12}>

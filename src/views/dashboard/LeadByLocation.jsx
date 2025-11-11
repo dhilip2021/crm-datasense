@@ -59,19 +59,25 @@ const LeadByLocation = ({ viewType, dataFilter, loading }) => {
   return (
     <>
       <Card sx={{borderRadius: 3}}>
-        <CardHeader title={`Lead By Location (${viewType})`} />
+        {/* <CardHeader title={`Lead By Location (${viewType})`} /> */}
 
         <CardContent
           sx={{
             display: 'flex',
             flexDirection: 'column',
             gap: 1,
-            maxHeight: 350,
+            maxHeight: 389,
             overflowY: 'auto',
-            height: 360,
+            height: 389,
             
           }}
         >
+          <Typography
+          variant='h6'
+          sx={{ fontWeight: 600, mb: 3, color: '#111', letterSpacing: 0.5 }}
+        >
+          Lead By Location
+        </Typography>
           {loading ? (
             Array.from({ length: 10 }).map((_, idx) => (
               <div key={idx} className='flex items-center gap-4'>
