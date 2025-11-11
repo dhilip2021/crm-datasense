@@ -11,7 +11,15 @@ import {
   LabelList,
   Cell
 } from 'recharts'
-import { Card, CardContent, Typography, useTheme } from '@mui/material'
+import {
+  Card,
+  CardContent,
+  Typography,
+  useTheme,
+  Box,
+  Skeleton,
+  Stack
+} from '@mui/material'
 
 const LeadJourneyStagesChart = ({ uniqueSources, dataFilter, loading }) => {
   const theme = useTheme()
@@ -28,7 +36,7 @@ const LeadJourneyStagesChart = ({ uniqueSources, dataFilter, loading }) => {
     }
   })
 
-  // Sort descending order for better visual (optional)
+  // Sort descending order for better visual
   const sortedData = [...data].sort((a, b) => b.value - a.value)
 
   // Add opacity fade for last bars
@@ -59,74 +67,101 @@ const LeadJourneyStagesChart = ({ uniqueSources, dataFilter, loading }) => {
           Lead Journey Stages
         </Typography>
 
-        <ResponsiveContainer width='100%' height={300}>
-          <BarChart
-            layout='vertical'
-            data={styledData}
-            margin={{ top: 10, right: 30, left: 110, bottom: 10 }} // extra left space
-            barSize={32} // slightly smaller bars
-            barCategoryGap={15} // 🔥 adds space between categories
-            barGap={8} // 🔥 small gap between stacked/grouped bars (even if single)
-          >
-            <defs>
-              <linearGradient id='barGradient' x1='0' y1='0' x2='1' y2='0'>
-                <stop offset='0%' stopColor='#03A9F4' />
-                <stop offset='100%' stopColor='#0288D1' />
-              </linearGradient>
-            </defs>
-
-            <XAxis type='number' hide />
-
-            <YAxis
-              dataKey='name'
-              type='category'
-              axisLine={false}
-              tickLine={false}
-              width={100}
-              tick={({ x, y, payload }) => (
-                <text
-                  x={x - 15} // added a bit more left gap
-                  y={y}
-                  textAnchor='end'
-                  dominantBaseline='middle'
-                  fill='#444'
-                  fontSize={14}
-                  fontWeight={500}
-                >
-                  {payload.value}
-                </text>
-              )}
-            />
-
-            <Tooltip
-              cursor={{ fill: 'rgba(0,0,0,0.03)' }}
-              contentStyle={{
-                borderRadius: 8,
-                border: 'none',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-              }}
-            />
-
-            <Bar dataKey='value' radius={[10, 10, 10, 10]}>
-              {styledData.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill='url(#barGradient)'
-                  opacity={entry.opacity}
+        {/* 🔥 Skeleton Loader when loading is true */}
+        {loading ? (
+          <Box sx={{ height: 300, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            {[...Array(6)].map((_, i) => (
+              <Stack key={i} direction='row' alignItems='center' spacing={2}>
+                <Skeleton variant='text' width={100} height={24} />
+                <Skeleton
+                  variant='rectangular'
+                  height={28}
+                  width={`${70 - i * 10}%`}
+                  sx={{ borderRadius: '8px' }}
                 />
-              ))}
-              <LabelList
-                dataKey='value'
-                position='right'
-                style={{
-                  fill: '#111',
-                  fontWeight: 600,
-                  fontSize: 14
+              </Stack>
+            ))}
+          </Box>
+        ) : (
+          <ResponsiveContainer width='100%' height={300}>
+            <BarChart
+              layout='vertical'
+              data={styledData}
+              margin={{ top: 10, right: 30, left: 110, bottom: 10 }}
+              barSize={32}
+              barCategoryGap={15}
+              barGap={8}
+            >
+              <defs>
+                <linearGradient id='barGradient' x1='0' y1='0' x2='1' y2='0'>
+                  <stop offset='0%' stopColor='#03A9F4' />
+                  <stop offset='100%' stopColor='#0288D1' />
+                </linearGradient>
+              </defs>
+
+              <XAxis type='number' hide />
+
+              <YAxis
+                dataKey='name'
+                type='category'
+                axisLine={false}
+                tickLine={false}
+                width={100}
+                tick={({ x, y, payload }) => (
+                  <text
+                    x={x - 15}
+                    y={y}
+                    textAnchor='end'
+                    dominantBaseline='middle'
+                    fill='#444'
+                    fontSize={14}
+                    fontWeight={500}
+                  >
+                    {payload.value}
+                  </text>
+                )}
+              />
+
+              <Tooltip
+                cursor={{ fill: 'rgba(0,0,0,0.03)' }}
+                contentStyle={{
+                  borderRadius: 8,
+                  border: 'none',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
                 }}
               />
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+
+              <Bar dataKey='value' radius={[10, 10, 10, 10]}>
+  {styledData.map((entry, index) => (
+    <Cell
+      key={`cell-${index}`}
+      fill='url(#barGradient)'
+      opacity={entry.opacity}
+    />
+  ))}
+
+  {/* ✅ Custom Label that always renders on top */}
+  <LabelList
+    dataKey='value'
+    content={({ x, y, width, height, value }) => (
+      <text
+        x={x + width / 2}
+        y={y + height / 2}
+        textAnchor='middle'
+        dominantBaseline='middle'
+        fill='#fff'
+        fontSize={14}
+        fontWeight={700}
+        style={{ pointerEvents: 'none' }}
+      >
+        {value}
+      </text>
+    )}
+  />
+</Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </CardContent>
     </Card>
   )

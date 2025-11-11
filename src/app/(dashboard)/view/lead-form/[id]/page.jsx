@@ -434,8 +434,20 @@ const LeadDetailView = () => {
   }, [leadData])
 
   // 🔹 Save handler
-  const handleFieldSave = async (label, newValue) => {
+  const handleFieldSave = async (label, newValue,reasonKey, selectedReasons) => {
     try {
+
+        // Base values
+    const updatedValues = {
+      [label]: newValue
+    }
+
+    // 🔹 Add reason fields dynamically
+    if (reasonKey && selectedReasons?.length) {
+      updatedValues[reasonKey] = selectedReasons
+    }
+
+
       const updatedLeadValues = {
         _id: leadData?._id,
         organization_id: leadData?.organization_id,
@@ -445,9 +457,10 @@ const LeadDetailView = () => {
         lead_slug_name: leadData?.lead_slug_name,
         form_name: leadData?.form_name,
         lead_touch: 'touch',
-        values: {
-          [label]: newValue // update particular field
-        },
+        // values: {
+        //   [label]: newValue // update particular field
+        // },
+        values: updatedValues, // ✅ both Lead Status + Reasons
         submittedAt: new Date().toISOString(),
         c_role_id: leadData?.c_role_id,
         c_createdBy: leadData?.c_createdBy,

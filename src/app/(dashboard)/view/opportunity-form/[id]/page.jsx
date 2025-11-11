@@ -433,63 +433,7 @@ const LeadDetailView = () => {
     }
   }, [leadData])
 
-  // // 🔹 Save handler
-  // const handleFieldSave = async (label, newValue, reasonKey, selectedReasons) => {
 
-  //   console.log(label,"<<<LABELLLLL")
-  //   console.log(newValue,"<<<newValueeeeeee")
-  //   console.log(reasonKey,"<<< reasonKey")
-  //   console.log(selectedReasons,"<<< selectedReasons")
-
-
-  //   try {
-  //     const updatedLeadValues = {
-  //       _id: leadData?._id,
-  //       organization_id: leadData?.organization_id,
-  //       auto_inc_id: leadData?.auto_inc_id,
-  //       lead_name: leadData?.lead_name,
-  //       lead_id: leadData?.lead_id,
-  //       lead_slug_name: leadData?.lead_slug_name,
-  //       form_name: leadData?.form_name,
-  //       lead_touch: 'touch',
-  //       values: {
-  //         [label]: newValue // update particular field
-  //       },
-  //       submittedAt: new Date().toISOString(),
-  //       c_role_id: leadData?.c_role_id,
-  //       c_createdBy: leadData?.c_createdBy,
-  //       updatedAt: leadData?.updatedAt,
-  //       createdAt: leadData?.createdAt
-  //     }
-
-  //     // 🔹 Persist to API
-  //     const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
-  //       method: 'PUT',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         Authorization: `Bearer ${getToken}`
-  //       },
-  //       body: JSON.stringify(updatedLeadValues)
-  //     })
-
-  //     const result = await res.json()
-
-  //     if (!result.success) {
-  //       toast.error('Failed to update field')
-  //       fetchLeadFromId() // rollback to latest DB values
-  //     } else {
-  //       toast.success(result?.message || 'Updated successfully', {
-  //         autoClose: 800,
-  //         position: 'bottom-center',
-  //         hideProgressBar: true
-  //       })
-  //       fetchLeadFromId()
-  //     }
-  //   } catch (err) {
-  //     toast.error('Error saving field')
-  //     console.error(err)
-  //   }
-  // }
 
   // 🔹 Save handler
 const handleFieldSave = async (label, newValue, reasonKey, selectedReasons) => {

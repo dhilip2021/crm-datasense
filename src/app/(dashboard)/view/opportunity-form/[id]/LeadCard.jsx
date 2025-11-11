@@ -24,12 +24,16 @@ import FlagIcon from '@mui/icons-material/Flag'
 import { useState } from 'react'
 
 export default function LeadCard({ fields, leadId, leadData, onToggleFlag, sections, handleFieldSave }) {
-  console.log(fields, '<<< fireldssssss')
+
 
   const [editing, setEditing] = useState(false)
   const [leadStatus, setLeadStatus] = useState(fields['Lead Status'] || '')
-  const [leadLossReasons, setLossLeadReasons] = useState(fields['Loss Reasons'] || [])
-  const [leadWonReasons, setWonLeadReasons] = useState(fields['Win Reasons'] || [])
+  const [leadLossReasons, setLossLeadReasons] = useState(
+  Array.isArray(fields?.['Loss Reasons']) ? fields['Loss Reasons'] : []
+)
+const [leadWonReasons, setWonLeadReasons] = useState(
+  Array.isArray(fields?.['Win Reasons']) ? fields['Win Reasons'] : []
+)
   const [openReasonDialog, setOpenReasonDialog] = useState(false)
   const [selectedReasons, setSelectedReasons] = useState([])
   const [reasonType, setReasonType] = useState('') // "won" or "lost"
@@ -102,6 +106,12 @@ export default function LeadCard({ fields, leadId, leadData, onToggleFlag, secti
     setSelectedReasons([])
     setReasonType('')
   }
+
+     useEffect(() => {
+  setLeadStatus(fields?.['Lead Status'] || '')
+  setWonLeadReasons(Array.isArray(fields?.['Win Reasons']) ? fields['Win Reasons'] : [])
+  setLossLeadReasons(Array.isArray(fields?.['Loss Reasons']) ? fields['Loss Reasons'] : [])
+}, [fields])
 
   return (
     <>
