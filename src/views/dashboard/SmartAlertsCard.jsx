@@ -58,7 +58,6 @@ const calculateReasonStats = deals => {
 }
 
 export default function SmartAlertsCard({ deals = [], loader }) {
-  console.log(deals, '<<< SmartAlertsCard deals')
 
   const { win, loss } = calculateReasonStats(deals)
 

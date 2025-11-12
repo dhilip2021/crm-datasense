@@ -14,9 +14,6 @@ import { encryptCryptoRes } from '@/helper/frontendHelper'
 
 export default function DealAgingAnalysis({ deals, loader }) {
 
-  console.log(deals,"<<< DEALDSSDSDSDS")
-
-
   const isEmpty = !deals || deals.length === 0
 
   return (

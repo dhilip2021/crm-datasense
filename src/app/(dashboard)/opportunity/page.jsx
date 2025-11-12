@@ -19,36 +19,36 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import OpportunityStatus from '@/views/dashboard/OpportunityStatus'
 
 
-const opportunityData = [
-    {
-      title: 'Total Pipeline Value',
-      value: '₹3,30,000',
-      change: '+12.5%',
-      icon: '₹',
-      color: '#22C55E'
-    },
-    {
-      title: 'Open Opportunities',
-      value: '4',
-      change: '+3',
-      icon: '🎯',
-      color: '#0EA5E9'
-    },
-    {
-      title: 'Win Rate',
-      value: '16.7%',
-      change: '+2.1%',
-      icon: '🎯',
-      color: '#A855F7'
-    },
-    {
-      title: 'Average Deal Size',
-      value: '₹82,500',
-      change: '+8.3%',
-      icon: '₹',
-      color: '#22C55E'
-    }
-  ]
+// const opportunityData = [
+//     {
+//       title: 'Total Pipeline Value',
+//       value: '₹3,30,000',
+//       change: '+12.5%',
+//       icon: '/images/icons/icon-inr.svg',
+//       color: '#60B527'
+//     },
+//     {
+//       title: 'Open Opportunities',
+//       value: '4',
+//       change: '+3',
+//       icon: '/images/icons/icon-circle.svg',
+//       color: '#009CDE'
+//     },
+//     {
+//       title: 'Win Rate',
+//       value: '16.7%',
+//       change: '+2.1%',
+//       icon: '/images/icons/icon-win.svg',
+//       color: '#AB09F7'
+//     },
+//     {
+//       title: 'Average Deal Size',
+//       value: '₹82,500',
+//       change: '+8.3%',
+//       icon: '/images/icons/icon-inr.svg',
+//       color: '#60B527'
+//     }
+//   ]
 
 
 const Opportunity = () => {
@@ -78,6 +78,7 @@ const Opportunity = () => {
     toDate: null,
     search: ''
   })
+const [opportunityData, setOpportunityData] = useState([])
 
   const [anchorViewEl, setAnchorViewEl] = useState(null)
   const [viewType, setViewType] = useState('This Month')
@@ -260,10 +261,7 @@ const Opportunity = () => {
 
   useEffect(() => {
     if (Array.isArray(data) && data.length > 0) {
-
-     
     const accountMap = {}
-
     data.forEach(item => {
       const companyName = item.values?.['Company'] || 'Unknown Company'
 
@@ -418,7 +416,102 @@ const Opportunity = () => {
 
       setFunnelData(emtyRes)
     }
+
+if (!Array.isArray(data) || data.length === 0) {
+    setOpportunityData([
+      { title: 'Total Pipeline Value', value: '₹0', change: '+0%', icon: '/images/icons/icon-inr.svg', color: '#60B527' },
+      { title: 'Open Opportunities', value: '0', change: '+0', icon: '/images/icons/icon-circle.svg', color: '#009CDE' },
+      { title: 'Win Rate', value: '0%', change: '+0%', icon: '/images/icons/icon-win.svg', color: '#AB09F7' },
+      { title: 'Average Deal Size', value: '₹0', change: '+0%', icon: '/images/icons/icon-inr.svg', color: '#60B527' }
+    ])
+    return
+  }
+
+  // 🔹 Total Pipeline Value
+  const totalPipelineValue = data.reduce((sum, item) => {
+    const totalItemValue = (item.items || []).reduce((leadSum, itemBlock) => {
+      const itemTotal = (itemBlock.item_ref || []).reduce(
+        (sum, ref) => sum + Number(ref.finalPrice || 0),
+        0
+      )
+      return leadSum + itemTotal
+    }, 0)
+    return sum + totalItemValue
+  }, 0)
+
+  // 🔹 Open Opportunities (excluding Closed Won & Closed Lost)
+  const openOpps = data.filter(item => {
+    const status = item.values?.['Lead Status'] || ''
+    return status !== 'Closed Won' && status !== 'Closed Lost'
+  }).length
+
+  // 🔹 Closed Won count
+  const closedWonCount = data.filter(item => item.values?.['Lead Status'] === 'Closed Won').length
+
+  // 🔹 Closed Lost count
+  const closedLostCount = data.filter(item => item.values?.['Lead Status'] === 'Closed Lost').length
+
+  // 🔹 Win Rate
+  const totalClosed = closedWonCount + closedLostCount
+  const winRate = totalClosed > 0 ? ((closedWonCount / totalClosed) * 100).toFixed(1) : 0
+
+  // 🔹 Average Deal Size (based on Closed Won only)
+  const wonDeals = data.filter(item => item.values?.['Lead Status'] === 'Closed Won')
+  const totalWonValue = wonDeals.reduce((sum, item) => {
+    const totalItemValue = (item.items || []).reduce((leadSum, itemBlock) => {
+      const itemTotal = (itemBlock.item_ref || []).reduce(
+        (sum, ref) => sum + Number(ref.finalPrice || 0),
+        0
+      )
+      return leadSum + itemTotal
+    }, 0)
+    return sum + totalItemValue
+  }, 0)
+  const avgDealSize = wonDeals.length > 0 ? totalWonValue / wonDeals.length : 0
+
+  // 🔹 Final formatted array
+  const formatted = [
+    {
+      title: 'Total Pipeline Value',
+      value: `₹${totalPipelineValue.toLocaleString('en-IN')}`,
+      change: '+0%', // You can later calculate vs previous period
+      icon: '/images/icons/icon-inr.svg',
+      color: '#60B527'
+    },
+    {
+      title: 'Open Opportunities',
+      value: openOpps.toString(),
+      change: '+0', // can later compute trend
+      icon: '/images/icons/icon-circle.svg',
+      color: '#009CDE'
+    },
+    {
+      title: 'Win Rate',
+      value: `${winRate}%`,
+      change: '+0%', // optional
+      icon: '/images/icons/icon-win.svg',
+      color: '#AB09F7'
+    },
+    {
+      title: 'Average Deal Size',
+      value: `₹${Math.round(avgDealSize).toLocaleString('en-IN')}`,
+      change: '+0%',
+      icon: '/images/icons/icon-inr.svg',
+      color: '#60B527'
+    }
+  ]
+
+  setOpportunityData(formatted)
+
+
+
+
   }, [data, fieldStatus])
+
+
+
+
+
 
   return (
     <Grid container spacing={6}>
@@ -443,7 +536,7 @@ const Opportunity = () => {
       </Grid>
 
       <Grid item xs={12}>
-          <OpportunityStatus opportunityData={opportunityData}/>
+          <OpportunityStatus opportunityData={opportunityData} loader={loader}/>
       </Grid>
       <Grid item xs={6}>
         {/* <SalesFunnelChart funnelData={funnelData} /> */}
