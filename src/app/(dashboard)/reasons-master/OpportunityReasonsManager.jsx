@@ -221,9 +221,19 @@ export default function OpportunityReasonsManager() {
               </Box>
 
               {data.lossReasons.length === 0 ? (
-                <Typography variant='body2' color='text.secondary'>
-                  No loss reasons found.
-                </Typography>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: 250
+                  }}
+                >
+                  <Typography variant='h6' color='text.secondary'>
+                    No loss reasons found
+                  </Typography>
+                </Box>
               ) : (
                 <Stack direction='row' flexWrap='wrap' gap={1}>
                   {data.lossReasons.map(reason => (
@@ -254,13 +264,7 @@ export default function OpportunityReasonsManager() {
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth='xs' fullWidth>
         <DialogTitle>{action === 'add' ? 'Add New Reason' : 'Edit Reason'}</DialogTitle>
         <DialogContent>
-          <TextField
-            fullWidth
-            label='Reason'
-            value={value}
-            onChange={e => setValue(e.target.value)}
-            sx={{ mt: 1 }}
-          />
+          <TextField fullWidth label='Reason' value={value} onChange={e => setValue(e.target.value)} sx={{ mt: 1 }} />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>Cancel</Button>

@@ -13,6 +13,7 @@ import Skeleton from '@mui/material/Skeleton'
 import classnames from 'classnames'
 import Link from 'next/link'
 import { encryptCryptoRes } from '@/helper/frontendHelper'
+import { Box } from '@mui/material'
 
 const LeadByLocation = ({ viewType, dataFilter, loading }) => {
   const [openDialog, setOpenDialog] = useState(false)
@@ -85,7 +86,19 @@ const LeadByLocation = ({ viewType, dataFilter, loading }) => {
           </div>
         ))
       ) : data.length === 0 ? (
-        <Typography color='text.secondary'>No leads found.</Typography>
+        <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: 250
+            }}
+          >
+            <Typography variant='h6' color='text.secondary'>
+              No Leads By Location
+            </Typography>
+          </Box>
       ) : (
         data.map((item, index) => (
           <div

@@ -58,7 +58,6 @@ const calculateReasonStats = deals => {
 }
 
 export default function SmartAlertsCard({ deals = [], loader }) {
-
   const { win, loss } = calculateReasonStats(deals)
 
   const [openDialog, setOpenDialog] = useState(false)
@@ -207,9 +206,19 @@ export default function SmartAlertsCard({ deals = [], loader }) {
               </Typography>
               <Stack spacing={1}>
                 {loss.length === 0 ? (
-                  <Typography variant='body2' color='text.secondary'>
-                    No loss reasons found
-                  </Typography>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: 250
+                    }}
+                  >
+                    <Typography variant='h6' color='text.secondary'>
+                      No loss reasons found
+                    </Typography>
+                  </Box>
                 ) : (
                   loss.map((r, i) => <ReasonItem key={i} label={r.reason} value={r.percentage} color='red' />)
                 )}

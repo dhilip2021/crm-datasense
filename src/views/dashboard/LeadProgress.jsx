@@ -313,12 +313,7 @@ export default function LeadProgress() {
 
   return (
     <Card sx={{ borderRadius: 3 }}>
-      {/* <CardHeader
-        title='Lead Progress'
-        action={<OptionsMenu iconClassName='text-textPrimary' options={['Refresh']} />}
-      /> */}
-      <CardContent>
-
+      <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1, height: 389 }}>
         <Typography
           variant='h6'
           sx={{ fontWeight: 600, mb: 3, color: '#111', letterSpacing: 0.5 }}
@@ -344,7 +339,7 @@ export default function LeadProgress() {
             }}
           >
             <Typography variant='h6' color='text.secondary'>
-              No records found
+              No Leads Progres
             </Typography>
           </Box>
         ) : (

@@ -55,12 +55,16 @@ export async function GET(req) {
         const reminderDateStr = reminderDateTime.toFormat('yyyy-MM-dd')
         const reminderTimeStr = reminderDateTime.toFormat('HH:mm')
 
+
+
         checkDateTime = {
             reminderDateStr:reminderDateStr,
             nowDate:nowDate,
             reminderTimeStr:reminderTimeStr,
             nowTime:nowTime,
         }
+
+        console.log(checkDateTime)
 
         if (reminderDateStr === nowDate && reminderTimeStr === nowTime) {
           dueReminders.push({
