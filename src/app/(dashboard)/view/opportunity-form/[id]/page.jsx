@@ -437,10 +437,7 @@ const LeadDetailView = () => {
 
   // 🔹 Save handler
 const handleFieldSave = async (label, newValue, reasonKey, selectedReasons) => {
-  console.log(label, '<<<LABELLLLL')
-  console.log(newValue, '<<<newValueeeeeee')
-  console.log(reasonKey, '<<< reasonKey')
-  console.log(selectedReasons, '<<< selectedReasons')
+
 
   try {
     // Base values

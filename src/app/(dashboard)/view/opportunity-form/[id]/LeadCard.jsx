@@ -21,7 +21,7 @@ import {
   Checkbox
 } from '@mui/material'
 import FlagIcon from '@mui/icons-material/Flag'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function LeadCard({ fields, leadId, leadData, onToggleFlag, sections, handleFieldSave }) {
 

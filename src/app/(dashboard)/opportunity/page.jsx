@@ -16,6 +16,40 @@ import SalesPipelineBarChart from '@/views/dashboard/SalesPipelineBarChart'
 import dayjs from 'dayjs'
 import { Box, Button, Menu, MenuItem } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+import OpportunityStatus from '@/views/dashboard/OpportunityStatus'
+
+
+const opportunityData = [
+    {
+      title: 'Total Pipeline Value',
+      value: '₹3,30,000',
+      change: '+12.5%',
+      icon: '₹',
+      color: '#22C55E'
+    },
+    {
+      title: 'Open Opportunities',
+      value: '4',
+      change: '+3',
+      icon: '🎯',
+      color: '#0EA5E9'
+    },
+    {
+      title: 'Win Rate',
+      value: '16.7%',
+      change: '+2.1%',
+      icon: '🎯',
+      color: '#A855F7'
+    },
+    {
+      title: 'Average Deal Size',
+      value: '₹82,500',
+      change: '+8.3%',
+      icon: '₹',
+      color: '#22C55E'
+    }
+  ]
+
 
 const Opportunity = () => {
   const organization_id = Cookies.get('organization_id')
@@ -278,8 +312,6 @@ const Opportunity = () => {
     setTopAccounts(topAccountsArr)
 
 
-       console.log(data,"<<< dataaaaaaaaaaaa")
-
       const today = new Date() // or new Date() in real use
 
       const deals = data.map(item => {
@@ -311,9 +343,6 @@ const Opportunity = () => {
       setTopAccounts([])
       setDealsAging([])
     }
-
-
-
 
 
 
@@ -413,6 +442,9 @@ const Opportunity = () => {
         </Box>
       </Grid>
 
+      <Grid item xs={12}>
+          <OpportunityStatus opportunityData={opportunityData}/>
+      </Grid>
       <Grid item xs={6}>
         {/* <SalesFunnelChart funnelData={funnelData} /> */}
         {/* <StageBarChart funnelData={funnelData} /> */}

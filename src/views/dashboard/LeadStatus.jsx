@@ -83,10 +83,11 @@ export default function LeadStatus({
         uniqueSources={uniqueSources}
         uniqueCities={uniqueCities}
         uniqueTimelines={uniqueTimelines}
+        
       />
 
       {/* OVERVIEW  */}
-      <LeadsOverview cardConfig={cardConfig} />
+      <LeadsOverview cardConfig={cardConfig} loading={loading} />
 
       <Dialog open={openStatus} onClose={handleCloseStatus} maxWidth='sm' fullWidth>
         <Box sx={{ p: 3, position: 'relative' }}>
