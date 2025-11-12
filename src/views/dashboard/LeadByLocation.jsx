@@ -58,86 +58,80 @@ const LeadByLocation = ({ viewType, dataFilter, loading }) => {
 
   return (
     <>
-      <Card sx={{borderRadius: 3}}>
-        {/* <CardHeader title={`Lead By Location (${viewType})`} /> */}
+      <Card sx={{ borderRadius: 3 }}>
+  <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1, height: 389 }}>
+    {/* Fixed Title */}
+    <Typography
+      variant='h6'
+      sx={{ fontWeight: 600, mb: 2, color: '#111', letterSpacing: 0.5 }}
+    >
+      Lead By Location
+    </Typography>
 
-        <CardContent
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 1,
-            maxHeight: 389,
-            overflowY: 'auto',
-            height: 389,
-            
-          }}
-        >
-          <Typography
-          variant='h6'
-          sx={{ fontWeight: 600, mb: 3, color: '#111', letterSpacing: 0.5 }}
-        >
-          Lead By Location
-        </Typography>
-          {loading ? (
-            Array.from({ length: 10 }).map((_, idx) => (
-              <div key={idx} className='flex items-center gap-4'>
-                <Skeleton variant='circular' width={40} height={40} />
-                <div className='flex flex-col flex-1 gap-1'>
-                  <Skeleton variant='text' width='50%' height={20} />
-                  <Skeleton variant='text' width='30%' height={16} />
-                </div>
-                <div className='flex flex-col gap-1'>
-                  <Skeleton variant='text' width={40} height={20} />
-                  <Skeleton variant='text' width={50} height={16} />
-                </div>
-              </div>
-            ))
-          ) : data.length === 0 ? (
-            <Typography color='text.secondary'>No leads found.</Typography>
-          ) : (
-            data.map((item, index) => (
-              <div
-                key={index}
-                className='flex items-center gap-4 cursor-pointer hover:bg-gray-100 p-1 rounded'
-                onClick={() => handleOpenDialog(item.subtitle, item.leads)}
-              >
-                <CustomAvatar skin='light' color={item.avatarColor}>
-                  {item.avatarLabel}
-                </CustomAvatar>
-                <div className='flex items-center justify-between flex-1 flex-wrap gap-x-4 gap-y-2'>
-                  <div className='flex flex-col gap-1'>
-                    <div className='flex items-center gap-1'>
-                      <Typography color='text.primary' className='font-medium'>
-                        {item.title}
-                      </Typography>
-                      <div className='flex items-center gap-1'>
-                        <i
-                          className={classnames(
-                            item.trend === 'up' ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line',
-                            item.trend === 'up' ? 'text-success' : 'text-error'
-                          )}
-                        ></i>
-                        <Typography color={item.trend === 'up' ? 'success.main' : 'error.main'}>
-                          {item.trendPercentage}
-                        </Typography>
-                      </div>
-                    </div>
-                    <Typography>{item.subtitle}</Typography>
-                  </div>
-                  <div className='flex flex-col gap-1'>
-                    <Typography color='text.primary' className='font-medium'>
-                      {item.sales}
-                    </Typography>
-                    <Typography variant='body2' color='text.disabled'>
-                      Leads
+    {/* Scrollable List */}
+    <div style={{ overflowY: 'auto', flex: 1, paddingRight: 4 }}>
+      {loading ? (
+        Array.from({ length: 10 }).map((_, idx) => (
+          <div key={idx} className='flex items-center gap-4'>
+            <Skeleton variant='circular' width={40} height={40} />
+            <div className='flex flex-col flex-1 gap-1'>
+              <Skeleton variant='text' width='50%' height={20} />
+              <Skeleton variant='text' width='30%' height={16} />
+            </div>
+            <div className='flex flex-col gap-1'>
+              <Skeleton variant='text' width={40} height={20} />
+              <Skeleton variant='text' width={50} height={16} />
+            </div>
+          </div>
+        ))
+      ) : data.length === 0 ? (
+        <Typography color='text.secondary'>No leads found.</Typography>
+      ) : (
+        data.map((item, index) => (
+          <div
+            key={index}
+            className='flex items-center gap-4 cursor-pointer hover:bg-gray-100 p-1 rounded'
+            onClick={() => handleOpenDialog(item.subtitle, item.leads)}
+          >
+            <CustomAvatar skin='light' color={item.avatarColor}>
+              {item.avatarLabel}
+            </CustomAvatar>
+            <div className='flex items-center justify-between flex-1 flex-wrap gap-x-4 gap-y-2'>
+              <div className='flex flex-col gap-1'>
+                <div className='flex items-center gap-1'>
+                  <Typography color='text.primary' className='font-medium'>
+                    {item.title}
+                  </Typography>
+                  <div className='flex items-center gap-1'>
+                    <i
+                      className={classnames(
+                        item.trend === 'up' ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line',
+                        item.trend === 'up' ? 'text-success' : 'text-error'
+                      )}
+                    ></i>
+                    <Typography color={item.trend === 'up' ? 'success.main' : 'error.main'}>
+                      {item.trendPercentage}
                     </Typography>
                   </div>
                 </div>
+                <Typography>{item.subtitle}</Typography>
               </div>
-            ))
-          )}
-        </CardContent>
-      </Card>
+              <div className='flex flex-col gap-1'>
+                <Typography color='text.primary' className='font-medium'>
+                  {item.sales}
+                </Typography>
+                <Typography variant='body2' color='text.disabled'>
+                  Leads
+                </Typography>
+              </div>
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  </CardContent>
+</Card>
+
 
       {/* Dialog for selected leads */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth='sm' fullWidth>
