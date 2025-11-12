@@ -22,10 +22,16 @@ import {
 } from '@mui/material'
 import FlagIcon from '@mui/icons-material/Flag'
 import { useEffect, useState } from 'react'
+import Cookies from 'js-cookie'
+import { useRouter } from 'next/navigation'
 
 export default function LeadCard({ fields, leadId, leadData, onToggleFlag, sections, handleFieldSave }) {
+  const organization_id = Cookies.get('organization_id')
+  const getToken = Cookies.get('_token')
+  const router = useRouter()
 
-
+    const [data, setData] = useState({ winReasons: [], lossReasons: [] })
+    const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
   const [leadStatus, setLeadStatus] = useState(fields['Lead Status'] || '')
   const [leadLossReasons, setLossLeadReasons] = useState(
@@ -44,26 +50,38 @@ const [leadWonReasons, setWonLeadReasons] = useState(
       .flatMap(sec => [...sec.fields.left, ...sec.fields.center, ...sec.fields.right])
       .find(f => f.label === 'Lead Status')?.options || []
 
-  // Possible win/loss reasons
-  const winReasons = [
-    'Feature Fit',
-    'Strong Relationship with Decision Maker',
-    'Competitive Pricing',
-    'Faster Implementation',
-    'Better Customer Support',
-    'Brand Reputation',
-    'Scalable Solution'
-  ]
 
-  const lossReasons = [
-    'Budget Constraints',
-    'Competitor Pricing',
-    'Missing Key Feature',
-    'Lack of Urgency',
-    'Decision Delay',
-    'Internal Project Freeze',
-    'Customer Unresponsive'
-  ]
+   // ✅ Fetch Data
+    const fetchReasons = async () => {
+      try {
+        setLoading(true)
+  
+        const header = {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken}`
+        }
+  
+        const res = await fetch(`/api/v1/admin/opportunity/reasons?organization_id=${organization_id}`, {
+          method: 'GET',
+          headers: header
+        })
+  
+        const result = await res.json()
+         console.log(result.data,"<<< fetch Data resposne 123....")
+        if (result.success) setData(result.data)
+        setLoading(false)
+      } catch (err) {
+        console.error(err)
+        toast.error('Failed to fetch reasons')
+        setLoading(false)
+      }
+    }
+  
+
+
+
+
+
 
   // --- Handle Status Change ---
   const handleStatusChange = e => {
@@ -112,6 +130,11 @@ const [leadWonReasons, setWonLeadReasons] = useState(
   setWonLeadReasons(Array.isArray(fields?.['Win Reasons']) ? fields['Win Reasons'] : [])
   setLossLeadReasons(Array.isArray(fields?.['Loss Reasons']) ? fields['Loss Reasons'] : [])
 }, [fields])
+
+
+    useEffect(() => {
+      if (organization_id) fetchReasons()
+    }, [organization_id])
 
   return (
     <>
@@ -253,36 +276,58 @@ const [leadWonReasons, setWonLeadReasons] = useState(
       </Box>
 
       {/* 💬 Win / Loss Reason Dialog */}
-      <Dialog open={openReasonDialog} onClose={handleCloseDialog} maxWidth='xs' fullWidth>
-        <DialogTitle sx={{ fontWeight: 600 }}>
-          {reasonType === 'won' ? 'Select Win Reasons' : 'Select Loss Reasons'}
-        </DialogTitle>
-        <DialogContent dividers>
-          <List>
-            {(reasonType === 'won' ? winReasons : lossReasons).map(reason => (
-              <ListItem key={reason} disablePadding>
-                <ListItemButton onClick={() => handleToggleReason(reason)}>
-                  <ListItemIcon>
-                    <Checkbox edge='start' checked={selectedReasons.includes(reason)} tabIndex={-1} disableRipple />
-                  </ListItemIcon>
-                  <ListItemText primary={reason} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button
-            variant='contained'
-            color='primary'
-            disabled={selectedReasons.length === 0}
-            onClick={handleConfirmReasons}
-          >
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+           <Dialog open={openReasonDialog} onClose={handleCloseDialog} maxWidth='xs' fullWidth>
+             <DialogTitle sx={{ fontWeight: 600 }}>
+               {reasonType === 'won' ? 'Select Win Reasons' : 'Select Loss Reasons'}
+             </DialogTitle>
+     
+             <DialogContent dividers>
+               {loading ? (
+                 <Box display='flex' justifyContent='center' alignItems='center' py={3}>
+                   <CircularProgress size={24} />
+                 </Box>
+               ) : (reasonType === 'won' ? data?.winReasons : data?.lossReasons)?.length > 0 ? (
+                 <List>
+                   {(reasonType === 'won' ? data?.winReasons : data?.lossReasons).map(reason => (
+                     <ListItem key={reason} disablePadding>
+                       <ListItemButton onClick={() => handleToggleReason(reason)}>
+                         <ListItemIcon>
+                           <Checkbox edge='start' checked={selectedReasons.includes(reason)} tabIndex={-1} disableRipple />
+                         </ListItemIcon>
+                         <ListItemText primary={reason} />
+                       </ListItemButton>
+                     </ListItem>
+                   ))}
+                 </List>
+               ) : (
+                 <Box textAlign='center' py={3}>
+                   <Typography variant='body2' color='text.secondary' mb={2}>
+                     No {reasonType === 'won' ? 'win' : 'loss'} reasons found.
+                   </Typography>
+                   <Button
+                     variant='outlined'
+                     color='primary'
+                     size='small'
+                     onClick={() => router.push('/reasons-master')} // ✅ Navigate to /reasons-master
+                   >
+                     ➕ Add New Reason
+                   </Button>
+                 </Box>
+               )}
+             </DialogContent>
+     
+             <DialogActions>
+               <Button onClick={handleCloseDialog}>Cancel</Button>
+               <Button
+                 variant='contained'
+                 color='primary'
+                 disabled={selectedReasons.length === 0}
+                 onClick={handleConfirmReasons}
+               >
+                 Confirm
+               </Button>
+             </DialogActions>
+           </Dialog>
     </>
   )
 }

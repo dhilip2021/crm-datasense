@@ -102,6 +102,9 @@ const VerticalMenu = ({ scrollMenu, roles }) => {
           <MenuItem href='/items' icon={<i className='ri-archive-2-line' />}>
             Item Master
           </MenuItem>
+           <MenuItem href='/reasons-master' icon={<i className='ri-archive-2-line' />}>
+            Reasons Master
+          </MenuItem>
         </SubMenu>
 
         {/* 🟨 Apps & Pages Section */}

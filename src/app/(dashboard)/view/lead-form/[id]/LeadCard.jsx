@@ -16,64 +16,66 @@ import {
   ListItemText,
   List,
   Checkbox,
-  DialogActions
+  DialogActions,
+  CircularProgress
 } from '@mui/material'
 // import EditableField from './EditableField'
 import FlagIcon from '@mui/icons-material/Flag' // ✅ MUI icon
 import { useEffect, useState } from 'react'
+import Cookies from 'js-cookie'
+import { useRouter } from 'next/navigation'
 
 export default function LeadCard({ fields, leadId, leadData, onToggleFlag, sections, handleFieldSave }) {
+  const organization_id = Cookies.get('organization_id')
+  const getToken = Cookies.get('_token')
+  const router = useRouter()
 
-
+  const [data, setData] = useState({ winReasons: [], lossReasons: [] })
+  const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
   const [leadStatus, setLeadStatus] = useState(fields['Lead Status'] || '')
   const [leadLossReasons, setLossLeadReasons] = useState(
-  Array.isArray(fields?.['Loss Reasons']) ? fields['Loss Reasons'] : []
-)
-const [leadWonReasons, setWonLeadReasons] = useState(
-  Array.isArray(fields?.['Win Reasons']) ? fields['Win Reasons'] : []
-)
+    Array.isArray(fields?.['Loss Reasons']) ? fields['Loss Reasons'] : []
+  )
+  const [leadWonReasons, setWonLeadReasons] = useState(
+    Array.isArray(fields?.['Win Reasons']) ? fields['Win Reasons'] : []
+  )
   const [openReasonDialog, setOpenReasonDialog] = useState(false)
   const [selectedReasons, setSelectedReasons] = useState([])
   const [reasonType, setReasonType] = useState('') // "won" or "lost"
 
   // Find Lead Status options from your sections response
-const leadStatusOptions =
-  Array.isArray(sections)
+  const leadStatusOptions = Array.isArray(sections)
     ? sections
-        .flatMap(sec => [
-          ...(sec.fields?.left || []),
-          ...(sec.fields?.center || []),
-          ...(sec.fields?.right || [])
-        ])
+        .flatMap(sec => [...(sec.fields?.left || []), ...(sec.fields?.center || []), ...(sec.fields?.right || [])])
         .filter(f => f.label === 'Lead Status')[0]?.options || []
     : []
 
+  // ✅ Fetch Data
+  const fetchReasons = async () => {
+    try {
+      setLoading(true)
 
+      const header = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getToken}`
+      }
 
+      const res = await fetch(`/api/v1/admin/opportunity/reasons?organization_id=${organization_id}`, {
+        method: 'GET',
+        headers: header
+      })
 
-  // Possible win/loss reasons
-  const winReasons = [
-    'Feature Fit',
-    'Strong Relationship with Decision Maker',
-    'Competitive Pricing',
-    'Faster Implementation',
-    'Better Customer Support',
-    'Brand Reputation',
-    'Scalable Solution'
-  ]
-
-  const lossReasons = [
-    'Already Using Competitor',
-    'Attempted',
-    'Budget Constraints',
-    'Invalid Number',
-    'Needs Analysis',
-    'Not Interested',
-    'Other',
-    'Scheduled',
-    'Wrong Contact Details'
-  ]
+      const result = await res.json()
+      console.log(result.data, '<<< fetch Data resposne....')
+      if (result.success) setData(result.data)
+      setLoading(false)
+    } catch (err) {
+      console.error(err)
+      toast.error('Failed to fetch reasons')
+      setLoading(false)
+    }
+  }
 
   const handleStatusChange = e => {
     const newStatus = e.target.value
@@ -116,14 +118,15 @@ const leadStatusOptions =
     setReasonType('')
   }
 
+  useEffect(() => {
+    setLeadStatus(fields?.['Lead Status'] || '')
+    setWonLeadReasons(Array.isArray(fields?.['Win Reasons']) ? fields['Win Reasons'] : [])
+    setLossLeadReasons(Array.isArray(fields?.['Loss Reasons']) ? fields['Loss Reasons'] : [])
+  }, [fields])
 
-   useEffect(() => {
-  setLeadStatus(fields?.['Lead Status'] || '')
-  setWonLeadReasons(Array.isArray(fields?.['Win Reasons']) ? fields['Win Reasons'] : [])
-  setLossLeadReasons(Array.isArray(fields?.['Loss Reasons']) ? fields['Loss Reasons'] : [])
-}, [fields])
-
-  
+  useEffect(() => {
+    if (organization_id) fetchReasons()
+  }, [organization_id])
 
   return (
     <>
@@ -145,7 +148,6 @@ const leadStatusOptions =
       >
         {/* Name Section */}
         <Box display={'flex'} justifyContent={'space-between'}>
-
           <Box display='flex' alignItems='center' mb={2}>
             {/* Lead Name */}
             <Typography
@@ -181,8 +183,6 @@ const leadStatusOptions =
             </IconButton>
           </Box>
 
-         
-
           <Box>
             <Typography variant='body1'>
               <strong>Score:</strong>{' '}
@@ -195,33 +195,32 @@ const leadStatusOptions =
           </Box>
         </Box>
 
-
-           <Box>
-            {editing ? (
-              <TextField
-                select
-                value={leadStatus}
-                onChange={handleStatusChange}
-                size='small'
-                onBlur={() => setEditing(false)}
-              >
-                {leadStatusOptions.map(opt => (
-                  <MenuItem key={opt} value={opt}>
-                    {opt}
-                  </MenuItem>
-                ))}
-              </TextField>
-            ) : (
-              <Chip
-                label={leadStatus}
-                color='primary'
-                variant='outlined'
-                size='small'
-                sx={{ cursor: 'pointer' }}
-                onClick={() => setEditing(true)}
-              />
-            )}
-          </Box>      
+        <Box>
+          {editing ? (
+            <TextField
+              select
+              value={leadStatus}
+              onChange={handleStatusChange}
+              size='small'
+              onBlur={() => setEditing(false)}
+            >
+              {leadStatusOptions.map(opt => (
+                <MenuItem key={opt} value={opt}>
+                  {opt}
+                </MenuItem>
+              ))}
+            </TextField>
+          ) : (
+            <Chip
+              label={leadStatus}
+              color='primary'
+              variant='outlined'
+              size='small'
+              sx={{ cursor: 'pointer' }}
+              onClick={() => setEditing(true)}
+            />
+          )}
+        </Box>
         <Box>
           {leadStatus === 'Closed Won' && leadWonReasons.length > 0 && (
             <Box mt={1}>
@@ -289,20 +288,42 @@ const leadStatusOptions =
         <DialogTitle sx={{ fontWeight: 600 }}>
           {reasonType === 'won' ? 'Select Win Reasons' : 'Select Loss Reasons'}
         </DialogTitle>
+
         <DialogContent dividers>
-          <List>
-            {(reasonType === 'won' ? winReasons : lossReasons).map(reason => (
-              <ListItem key={reason} disablePadding>
-                <ListItemButton onClick={() => handleToggleReason(reason)}>
-                  <ListItemIcon>
-                    <Checkbox edge='start' checked={selectedReasons.includes(reason)} tabIndex={-1} disableRipple />
-                  </ListItemIcon>
-                  <ListItemText primary={reason} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
+          {loading ? (
+            <Box display='flex' justifyContent='center' alignItems='center' py={3}>
+              <CircularProgress size={24} />
+            </Box>
+          ) : (reasonType === 'won' ? data?.winReasons : data?.lossReasons)?.length > 0 ? (
+            <List>
+              {(reasonType === 'won' ? data?.winReasons : data?.lossReasons).map(reason => (
+                <ListItem key={reason} disablePadding>
+                  <ListItemButton onClick={() => handleToggleReason(reason)}>
+                    <ListItemIcon>
+                      <Checkbox edge='start' checked={selectedReasons.includes(reason)} tabIndex={-1} disableRipple />
+                    </ListItemIcon>
+                    <ListItemText primary={reason} />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          ) : (
+            <Box textAlign='center' py={3}>
+              <Typography variant='body2' color='text.secondary' mb={2}>
+                No {reasonType === 'won' ? 'win' : 'loss'} reasons found.
+              </Typography>
+              <Button
+                variant='outlined'
+                color='primary'
+                size='small'
+                onClick={() => router.push('/reasons-master')} // ✅ Navigate to /reasons-master
+              >
+                ➕ Add New Reason
+              </Button>
+            </Box>
+          )}
         </DialogContent>
+
         <DialogActions>
           <Button onClick={handleCloseDialog}>Cancel</Button>
           <Button
