@@ -16,9 +16,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 export default function ErrorPopup(props) {
   const { open, close, title, trailVal } = props
 
-   
-
-  const regexSplit =title !== "" && title.match(/[^.]+[.?!]?/g).map(s => s.trim())
+  const regexSplit = title !== '' && title.match(/[^.]+[.?!]?/g).map(s => s.trim())
 
   const theme = useTheme()
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'))
@@ -29,7 +27,7 @@ export default function ErrorPopup(props) {
         fullScreen={fullScreen}
         maxWidth={'md'}
         open={open}
-        onClose={(e)=>close(trailVal)}
+        onClose={e => close(trailVal)}
         TransitionComponent={Transition}
         keepMounted
         aria-labelledby='responsive-dialog-title'
@@ -52,7 +50,7 @@ export default function ErrorPopup(props) {
               fontSize: 30,
               cursor: 'pointer'
             }}
-            onClick={(e)=>close(trailVal)}
+            onClick={e => close(trailVal)}
             className='ri-close-line'
           ></i>
         </DialogTitle>
@@ -74,7 +72,41 @@ export default function ErrorPopup(props) {
             <Typography variant='h6' sx={{ fontWeight: 'bold', mb: 1 }}>
               {regexSplit[0]}
             </Typography>
+
             <Typography variant='body1'>{regexSplit[1]}</Typography>
+            <br/>
+            <Typography
+              variant='h6'
+              sx={{
+                fontWeight: 700,
+                color: '#0288D1',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: 1
+              }}
+            >
+              📞 Call this Number
+            </Typography>
+            <Typography variant='h5' sx={{ fontWeight: 800, color: '#01579B', letterSpacing: 1, mt: 1 }}>
+              +91-83102 77549
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              textAlign: 'center',
+              p: 3,
+              borderRadius: 2,
+              border: '2px solid #e0f7fa',
+              backgroundColor: '#f5fcff',
+              transition: '0.3s',
+              '&:hover': {
+                boxShadow: '0 4px 14px rgba(0,0,0,0.1)',
+                transform: 'translateY(-3px)'
+              }
+            }}
+          >
+            
           </Box>
         </DialogContent>
 
@@ -86,7 +118,7 @@ export default function ErrorPopup(props) {
             width='100%'
             px={2}
           >
-            <Button color='error' variant='outlined' onClick={(e)=>close(trailVal)}>
+            <Button color='error' variant='outlined' onClick={e => close(trailVal)}>
               OK
             </Button>
           </Box>
