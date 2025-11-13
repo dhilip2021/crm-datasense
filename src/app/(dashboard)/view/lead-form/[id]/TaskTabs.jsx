@@ -13,7 +13,9 @@ import {
   Tooltip,
   Stack,
   Grid,
-  Avatar
+  Avatar,
+  useMediaQuery,
+  useTheme
 } from '@mui/material'
 import dayjs from 'dayjs'
 import Cookies from 'js-cookie'
@@ -45,6 +47,11 @@ const priorityColors = {
 }
 
 export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+
   const getToken = Cookies.get('_token')
   const user_name = Cookies.get('user_name')
   const user_id = Cookies.get('user_id')
@@ -718,7 +725,7 @@ const renderMeetingCard = meeting => (
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ width: '100%', mx: 'auto', mt: 0 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        {/* <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Tabs
             value={tab}
             onChange={(e, val) => setTab(val)}
@@ -762,7 +769,66 @@ const renderMeetingCard = meeting => (
               ++ Create Call
             </Button>
           )}
-        </Box>
+        </Box> */}
+
+        <Box
+      sx={{
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        alignItems: isMobile ? 'stretch' : 'center',
+        justifyContent: 'space-between',
+        gap: isMobile ? 1 : 0,
+        mb: 2
+      }}
+    >
+      <Tabs
+        value={tab}
+        onChange={(e, val) => setTab(val)}
+        textColor='secondary'
+        indicatorColor='secondary'
+        variant={isMobile ? 'scrollable' : 'standard'}
+        scrollButtons={isMobile ? 'auto' : false}
+        sx={{
+          '& .MuiTab-root': { textTransform: 'none', fontWeight: 500, minWidth: isMobile ? '120px' : 'auto' },
+          '& .Mui-selected': { color: '#9c27b0 !important', fontWeight: 600 },
+          flexGrow: isMobile ? 1 : 'unset'
+        }}
+      >
+        <Tab label={`Task (${leadArrayTasks.length})`} />
+        <Tab label={`Meetings (${leadArrayMeetings.length})`} />
+        <Tab label={`Calls (${calls.length})`} />
+      </Tabs>
+
+      <Box sx={{ mt: isMobile ? 1 : 0 }}>
+        {tab === 0 && (
+          <Button
+            variant='contained'
+            onClick={() => setOpenTaskDialog(true)}
+            sx={{ bgcolor: '#009cde', '&:hover': { bgcolor: '#007bb5' }, borderRadius: 2, textTransform: 'none', width: isMobile ? '100%' : 'auto' }}
+          >
+            + Create Task
+          </Button>
+        )}
+        {tab === 1 && (
+          <Button
+            variant='contained'
+            onClick={() => setOpenMeetingDialog(true)}
+            sx={{ bgcolor: '#009cde', '&:hover': { bgcolor: '#007bb5' }, borderRadius: 2, textTransform: 'none', width: isMobile ? '100%' : 'auto' }}
+          >
+            + Create Meeting
+          </Button>
+        )}
+        {tab === 2 && (
+          <Button
+            variant='contained'
+            onClick={() => setOpenCallDialog(true)}
+            sx={{ bgcolor: '#009cde', '&:hover': { bgcolor: '#007bb5' }, borderRadius: 2, textTransform: 'none', width: isMobile ? '100%' : 'auto' }}
+          >
+            + Create Call
+          </Button>
+        )}
+      </Box>
+    </Box>
 
         <Divider sx={{ my: 2 }} />
 
