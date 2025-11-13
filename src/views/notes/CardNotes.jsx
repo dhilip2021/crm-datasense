@@ -22,6 +22,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import LoaderGif from '@assets/gif/loader.gif'
 import NoteCard from './NoteCard'
+import NotesIcon from '@mui/icons-material/Notes'
 // import AddNotesPopup from './AddNotesPopup'
 
 const CardNotes = () => {
@@ -29,7 +30,6 @@ const CardNotes = () => {
   const organization_id = Cookies.get('organization_id')
   const loggedInUserId = Cookies.get('user_id')
   const loggedInUserName = Cookies.get('user_name')
-
 
   const [notes, setNotes] = useState([])
   const [loading, setLoading] = useState(false)
@@ -42,7 +42,6 @@ const CardNotes = () => {
 
   const [userList, setUserList] = useState([])
   const [selectedUsers, setSelectedUsers] = useState([])
-
 
   const getUserListFn = async () => {
     try {
@@ -96,9 +95,8 @@ const CardNotes = () => {
   }
 
   // ✅ Edit Note Handler
-  const onEdit = async (note) => {
-
-    console.log(note,"Edit note")
+  const onEdit = async note => {
+    console.log(note, 'Edit note')
 
     try {
       const trimmedNote = note.note?.trim() || ''
@@ -149,7 +147,6 @@ const CardNotes = () => {
           hideProgressBar: true
         })
       }
-
     } catch (err) {
       console.error('❌ Edit error:', err)
       toast.error('Something went wrong', {
@@ -160,11 +157,10 @@ const CardNotes = () => {
     }
   }
 
-  const onAdd= async (note) =>{
+  const onAdd = async note => {
+    console.log(note, '<<< add Notess')
 
-    console.log(note,"<<< add Notess")
-
-     try {
+    try {
       const trimmedNote = note.note?.trim() || ''
       const leadId = note.lead_id // ensure leadId is passed
 
@@ -180,7 +176,7 @@ const CardNotes = () => {
               title: note.title,
               note: trimmedNote,
               createdAt: note.createdAt,
-              createdBy: note.createdBy,
+              createdBy: note.createdBy
             }
           ]
         },
@@ -212,7 +208,6 @@ const CardNotes = () => {
           hideProgressBar: true
         })
       }
-
     } catch (err) {
       console.error('❌ Edit error:', err)
       toast.error('Something went wrong', {
@@ -222,8 +217,6 @@ const CardNotes = () => {
       })
     }
   }
-
-
 
   useEffect(() => {
     if (search === '') {
@@ -388,9 +381,28 @@ const CardNotes = () => {
             </Typography>
           </Box>
         ) : notes.length === 0 ? (
-          <Box textAlign='center' py={6}>
-            <Typography variant='body1' color='text.secondary'>
-              No notes found for the selected period.
+          <Box
+            sx={{
+              textAlign: 'center',
+              py: 6,
+              px: 3,
+              borderRadius: 3,
+              bgcolor: 'grey.50',
+              border: '1px dashed',
+              borderColor: 'grey.300',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+            }}
+          >
+            <NotesIcon sx={{ fontSize: 48, color: 'grey.400', mb: 2 }} />
+            <Typography variant='h6' color='text.secondary' sx={{ mb: 1, fontWeight: 500 }}>
+              No notes found
+            </Typography>
+            <Typography variant='body2' color='text.secondary' sx={{ maxWidth: 320 }}>
+              There are no notes available for the selected period.
             </Typography>
           </Box>
         ) : (
