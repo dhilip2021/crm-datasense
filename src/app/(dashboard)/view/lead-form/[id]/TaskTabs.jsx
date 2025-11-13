@@ -50,10 +50,10 @@ const priorityColors = {
 export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-
   const getToken = Cookies.get('_token')
   const user_name = Cookies.get('user_name')
   const user_id = Cookies.get('user_id')
+
 
   // Filter out completed tasks for display
   const leadArrayTasks = leadData?.values?.Activity?.[0]?.task || []
@@ -725,7 +725,8 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
     }
   }
 
-  const phoneNumber = '+918012005747'
+  const fromPhoneNumber = '+918870847064'
+  const toPhoneNumber = '+918012005747'
   const [isCalling, setIsCalling] = useState(false)
   const [seconds, setSeconds] = useState(0)
   const [startTime, setStartTime] = useState(null)
@@ -745,7 +746,7 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
     }, 1000)
 
     // Trigger mobile call dialer (will open in phone)
-    window.location.href = `tel:${phoneNumber}`
+    window.location.href = `tel:${toPhoneNumber}`
   }
 
   // 🔴 STOP CALL + Log to backend
@@ -771,13 +772,13 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
           {
             call: [
               {
-                from: '+918870847064', // example caller number
-                to: phoneNumber,
+                from: fromPhoneNumber, // example caller number
+                to: toPhoneNumber,
                 startTime: startTime,
                 endTime: new Date().toISOString(),
                 duration: formatDuration(durationSeconds),
                 createdAt: new Date().toISOString(),
-                createdBy: 'Dhilip DS'
+                createdBy: user_name
               }
             ]
           }
