@@ -1,85 +1,106 @@
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
   Box,
   Button,
   Dialog,
-  DialogActions,
   DialogContent,
   DialogTitle,
-  FormControl,
-  FormControlLabel,
-  Grid,
+  DialogActions,
   IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
-  Switch,
-  TextField,
-  Tooltip,
-  Typography
+  Tooltip
 } from '@mui/material'
-import { DatePicker, TimePicker } from '@mui/x-date-pickers'
 import CloseIcon from '@mui/icons-material/Close'
-import dayjs from 'dayjs'
-
-const validateReminderTime = () => {
-  if (!taskData.reminderEnabled || !taskData.reminderTime || !taskData.reminderDate) return true
-
-  const reminderDateTime = dayjs(
-    `${dayjs(taskData.reminderDate).format('YYYY-MM-DD')} ${taskData.reminderTime}`,
-    'YYYY-MM-DD HH:mm'
-  )
-  const now = dayjs()
-
-  // If reminder is set for today, time must be >= current time
-  if (dayjs(taskData.reminderDate).isSame(now, 'day') && reminderDateTime.isBefore(now)) {
-    return false
-  }
-  return true
-}
 
 function CallDialog({ openCallDialog, handleCallClose }) {
+  const phoneNumber = '+918012005747'
+  const [isCalling, setIsCalling] = useState(false)
+  const [seconds, setSeconds] = useState(0)
+  const timerRef = useRef(null)
 
-    const phoneNumber = '+918012005747';
+  const formatTime = sec => {
+    const m = Math.floor(sec / 60)
+      .toString()
+      .padStart(2, '0')
+    const s = (sec % 60).toString().padStart(2, '0')
+    return `${m}:${s}`
+  }
+
+  const handleStartCall = () => {
+    // Start the timer
+    setIsCalling(true)
+    timerRef.current = setInterval(() => {
+      setSeconds(prev => prev + 1)
+    }, 1000)
+
+    // Open mobile dialer
+    window.location.href = `tel:${phoneNumber}`
+  }
+
+  const handleStopCall = () => {
+    setIsCalling(false)
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
+    }
+    console.log('Call format (seconds):', formatTime(seconds))
+    setSeconds(0) // Reset timer for next call
+    handleCallClose()
+
+
+  }
+
+  useEffect(() => {
+    return () => {
+      // Clean up timer on unmount
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
+  }, [])
 
   return (
-    <div>
-      {/* Task Dialog */}
-      <Dialog
-        open={openCallDialog}
-        onClose={handleCallClose}
-        maxWidth='sm'
-        fullWidth
-        PaperProps={{ sx: { borderRadius: 3, p: 1 } }}
-      >
-        <DialogTitle
-          sx={{
-            fontWeight: 'bold',
-            fontSize: '1.3rem',
-            textAlign: 'center',
-            borderBottom: '1px solid #f0f0f0',
-            pb: 2
-          }}
-        >
-          <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
-            Create Call
-            <Tooltip title='Close' arrow>
-              <IconButton onClick={handleCallClose}>
-                <CloseIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </DialogTitle>
+    <Dialog
+      open={openCallDialog}
+      onClose={handleCallClose}
+      maxWidth='sm'
+      fullWidth
+      PaperProps={{ sx: { borderRadius: 3, p: 1 } }}
+    >
+      <DialogTitle sx={{ fontWeight: 'bold', textAlign: 'center', borderBottom: '1px solid #f0f0f0' }}>
+        <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+          Call
+          <Tooltip title='Close' arrow>
+            <IconButton onClick={handleCallClose}>
+              <CloseIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </DialogTitle>
 
-        <DialogContent dividers sx={{ p: 3 }}>
-          <Button variant='contained' color='primary' href={`tel:${phoneNumber}`}>
-            Call to this Number:  {phoneNumber}
+      <DialogContent dividers sx={{ p: 3, textAlign: 'center' }}>
+        <Box sx={{ mb: 2, fontSize: '1.5rem', fontWeight: 500 }}>
+          {isCalling ? `Call Timer: ${formatTime(seconds)}` : 'Ready to call'}
+        </Box>
+        {!isCalling ? (
+          <Button
+            variant='contained'
+            color='primary'
+            onClick={handleStartCall}
+            sx={{ mr: 2 }}
+          >
+            Start Call
           </Button>
-        </DialogContent>
+        ) : (
+          <Button
+            variant='contained'
+            color='error'
+            onClick={handleStopCall}
+          >
+            Stop Call
+          </Button>
+        )}
+      </DialogContent>
 
-        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #f0f0f0', mt: 2 }}></DialogActions>
-      </Dialog>
-    </div>
+      <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #f0f0f0' }}></DialogActions>
+    </Dialog>
   )
 }
 

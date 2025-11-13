@@ -188,7 +188,7 @@ const NoteCard = ({ search, notes, onEdit, onAdd, initialLimit = 4, loadMoreStep
                 </Typography>
                 <Button
   variant='contained'
-  color='success'
+  color='primary'
   onClick={() => handleAddClick(lead.lead_id)}
   startIcon={<AddIcon />}
   sx={{
