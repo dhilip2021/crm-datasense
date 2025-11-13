@@ -606,11 +606,13 @@ const Login = ({ mode }) => {
           let dummyArray = []
 
           resultsPayloadJson?.privileges.map(data => dummyArray.push(data?.role_privileage))
+          console.log(resultsPayloadJson,"<<< resultsPayloadJson")
 
           Cookies.set('_token', resultsPayloadJson?.tokenAccess)
           Cookies.set('_token_expiry', resultsPayloadJson?.tokenExpiry)
           Cookies.set('role_id', resultsPayloadJson?.c_role_id)
           Cookies.set('email', resultsPayloadJson?.email)
+          Cookies.set('mobile', resultsPayloadJson?.mobile)
           Cookies.set('user_id', resultsPayloadJson?.user_id)
           Cookies.set('organization_id', resultsPayloadJson?.organization_id)
           Cookies.set('organization_name', resultsPayloadJson?.organization_name)
@@ -663,6 +665,7 @@ const Login = ({ mode }) => {
         Cookies.set('_token_expiry', resultsPayloadJson?.tokenExpiry)
         Cookies.set('role_id', resultsPayloadJson?.c_role_id)
         Cookies.set('email', resultsPayloadJson?.email)
+        Cookies.set('mobile', resultsPayloadJson?.mobile)
         Cookies.set('user_id', resultsPayloadJson?.user_id)
         Cookies.set('organization_id', resultsPayloadJson?.organization_id)
         Cookies.set('organization_name', resultsPayloadJson?.organization_name)
@@ -671,6 +674,8 @@ const Login = ({ mode }) => {
         Cookies.set('role_name', resultsPayloadJson?.role)
         Cookies.set('user_name', resultsPayloadJson?.user_name)
         Cookies.set('privileges', JSON.stringify(dummyArray))
+
+        console.log(resultsPayloadJson,"<<< resultsPayloadJson 11")
 
         if (resultsPayloadJson?.c_role_id === '27f01165688z') {
           router.push('/')

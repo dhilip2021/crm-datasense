@@ -53,12 +53,15 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
   const getToken = Cookies.get('_token')
   const user_name = Cookies.get('user_name')
   const user_id = Cookies.get('user_id')
+  const fromPhoneNumber = Cookies.get('mobile')
 
 
   // Filter out completed tasks for display
   const leadArrayTasks = leadData?.values?.Activity?.[0]?.task || []
   const leadArrayMeetings = leadData?.values?.Activity?.[0]?.meeting || []
   const leadArrayCalls = leadData?.values?.Activity?.[0]?.call || []
+  const toPhoneNumber = leadData?.values?.Phone || ""
+  // const fromPhoneNumber = '+918870847064'
 
   const sortedTasks = useMemo(() => {
     return [...leadArrayTasks]
@@ -725,8 +728,7 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
     }
   }
 
-  const fromPhoneNumber = '+918870847064'
-  const toPhoneNumber = '+918012005747'
+
   const [isCalling, setIsCalling] = useState(false)
   const [seconds, setSeconds] = useState(0)
   const [startTime, setStartTime] = useState(null)
