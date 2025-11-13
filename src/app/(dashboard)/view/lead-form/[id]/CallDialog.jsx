@@ -1,3 +1,4 @@
+'use client'
 import React, { useState, useEffect, useRef } from 'react'
 import {
   Box,
@@ -5,67 +6,50 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
-  DialogActions,
   IconButton,
-  Tooltip
+  Tooltip,
+  LinearProgress,
+  Typography
 } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 
-function CallDialog({ openCallDialog, handleCallClose }) {
-  const phoneNumber = '+918012005747'
-  const [isCalling, setIsCalling] = useState(false)
-  const [seconds, setSeconds] = useState(0)
-  const timerRef = useRef(null)
 
-  const formatTime = sec => {
+function CallDialog({ openCallDialog, handleCallClose, progress, seconds, isCalling, handleStopCall, handleStartCall, }) {
+
+
+ const formatTime = sec => {
     const m = Math.floor(sec / 60)
       .toString()
       .padStart(2, '0')
     const s = (sec % 60).toString().padStart(2, '0')
     return `${m}:${s}`
   }
-
-  const handleStartCall = () => {
-    // Start the timer
-    setIsCalling(true)
-    timerRef.current = setInterval(() => {
-      setSeconds(prev => prev + 1)
-    }, 1000)
-
-    // Open mobile dialer
-    window.location.href = `tel:${phoneNumber}`
-  }
-
-  const handleStopCall = () => {
-    setIsCalling(false)
-    if (timerRef.current) {
-      clearInterval(timerRef.current)
-      timerRef.current = null
-    }
-    console.log('Call format (seconds):', formatTime(seconds))
-    setSeconds(0) // Reset timer for next call
-    handleCallClose()
-
-
-  }
-
-  useEffect(() => {
-    return () => {
-      // Clean up timer on unmount
-      if (timerRef.current) clearInterval(timerRef.current)
-    }
-  }, [])
+  
 
   return (
     <Dialog
       open={openCallDialog}
       onClose={handleCallClose}
-      maxWidth='sm'
+      maxWidth='xs'
       fullWidth
-      PaperProps={{ sx: { borderRadius: 3, p: 1 } }}
+      PaperProps={{
+        sx: {
+          borderRadius: 3,
+          overflow: 'hidden',
+          position: 'relative',
+          boxShadow: 5
+        }
+      }}
     >
-      <DialogTitle sx={{ fontWeight: 'bold', textAlign: 'center', borderBottom: '1px solid #f0f0f0' }}>
-        <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+      <DialogTitle
+        sx={{
+          fontWeight: 'bold',
+          textAlign: 'center',
+          borderBottom: '1px solid #f0f0f0',
+          bgcolor: '#fafafa'
+        }}
+      >
+        <Box display='flex' alignItems='center' justifyContent='space-between'>
           Call
           <Tooltip title='Close' arrow>
             <IconButton onClick={handleCallClose}>
@@ -75,31 +59,71 @@ function CallDialog({ openCallDialog, handleCallClose }) {
         </Box>
       </DialogTitle>
 
-      <DialogContent dividers sx={{ p: 3, textAlign: 'center' }}>
-        <Box sx={{ mb: 2, fontSize: '1.5rem', fontWeight: 500 }}>
-          {isCalling ? `Call Timer: ${formatTime(seconds)}` : 'Ready to call'}
-        </Box>
-        {!isCalling ? (
-          <Button
-            variant='contained'
-            color='primary'
-            onClick={handleStartCall}
-            sx={{ mr: 2 }}
-          >
-            Start Call
-          </Button>
-        ) : (
-          <Button
-            variant='contained'
-            color='error'
-            onClick={handleStopCall}
-          >
-            Stop Call
-          </Button>
-        )}
-      </DialogContent>
+      {/* Progress Bar */}
+      <LinearProgress
+        variant='determinate'
+        value={progress}
+        sx={{
+          height: 6,
+          borderRadius: 3,
+          bgcolor: 'grey.300',
+          '& .MuiLinearProgress-bar': {
+            bgcolor: isCalling ? '#43a047' : '#1976d2'
+          }
+        }}
+      />
 
-      <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #f0f0f0' }}></DialogActions>
+      <DialogContent sx={{ p: 3, textAlign: 'center' }}>
+        <Typography variant='h5' sx={{ mb: 2, fontWeight: 600 }}>
+          {isCalling ? `⏱ ${formatTime(seconds)}` : 'Ready to call'}
+        </Typography>
+
+        {/* Floating Call Controls */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 2,
+            position: 'relative'
+          }}
+        >
+          {!isCalling ? (
+            <Button
+              variant='contained'
+              color='success'
+              onClick={handleStartCall}
+              sx={{
+                borderRadius: '50px',
+                px: 4,
+                py: 1.5,
+                fontWeight: 600,
+                fontSize: 16,
+                textTransform: 'none',
+                boxShadow: '0 3px 10px rgba(76,175,80,0.3)'
+              }}
+            >
+              📞 Start Call
+            </Button>
+          ) : (
+            <Button
+              variant='contained'
+              color='error'
+              onClick={handleStopCall}
+              sx={{
+                borderRadius: '50px',
+                px: 4,
+                py: 1.5,
+                fontWeight: 600,
+                fontSize: 16,
+                textTransform: 'none',
+                boxShadow: '0 3px 10px rgba(244,67,54,0.3)'
+              }}
+            >
+              🛑 Stop Call
+            </Button>
+          )}
+        </Box>
+      </DialogContent>
     </Dialog>
   )
 }

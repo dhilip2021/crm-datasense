@@ -523,6 +523,8 @@ export async function PATCH(req, { params }) {
     let updateTask = null
     let newMeeting = null
     let updateMeeting = null
+    let newCall = null
+    let updateCall = null
 
     if (noteFromBody && (noteFromBody.title || noteFromBody.note)) {
       if (noteFromBody._id) {
@@ -547,6 +549,7 @@ export async function PATCH(req, { params }) {
     const activityFromBody = body.values?.Activity?.[0] || {}
     const taskFromBody = activityFromBody.task?.[0] || {}
     const meetingFromBody = activityFromBody.meeting?.[0] || {}
+    const callFromBody = activityFromBody.call?.[0] || {}
 
     if (taskFromBody && (taskFromBody.subject || taskFromBody.dueDate)) {
       if (taskFromBody._id) {
@@ -589,7 +592,7 @@ export async function PATCH(req, { params }) {
           fromTime: meetingFromBody.fromTime || null,
           toDate: meetingFromBody.toDate ? new Date(meetingFromBody.toDate) : null,
           toTime: meetingFromBody.toTime || null,
-           participants: meetingFromBody.participants || [],
+          participants: meetingFromBody.participants || [],
           createdAt: new Date()
         }
       } else {
@@ -605,7 +608,30 @@ export async function PATCH(req, { params }) {
           toDate: meetingFromBody.toDate ? new Date(meetingFromBody.toDate) : null,
           toTime: meetingFromBody.toTime || null,
           participants: meetingFromBody.participants || [],
-          
+
+          createdAt: new Date()
+        }
+      }
+    } else if (callFromBody && (callFromBody.from || callFromBody.to || callFromBody.duration)) {
+      if (callFromBody._id) {
+        updateCall = {
+          from: callFromBody.from || null,
+          to: callFromBody.to || null,
+          startTime: callFromBody.startTime || null,
+          endTime: callFromBody.endTime || null,
+          duration: callFromBody.duration || null,
+          createdBy: callFromBody.createdBy || null,
+          createdAt: new Date()
+        }
+      } else {
+        newCall = {
+          _id: new mongoose.Types.ObjectId(),
+          from: callFromBody.from || null,
+          to: callFromBody.to || null,
+          startTime: callFromBody.startTime || null,
+          endTime: callFromBody.endTime || null,
+          duration: callFromBody.duration || null,
+          createdBy: callFromBody.createdBy || null,
           createdAt: new Date()
         }
       }
@@ -629,12 +655,12 @@ export async function PATCH(req, { params }) {
       updateQuery.$set[`values.${key}`] = val
     }
 
+    // **********************************************************************
     // Notes push
     if (newNote) {
       newNote._id = toObjectId(newNote._id)
       updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Notes': newNote }
     }
-
     // Update note
     if (updateNote) {
       const noteId = toObjectId(noteFromBody._id)
@@ -654,6 +680,9 @@ export async function PATCH(req, { params }) {
       )
       return NextResponse.json({ success: true, message: 'Note updated successfully', data: updated })
     }
+
+    // **********************************************************************
+    // **********************************************************************
 
     // Tasks push
     if (newTask) {
@@ -697,7 +726,10 @@ export async function PATCH(req, { params }) {
       })
     }
 
-    // Tasks push
+    // **********************************************************************
+    // **********************************************************************
+
+    // meeting push
     if (newMeeting) {
       console.log(newMeeting, 'NEW MEETING')
       newMeeting._id = toObjectId(newMeeting._id)
@@ -741,6 +773,49 @@ export async function PATCH(req, { params }) {
         data: updatedMeeting
       })
     }
+
+    // **********************************************************************
+    // **********************************************************************
+
+
+
+    // call push
+    if (newCall) {
+      newCall._id = toObjectId(newCall._id)
+      updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Activity.0.call': newCall }
+    }
+
+    // Update meeting
+    if (updateCall) {
+      const callId = toObjectId(callFromBody._id)
+      const updateSet = {
+        'values.Activity.0.call.$[t].from': updateCall.from,
+        'values.Activity.0.call.$[t].to': updateCall.to,
+        'values.Activity.0.call.$[t].startTime': updateCall.startTime,
+        'values.Activity.0.call.$[t].endTime': updateCall.endTime,
+        'values.Activity.0.call.$[t].duration': updateCall.duration,
+        'values.Activity.0.call.$[t].createdAt': updateCall.createdAt,
+        'values.Activity.0.call.$[t].createdBy': updateCall.createdBy,
+        lead_touch: body.lead_touch,
+        updatedAt: new Date()
+      }
+
+    
+      const updatedCall = await Leadform.findOneAndUpdate(
+        { lead_id },
+        { $set: updateSet },
+        { arrayFilters: [{ 't._id': callId }], new: true }
+      )
+
+      return NextResponse.json({
+        success: true,
+        message: 'Call updated successfully',
+        data: updatedCall
+      })
+    }
+
+    // **********************************************************************
+    // **********************************************************************
 
     // Final update (includes Next Follow-up Date and other fields)
     const updated = await Leadform.findOneAndUpdate({ lead_id }, updateQuery, {
