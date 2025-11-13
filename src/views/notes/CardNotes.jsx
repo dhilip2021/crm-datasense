@@ -30,8 +30,6 @@ const CardNotes = () => {
   const loggedInUserId = Cookies.get('user_id')
   const loggedInUserName = Cookies.get('user_name')
 
-  const [view, setView] = useState('google')
-  const [viewAnchor, setViewAnchor] = useState(null)
 
   const [notes, setNotes] = useState([])
   const [loading, setLoading] = useState(false)
@@ -45,7 +43,6 @@ const CardNotes = () => {
   const [userList, setUserList] = useState([])
   const [selectedUsers, setSelectedUsers] = useState([])
 
-  const [selectedDate, setSelectedDate] = useState(dayjs())
 
   const getUserListFn = async () => {
     try {
@@ -98,7 +95,136 @@ const CardNotes = () => {
     }
   }
 
-  // ✅ Automatically refetch notes when search is cleared
+  // ✅ Edit Note Handler
+  const onEdit = async (note) => {
+
+    console.log(note,"Edit note")
+
+    try {
+      const trimmedNote = note.note?.trim() || ''
+      const leadId = note.lead_id // ensure leadId is passed
+
+      if (!leadId) {
+        toast.error('Lead ID missing in note payload', { position: 'bottom-center', autoClose: 1000 })
+        return
+      }
+
+      const payload = {
+        values: {
+          Notes: [
+            {
+              title: note.title,
+              note: trimmedNote,
+              createdAt: note.createdAt,
+              createdBy: note.createdBy,
+              _id: note._id
+            }
+          ]
+        },
+        lead_touch: 'touch'
+      }
+
+      const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken}`
+        },
+        body: JSON.stringify(payload)
+      })
+
+      const result = await res.json()
+
+      if (result.success) {
+        toast.success('Note updated successfully', {
+          autoClose: 800,
+          position: 'bottom-center',
+          hideProgressBar: true
+        })
+        fetchNotes({ from, to }) // ✅ Refresh list after update
+      } else {
+        toast.error(result.error || 'Error updating note', {
+          autoClose: 800,
+          position: 'bottom-center',
+          hideProgressBar: true
+        })
+      }
+
+    } catch (err) {
+      console.error('❌ Edit error:', err)
+      toast.error('Something went wrong', {
+        autoClose: 800,
+        position: 'bottom-center',
+        hideProgressBar: true
+      })
+    }
+  }
+
+  const onAdd= async (note) =>{
+
+    console.log(note,"<<< add Notess")
+
+     try {
+      const trimmedNote = note.note?.trim() || ''
+      const leadId = note.lead_id // ensure leadId is passed
+
+      if (!leadId) {
+        toast.error('Lead ID missing in note payload', { position: 'bottom-center', autoClose: 1000 })
+        return
+      }
+
+      const payload = {
+        values: {
+          Notes: [
+            {
+              title: note.title,
+              note: trimmedNote,
+              createdAt: note.createdAt,
+              createdBy: note.createdBy,
+            }
+          ]
+        },
+        lead_touch: 'touch'
+      }
+
+      const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken}`
+        },
+        body: JSON.stringify(payload)
+      })
+
+      const result = await res.json()
+
+      if (result.success) {
+        toast.success('Note Added successfully', {
+          autoClose: 800,
+          position: 'bottom-center',
+          hideProgressBar: true
+        })
+        fetchNotes({ from, to }) // ✅ Refresh list after update
+      } else {
+        toast.error(result.error || 'Error updating note', {
+          autoClose: 800,
+          position: 'bottom-center',
+          hideProgressBar: true
+        })
+      }
+
+    } catch (err) {
+      console.error('❌ Edit error:', err)
+      toast.error('Something went wrong', {
+        autoClose: 800,
+        position: 'bottom-center',
+        hideProgressBar: true
+      })
+    }
+  }
+
+
+
   useEffect(() => {
     if (search === '') {
       fetchNotes({ from, to })
@@ -269,7 +395,7 @@ const CardNotes = () => {
           </Box>
         ) : (
           <Grid container spacing={2}>
-            <NoteCard search={search} notes={notes} onEdit={note => console.log('Edit note:', note)} />
+            <NoteCard search={search} notes={notes} onEdit={onEdit} onAdd={onAdd} />
           </Grid>
         )}
       </Box>

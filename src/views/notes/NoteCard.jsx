@@ -9,32 +9,35 @@ import {
   Divider,
   Chip,
   Button,
-  Grid
+  Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField
 } from '@mui/material'
+import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import BusinessIcon from '@mui/icons-material/Business'
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline'
 import NotesIcon from '@mui/icons-material/Notes'
 import dayjs from 'dayjs'
+import Cookies from 'js-cookie'
 
-// Escape regex special characters in search
-const escapeRegex = (string) => {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // $& means the whole matched string
-}
+// Escape regex special characters
+const escapeRegex = string => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
-// Helper function to highlight text
+// Highlight matched text
 const highlightText = (text, search) => {
   if (!text) return ''
   if (!search) return text
-
-  const escapedSearch = escapeRegex(search) // escape special characters
-  const regex = new RegExp(`(${escapedSearch})`, 'gi') // case-insensitive
+  const escapedSearch = escapeRegex(search)
+  const regex = new RegExp(`(${escapedSearch})`, 'gi')
   const parts = String(text).split(regex)
-
-  return parts.map((part, index) =>
+  return parts.map((part, i) =>
     regex.test(part) ? (
-      <span key={index} style={{ backgroundColor: '#fff176', padding: '0 2px', borderRadius: 2 }}>
+      <span key={i} style={{ backgroundColor: '#fff176', padding: '0 2px', borderRadius: 2 }}>
         {part}
       </span>
     ) : (
@@ -43,12 +46,75 @@ const highlightText = (text, search) => {
   )
 }
 
-const NoteCard = ({ search, notes, onEdit, initialLimit = 4, loadMoreStep = 4 }) => {
-  const filteredLeads = notes.filter(
-    lead => Array.isArray(lead.values?.Notes) && lead.values.Notes.length > 0
-  )
+const NoteCard = ({ search, notes, onEdit, onAdd, initialLimit = 4, loadMoreStep = 4 }) => {
 
+  
+   const user_name = Cookies.get('user_name')
+
+  const filteredLeads = notes.filter(lead => Array.isArray(lead.values?.Notes) && lead.values.Notes.length > 0)
   const [limit, setLimit] = useState(initialLimit)
+  const [leadId, setLeadId] = useState('')
+  const [noteType, setNoteType] = useState('Add Note')
+
+  // Dialog State
+  const [openDialog, setOpenDialog] = useState(false)
+  const [selectedNote, setSelectedNote] = useState(null)
+  const [editData, setEditData] = useState({ title: '', note: '' })
+
+  // 🔹 Add Note button click
+  const handleAddClick = (lead_id) => {
+
+    setNoteType('Add Note')
+    setLeadId(lead_id)
+    setSelectedNote(null)
+    setEditData({ title: '', note: '' })
+    setOpenDialog(true)
+  }
+
+  // 🔹 Edit Note button click
+  const handleEditClick = (note, lead_id) => {
+    setNoteType('Edit Note')
+    setLeadId(lead_id)
+    setSelectedNote(note)
+    setEditData({ title: note.title || '', note: note.note || '' })
+    setOpenDialog(true)
+  }
+
+  // 🔹 Close dialog
+  const handleClose = () => {
+    setNoteType('')
+    setOpenDialog(false)
+    setSelectedNote(null)
+  }
+
+  // 🔹 Save/Add note
+  const handleSave = () => {
+    if (noteType === 'Edit Note' && onEdit && selectedNote) {
+      const updatedNote = {
+        ...selectedNote,
+        ...editData,
+        lead_id: leadId
+      }
+      onEdit(updatedNote)
+    } else if (noteType === 'Add Note' && onAdd) {
+      const newNote = {
+        title: editData.title,
+        note: editData.note,
+        lead_id: leadId,
+        createdAt: new Date().toISOString(),
+        createdBy: user_name // customize if needed
+      }
+      onAdd(newNote)
+    }
+    setOpenDialog(false)
+  }
+
+  const handleChange = e => {
+    const { name, value } = e.target
+    setEditData(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleLoadMore = () => setLimit(prev => prev + loadMoreStep)
 
   if (filteredLeads.length === 0) {
     return (
@@ -71,17 +137,12 @@ const NoteCard = ({ search, notes, onEdit, initialLimit = 4, loadMoreStep = 4 })
     )
   }
 
-  // Slice for pagination
   const displayedLeads = filteredLeads.slice(0, limit)
-
-  const handleLoadMore = () => {
-    setLimit(prev => prev + loadMoreStep)
-  }
 
   return (
     <Box sx={{ width: '100%' }}>
       <Grid container spacing={2}>
-        {displayedLeads.map((lead) => (
+        {displayedLeads.map(lead => (
           <Grid item xs={12} sm={6} key={lead._id}>
             <Box
               sx={{
@@ -125,9 +186,31 @@ const NoteCard = ({ search, notes, onEdit, initialLimit = 4, loadMoreStep = 4 })
                 <Typography variant='body2' color='text.secondary' sx={{ mt: { xs: 1, sm: 0 } }}>
                   Total Notes: {lead.values.Notes.length}
                 </Typography>
+                <Button
+  variant='contained'
+  color='success'
+  onClick={() => handleAddClick(lead.lead_id)}
+  startIcon={<AddIcon />}
+  sx={{
+    textTransform: 'none',
+    borderRadius: '12px',
+    fontWeight: 600,
+    px: 2.5,
+    py: 1,
+    boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+    transition: 'all 0.25s ease',
+    '&:hover': {
+      backgroundColor: '#2e7d32',
+      transform: 'translateY(-2px)',
+      boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
+    }
+  }}
+>
+  Add Note
+</Button>
               </Box>
 
-              {/* Notes */}
+              {/* Notes List */}
               <Box sx={{ p: 2.5 }}>
                 {lead.values.Notes.map((note, index) => (
                   <Box key={note._id || index}>
@@ -144,11 +227,21 @@ const NoteCard = ({ search, notes, onEdit, initialLimit = 4, loadMoreStep = 4 })
                       }}
                     >
                       <Box sx={{ flex: 1 }}>
-                        <Typography variant='subtitle1' fontWeight={600} sx={{ mb: 0.5, color: 'text.primary', fontSize: 15 }}>
+                        <Typography
+                          variant='subtitle1'
+                          fontWeight={600}
+                          sx={{ mb: 0.5, color: 'text.primary', fontSize: 15 }}
+                        >
                           {highlightText(note.title, search)}
                         </Typography>
 
-                        <Box display='flex' alignItems='center' flexWrap='wrap' gap={1.5} sx={{ color: 'text.secondary', fontSize: 13 }}>
+                        <Box
+                          display='flex'
+                          alignItems='center'
+                          flexWrap='wrap'
+                          gap={1.5}
+                          sx={{ color: 'text.secondary', fontSize: 13 }}
+                        >
                           <Box display='flex' alignItems='center' gap={0.5}>
                             <CalendarMonthIcon fontSize='small' sx={{ fontSize: 18 }} />
                             <Typography variant='body2'>
@@ -164,13 +257,32 @@ const NoteCard = ({ search, notes, onEdit, initialLimit = 4, loadMoreStep = 4 })
                           </Box>
                         </Box>
 
-                        <Typography variant='body2' sx={{ mt: 1.3, color: 'text.secondary', lineHeight: 1.7, whiteSpace: 'pre-line' }}>
+                        <Typography
+                          variant='body2'
+                          sx={{
+                            mt: 1.3,
+                            color: 'text.secondary',
+                            lineHeight: 1.7,
+                            whiteSpace: 'pre-line'
+                          }}
+                        >
                           {highlightText(note.note, search)}
                         </Typography>
                       </Box>
 
                       <Tooltip title='Edit Note'>
-                        <IconButton onClick={() => onEdit(note)} size='small' sx={{ bgcolor: 'grey.100', borderRadius: 2, mt: 0.5, ml: 2, transition: '0.2s', '&:hover': { bgcolor: 'grey.200', transform: 'scale(1.1)' } }}>
+                        <IconButton
+                          onClick={() => handleEditClick(note, lead.lead_id)}
+                          size='small'
+                          sx={{
+                            bgcolor: 'grey.100',
+                            borderRadius: 2,
+                            mt: 0.5,
+                            ml: 2,
+                            transition: '0.2s',
+                            '&:hover': { bgcolor: 'grey.200', transform: 'scale(1.1)' }
+                          }}
+                        >
                           <EditIcon fontSize='small' />
                         </IconButton>
                       </Tooltip>
@@ -185,7 +297,7 @@ const NoteCard = ({ search, notes, onEdit, initialLimit = 4, loadMoreStep = 4 })
         ))}
       </Grid>
 
-      {/* Load More Button */}
+      {/* Load More */}
       {limit < filteredLeads.length && (
         <Box textAlign='center' mt={2}>
           <Button variant='contained' onClick={handleLoadMore}>
@@ -193,6 +305,38 @@ const NoteCard = ({ search, notes, onEdit, initialLimit = 4, loadMoreStep = 4 })
           </Button>
         </Box>
       )}
+
+      {/* ✏️ Add/Edit Note Dialog */}
+      <Dialog open={openDialog} onClose={handleClose} maxWidth='sm' fullWidth>
+        <DialogTitle>{noteType}</DialogTitle>
+        <DialogContent sx={{ mt: 2 }}>
+          <TextField
+            fullWidth
+            label='Title'
+            name='title'
+            value={editData.title}
+            onChange={handleChange}
+            sx={{ mb: 3 }}
+          />
+          <TextField
+            fullWidth
+            multiline
+            rows={5}
+            label='Note'
+            name='note'
+            value={editData.note}
+            onChange={handleChange}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={handleClose} variant='outlined'>
+            Cancel
+          </Button>
+          <Button onClick={handleSave} variant='contained' color='primary'>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

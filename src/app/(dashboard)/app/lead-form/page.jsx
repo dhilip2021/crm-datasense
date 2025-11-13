@@ -684,7 +684,7 @@ function LeadFormAppPage() {
               Cancel
             </Button>
             <Button variant='contained' color='primary' onClick={handleSubmit}>
-              Submit 1
+              Submit
             </Button>
           </Box>
         </>
