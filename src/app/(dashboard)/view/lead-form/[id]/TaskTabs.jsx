@@ -28,6 +28,7 @@ import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined'
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined'
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline'
 import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined'
+import CallDialog from './CallDialog'
 
 const statusColors = {
   'Not Started': { bg: '#F2F3F4', color: '#7F8C8D' },
@@ -111,6 +112,8 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
 
   const [tab, setTab] = useState(0)
   const [openTaskDialog, setOpenTaskDialog] = useState(false)
+  const [openCallDialog, setOpenCallDialog] = useState(false)
+
   const [openMeetingDialog, setOpenMeetingDialog] = useState(false)
   const [tasks, setTasks] = useState(sortedTasks)
   const [meetings, setMeetings] = useState(sortedMeetings)
@@ -436,6 +439,13 @@ const renderMeetingCard = meeting => (
     setReminderToTimeMeetingError(false)
   }
 
+  const handleCallClose = () => {
+    setOpenCallDialog(false)
+    // setEditingTask(null)
+    // setErrorTaskData({ subject: false, dueDate: false, reminderDate: false })
+    // setReminderTimeTaskError(false)
+  }
+
   const hasInitialTaskSpace = str => str?.[0] === ' '
   const hasInitialMeetingSpace = str => str?.[0] === ' '
 
@@ -746,10 +756,10 @@ const renderMeetingCard = meeting => (
           {tab === 2 && (
             <Button
               variant='contained'
-              onClick={() => setOpenTaskDialog(true)}
+              onClick={() => setOpenCallDialog(true)}
               sx={{ bgcolor: '#009cde', '&:hover': { bgcolor: '#007bb5' }, borderRadius: 2, textTransform: 'none' }}
             >
-              + Create Call
+              ++ Create Call
             </Button>
           )}
         </Box>
@@ -874,7 +884,13 @@ const renderMeetingCard = meeting => (
           reminderToTimeMeetingError={reminderToTimeMeetingError}
           saveMeeting={saveMeeting}
         />
+
+        <CallDialog 
+         openCallDialog={openCallDialog}
+         handleCallClose={handleCallClose}
+        />
       </Box>
+
     </LocalizationProvider>
   )
 }
