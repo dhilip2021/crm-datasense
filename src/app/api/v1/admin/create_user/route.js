@@ -67,6 +67,7 @@ export async function POST(request) {
         })
 
         const encEmail = encryptCryptoResponse(dData?.email)
+        const encMobile = encryptCryptoResponse(dData?.mobile)
         const body = {
           organization_id: dData?.organization_id,
           first_name: dData?.first_name,
@@ -75,7 +76,7 @@ export async function POST(request) {
           c_about_user: dData?.c_about_user,
           slug_name: slug_name,
           email: encEmail,
-          mobile: dData?.mobile,
+          mobile: encMobile,
           role: dData?.role,
           c_role_id: dData?.c_role_id,
           c_user_img_url: dData?.c_user_img_url,

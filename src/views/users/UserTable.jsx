@@ -73,6 +73,7 @@ const UserTable = () => {
     first_name: '',
     last_name: '',
     email: '',
+    mobile: '',
     password: '',
     c_role_id: '',
     c_about_user: '',
@@ -84,6 +85,7 @@ const UserTable = () => {
     first_name: false,
     last_name: false,
     email: false,
+    mobile: false,
     password: false,
     c_role_id: false,
     c_about_user: false,
@@ -250,10 +252,13 @@ const UserTable = () => {
         last_name: inputs?.last_name,
         c_about_user: inputs?.c_about_user,
         email: inputs?.email,
+        mobile: inputs?.mobile,
         role: '',
         c_role_id: inputs?.c_role_id,
         n_status: inputs?.n_status
       }
+
+
 
       if (!edit) {
         body['password'] = inputs?.password
@@ -261,6 +266,10 @@ const UserTable = () => {
       if (inputs?.id !== '') {
         body['Id'] = inputs?.id
       }
+
+      console.log(body,"<<< BODYYYYY")
+
+
 
       const enycryptDAta = encryptCryptoResponse(body)
       const dataValue = { data: enycryptDAta }
@@ -297,6 +306,7 @@ const UserTable = () => {
           first_name: '',
           last_name: '',
           email: '',
+          mobile: '',
           password: '',
           c_role_id: '',
           c_about_user: ''
@@ -327,7 +337,7 @@ const UserTable = () => {
         const results = await getUserListApi(userId, header)
         setLoader(false)
         if (results?.appStatusCode === 0) {
-          console.log(results?.payloadJson[0]?.first_name, '<<< resultssss')
+          console.log(results, '<<< user resultssss')
 
           setInputs({
             id: results?.payloadJson[0]?._id,
@@ -335,6 +345,7 @@ const UserTable = () => {
             last_name: results?.payloadJson[0]?.last_name,
             // email: decrypCryptoRequest(results?.payloadJson[0]?.email),
             email: results?.payloadJson[0]?.email,
+            mobile: results?.payloadJson[0]?.mobile,
             password: results?.payloadJson[0]?.password,
             c_role_id: results?.payloadJson[0]?.c_role_id,
             c_about_user: results?.payloadJson[0]?.c_about_user,
@@ -471,6 +482,37 @@ const UserTable = () => {
                   onBlur={e => handleBlur(e)}
                 />
               </Grid>
+
+              <Grid item xs={12} md={4}>
+                <TextField
+                  autoComplete='off'
+                  fullWidth
+                  type='mobile *'
+                  label='Mobile'
+                  name='mobile'
+                  value={inputs.mobile}
+                  onChange={handleOnChange}
+                  error={errors?.mobile}
+                  helperText={
+                    errors?.mobile && inputs?.mobile === ''
+                      ? 'Please enter valid Mobile'
+                      : errors?.mobile
+                        ? 'Mobile already exists!'
+                        : ''
+                  }
+                  placeholder='+919876543210'
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position='start'>
+                        <i className='ri-mail-line' />
+                      </InputAdornment>
+                    )
+                  }}
+                  size='small'
+                  onBlur={e => handleBlur(e)}
+                />
+              </Grid>
+
               <Grid item xs={12} md={4}>
                 <TextField
                   disabled={edit}

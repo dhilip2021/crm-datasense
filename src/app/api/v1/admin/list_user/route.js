@@ -426,17 +426,15 @@ export async function GET(request) {
       },
       { $sort: { createdAt: -1 } }
     ])
-
+     console.log(data,"<<< DATA aPI")
     if (data.length > 0) {
       // Decrypt + Mask like in POST
       const updatedData = data.map(user => {
         try {
           if (user.email) {
-            // user.email = maskEmail(decrypCryptoRequest(user.email))
             user.email = decrypCryptoRequest(user.email)
           }
           if (user.mobile) {
-            // user.mobile = maskEmail(decrypCryptoRequest(user.mobile))
             user.mobile = decrypCryptoRequest(user.mobile)
           }
         } catch (err) {
@@ -445,6 +443,8 @@ export async function GET(request) {
         return user
       })
 
+
+console.log(updatedData,"<<< DATAAAAAAA aPI")
       sendResponse = {
         appStatusCode: 0,
         message: '',
