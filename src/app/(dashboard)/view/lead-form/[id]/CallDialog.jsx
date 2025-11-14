@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect, useRef } from 'react'
+import React from 'react'
 import {
   Box,
   Button,
@@ -9,22 +9,33 @@ import {
   IconButton,
   Tooltip,
   LinearProgress,
-  Typography
+  Typography,
+  TextField,
+  Stack
 } from '@mui/material'
+
 import CloseIcon from '@mui/icons-material/Close'
 
-
-function CallDialog({ openCallDialog, handleCallClose, progress, seconds, isCalling, handleStopCall, handleStartCall, }) {
-
-
- const formatTime = sec => {
+function CallDialog({
+  openCallDialog,
+  handleCallClose,
+  progress,
+  seconds,
+  isCalling,
+  handleStopCall,
+  handleStartCall,
+  toPhoneNumber,
+  setToPhoneNumber,
+  callResponse,
+  setCallResponse
+}) {
+  const formatTime = sec => {
     const m = Math.floor(sec / 60)
       .toString()
       .padStart(2, '0')
     const s = (sec % 60).toString().padStart(2, '0')
     return `${m}:${s}`
   }
-  
 
   return (
     <Dialog
@@ -34,38 +45,42 @@ function CallDialog({ openCallDialog, handleCallClose, progress, seconds, isCall
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 3,
+          borderRadius: 4,
           overflow: 'hidden',
           position: 'relative',
-          boxShadow: 5
+          boxShadow: '0 8px 30px rgba(0,0,0,0.15)'
         }
       }}
     >
+      {/* ------------ HEADER ------------- */}
       <DialogTitle
         sx={{
-          fontWeight: 'bold',
-          textAlign: 'center',
-          borderBottom: '1px solid #f0f0f0',
+          fontWeight: 700,
+          fontSize: 18,
+          p: 2,
+          px: 3,
+          borderBottom: '1px solid #eee',
           bgcolor: '#fafafa'
         }}
       >
         <Box display='flex' alignItems='center' justifyContent='space-between'>
-          Call
+          <Typography fontWeight={700}>Call</Typography>
+
           <Tooltip title='Close' arrow>
-            <IconButton onClick={handleCallClose}>
-              <CloseIcon />
+            <IconButton size='small' onClick={handleCallClose}>
+              <CloseIcon fontSize='small' />
             </IconButton>
           </Tooltip>
         </Box>
       </DialogTitle>
 
-      {/* Progress Bar */}
+      {/* ------------ PROGRESS BAR ------------- */}
       <LinearProgress
         variant='determinate'
         value={progress}
         sx={{
           height: 6,
-          borderRadius: 3,
+          borderRadius: 2,
           bgcolor: 'grey.300',
           '& .MuiLinearProgress-bar': {
             bgcolor: isCalling ? '#43a047' : '#1976d2'
@@ -73,56 +88,80 @@ function CallDialog({ openCallDialog, handleCallClose, progress, seconds, isCall
         }}
       />
 
-      <DialogContent sx={{ p: 3, textAlign: 'center' }}>
-        <Typography variant='h5' sx={{ mb: 2, fontWeight: 600 }}>
+      {/* ------------ BODY CONTENT ------------- */}
+      <DialogContent sx={{ p: 3 }}>
+        <Typography
+          variant='h5'
+          sx={{
+            mb: 3,
+            fontWeight: 700,
+            textAlign: 'center',
+            color: isCalling ? '#2e7d32' : '#1976d2'
+          }}
+        >
           {isCalling ? `⏱ ${formatTime(seconds)}` : 'Ready to call'}
         </Typography>
 
-        {/* Floating Call Controls */}
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: 2,
-            position: 'relative'
-          }}
-        >
-          {!isCalling ? (
+        {/* ------------ INPUT FIELD ------------- */}
+        <TextField
+          size='small'
+          fullWidth
+          label='Phone Number'
+          value={toPhoneNumber}
+          onChange={e => setToPhoneNumber(e.target.value)}
+          sx={{ mb: 3 }}
+        />
+
+        {/* ------------ START / STOP CONTROLS ------------- */}
+        {!isCalling ? (
+          <Box textAlign='center'>
             <Button
+            disabled={toPhoneNumber === ""}
               variant='contained'
               color='success'
               onClick={handleStartCall}
               sx={{
-                borderRadius: '50px',
-                px: 4,
-                py: 1.5,
-                fontWeight: 600,
+                borderRadius: 20,
+                px: 5,
+                py: 1.4,
+                fontWeight: 700,
                 fontSize: 16,
                 textTransform: 'none',
-                boxShadow: '0 3px 10px rgba(76,175,80,0.3)'
+                boxShadow: '0 4px 14px rgba(76,175,80,0.3)'
               }}
             >
               📞 Start Call
             </Button>
-          ) : (
+          </Box>
+        ) : (
+          <Stack spacing={2}>
+            <TextField
+              required
+              size='small'
+              fullWidth
+              label='Call Response'
+              value={callResponse}
+              onChange={e => setCallResponse(e.target.value)}
+            />
+
             <Button
               variant='contained'
               color='error'
               onClick={handleStopCall}
+              fullWidth
               sx={{
-                borderRadius: '50px',
-                px: 4,
-                py: 1.5,
-                fontWeight: 600,
+                borderRadius: 20,
+                py: 1.4,
+                fontWeight: 700,
                 fontSize: 16,
                 textTransform: 'none',
-                boxShadow: '0 3px 10px rgba(244,67,54,0.3)'
+                boxShadow: '0 4px 14px rgba(244,67,54,0.3)'
               }}
             >
               🛑 Stop Call
             </Button>
-          )}
-        </Box>
+          </Stack>
+        )}
       </DialogContent>
     </Dialog>
   )

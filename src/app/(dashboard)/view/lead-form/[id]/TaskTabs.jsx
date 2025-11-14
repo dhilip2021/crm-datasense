@@ -32,6 +32,7 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutline'
 import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined'
 import CallDialog from './CallDialog'
 import CallLog from './CallLog'
+import CallUIPopup from './CallUIPopup'
 
 const statusColors = {
   'Not Started': { bg: '#F2F3F4', color: '#7F8C8D' },
@@ -60,8 +61,9 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
   const leadArrayTasks = leadData?.values?.Activity?.[0]?.task || []
   const leadArrayMeetings = leadData?.values?.Activity?.[0]?.meeting || []
   const leadArrayCalls = leadData?.values?.Activity?.[0]?.call || []
-  const toPhoneNumber = leadData?.values?.Phone || ""
-  // const fromPhoneNumber = '+918870847064'
+  // const toPhoneNumber = leadData?.values?.Phone || ""
+  const [toPhoneNumber, setToPhoneNumber] = useState(leadData?.values?.Phone)
+  const [callResponse, setCallResponse] = useState("")
 
   const sortedTasks = useMemo(() => {
     return [...leadArrayTasks]
@@ -112,6 +114,7 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
         startTime: t.startTime || '',
         endTime: t.endTime || '',
         duration: t.duration || null,
+        createdBy: t.createdBy || ''
        
       }))
   }, [leadArrayCalls])
@@ -1076,7 +1079,7 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
           saveMeeting={saveMeeting}
         />
 
-        <CallDialog
+        {/* <CallDialog
           openCallDialog={openCallDialog}
           handleCallClose={handleCallClose}
           progress={progress}
@@ -1084,7 +1087,20 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
           isCalling={isCalling}
           handleStopCall={handleStopCall}
           handleStartCall={handleStartCall}
-        />
+          toPhoneNumber={toPhoneNumber}
+          setToPhoneNumber={setToPhoneNumber}
+          callResponse={callResponse} 
+          setCallResponse={setCallResponse}
+        /> */}
+
+
+          <CallUIPopup
+              open={openCallDialog}
+              onClose={handleCallClose}
+              toPhoneNumber={toPhoneNumber}
+              setToPhoneNumber={setToPhoneNumber}
+          />
+
       </Box>
     </LocalizationProvider>
   )

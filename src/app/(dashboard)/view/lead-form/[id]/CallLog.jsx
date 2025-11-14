@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Box,
   Card,
@@ -9,7 +9,8 @@ import {
   Stack,
   Typography,
   Chip,
-  LinearProgress
+  LinearProgress,
+  Button
 } from '@mui/material'
 import CallIcon from '@mui/icons-material/Call'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
@@ -17,6 +18,18 @@ import PersonIcon from '@mui/icons-material/Person'
 import dayjs from 'dayjs'
 
 const CallLog = ({ calls = [] }) => {
+
+  // Sort by startTime DESC
+  const sortedCalls = [...calls].sort(
+    (a, b) => new Date(b.startTime) - new Date(a.startTime)
+  )
+
+  // How many items to show initially
+  const [visibleCount, setVisibleCount] = useState(5)
+
+  // Slice to show only visibleCount
+  const visibleCalls = sortedCalls.slice(0, visibleCount)
+
   return (
     <Card
       variant='outlined'
@@ -27,7 +40,6 @@ const CallLog = ({ calls = [] }) => {
         overflow: 'hidden'
       }}
     >
-      {/* Header */}
       <Box
         sx={{
           px: 3,
@@ -42,8 +54,7 @@ const CallLog = ({ calls = [] }) => {
       </Box>
 
       <CardContent sx={{ p: 0 }}>
-        {/* Empty State */}
-        {calls.length === 0 ? (
+        {visibleCalls.length === 0 ? (
           <Box
             sx={{
               py: 5,
@@ -55,7 +66,7 @@ const CallLog = ({ calls = [] }) => {
             No call logs available.
           </Box>
         ) : (
-          calls.map((call, index) => {
+          visibleCalls.map((call, index) => {
             const start = dayjs(call.startTime).format('MMM D, YYYY h:mm:ss A')
             const end = dayjs(call.endTime).format('h:mm:ss A')
 
@@ -73,7 +84,6 @@ const CallLog = ({ calls = [] }) => {
                   }}
                 >
                   <Stack direction='row' spacing={2} alignItems='center'>
-                    {/* Call Icon */}
                     <Box
                       sx={{
                         bgcolor: '#e3f2fd',
@@ -87,7 +97,6 @@ const CallLog = ({ calls = [] }) => {
                       <CallIcon sx={{ color: '#1976d2' }} />
                     </Box>
 
-                    {/* Call Info */}
                     <Box>
                       <Typography variant='subtitle1' fontWeight={600}>
                         {call.from} → {call.to}
@@ -97,7 +106,6 @@ const CallLog = ({ calls = [] }) => {
                         {start} — {end}
                       </Typography>
 
-                      {/* Aligned Duration & Created By Row */}
                       <Stack
                         direction='row'
                         spacing={4}
@@ -122,7 +130,6 @@ const CallLog = ({ calls = [] }) => {
                     </Box>
                   </Stack>
 
-                  {/* Duration Chip */}
                   <Chip
                     label={call.duration}
                     sx={{
@@ -139,7 +146,6 @@ const CallLog = ({ calls = [] }) => {
                   />
                 </Box>
 
-                {/* Progress bar */}
                 <LinearProgress
                   variant='determinate'
                   value={Math.min(parseInt(call.duration.split(':')[1]) * 4, 100)}
@@ -159,10 +165,28 @@ const CallLog = ({ calls = [] }) => {
                   }}
                 />
 
-                {index < calls.length - 1 && <Divider />}
+                {index < visibleCalls.length - 1 && <Divider />}
               </React.Fragment>
             )
           })
+        )}
+
+        {/* LOAD MORE BUTTON */}
+        {visibleCount < sortedCalls.length && (
+          <Box textAlign='center' py={2}>
+            <Button
+              variant='contained'
+              onClick={() => setVisibleCount(prev => prev + 5)}
+              sx={{
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 'bold',
+                px: 4
+              }}
+            >
+              Load More
+            </Button>
+          </Box>
         )}
       </CardContent>
     </Card>
