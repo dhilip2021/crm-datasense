@@ -70,6 +70,9 @@ export async function POST(request) {
           await bcrypt
             .compare(dData?.password, data.password)
             .then(async response => {
+
+              
+
               if (response) {
                 const UserPrivilege = await UserPrivileges.findOne({ c_role_id: data.c_role_id })
                 const date_time = getDateTime()
@@ -77,7 +80,7 @@ export async function POST(request) {
                   _id: data._id,
                   user_id: data.user_id,
                   email: data.email,
-                  mobile: data.mobile,
+                  // mobile: data.mobile? data.mobile : "",
                   organization_id: data.organization_id,
                   password: dData?.password,
                   c_role_id: data.c_role_id,
@@ -97,9 +100,6 @@ export async function POST(request) {
                
 
                 if (data.c_role_id) {
-
-                  
-
                   
 
                   let dataResults = {
@@ -113,7 +113,7 @@ export async function POST(request) {
                     c_about_user: data.c_about_user,
                     // email: maskEmail(decrypCryptoRequest(data.email)),
                     email: decrypCryptoRequest(data.email),
-                    mobile: decrypCryptoRequest(data.mobile),
+                    // mobile: data.mobile? decrypCryptoRequest(data.mobile) :"",
                     c_role_id: data.c_role_id,
                     user_id: data.user_id,
                     role: listRes.c_role_name,
@@ -122,8 +122,6 @@ export async function POST(request) {
                     privileges: UserPrivilege.c_role_privileges
                   }
 
-
-                  
 
                    
 
