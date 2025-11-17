@@ -10,7 +10,9 @@ import {
   Checkbox,
   Chip,
   Divider,
+  Drawer,
   Grid,
+  IconButton,
   InputAdornment,
   LinearProgress,
   ListItemText,
@@ -26,7 +28,9 @@ import {
   TableRow,
   TextField,
   Tooltip,
-  Typography
+  Typography,
+  useMediaQuery,
+  useTheme
 } from '@mui/material'
 // import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
 // import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -46,6 +50,7 @@ import FlagIcon from '@mui/icons-material/Flag' // ✅ MUI icon
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload'
 import SearchIcon from '@mui/icons-material/Search'
+import FilterListIcon from '@mui/icons-material/FilterList'
 // import { DateRangePicker, MultiInputDateRangeField } from '@mui/x-date-pickers-pro/DateRangePicker'
 
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo'
@@ -54,6 +59,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers-pro/AdapterDayjs'
 import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker'
 
 const LeadTable = () => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const organization_id = Cookies.get('organization_id')
   const getToken = Cookies.get('_token')
   const loggedInUserId = Cookies.get('user_id')
@@ -73,6 +80,11 @@ const LeadTable = () => {
   const [anchorPdfEl, setAnchorPdfEl] = useState(null)
   const [selectedPdfFields, setSelectedPdfFields] = useState([])
   const [fetched, setFetched] = useState(true)
+
+  const [openFilter, setOpenFilter] = useState(false)
+
+  const handleOpenFilter = () => setOpenFilter(true)
+  const handleCloseFilter = () => setOpenFilter(false)
 
   // const dynamicPdfFields = data.length > 0 ? Object.keys(data[0].values) : []
   // const fieldsPdf = [...new Set([...dynamicPdfFields])]
@@ -119,6 +131,124 @@ const LeadTable = () => {
     fromFollowDate: null,
     toFollowDate: null
   })
+
+  const renderFilters = isMobile => (
+    <Stack
+      direction={isMobile ? 'column' : 'row'} // ← horizontal for desktop
+      spacing={1.5}
+      flexWrap='wrap'
+      alignItems={isMobile ? 'stretch' : 'center'}
+    >
+      {/* Status */}
+      <TextField
+        select
+        size='small'
+        variant='outlined'
+        label='Status'
+        value={filters.status}
+        onChange={e => {
+          setFilters({ ...filters, status: e.target.value })
+          if (isMobile) handleCloseFilter()
+        }}
+        sx={{ minWidth: 150 }}
+      >
+        <MenuItem value=''>All</MenuItem>
+        {uniqueStatus.map(status => (
+          <MenuItem key={status} value={status}>
+            {status}
+          </MenuItem>
+        ))}
+      </TextField>
+
+      {/* Touch */}
+      <TextField
+        select
+        size='small'
+        variant='outlined'
+        label='Touch'
+        value={filters.touch}
+        onChange={e => {
+          setFilters({ ...filters, touch: e.target.value })
+          if (isMobile) handleCloseFilter()
+        }}
+        sx={{ minWidth: 150 }}
+      >
+        <MenuItem value=''>All</MenuItem>
+        {['touch', 'untouch'].map(touch => (
+          <MenuItem key={touch} value={touch}>
+            {touch}
+          </MenuItem>
+        ))}
+      </TextField>
+
+      {/* Assigned To */}
+      <TextField
+        select
+        size='small'
+        variant='outlined'
+        label='Assigned to'
+        value={filters.assign}
+        onChange={e => {
+          if (isMobile) handleCloseFilter()
+          setFilters({ ...filters, assign: e.target.value })
+        }}
+        sx={{ minWidth: 150 }}
+      >
+        <MenuItem value=''>All</MenuItem>
+        {userList.map(u => (
+          <MenuItem key={u.user_id} value={u.user_id}>
+            {u.user_name}
+          </MenuItem>
+        ))}
+      </TextField>
+
+      {/* Source */}
+      <TextField
+        select
+        size='small'
+        variant='outlined'
+        label='Source'
+        value={filters.source}
+        onChange={e => {
+          if (isMobile) handleCloseFilter()
+          setFilters({ ...filters, source: e.target.value })
+        }}
+        sx={{ minWidth: 150 }}
+      >
+        <MenuItem value=''>All</MenuItem>
+        {uniqueSources.map(source => (
+          <MenuItem key={source} value={source}>
+            {source}
+          </MenuItem>
+        ))}
+      </TextField>
+
+      {/* Clear All */}
+      <Button
+        variant='text'
+        sx={{ color: '#009cde', fontWeight: 500, minWidth: 120 }}
+        onClick={() => {
+          if (isMobile) handleCloseFilter()
+          setFilters({
+            search: '',
+            status: '',
+            touch: '',
+            assign: '',
+            company: '',
+            city: '',
+            label: '',
+            fromDate: null,
+            toDate: null,
+            fromFollowDate: null,
+            toFollowDate: null
+          })
+          
+        }}
+      >
+        Clear All
+      </Button>
+    </Stack>
+  )
 
   const flattenFields = sections => {
     const flat = []
@@ -394,19 +524,30 @@ const LeadTable = () => {
     <Box px={2} py={2}>
       {/* 🔹 Header */}
 
-      <Grid container alignItems='center' justifyContent='space-between' mb={3}>
-        {/* Left: Title */}
-        <Grid item>
+      <Grid container alignItems='center' justifyContent='space-between' spacing={2} mb={3}>
+        {/* Title */}
+        <Grid item xs={12} md='auto' sx={{ mb: isMobile ? 2 : 0 }}>
           <Typography variant='h6' fontWeight='bold'>
             Leads
           </Typography>
         </Grid>
 
-        {/* Right: Actions */}
-        <Grid item>
-          <Stack direction='row' alignItems='center' spacing={1.5}>
-            {/* Export */}
-            <Button variant='outlined' size='small' endIcon={<KeyboardArrowDownIcon />} onClick={handleClick}>
+        {/* Buttons */}
+        <Grid item xs={12} md>
+          <Stack
+            direction={isMobile ? 'column' : 'row'}
+            spacing={1.5}
+            alignItems={isMobile ? 'stretch' : 'center'}
+            justifyContent={isMobile ? 'flex-start' : 'flex-end'}
+          >
+            {/* Export Button */}
+            <Button
+              variant='outlined'
+              size='small'
+              endIcon={<KeyboardArrowDownIcon />}
+              onClick={handleClick}
+              fullWidth={isMobile}
+            >
               Export
             </Button>
             <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
@@ -440,6 +581,7 @@ const LeadTable = () => {
                 bgcolor: '#fff',
                 '&:hover': { bgcolor: '#f5f5f5' }
               }}
+              fullWidth={isMobile}
             >
               Import
               <input
@@ -466,6 +608,7 @@ const LeadTable = () => {
               }}
               href='/sample/sample_lead_data.xlsx'
               download
+              fullWidth={isMobile}
             >
               Sample Data
             </Button>
@@ -483,6 +626,7 @@ const LeadTable = () => {
                 '&:hover': { bgcolor: '#007bb5' }
               }}
               disabled={loader}
+              fullWidth={isMobile}
             >
               + New Lead
             </Button>
@@ -510,194 +654,26 @@ const LeadTable = () => {
                   </InputAdornment>
                 )
               }}
+              fullWidth={isMobile}
             />
-            {/* Status */}
-            <TextField
-              select
-              size='small'
-              variant='outlined'
-              label='Status'
-              value={filters.status}
-              onChange={e => setFilters({ ...filters, status: e.target.value })}
-              sx={{ minWidth: 120, maxWidth: 150, bgcolor: 'white' }}
-              SelectProps={{
-                MenuProps: {
-                  PaperProps: {
-                    style: {
-                      maxHeight: 250, // 👈 Fixed dropdown height (you can adjust this)
-                      overflowY: 'auto' // 👈 Enables vertical scrolling
-                    }
-                  }
-                }
-              }}
-            >
-              <MenuItem value=''>All</MenuItem>
-              {uniqueStatus.map(status => (
-                <MenuItem key={status} value={status}>
-                  {status}
-                </MenuItem>
-              ))}
-            </TextField>
 
-            {/* Touch */}
-            <TextField
-              autoComplete='off'
-              size='small'
-              variant='outlined'
-              select
-              label='Touch'
-              value={filters.touch}
-              onChange={e => setFilters({ ...filters, touch: e.target.value })}
-              sx={{ minWidth: 120, maxWidth: 150, bgcolor: 'white' }}
-              SelectProps={{
-                MenuProps: {
-                  PaperProps: {
-                    style: {
-                      maxHeight: 250, // 👈 Fixed dropdown height (you can adjust this)
-                      overflowY: 'auto' // 👈 Enables vertical scrolling
-                    }
-                  }
-                }
-              }}
-            >
-              <MenuItem value=''>All</MenuItem>
-              {['touch', 'untouch'].map(touch => (
-                <MenuItem key={touch} value={touch}>
-                  {touch}
-                </MenuItem>
-              ))}
-            </TextField>
+            {/* Mobile Filter Icon */}
+            {isMobile && (
+              <IconButton onClick={handleOpenFilter} color='primary'>
+                <FilterListIcon />
+              </IconButton>
+            )}
 
-            {/* Assigned To */}
-            <TextField
-              select
-              size='small'
-              variant='outlined'
-              label='Assigned to'
-              value={filters.assign}
-              onChange={e => setFilters({ ...filters, assign: e.target.value })}
-              sx={{ minWidth: 140, maxWidth: 160, bgcolor: 'white' }}
-              SelectProps={{
-                MenuProps: {
-                  PaperProps: {
-                    style: {
-                      maxHeight: 250, // 👈 Fixed dropdown height (you can adjust this)
-                      overflowY: 'auto' // 👈 Enables vertical scrolling
-                    }
-                  }
-                }
-              }}
-            >
-              <MenuItem value=''>All</MenuItem>
-              {userList.map(u => (
-                <MenuItem key={u.user_id} value={u.user_id}>
-                  {u.user_name}
-                </MenuItem>
-              ))}
-            </TextField>
-
-            <TextField
-              autoComplete='off'
-              size='small'
-              select
-              label='Source'
-              value={filters.source}
-              onChange={e => setFilters({ ...filters, source: e.target.value })}
-              sx={{ minWidth: 120, maxWidth: 150, bgcolor: 'white' }}
-              SelectProps={{
-                MenuProps: {
-                  PaperProps: {
-                    style: {
-                      maxHeight: 250, // 👈 Fixed dropdown height (you can adjust this)
-                      overflowY: 'auto' // 👈 Enables vertical scrolling
-                    }
-                  }
-                }
-              }}
-            >
-              <MenuItem value=''>All</MenuItem>
-              {uniqueSources.map(source => (
-                <MenuItem key={source} value={source}>
-                  {source}
-                </MenuItem>
-              ))}
-            </TextField>
-
-            {/* Date Range Picker */}
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DateRangePicker
-                value={[filters.fromDate, filters.toDate]} // 🔹 filters la connect pannirukken
-                label='Created Date Range'
-                format='DD/MM/YYYY'
-                onChange={newValue => {
-                  setFilters({
-                    ...filters,
-                    fromDate: newValue[0],
-                    toDate: newValue[1]
-                  })
-                }}
-                slotProps={{
-                  textField: ({ position }) => ({
-                    size: 'small',
-                    sx: {
-                      minWidth: 250,
-                      maxWidth: 280,
-                      bgcolor: 'white',
-                      mr: position === 'start' ? 1 : 0
-                    }
-                  })
-                }}
-              />
-            </LocalizationProvider>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DateRangePicker
-                value={[filters.fromFollowDate, filters.toFollowDate]} // 🔹 filters la connect pannirukken
-                label='Follow-Up Date Range'
-                format='DD/MM/YYYY'
-                onChange={newValue => {
-                  setFilters({
-                    ...filters,
-                    fromFollowDate: newValue[0],
-                    toFollowDate: newValue[1]
-                  })
-                }}
-                slotProps={{
-                  textField: ({ position }) => ({
-                    size: 'small',
-                    sx: {
-                      minWidth: 250,
-                      maxWidth: 280,
-                      bgcolor: 'white',
-                      mr: position === 'start' ? 1 : 0
-                    }
-                  })
-                }}
-              />
-            </LocalizationProvider>
-
-            {/* Clear All */}
-            <Button
-              variant='text'
-              sx={{ color: '#009cde', fontWeight: 500, ml: 'auto' }}
-              onClick={() =>
-                setFilters({
-                  search: '',
-                  status: '',
-                  touch: '',
-                  assign: '',
-                  company: '',
-                  city: '',
-                  label: '',
-                  fromDate: null,
-                  toDate: null,
-                  fromFollowDate: null,
-                  toFollowDate: null
-                })
-              }
-            >
-              Clear All
-            </Button>
+            {/* Desktop Filters */}
+            {!isMobile && renderFilters(isMobile)}
           </Box>
+
+          {/* Mobile Drawer */}
+          <Drawer anchor='right' open={openFilter} onClose={handleCloseFilter}>
+            <Box p={2} width={250}>
+              {renderFilters(isMobile)}
+            </Box>
+          </Drawer>
         </Grid>
 
         {/* 🔹 Right Column: Table + Actions */}
@@ -734,12 +710,11 @@ const LeadTable = () => {
                       position: 'sticky',
                       left: 0,
                       zIndex: 9,
-                      minWidth: 250
+                      minWidth: isMobile? 50 : 250
                     }}
                   >
                     Full Name
                   </TableCell>
-                  {/* <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>First Name</TableCell> */}
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Company</TableCell>
                   <TableCell sx={{ minWidth: 50, maxWidth: 80, whiteSpace: 'nowrap' }}>Flag</TableCell>
                   <TableCell>City</TableCell>
@@ -753,7 +728,6 @@ const LeadTable = () => {
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Label</TableCell>
                   <TableCell sx={{ minWidth: 180, maxWidth: 200, whiteSpace: 'nowrap' }}>Last Contact Date</TableCell>
                   <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Created By</TableCell>
-                  {/* <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Action</TableCell> */}
                 </TableRow>
               </TableHead>
 
@@ -784,7 +758,7 @@ const LeadTable = () => {
                             left: 0,
                             zIndex: 2,
                             backgroundColor: '#fff',
-                            minWidth: 250
+                            minWidth: isMobile? 50 : 250
                           }}
                         >
                           <Link
@@ -803,19 +777,6 @@ const LeadTable = () => {
                             </strong>
                           </Link>
                         </TableCell>
-                        {/* <TableCell
-                          sx={{
-                            minWidth: 180,
-                            maxWidth: 200,
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis'
-                          }}
-                        >
-                          <Tooltip title={row.values['First Name'] || ''} arrow>
-                            {row.values['First Name'] || ''}
-                          </Tooltip>
-                        </TableCell> */}
                         <TableCell
                           sx={{
                             minWidth: 180,
