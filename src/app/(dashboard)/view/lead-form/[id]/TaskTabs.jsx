@@ -64,6 +64,7 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
   // const toPhoneNumber = leadData?.values?.Phone || ""
   const [toPhoneNumber, setToPhoneNumber] = useState(leadData?.values?.Phone)
   const [callResponse, setCallResponse] = useState("")
+const [openResponseDialog, setOpenResponseDialog] = useState(false)
 
   const sortedTasks = useMemo(() => {
     return [...leadArrayTasks]
@@ -468,6 +469,7 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
 
   const handleCallClose = () => {
     setOpenCallDialog(false)
+    setToPhoneNumber(leadData?.values?.Phone)
     // setEditingTask(null)
     // setErrorTaskData({ subject: false, dueDate: false, reminderDate: false })
     // setReminderTimeTaskError(false)
@@ -754,6 +756,12 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
     window.location.href = `tel:${toPhoneNumber}`
   }
 
+
+
+
+
+
+
   // 🔴 STOP CALL + Log to backend
   const handleStopCall = async () => {
     setIsCalling(false)
@@ -782,6 +790,7 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
                 startTime: startTime,
                 endTime: new Date().toISOString(),
                 duration: formatDuration(durationSeconds),
+                response:callResponse,
                 createdAt: new Date().toISOString(),
                 createdBy: user_name
               }
@@ -838,10 +847,13 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
     setOpenCallDialog(false)
   }
 
-  // 🧹 Cleanup on unmount
-  useEffect(() => {
-    
-  }, [])
+  const onStopCall = () => {
+  // handleStopCall();       // ungaloda existing stop logic
+  handleCallClose();      // main dialog close
+  setOpenResponseDialog(true); // new response popup open
+}
+
+ 
 
 
 
@@ -1079,27 +1091,30 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
           saveMeeting={saveMeeting}
         />
 
-        {/* <CallDialog
+        <CallDialog
           openCallDialog={openCallDialog}
           handleCallClose={handleCallClose}
           progress={progress}
           seconds={seconds}
           isCalling={isCalling}
-          handleStopCall={handleStopCall}
           handleStartCall={handleStartCall}
           toPhoneNumber={toPhoneNumber}
           setToPhoneNumber={setToPhoneNumber}
           callResponse={callResponse} 
           setCallResponse={setCallResponse}
-        /> */}
+          onStopCall={onStopCall}
+          openResponseDialog={openResponseDialog}
+          setOpenResponseDialog={setOpenResponseDialog}
+          handleStopCall={handleStopCall}
+        />
 
 
-          <CallUIPopup
+          {/* <CallUIPopup
               open={openCallDialog}
               onClose={handleCallClose}
               toPhoneNumber={toPhoneNumber}
               setToPhoneNumber={setToPhoneNumber}
-          />
+          /> */}
 
       </Box>
     </LocalizationProvider>

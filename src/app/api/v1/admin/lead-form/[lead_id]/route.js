@@ -620,6 +620,7 @@ export async function PATCH(req, { params }) {
           startTime: callFromBody.startTime || null,
           endTime: callFromBody.endTime || null,
           duration: callFromBody.duration || null,
+          response: callFromBody.response || null,
           createdBy: callFromBody.createdBy || null,
           createdAt: new Date()
         }
@@ -631,6 +632,7 @@ export async function PATCH(req, { params }) {
           startTime: callFromBody.startTime || null,
           endTime: callFromBody.endTime || null,
           duration: callFromBody.duration || null,
+          response: callFromBody.response || null,
           createdBy: callFromBody.createdBy || null,
           createdAt: new Date()
         }

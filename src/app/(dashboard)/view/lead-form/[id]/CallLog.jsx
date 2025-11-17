@@ -1,28 +1,17 @@
 'use client'
 
 import React, { useState } from 'react'
-import {
-  Box,
-  Card,
-  CardContent,
-  Divider,
-  Stack,
-  Typography,
-  Chip,
-  LinearProgress,
-  Button
-} from '@mui/material'
+import { Box, Card, CardContent, Divider, Stack, Typography, Chip, LinearProgress, Button } from '@mui/material'
 import CallIcon from '@mui/icons-material/Call'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import PersonIcon from '@mui/icons-material/Person'
 import dayjs from 'dayjs'
 
 const CallLog = ({ calls = [] }) => {
+  console.log(calls, '<<< callaaa')
 
   // Sort by startTime DESC
-  const sortedCalls = [...calls].sort(
-    (a, b) => new Date(b.startTime) - new Date(a.startTime)
-  )
+  const sortedCalls = [...calls].sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
 
   // How many items to show initially
   const [visibleCount, setVisibleCount] = useState(5)
@@ -106,13 +95,26 @@ const CallLog = ({ calls = [] }) => {
                         {start} — {end}
                       </Typography>
 
-                      <Stack
-                        direction='row'
-                        spacing={4}
-                        alignItems='center'
-                        mt={1}
-                        sx={{ flexWrap: 'wrap' }}
-                      >
+                      {call.response && (
+                        <Typography
+                          variant='body2'
+                          sx={{
+                            mt: 2,
+                            mb: 4,
+                            color: '#444',
+                            fontStyle: 'italic',
+                            // background: '#f0f4ff',
+                            // borderLeft: '4px solid #1976d2',
+                            padding: '6px 0px',
+                            borderRadius: '6px',
+                            maxWidth: '100%'
+                          }}
+                        >
+                          📝 <strong>Response:</strong> {call.response}
+                        </Typography>
+                      )}
+
+                      <Stack direction='row' spacing={4} alignItems='center' mt={1} sx={{ flexWrap: 'wrap' }}>
                         <Stack direction='row' spacing={1} alignItems='center'>
                           <AccessTimeIcon sx={{ fontSize: 16, color: '#666' }} />
                           <Typography variant='body2' color='text.secondary'>
@@ -140,8 +142,8 @@ const CallLog = ({ calls = [] }) => {
                         call.duration >= '00:30'
                           ? 'success.main'
                           : call.duration >= '00:10'
-                          ? 'warning.main'
-                          : 'error.main'
+                            ? 'warning.main'
+                            : 'error.main'
                     }}
                   />
                 </Box>
@@ -155,12 +157,7 @@ const CallLog = ({ calls = [] }) => {
                     bgcolor: '#f3f3f3',
                     '& .MuiLinearProgress-bar': {
                       borderRadius: 0,
-                      bgcolor:
-                        call.duration >= '00:30'
-                          ? '#4caf50'
-                          : call.duration >= '00:10'
-                          ? '#ff9800'
-                          : '#f44336'
+                      bgcolor: call.duration >= '00:30' ? '#4caf50' : call.duration >= '00:10' ? '#ff9800' : '#f44336'
                     }
                   }}
                 />
