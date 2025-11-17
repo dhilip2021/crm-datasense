@@ -124,12 +124,13 @@ const VerticalMenu = ({ scrollMenu, roles }) => {
           <MenuItem href='/tasks' icon={<i className='ri-task-line' />}>
             Tasks
           </MenuItem>
+           <MenuItem href='/calls' icon={<i className='ri-phone-line' />}>
+            Calls
+          </MenuItem>
           <MenuItem href='/organization' icon={<i className='ri-building-line' />}>
             Organization
           </MenuItem>
-          <MenuItem href='/calls' icon={<i className='ri-phone-line' />}>
-            Calls
-          </MenuItem>
+         
           <MenuItem href='/emails' icon={<i className='ri-mail-line' />}>
             Emails
           </MenuItem>

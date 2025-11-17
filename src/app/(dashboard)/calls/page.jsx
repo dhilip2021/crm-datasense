@@ -2,25 +2,16 @@
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import Divider from '@mui/material/Divider'
-
-
-
+import CardCalls from '@/views/calls/CardCalls'
+import { Box } from '@mui/material'
 
 const Calls = () => {
-
-
-
   return (
-    <Grid container spacing={6}>
-      <Grid item xs={12}>
-        <Typography variant='h5'>Calls</Typography>
-        <Divider />
-      </Grid>
-     
-      
-      
-      
-    </Grid>
+      <Box>
+        <Grid item xs={12} sm={12} md={4}>
+          <CardCalls />
+        </Grid>
+      </Box>
   )
 }
 

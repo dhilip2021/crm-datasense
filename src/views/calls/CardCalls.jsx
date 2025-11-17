@@ -21,22 +21,22 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import LoaderGif from '@assets/gif/loader.gif'
-import NoteCard from './NoteCard'
 import NotesIcon from '@mui/icons-material/Notes'
+import CallCard from './CallCard'
 
-const CardNotes = () => {
+const CardCalls = () => {
   const getToken = Cookies.get('_token')
   const organization_id = Cookies.get('organization_id')
   const loggedInUserId = Cookies.get('user_id')
   const loggedInUserName = Cookies.get('user_name')
 
-  const [notes, setNotes] = useState([])
+  const [calls, setCalls] = useState([])
   const [loading, setLoading] = useState(false)
 
   const [search, setSearch] = useState('')
   const [priority, setPriority] = useState('')
   const [status, setStatus] = useState('')
-  const [from, setFrom] = useState(dayjs().startOf('Today'))
+  const [from, setFrom] = useState(dayjs().startOf('Month'))
   const [to, setTo] = useState(dayjs().endOf('Today'))
 
   const [userList, setUserList] = useState([])
@@ -55,7 +55,7 @@ const CardNotes = () => {
     }
   }
 
-  const fetchNotes = async (dateRange = null) => {
+  const fetchCalls = async (dateRange = null) => {
     setLoading(true)
     try {
       const payload = {
@@ -80,11 +80,11 @@ const CardNotes = () => {
 
       const data = await res.json()
       if (data.success) {
-        console.log(data.data, '<<<< Data data')
+        console.log(data.data, '<<<< Data callsssss')
 
-        setNotes(data.data)
+        setCalls(data.data)
       } else {
-        setNotes([])
+        setCalls([])
       }
     } catch (err) {
       console.error('❌ Fetch error:', err)
@@ -138,7 +138,7 @@ const CardNotes = () => {
           position: 'bottom-center',
           hideProgressBar: true
         })
-        fetchNotes({ from, to }) // ✅ Refresh list after update
+        fetchCalls({ from, to }) // ✅ Refresh list after update
       } else {
         toast.error(result.error || 'Error updating note', {
           autoClose: 800,
@@ -199,7 +199,7 @@ const CardNotes = () => {
           position: 'bottom-center',
           hideProgressBar: true
         })
-        fetchNotes({ from, to }) // ✅ Refresh list after update
+        fetchCalls({ from, to }) // ✅ Refresh list after update
       } else {
         toast.error(result.error || 'Error updating note', {
           autoClose: 800,
@@ -219,13 +219,13 @@ const CardNotes = () => {
 
   useEffect(() => {
     if (search === '') {
-      fetchNotes({ from, to })
+      fetchCalls({ from, to })
     }
   }, [search])
 
   useEffect(() => {
     getUserListFn()
-    fetchNotes({ from, to })
+    fetchCalls({ from, to })
   }, [])
 
   return (
@@ -246,13 +246,13 @@ const CardNotes = () => {
             <TextField
               fullWidth
               autoComplete='off'
-              placeholder='Search Notes....'
+              placeholder='Search Calls....'
               name='search'
               value={search}
               onChange={e => setSearch(e.target.value)}
               onKeyDown={e => {
                 if (e.key === 'Enter') {
-                  fetchNotes() // ✅ call fetchNotes on Enter
+                  fetchCalls() // ✅ call fetchCalls on Enter
                 }
               }}
               InputProps={{
@@ -323,7 +323,7 @@ const CardNotes = () => {
             <Button
               variant='contained'
               fullWidth
-              onClick={() => fetchNotes({ from, to })}
+              onClick={() => fetchCalls({ from, to })}
               sx={{
                 height: '40px',
                 textTransform: 'none',
@@ -344,11 +344,11 @@ const CardNotes = () => {
                 setPriority('')
                 setStatus('')
                 setSelectedUsers([])
-                setFrom(dayjs().startOf('Today'))
+                setFrom(dayjs().startOf('Month'))
                 setTo(dayjs().endOf('Today'))
 
                 // Refetch notes
-                fetchNotes({ from: dayjs().startOf('Today'), to: dayjs().endOf('Today') })
+                fetchCalls({ from: dayjs().startOf('Month'), to: dayjs().endOf('Today') })
               }}
               sx={{
                 height: '40px',
@@ -376,10 +376,10 @@ const CardNotes = () => {
           <Box textAlign='center' py={5}>
             <Image src={LoaderGif} alt='Loading...' width={60} height={60} />
             <Typography variant='body2' color='text.secondary' mt={1}>
-              Fetching notes...
+              Fetching calls...
             </Typography>
           </Box>
-        ) : notes.length === 0 ? (
+        ) : calls.length === 0 ? (
           <Box
             sx={{
               textAlign: 'center',
@@ -398,15 +398,15 @@ const CardNotes = () => {
           >
             <NotesIcon sx={{ fontSize: 48, color: 'grey.400', mb: 2 }} />
             <Typography variant='h6' color='text.secondary' sx={{ mb: 1, fontWeight: 500 }}>
-              No notes found
+              No calls found
             </Typography>
             <Typography variant='body2' color='text.secondary' sx={{ maxWidth: 320 }}>
-              There are no notes available for the selected period.
+              There are no calls available for the selected period.
             </Typography>
           </Box>
         ) : (
           <Grid container spacing={2}>
-            <NoteCard search={search} notes={notes} onEdit={onEdit} onAdd={onAdd} />
+            <CallCard search={search} calls={calls} onEdit={onEdit} onAdd={onAdd} />
           </Grid>
         )}
       </Box>
@@ -414,4 +414,4 @@ const CardNotes = () => {
   )
 }
 
-export default CardNotes
+export default CardCalls
