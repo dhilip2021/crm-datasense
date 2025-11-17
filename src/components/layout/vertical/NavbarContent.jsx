@@ -41,7 +41,7 @@ const NavbarContent = ({c_version, endedAt}) => {
     <div className={classnames(verticalLayoutClasses.navbarContent, 'flex items-center justify-between gap-4 is-full')}>
       <div className='flex items-center gap-2 sm:gap-4'>
         <NavToggle />
-        <NavSearch />
+        {/* <NavSearch /> */}
       </div>
       {c_version === "Trial" && (
        <div className='hidden md:flex items-center'>
