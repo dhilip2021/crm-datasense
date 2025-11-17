@@ -876,9 +876,6 @@ const [openResponseDialog, setOpenResponseDialog] = useState(false)
 
   const progress = Math.min((seconds / maxCallTime) * 100, 100)
 
-  // useEffect(() => {
-  //   setTasks(sortedTasks)
-  // }, [sortedTasks])
 
 
 
