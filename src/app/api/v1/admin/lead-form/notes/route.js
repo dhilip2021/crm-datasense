@@ -292,7 +292,7 @@ export async function POST(req) {
       if (from) dateFilter.$gte = new Date(from)
       if (to) dateFilter.$lte = new Date(to + 'T23:59:59')
       query.$and = query.$and || []
-      query.$and.push({ createdAt: dateFilter })
+      query.$and.push({ updatedAt: dateFilter })
     }
 
     if (fromFollow || toFollow) {
