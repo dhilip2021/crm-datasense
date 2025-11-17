@@ -64,8 +64,6 @@ export async function GET(req) {
             nowTime:nowTime,
         }
 
-        console.log(checkDateTime)
-
         if (reminderDateStr === nowDate && reminderTimeStr === nowTime) {
           dueReminders.push({
             lead_id: lead.lead_id,

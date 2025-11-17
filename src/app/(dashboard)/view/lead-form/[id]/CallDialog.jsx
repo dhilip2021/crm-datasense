@@ -203,6 +203,9 @@ function CallDialog({
                 fullWidth
                 value={toPhoneNumber}
                 onChange={e => setToPhoneNumber(e.target.value)}
+                 inputProps={{
+    style: { textAlign: 'center' }  // RIGHT ALIGN
+  }}
                 sx={{
                   mb: 3,
                   '& .MuiInputBase-root': {

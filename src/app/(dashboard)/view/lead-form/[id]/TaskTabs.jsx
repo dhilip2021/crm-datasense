@@ -32,7 +32,6 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutline'
 import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined'
 import CallDialog from './CallDialog'
 import CallLog from './CallLog'
-import CallUIPopup from './CallUIPopup'
 
 const statusColors = {
   'Not Started': { bg: '#F2F3F4', color: '#7F8C8D' },
@@ -916,6 +915,7 @@ const [openResponseDialog, setOpenResponseDialog] = useState(false)
 
           <Box sx={{ mt: isMobile ? 1 : 0 }}>
             {tab === 0 && (
+               <Box textAlign={'center'}>
               <Button
                 variant='contained'
                 onClick={() => setOpenTaskDialog(true)}
@@ -924,13 +924,15 @@ const [openResponseDialog, setOpenResponseDialog] = useState(false)
                   '&:hover': { bgcolor: '#007bb5' },
                   borderRadius: 2,
                   textTransform: 'none',
-                  width: isMobile ? '100%' : 'auto'
+                  width: isMobile ? 'auto' : 'auto'
                 }}
               >
                 + Create Task
               </Button>
+              </Box>
             )}
             {tab === 1 && (
+               <Box textAlign={'center'}>
               <Button
                 variant='contained'
                 onClick={() => setOpenMeetingDialog(true)}
@@ -939,13 +941,15 @@ const [openResponseDialog, setOpenResponseDialog] = useState(false)
                   '&:hover': { bgcolor: '#007bb5' },
                   borderRadius: 2,
                   textTransform: 'none',
-                  width: isMobile ? '100%' : 'auto'
+                  width: isMobile ? 'auto' : 'auto'
                 }}
               >
                 + Create Meeting
               </Button>
+              </Box>
             )}
             {tab === 2 && (
+              <Box textAlign={'center'}>
               <Button
                 variant='contained'
                 onClick={() => setOpenCallDialog(true)}
@@ -954,11 +958,12 @@ const [openResponseDialog, setOpenResponseDialog] = useState(false)
                   '&:hover': { bgcolor: '#007bb5' },
                   borderRadius: 2,
                   textTransform: 'none',
-                  width: isMobile ? '100%' : 'auto'
+                  width: isMobile ? 'auto' : 'auto'
                 }}
               >
                 + Create Call
               </Button>
+              </Box>
             )}
           </Box>
         </Box>
@@ -1106,12 +1111,7 @@ const [openResponseDialog, setOpenResponseDialog] = useState(false)
         />
 
 
-          {/* <CallUIPopup
-              open={openCallDialog}
-              onClose={handleCallClose}
-              toPhoneNumber={toPhoneNumber}
-              setToPhoneNumber={setToPhoneNumber}
-          /> */}
+         
 
       </Box>
     </LocalizationProvider>
