@@ -38,26 +38,32 @@ export async function GET(req) {
     const tasks = lead.values?.Activity?.[0]?.task || []
     const values = lead.values || []
 
-    tasks.forEach(task => {
+    // Use Luxon DateTime.utc() to ensure server consistency
+const nowIST = DateTime.now().setZone('Asia/Kolkata')
+
+tasks.forEach(task => {
   if (task.reminderEnabled && task.reminderDate && task.reminderTime) {
 
+    // Split reminder time
     const [hours, minutes] = task.reminderTime.split(':').map(Number)
 
+    // Build reminder datetime (IST) from Date object
     const reminderDateTime = DateTime.fromJSDate(new Date(task.reminderDate))
       .setZone('Asia/Kolkata')
-      .set({ hour: hours, minute: minutes })
+      .set({ hour: hours, minute: minutes, second: 0 })
 
-    const reminderDateStr = reminderDateTime.toFormat('yyyy-MM-dd')
-    const reminderTimeStr = reminderDateTime.toFormat('HH:mm')
+    // Compare using minute-level difference, not string match
+    const diffInMinutes = nowIST.diff(reminderDateTime, 'minutes').toObject().minutes
 
+    // Save for testing
     checkDateTime = {
-      reminderDateStr,
-      reminderTimeStr,
-      nowDate,
-      nowTime
+      nowIST: nowIST.toISO(),
+      reminderDateTime: reminderDateTime.toISO(),
+      diffInMinutes
     }
 
-    if (reminderDateStr === nowDate && reminderTimeStr === nowTime) {
+    // Trigger if exact match or within ±1 minute (safety buffer)
+    if (diffInMinutes >= 0 && diffInMinutes <= 1) {
       dueReminders.push({
         lead_id: lead.lead_id,
         lead_name: lead.lead_name,
