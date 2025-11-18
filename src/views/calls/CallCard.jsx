@@ -4,8 +4,6 @@ import { useState } from 'react'
 import {
   Box,
   Typography,
-  IconButton,
-  Tooltip,
   Divider,
   Chip,
   Button,
@@ -16,8 +14,7 @@ import {
   DialogActions,
   TextField
 } from '@mui/material'
-import AddIcon from '@mui/icons-material/Add'
-import EditIcon from '@mui/icons-material/Edit'
+
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import BusinessIcon from '@mui/icons-material/Business'
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline'
@@ -46,76 +43,20 @@ const highlightText = (text, search) => {
   )
 }
 
-const CallCard = ({ search, calls, onEdit, onAdd, initialLimit = 4, loadMoreStep = 4 }) => {
+const CallCard = ({ search, calls, initialLimit = 4, loadMoreStep = 4 }) => {
   const user_name = Cookies.get('user_name')
-
-  const filteredLeads = calls.filter(
-    lead => Array.isArray(lead.values?.Activity[0]?.call) && lead.values?.Activity[0]?.call.length > 0
-  )
-
-  console.log(filteredLeads, '<<< filteredLeads')
   const [limit, setLimit] = useState(initialLimit)
-  const [leadId, setLeadId] = useState('')
-  const [noteType, setNoteType] = useState('Add Note')
 
-  // Dialog State
-  const [openDialog, setOpenDialog] = useState(false)
-  const [selectedNote, setSelectedNote] = useState(null)
-  const [editData, setEditData] = useState({ title: '', note: '' })
+  // 🛠️ Flatten calls from all activities safely
+  const filteredLeads = calls
+    .map(lead => {
+      const allCalls = lead.values?.Activity?.flatMap(activity => activity.call || []) || []
 
-  // 🔹 Add Note button click
-  const handleAddClick = lead_id => {
-    setNoteType('Add Call')
-    setLeadId(lead_id)
-    setSelectedNote(null)
-    setEditData({ title: '', note: '' })
-    setOpenDialog(true)
-  }
-
-  // 🔹 Edit Note button click
-  const handleEditClick = (note, lead_id) => {
-    setNoteType('Edit call')
-    setLeadId(lead_id)
-    setSelectedNote(note)
-    setEditData({ title: note.title || '', note: note.note || '' })
-    setOpenDialog(true)
-  }
-
-  // 🔹 Close dialog
-  const handleClose = () => {
-    setNoteType('')
-    setOpenDialog(false)
-    setSelectedNote(null)
-  }
-
-  // 🔹 Save/Add note
-  const handleSave = () => {
-    if (noteType === 'Edit Note' && onEdit && selectedNote) {
-      const updatedNote = {
-        ...selectedNote,
-        ...editData,
-        lead_id: leadId
-      }
-      onEdit(updatedNote)
-    } else if (noteType === 'Add Note' && onAdd) {
-      const newNote = {
-        title: editData.title,
-        note: editData.note,
-        lead_id: leadId,
-        createdAt: new Date().toISOString(),
-        createdBy: user_name // customize if needed
-      }
-      onAdd(newNote)
-    }
-    setOpenDialog(false)
-  }
-
-  const handleChange = e => {
-    const { name, value } = e.target
-    setEditData(prev => ({ ...prev, [name]: value }))
-  }
-
-  const handleLoadMore = () => setLimit(prev => prev + loadMoreStep)
+      return allCalls.length > 0
+        ? { ...lead, allCalls: allCalls.sort((a, b) => new Date(b.startTime) - new Date(a.startTime)) }
+        : null
+    })
+    .filter(Boolean) // remove nulls
 
   if (filteredLeads.length === 0) {
     return (
@@ -152,7 +93,6 @@ const CallCard = ({ search, calls, onEdit, onAdd, initialLimit = 4, loadMoreStep
                 border: '1px solid',
                 borderColor: 'divider',
                 overflow: 'hidden',
-                width: '100%',
                 bgcolor: 'background.paper'
               }}
             >
@@ -184,37 +124,15 @@ const CallCard = ({ search, calls, onEdit, onAdd, initialLimit = 4, loadMoreStep
                   />
                 </Box>
 
-                <Typography variant='body2' color='text.secondary' sx={{ mt: { xs: 1, sm: 0 } }}>
-                  Total Calls: {lead.values.Activity[0].call.length}
+                <Typography variant='body2' color='text.secondary'>
+                  Total Calls: {lead.allCalls.length}
                 </Typography>
-                {/* <Button
-                  variant='contained'
-                  color='primary'
-                  onClick={() => handleAddClick(lead.lead_id)}
-                  startIcon={<AddIcon />}
-                  sx={{
-                    textTransform: 'none',
-                    borderRadius: '12px',
-                    fontWeight: 600,
-                    px: 2.5,
-                    py: 1,
-                    boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-                    transition: 'all 0.25s ease',
-                    '&:hover': {
-                      backgroundColor: '#2e7d32',
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
-                    }
-                  }}
-                >
-                  Add Call
-                </Button> */}
               </Box>
 
-              {/* Notes List */}
+              {/* Calls List */}
               <Box sx={{ p: 2.5 }}>
-                {lead.values.Activity[0].call.map((data, index) => (
-                  <Box key={data._id || index}>
+                {lead.allCalls.map((data, index) => (
+                  <Box key={data._id || index} sx={{ mb: 2 }}>
                     <Box
                       sx={{
                         display: 'flex',
@@ -230,35 +148,21 @@ const CallCard = ({ search, calls, onEdit, onAdd, initialLimit = 4, loadMoreStep
                       {/* LEFT SECTION */}
                       <Box sx={{ flex: 1 }}>
                         {/* Call Response */}
-                        <Typography
-                          variant='subtitle1'
-                          fontWeight={600}
-                          sx={{ mb: 0.5, color: 'text.primary', fontSize: 15 }}
-                        >
+                        <Typography variant='subtitle1' fontWeight={600} sx={{ mb: 0.5 }}>
                           {highlightText(data.response, search)}
                         </Typography>
 
                         {/* META INFO */}
-                        <Box
-                          display='flex'
-                          alignItems='center'
-                          flexWrap='wrap'
-                          gap={1.5}
-                          sx={{ color: 'text.secondary', fontSize: 13 }}
-                        >
-                          <Box display='flex' alignItems='center' gap={0.5}>
-                            <CalendarMonthIcon fontSize='small' sx={{ fontSize: 18 }} />
-                            <Typography variant='body2'>
-                              {dayjs(data.startTime).format('DD MMM YYYY, hh:mm A')}
-                            </Typography>
-                          </Box>
+                        <Box display='flex' alignItems='center' gap={1} sx={{ color: 'text.secondary', fontSize: 13 }}>
+                          <CalendarMonthIcon sx={{ fontSize: 18 }} />
+                          <Typography variant='body2'>
+                            {dayjs(data.startTime).format('DD MMM YYYY, hh:mm A')}
+                          </Typography>
 
                           <Divider orientation='vertical' flexItem />
 
-                          <Box display='flex' alignItems='center' gap={0.5}>
-                            <PersonOutlineIcon fontSize='small' sx={{ fontSize: 18 }} />
-                            <Typography variant='body2'>{data.createdBy || 'Unknown'}</Typography>
-                          </Box>
+                          <PersonOutlineIcon sx={{ fontSize: 18 }} />
+                          <Typography variant='body2'>{data.createdBy || 'Unknown'}</Typography>
 
                           <Divider orientation='vertical' flexItem />
 
@@ -267,16 +171,9 @@ const CallCard = ({ search, calls, onEdit, onAdd, initialLimit = 4, loadMoreStep
 
                         {/* FROM → TO */}
                         <Typography variant='body2' sx={{ mt: 1, color: 'text.secondary' }}>
-                          <b>From:</b> {data.from} &nbsp;&nbsp; <b>To:</b> {data.to}
+                          <strong>From:</strong> {data.from} <strong>→ To:</strong> {data.to}
                         </Typography>
                       </Box>
-
-                      {/* Edit (disable because calls = not notes) */}
-                      {/* <Tooltip title='Edit Call'>
-                        <IconButton disabled size='small' sx={{ opacity: 0.3 }}>
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip> */}
                     </Box>
                   </Box>
                 ))}
@@ -289,43 +186,11 @@ const CallCard = ({ search, calls, onEdit, onAdd, initialLimit = 4, loadMoreStep
       {/* Load More */}
       {limit < filteredLeads.length && (
         <Box textAlign='center' mt={2}>
-          <Button variant='contained' onClick={handleLoadMore}>
+          <Button variant='contained' onClick={() => setLimit(limit + loadMoreStep)}>
             Load More
           </Button>
         </Box>
       )}
-
-      {/* ✏️ Add/Edit Note Dialog */}
-      <Dialog open={openDialog} onClose={handleClose} maxWidth='sm' fullWidth>
-        <DialogTitle>{noteType}</DialogTitle>
-        <DialogContent sx={{ mt: 2 }}>
-          <TextField
-            fullWidth
-            label='Title'
-            name='title'
-            value={editData.title}
-            onChange={handleChange}
-            sx={{ mb: 3 }}
-          />
-          <TextField
-            fullWidth
-            multiline
-            rows={5}
-            label='Note'
-            name='note'
-            value={editData.note}
-            onChange={handleChange}
-          />
-        </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={handleClose} variant='outlined'>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} variant='contained' color='primary'>
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   )
 }
