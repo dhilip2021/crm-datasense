@@ -1,13 +1,13 @@
 // MUI Imports
 import Grid from '@mui/material/Grid'
-import CardCalls from '@/views/calls/CardCalls'
 import { Box } from '@mui/material'
+import CardContacts from '@/views/contacts/CardContacts'
 
 const Calls = () => {
   return (
       <Box>
         <Grid item xs={12} sm={12} md={4}>
-          <CardCalls />
+          <CardContacts />
         </Grid>
       </Box>
   )

@@ -257,6 +257,9 @@ export default function LeadCard({ fields, leadId, leadData, onToggleFlag, secti
             Lead Id:<span style={{ color: '#374151', fontWeight: 600 }}> {leadId}</span>
           </Typography>
           <Typography variant='body1' color={'#000'}>
+            City:<span style={{ color: '#374151', fontWeight: 600 }}> {fields['City']}</span>
+          </Typography>
+          <Typography variant='body1' color={'#000'}>
             Company Name:<span style={{ color: '#374151', fontWeight: 600 }}> {fields['Company']}</span>
           </Typography>
           <Typography variant='body1' color={'#000'}>

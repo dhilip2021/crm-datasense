@@ -249,6 +249,9 @@ const [leadWonReasons, setWonLeadReasons] = useState(
           <Typography variant='body1'>
             Lead Id: <span style={{ fontWeight: 600 }}>{leadId}</span>
           </Typography>
+          <Typography variant='body1' color={'#000'}>
+            City:<span style={{ color: '#374151', fontWeight: 600 }}> {fields['City']}</span>
+          </Typography>
           <Typography variant='body1'>
             Deal Name: <span style={{ fontWeight: 600 }}>{fields['Deal Name']}</span>
           </Typography>
