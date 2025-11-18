@@ -59,8 +59,8 @@ export async function GET(req) {
 
         checkDateTime = {
             reminderDateStr:reminderDateStr,
-            nowDate:nowDate,
             reminderTimeStr:reminderTimeStr,
+            nowDate:nowDate,
             nowTime:nowTime,
         }
 
