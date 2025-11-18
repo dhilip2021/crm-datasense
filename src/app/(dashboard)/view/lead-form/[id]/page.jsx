@@ -50,27 +50,27 @@ const fieldValidators = {
   //   return null
   // },
 
-Phone: val => {
-  if (!val) return 'Phone is required'
+  Phone: val => {
+    if (!val) return 'Phone is required'
 
-  // ✅ Accepts:
-  // - 8012005747
-  // - +918012005747
-  // - +447912345678
-  // - +971501234567
-  // ❌ Rejects:
-  // - +91 8012005747 (spaces)
-  // - +91-8012005747 (special chars)
-  // - alphabets or symbols
+    // ✅ Accepts:
+    // - 8012005747
+    // - +918012005747
+    // - +447912345678
+    // - +971501234567
+    // ❌ Rejects:
+    // - +91 8012005747 (spaces)
+    // - +91-8012005747 (special chars)
+    // - alphabets or symbols
 
-  const phoneRegex = /^\+?\d{10,15}$/
+    const phoneRegex = /^\+?\d{10,15}$/
 
-  if (!phoneRegex.test(val)) {
-    return 'Enter a valid phone number (10–15 digits, optional +country code)'
-  }
+    if (!phoneRegex.test(val)) {
+      return 'Enter a valid phone number (10–15 digits, optional +country code)'
+    }
 
-  return null
-},
+    return null
+  },
   'First Name': val => (!val ? 'First Name is required' : null),
   'Last Name': val => (!val ? 'Last Name is required' : null),
   Company: val => (!val ? 'Company name is required' : null),
@@ -348,6 +348,8 @@ const LeadDetailView = () => {
   }
 
   const convertLeadFn = async (leadData, createDeal, dealData) => {
+    console.log(createDeal)
+
     try {
       const id = leadData?._id
       const organization_id = leadData?.organization_id
@@ -373,12 +375,16 @@ const LeadDetailView = () => {
         locale: 'en'
       })
 
-      // 💡 Lead Status update logic
+      // 📌 Base values (always included)
       const values = {
-        'Lead Status': createDeal ? dealData?.stage : 'Contacted / Qualification',
-        'Deal Name': dealData?.dealName,
-        'Expected Revenue': dealData?.amount,
-        'Closing Date': new Date(dealData?.closingDate).toISOString().split('T')[0]
+        'Lead Status': createDeal ? dealData?.stage : 'Contacted / Qualification'
+      }
+
+      // 📌 Only include deal fields WHEN createDeal is true
+      if (createDeal) {
+        values['Deal Name'] = dealData?.dealName || ''
+        values['Expected Revenue'] = dealData?.amount || ''
+        values['Closing Date'] = dealData?.closingDate ? new Date(dealData.closingDate).toISOString().split('T')[0] : ''
       }
 
       // 🧠 Final payload
@@ -392,7 +398,6 @@ const LeadDetailView = () => {
         updatedAt: new Date().toISOString()
       }
 
-      console.log(payload, '<<< PAYLOADDDDD')
 
       // 🔹 If you want to update to API, uncomment below:
 
@@ -434,19 +439,17 @@ const LeadDetailView = () => {
   }, [leadData])
 
   // 🔹 Save handler
-  const handleFieldSave = async (label, newValue,reasonKey, selectedReasons) => {
+  const handleFieldSave = async (label, newValue, reasonKey, selectedReasons) => {
     try {
+      // Base values
+      const updatedValues = {
+        [label]: newValue
+      }
 
-        // Base values
-    const updatedValues = {
-      [label]: newValue
-    }
-
-    // 🔹 Add reason fields dynamically
-    if (reasonKey && selectedReasons?.length) {
-      updatedValues[reasonKey] = selectedReasons
-    }
-
+      // 🔹 Add reason fields dynamically
+      if (reasonKey && selectedReasons?.length) {
+        updatedValues[reasonKey] = selectedReasons
+      }
 
       const updatedLeadValues = {
         _id: leadData?._id,
