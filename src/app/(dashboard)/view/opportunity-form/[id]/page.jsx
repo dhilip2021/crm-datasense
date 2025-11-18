@@ -377,7 +377,7 @@ const LeadDetailView = () => {
 
       // 💡 Lead Status update logic
       const values = {
-        'Lead Status': createDeal ? dealData?.stage : 'Contacted',
+        'Lead Status': createDeal ? dealData?.stage : 'Contacted / Qualification',
         'Deal Name': dealData?.dealName,
         'Expected Revenue': dealData?.amount,
         'Closing Date': new Date(dealData?.closingDate).toISOString().split('T')[0]

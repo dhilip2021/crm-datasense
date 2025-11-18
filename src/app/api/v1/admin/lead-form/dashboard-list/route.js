@@ -113,7 +113,7 @@ if (source) {
           },
           contactedLeads: {
             $sum: {
-              $cond: [{ $regexMatch: { input: '$values.Lead Status', regex: 'Contacted', options: 'i' } }, 1, 0]
+              $cond: [{ $regexMatch: { input: '$values.Lead Status', regex: 'Contacted / Qualification', options: 'i' } }, 1, 0]
             }
           },
           qualifiedLeads: {
@@ -123,12 +123,12 @@ if (source) {
           },
           proposalsentLeads: {
             $sum: {
-              $cond: [{ $regexMatch: { input: '$values.Lead Status', regex: 'Proposal Sent', options: 'i' } }, 1, 0]
+              $cond: [{ $regexMatch: { input: '$values.Lead Status', regex: 'Demo / Proposal Stage', options: 'i' } }, 1, 0]
             }
           },
           negotiationLeads: {
             $sum: {
-              $cond: [{ $regexMatch: { input: '$values.Lead Status', regex: 'Negotiation', options: 'i' } }, 1, 0]
+              $cond: [{ $regexMatch: { input: '$values.Lead Status', regex: 'Negotiation / Ready to Close', options: 'i' } }, 1, 0]
             }
           },
           closedWonLeads: {
@@ -140,7 +140,17 @@ if (source) {
             $sum: {
               $cond: [{ $regexMatch: { input: '$values.Lead Status', regex: 'Closed Lost', options: 'i' } }, 1, 0]
             }
-          }
+          },
+          junkLeads: {
+            $sum: {
+              $cond: [{ $regexMatch: { input: '$values.Lead Status', regex: 'Invalid / Junk / Wrong Contact', options: 'i' } }, 1, 0]
+            }
+          },
+           callBackLeads: {
+            $sum: {
+              $cond: [{ $regexMatch: { input: '$values.Lead Status', regex: 'Call Back', options: 'i' } }, 1, 0]
+            }
+          },
         }
       }
     ]
@@ -165,7 +175,10 @@ if (source) {
         proposalsentLeads: 0,
         negotiationLeads: 0,
         closedWonLeads: 0,
-        closedLostLeads: 0
+        closedLostLeads: 0,
+        junkLeads: 0,
+        callBackLeads: 0
+
       },
       data
     })

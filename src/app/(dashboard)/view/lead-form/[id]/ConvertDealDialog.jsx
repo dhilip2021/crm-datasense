@@ -144,7 +144,7 @@ const ConvertDealDialog = ({
         {/* 💼 Create Deal Checkbox */}
         <FormControlLabel
           control={<Checkbox checked={createDeal} onChange={e => setCreateDeal(e.target.checked)} />}
-          label='Create a new Opportunity for this Accountt'
+          label='Create a new Opportunity for this Account'
           sx={{ mt: 1 }}
         />
 
