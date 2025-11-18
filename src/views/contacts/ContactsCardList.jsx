@@ -158,9 +158,9 @@ const ContactsCardList = ({ contacts, fetchMoreContacts, totalCount, page, setPa
                 {loadingMore ? 'Loading...' : 'Load More'}
                 
               </Button>
-              <Typography>
+              {/* <Typography>
                 {contacts.length} / {totalCount}
-              </Typography>
+              </Typography> */}
             </Box>
           </Grid>
         )}

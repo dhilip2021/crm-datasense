@@ -266,6 +266,7 @@ const CardContacts = () => {
 
                 // Refetch notes
                 fetchContacts( {from, to})
+                setPage(1)
               }}
               sx={{
                 height: '40px',
