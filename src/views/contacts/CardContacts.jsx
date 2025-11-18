@@ -52,7 +52,11 @@ const CardContacts = () => {
     }
   }
 
-  const fetchContacts = async (from, to) => {
+  const fetchContacts = async ({from, to}) => {
+
+   
+
+
     setLoading(true)
     try {
       const payload = {
@@ -94,7 +98,7 @@ const CardContacts = () => {
 
   const fetchMoreContacts = async (nextPage,from,to) => {
 
-    setLoading(true)
+    // setLoading(true)
     try {
       const payload = {
         organization_id,
@@ -118,8 +122,8 @@ const CardContacts = () => {
 
       const data = await res.json()
       if (data.success) {
-        setContacts(prev => [...prev, ...data.data]) // append new page data
-        //  setTotalContactsCount(data?.total)
+        setContacts(prev => [...prev, ...data.data ]) // append new page data
+         setTotalContactsCount(data?.total)
       }
     } catch (err) {
       console.error(err)
@@ -130,13 +134,13 @@ const CardContacts = () => {
 
   useEffect(() => {
     if (search === '') {
-      fetchContacts({ from, to })
+      fetchContacts( {from, to} )
     }
   }, [search])
 
   useEffect(() => {
     getUserListFn()
-    fetchContacts({ from, to })
+    // fetchContacts( from, to )
   }, [])
 
   return (
@@ -164,7 +168,7 @@ const CardContacts = () => {
               onKeyDown={e => {
                 if (e.key === 'Enter') {
                     
-                  fetchContacts(from, to) // ✅ call fetchContacts on Enter
+                  fetchContacts({from, to}) // ✅ call fetchContacts on Enter
                   setPage(1)
                 }
               }}
@@ -236,7 +240,7 @@ const CardContacts = () => {
             <Button
               variant='contained'
               fullWidth
-              onClick={() => fetchContacts({ from, to })}
+              onClick={() => fetchContacts( {from, to} )}
               sx={{
                 height: '40px',
                 textTransform: 'none',
@@ -261,7 +265,7 @@ const CardContacts = () => {
                 setTo(dayjs().endOf('Today'))
 
                 // Refetch notes
-                fetchContacts({ from: dayjs().startOf('Month'), to: dayjs().endOf('Today') })
+                fetchContacts( {from, to})
               }}
               sx={{
                 height: '40px',
