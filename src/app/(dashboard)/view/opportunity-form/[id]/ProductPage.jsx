@@ -274,7 +274,7 @@ function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData, dealFnCall 
                   ---------------------------------
                 </Typography>
                 <Typography variant='subtitle1' fontWeight={700} color='#4caf50'>
-                  Grand Total:: {formatCurrency(total)}
+                  Grand Total: {formatCurrency(total)}
                 </Typography>
                 <Typography variant='body2' sx={{ fontSize: 13 }}>
                   {' '}

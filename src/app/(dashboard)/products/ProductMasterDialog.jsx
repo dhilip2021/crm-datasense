@@ -366,60 +366,6 @@ const ProductMasterDialog = ({ open, onClose, fetchProducts }) => {
             </Grid>
           </Grid>
         </Box>
-
-        {/* <Box sx={{ mt: 4, bgcolor: 'white', borderRadius: '8px', p: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 'medium', color: '#374151' }}>
-            Price Books
-          </Typography>
-          <Table size="small" sx={{ border: '1px solid #e5e7eb', borderRadius: '8px' }}>
-            <TableHead>
-              <TableRow sx={{ bgcolor: '#f3f4f6' }}>
-                <TableCell sx={{ fontWeight: 'bold', color: '#374151' }}>Name</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', color: '#374151' }}>Price</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {newProduct.priceBooks.map((pb, i) => (
-                <TableRow key={i} sx={{ '&:hover': { bgcolor: '#f9fafb' } }}>
-                  <TableCell>
-                    <TextField
-                      size="small"
-                      value={pb.name}
-                      onChange={e => handlePriceBookChange(i, 'name', e.target.value)}
-                      sx={{ '& .MuiInputBase-root': { borderRadius: '8px' } }}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      size="small"
-                      type="number"
-                      value={pb.price}
-                      onChange={e => handlePriceBookChange(i, 'price', e.target.value)}
-                      sx={{ '& .MuiInputBase-root': { borderRadius: '8px' } }}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
-              <TableRow>
-                <TableCell colSpan={2} align="center">
-                  <Button
-                    startIcon={<AddIcon />}
-                    onClick={handleAddPriceBook}
-                    sx={{
-                      bgcolor: '#009CDE',
-                      color: 'white',
-                      borderRadius: '8px',
-                      textTransform: 'none',
-                      '&:hover': { bgcolor: '#1565c0' }
-                    }}
-                  >
-                    Add Price Book
-                  </Button>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </Box> */}
       </DialogContent>
 
       <DialogActions sx={{ p: 3, bgcolor: '#f9fafb', borderTop: '1px solid #e5e7eb' }}>

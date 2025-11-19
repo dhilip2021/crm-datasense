@@ -584,7 +584,7 @@ const LeadDetailView = () => {
           >
             <Tab label='Notes' />
             <Tab label='Activities' />
-            {/* <Tab label='Items' /> */}
+            <Tab label='Items' />
           </Tabs>
         </Box>
       </Grid>
@@ -609,7 +609,12 @@ const LeadDetailView = () => {
 
         {tabIndex === 2 && (
           <Box>
-            <ProductPage leadId={leadId} leadData={leadData} fetchLeadFromId={fetchLeadFromId} itemsData={itemsData} />
+            <ProductPage 
+            leadId={leadId} 
+            leadData={leadData} 
+            fetchLeadFromId={fetchLeadFromId} 
+            itemsData={itemsData} 
+            />
           </Box>
         )}
       </Grid>
