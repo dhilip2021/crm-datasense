@@ -121,6 +121,8 @@ const NotesSection = ({ leadId, leadData }) => {
         _id: editingNote?._id
       }
 
+      console.log(notePayload,"<< new Payloadddd")
+
       setLoader(true)
       const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
         method: 'PATCH',

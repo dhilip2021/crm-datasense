@@ -122,7 +122,6 @@ export async function GET(request) {
 
     const data = await ItemMaster.aggregate(pipeline)
 
-    console.log(data,"<<< get item list")
 
     if (data.length > 0) {
       sendResponse = { appStatusCode: 0, message: '', payloadJson: data, error: [] }

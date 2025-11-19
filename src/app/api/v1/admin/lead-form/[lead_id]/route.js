@@ -1,6 +1,6 @@
 // File: app/api/v1/admin/lead-form/[lead_id]/route.js
 
-import { verifyAccessToken } from '@/helper/clientHelper'
+import { transporter, verifyAccessToken } from '@/helper/clientHelper'
 import connectMongoDB from '@/libs/mongodb'
 import { ItemMaster } from '@/models/ItemMasterModel'
 import Leadform from '@/models/Leadform'
@@ -8,6 +8,20 @@ import { Organization } from '@/models/organizationModel' // 👈 Add this model
 import { User } from '@/models/userModel' // 👈 Add user model
 import mongoose from 'mongoose'
 import { NextResponse } from 'next/server'
+
+
+
+function emailSend(mailData) {
+  return new Promise(async (resolve, reject) => {
+    await transporter.sendMail(mailData, function async(err, data) {
+      if (err) {
+        reject(err)
+      } else {
+        resolve(data)
+      }
+    })
+  })
+}
 
 // 🧮 Lead Scoring Logic (same as before)
 const calculateLeadScore = values => {
@@ -517,14 +531,18 @@ export async function PATCH(req, { params }) {
 
     // ---------------- NOTES ----------------
     const noteFromBody = body.values?.Notes?.[0] || {}
+    const quotationFromBody = body.values?.Quotation?.[0] || {}
     let newNote = null
     let updateNote = null
+    let newQuotation = null
+    let updateQuotation = null
     let newTask = null
     let updateTask = null
     let newMeeting = null
     let updateMeeting = null
     let newCall = null
     let updateCall = null
+
 
     if (noteFromBody && (noteFromBody.title || noteFromBody.note)) {
       if (noteFromBody._id) {
@@ -541,6 +559,24 @@ export async function PATCH(req, { params }) {
           note: noteFromBody.note || null,
           createdAt: noteFromBody.createdAt ? new Date(noteFromBody.createdAt) : new Date(),
           createdBy: noteFromBody.createdBy || null
+        }
+      }
+    }
+     if (quotationFromBody && (quotationFromBody.quotation_id || quotationFromBody.quotation_data)) {
+      if (quotationFromBody._id) {
+        updateQuotation = {
+          quotation_id: quotationFromBody.quotation_id || null,
+          quotation_data: quotationFromBody.quotation_data || null,
+          createdAt: quotationFromBody.createdAt ? new Date(quotationFromBody.createdAt) : new Date(),
+          createdBy: quotationFromBody.createdBy || null
+        }
+      } else {
+        newQuotation = {
+          _id: new mongoose.Types.ObjectId(),
+          quotation_id: quotationFromBody.quotation_id || null,
+          quotation_data: quotationFromBody.quotation_data || null,
+          createdAt: quotationFromBody.createdAt ? new Date(quotationFromBody.createdAt) : new Date(),
+          createdBy: quotationFromBody.createdBy || null
         }
       }
     }
@@ -653,7 +689,7 @@ export async function PATCH(req, { params }) {
     const valuesToUpdate = body.values || {}
     for (const [key, val] of Object.entries(valuesToUpdate)) {
       // skip arrays handled separately
-      if (['Notes', 'Activity'].includes(key)) continue
+      if (['Notes', 'Activity','Quotation'].includes(key)) continue
       updateQuery.$set[`values.${key}`] = val
     }
 
@@ -681,6 +717,33 @@ export async function PATCH(req, { params }) {
         { arrayFilters: [{ 'n._id': noteId }], new: true }
       )
       return NextResponse.json({ success: true, message: 'Note updated successfully', data: updated })
+    }
+
+     if (newQuotation) {
+      newQuotation._id = toObjectId(newQuotation._id)
+      updateQuery.$push = { ...(updateQuery.$push || {}), 'values.Quotation': newQuotation }
+       const result = await emailSend(newQuotation?.quotation_data)
+
+    }
+
+     if (updateQuotation) {
+      console.log(newQuotation,"<<< update quooooo")
+      const quoId = toObjectId(quotationFromBody._id)
+      const updated = await Leadform.findOneAndUpdate(
+        { lead_id },
+        {
+          $set: {
+            'values.Quotation.$[n].quotation_id': updateQuotation.quotation_id,
+            'values.Quotation.$[n].quotation_data': updateQuotation.quotation_data,
+            'values.Quotation.$[n].createdAt': updateQuotation.createdAt,
+            'values.Quotation.$[n].createdBy': updateQuotation.createdBy,
+            lead_touch: body.lead_touch,
+            updatedAt: new Date()
+          }
+        },
+        { arrayFilters: [{ 'n._id': quoId }], new: true }
+      )
+      return NextResponse.json({ success: true, message: 'Quotation updated successfully', data: updated })
     }
 
     // **********************************************************************

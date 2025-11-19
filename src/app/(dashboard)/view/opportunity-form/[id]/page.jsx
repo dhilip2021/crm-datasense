@@ -58,6 +58,18 @@ const fieldValidators = {
   }
 }
 
+
+const generateQuotationNumber = (leadData) => {
+  const date = new Date()
+  const yyyy = date.getFullYear()
+  const mm = String(date.getMonth() + 1).padStart(2, '0')
+  const dd = String(date.getDate()).padStart(2, '0')
+  const timestamp = Date.now().toString().slice(-4) // last 4 digits
+  const leadInc = leadData?.auto_inc_id || '0000'
+
+  return `QTN-${yyyy}${mm}${dd}-${leadInc}-${timestamp}`
+}
+
 const LeadDetailView = () => {
   const params = useParams()
   const encryptedId = decodeURIComponent(params.id)
@@ -73,7 +85,6 @@ const LeadDetailView = () => {
   const getToken = Cookies.get('_token')
   const router = useRouter()
   const [loader, setLoader] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [leadData, setLeadData] = useState(null)
   const [sections, setSections] = useState([])
   const [sectionsOpportunity, setSectionsOpportunity] = useState([])
@@ -305,31 +316,44 @@ const LeadDetailView = () => {
     }
   }
 
+  // const dealFnCall1 = order_ID => {
+  //   if (!leadData?.items || leadData.items.length === 0 || !order_ID) {
+  //     setDataItems([])
+  //     return
+  //   }
+
+  //   // Find the matching item group by orderId
+  //   const selectedOrder = leadData.items.find(item => item.item_id === order_ID)
+
+  //   console.log(selectedOrder, '<<< REFFFFFFF')
+
+  //   setDataItems(selectedOrder?.item_ref || [])
+
+  //   setOrderId(order_ID)
+  //   setConfirm(true)
+  // }
+
   const dealFnCall = order_ID => {
-
-    console.log(leadData,"<<< leadData")
-    console.log(order_ID,"<<< order_ID")
-
-
-
-
-    if (!leadData?.items || leadData.items.length === 0 || !order_ID) {
-      setDataItems([])
-      return
-    }
-
-    // Find the matching item group by orderId
-    const selectedOrder = leadData.items.find(item => item.item_id === order_ID)
-
-    console.log(selectedOrder?.item_ref,"<<< REFFFFFFF")
-
-    setDataItems(selectedOrder?.item_ref || [])
-
-    setOrderId(order_ID)
-    setConfirm(true)
+  if (!leadData?.items || leadData.items.length === 0 || !order_ID) {
+    setDataItems([])
+    return
   }
 
+  // Find the matching item group by orderId
+  const selectedOrder = leadData.items.find(item => item.item_id === order_ID)
+  const items = selectedOrder?.item_ref || []
 
+  // ✅ Generate Quotation Number
+  const quotationNumber = generateQuotationNumber(leadData)
+
+  // ✅ Attach quotation number to each item or store globally
+  const itemsWithQTN = items.map(item => ({ ...item, quotationNumber }))
+
+  console.log('Generated Quotation Number:', quotationNumber)
+  setDataItems(itemsWithQTN)
+  setOrderId(order_ID)
+  setConfirm(true)
+}
 
   const handleQtyChange = (index, value) => {
     const newItems = [...items]
@@ -433,70 +457,64 @@ const LeadDetailView = () => {
     }
   }, [leadData])
 
-
-
   // 🔹 Save handler
-const handleFieldSave = async (label, newValue, reasonKey, selectedReasons) => {
+  const handleFieldSave = async (label, newValue, reasonKey, selectedReasons) => {
+    try {
+      // Base values
+      const updatedValues = {
+        [label]: newValue
+      }
 
+      // 🔹 Add reason fields dynamically
+      if (reasonKey && selectedReasons?.length) {
+        updatedValues[reasonKey] = selectedReasons
+      }
 
-  try {
-    // Base values
-    const updatedValues = {
-      [label]: newValue
-    }
+      const updatedLeadValues = {
+        _id: leadData?._id,
+        organization_id: leadData?.organization_id,
+        auto_inc_id: leadData?.auto_inc_id,
+        lead_name: leadData?.lead_name,
+        lead_id: leadData?.lead_id,
+        lead_slug_name: leadData?.lead_slug_name,
+        form_name: leadData?.form_name,
+        lead_touch: 'touch',
+        values: updatedValues, // ✅ both Lead Status + Reasons
+        submittedAt: new Date().toISOString(),
+        c_role_id: leadData?.c_role_id,
+        c_createdBy: leadData?.c_createdBy,
+        updatedAt: leadData?.updatedAt,
+        createdAt: leadData?.createdAt
+      }
 
-    // 🔹 Add reason fields dynamically
-    if (reasonKey && selectedReasons?.length) {
-      updatedValues[reasonKey] = selectedReasons
-    }
-
-    const updatedLeadValues = {
-      _id: leadData?._id,
-      organization_id: leadData?.organization_id,
-      auto_inc_id: leadData?.auto_inc_id,
-      lead_name: leadData?.lead_name,
-      lead_id: leadData?.lead_id,
-      lead_slug_name: leadData?.lead_slug_name,
-      form_name: leadData?.form_name,
-      lead_touch: 'touch',
-      values: updatedValues, // ✅ both Lead Status + Reasons
-      submittedAt: new Date().toISOString(),
-      c_role_id: leadData?.c_role_id,
-      c_createdBy: leadData?.c_createdBy,
-      updatedAt: leadData?.updatedAt,
-      createdAt: leadData?.createdAt
-    }
-
-    // 🔹 API call
-    const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken}`
-      },
-      body: JSON.stringify(updatedLeadValues)
-    })
-
-    const result = await res.json()
-
-    if (!result.success) {
-      toast.error('Failed to update field')
-      fetchLeadFromId()
-    } else {
-      toast.success(result?.message || 'Updated successfully', {
-        autoClose: 800,
-        position: 'bottom-center',
-        hideProgressBar: true
+      // 🔹 API call
+      const res = await fetch(`/api/v1/admin/lead-form/${leadId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken}`
+        },
+        body: JSON.stringify(updatedLeadValues)
       })
-      fetchLeadFromId()
+
+      const result = await res.json()
+
+      if (!result.success) {
+        toast.error('Failed to update field')
+        fetchLeadFromId()
+      } else {
+        toast.success(result?.message || 'Updated successfully', {
+          autoClose: 800,
+          position: 'bottom-center',
+          hideProgressBar: true
+        })
+        fetchLeadFromId()
+      }
+    } catch (err) {
+      toast.error('Error saving field')
+      console.error(err)
     }
-  } catch (err) {
-    toast.error('Error saving field')
-    console.error(err)
   }
-}
-
-
 
   if (loader) {
     return (
@@ -640,7 +658,14 @@ const handleFieldSave = async (label, newValue, reasonKey, selectedReasons) => {
             pr: 1 // scrollbar overlap avoid
           }}
         >
-          <LeadCard fields={fields} leadId={leadId} leadData={leadData} onToggleFlag={onToggleFlag} sections={sections} handleFieldSave={handleFieldSave} />
+          <LeadCard
+            fields={fields}
+            leadId={leadId}
+            leadData={leadData}
+            onToggleFlag={onToggleFlag}
+            sections={sections}
+            handleFieldSave={handleFieldSave}
+          />
 
           {/* 🔹 Dynamic Sections */}
           {sections.map((section, index) => (
@@ -690,13 +715,13 @@ const handleFieldSave = async (label, newValue, reasonKey, selectedReasons) => {
             </Box>
           ))}
         </Box>
-        <ProposalDialogPage 
-        open={confirm} 
-        onClose={handleClose} 
-        leadData={leadData} 
-        orderId={orderId} 
-        dataItems={dataItems}
-        handleQtyChange={handleQtyChange}
+        <ProposalDialogPage
+          open={confirm}
+          onClose={handleClose}
+          leadData={leadData}
+          orderId={orderId}
+          dataItems={dataItems}
+          handleQtyChange={handleQtyChange}
         />
       </Grid>
     </Grid>

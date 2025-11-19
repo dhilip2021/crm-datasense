@@ -36,6 +36,19 @@ const NoteSchema = new mongoose.Schema(
   { _id: false }
 )
 
+const QuotationSchema = new mongoose.Schema(
+  {
+    _id: { type: mongoose.Schema.Types.ObjectId, auto: true }, // keep this
+    quotation_id: { type: String, required: true },            // unique ID (string)
+    quotation_data: { type: Object, default: {} },             // 🔥 Accept full HTML or data object
+    createdAt: { type: Date, default: Date.now },
+    createdBy: { type: String, default: null }
+  },
+  { _id: true } // ✅ Allow auto _id — REQUIRED for updates
+)
+
+
+
 const TaskSchema = new mongoose.Schema(
   {
     subject: { type: String, default: null },
@@ -132,6 +145,7 @@ const LeadFormSchema = new mongoose.Schema(
     // ],
 
     'values.Notes': [NoteSchema],
+    'values.Quotation': [QuotationSchema],
     'values.Activity': [ActivitySchema],
 
     submittedAt: { type: Date, default: Date.now },
