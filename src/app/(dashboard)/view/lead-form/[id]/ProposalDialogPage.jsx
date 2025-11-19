@@ -30,6 +30,9 @@ import SendIcon from '@mui/icons-material/Send'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 
 const ProposalDialogPage = ({ open, onClose, leadData, handleQtyChange, dataItems }) => {
+
+    console.log(leadData,"<<< LEAD DATA download pdf")
+
   const quoNumber = dataItems[0]?.quotationNumber
   const getToken = Cookies.get('_token')
   const organization_name = Cookies.get('organization_name')
@@ -102,13 +105,13 @@ const ProposalDialogPage = ({ open, onClose, leadData, handleQtyChange, dataItem
     const quoData = {
       from: '"Lumivo CRM Datasense" <no-reply@datasense.in>', // sender address
       to: leadData.values['Email'], // customer email
-      subject: `Quotation for ${leadData.values['Lead Name']} - ${organization_name}`,
+      subject: `Quotation for ${leadData.values['Company']} - ${organization_name}`,
       html: `
       <div style="font-family: Arial, sans-serif; max-width: 700px; margin:auto; border:1px solid #e0e0e0; border-radius:10px; padding:20px; background:#f9fafc;">
         <h2 style="text-align:center; color:#1976d2; margin-bottom:10px;">${organization_name}</h2>
         <h3 style="text-align:center; color:#d1d1d1; margin-bottom:20px;">Quotation No: ${quoNumber}</h3>
         <p>Dear <b>${leadData.values['First Name']} ${leadData.values['Last Name']}</b>,</p>
-        <p>We are pleased to share our quotation for your requirement <b>${leadData.values['Lead Name']}</b>. Please find the details below:</p>
+        <p>We are pleased to share our quotation for your requirement <b>${leadData.values['Company']}</b>. Please find the details below:</p>
         
         <table style="width:100%; border-collapse:collapse; margin-top:10px;">
           <thead>
@@ -307,7 +310,7 @@ const ProposalDialogPage = ({ open, onClose, leadData, handleQtyChange, dataItem
     doc.text(user_name, margin, closingY + lineHeight * 3)
     doc.text('CEO', margin, closingY + lineHeight * 4)
     doc.text(organization_name, margin, closingY + lineHeight * 5)
-    doc.save(`Quotation_${leadData.values['Lead Name']}.pdf`)
+    doc.save(`Quotation_${leadData.values['Company']}.pdf`)
   }
 
   return (
@@ -371,7 +374,7 @@ const ProposalDialogPage = ({ open, onClose, leadData, handleQtyChange, dataItem
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
                   <Typography>
-                    <b>Lead Name:</b> {leadData.values['Lead Name']}
+                    <b>Company:</b> {leadData.values['Company']}
                   </Typography>
                   <Typography>
                     <b>Expected Revenue:</b> ₹{leadData.values['Expected Revenue']}

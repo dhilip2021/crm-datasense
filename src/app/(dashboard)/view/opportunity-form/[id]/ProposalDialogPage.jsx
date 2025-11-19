@@ -30,6 +30,9 @@ import SendIcon from '@mui/icons-material/Send'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 
 const ProposalDialogPage = ({ open, onClose, leadData, handleQtyChange, dataItems }) => {
+
+     console.log(leadData,"<<< DEAL DATA download pdf") 
+     
   const quoNumber = dataItems[0]?.quotationNumber
   const getToken = Cookies.get('_token')
   const organization_name = Cookies.get('organization_name')
