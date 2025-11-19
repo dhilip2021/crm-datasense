@@ -316,22 +316,6 @@ const LeadDetailView = () => {
     }
   }
 
-  // const dealFnCall1 = order_ID => {
-  //   if (!leadData?.items || leadData.items.length === 0 || !order_ID) {
-  //     setDataItems([])
-  //     return
-  //   }
-
-  //   // Find the matching item group by orderId
-  //   const selectedOrder = leadData.items.find(item => item.item_id === order_ID)
-
-  //   console.log(selectedOrder, '<<< REFFFFFFF')
-
-  //   setDataItems(selectedOrder?.item_ref || [])
-
-  //   setOrderId(order_ID)
-  //   setConfirm(true)
-  // }
 
   const dealFnCall = order_ID => {
   if (!leadData?.items || leadData.items.length === 0 || !order_ID) {

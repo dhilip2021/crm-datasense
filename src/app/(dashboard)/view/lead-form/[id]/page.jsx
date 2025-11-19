@@ -35,6 +35,7 @@ import TaskTabs from './TaskTabs'
 import { getUserAllListApi } from '@/apiFunctions/ApiAction'
 import slugify from 'slugify'
 import ConvertDealDialog from './ConvertDealDialog'
+import ProposalDialogPage from './ProposalDialogPage'
 // import CloseActivities from './closeActivities'
 
 // ✅ Validation rules
@@ -81,6 +82,17 @@ const fieldValidators = {
   }
 }
 
+const generateQuotationNumber = leadData => {
+  const date = new Date()
+  const yyyy = date.getFullYear()
+  const mm = String(date.getMonth() + 1).padStart(2, '0')
+  const dd = String(date.getDate()).padStart(2, '0')
+  const timestamp = Date.now().toString().slice(-4) // last 4 digits
+  const leadInc = leadData?.auto_inc_id || '0000'
+
+  return `QTN-${yyyy}${mm}${dd}-${leadInc}-${timestamp}`
+}
+
 const LeadDetailView = () => {
   const params = useParams()
   const encryptedId = decodeURIComponent(params.id)
@@ -103,14 +115,15 @@ const LeadDetailView = () => {
   const [fieldConfig, setFieldConfig] = useState({})
   const [fieldOpportunityConfig, setFieldOpportunityConfig] = useState({})
   const [itemsData, setItemsData] = useState([])
+  const [dealConfirm, setDealConfirm] = useState(false)
   const [confirm, setConfirm] = useState(false)
-
+  const [orderId, setOrderId] = useState('')
   // 🧠 leadData = API response object you shared above
   const [accountName, setAccountName] = useState('')
   const [contactName, setContactName] = useState('')
   const [createDeal, setCreateDeal] = useState(false)
   const [ownerName, setOwnerName] = useState('')
-
+  const [dataItems, setDataItems] = useState([])
   // 🧩 Prefill default values from leadData
   const [dealData, setDealData] = useState({
     amount: '',
@@ -133,6 +146,17 @@ const LeadDetailView = () => {
       })
     })
     return flat
+  }
+
+  const handleQtyChange = (index, value) => {
+    const newItems = [...items]
+    newItems[index].quantity = Number(value)
+    newItems[index].finalPrice = newItems[index].quantity * newItems[index].unitPrice
+    setDataItems(newItems)
+  }
+
+  const handleClose = () => {
+    setConfirm(false)
   }
 
   const handleTabChange = (e, newValue) => {
@@ -327,12 +351,34 @@ const LeadDetailView = () => {
     }
   }
 
-  const dealFnCall = (id, lead_name) => {
+  const dealFunCall = (id, lead_name) => {
+    setDealConfirm(true)
+  }
+
+  const dealFnCall = order_ID => {
+    if (!leadData?.items || leadData.items.length === 0 || !order_ID) {
+      setDataItems([])
+      return
+    }
+
+    // Find the matching item group by orderId
+    const selectedOrder = leadData.items.find(item => item.item_id === order_ID)
+    const items = selectedOrder?.item_ref || []
+
+    // ✅ Generate Quotation Number
+    const quotationNumber = generateQuotationNumber(leadData)
+
+    // ✅ Attach quotation number to each item or store globally
+    const itemsWithQTN = items.map(item => ({ ...item, quotationNumber }))
+
+    console.log('Generated Quotation Number:', quotationNumber)
+    setDataItems(itemsWithQTN)
+    setOrderId(order_ID)
     setConfirm(true)
   }
 
-  const handleClose = () => {
-    setConfirm(false)
+  const handleDealClose = () => {
+    setDealConfirm(false)
     setCreateDeal(false)
     setDealData({
       amount: '',
@@ -344,7 +390,7 @@ const LeadDetailView = () => {
 
   const handleConvert = () => {
     convertLeadFn(leadData, createDeal, dealData)
-    handleClose()
+    handleDealClose()
   }
 
   const convertLeadFn = async (leadData, createDeal, dealData) => {
@@ -397,7 +443,6 @@ const LeadDetailView = () => {
         lead_touch: 'touch',
         updatedAt: new Date().toISOString()
       }
-
 
       // 🔹 If you want to update to API, uncomment below:
 
@@ -609,11 +654,13 @@ const LeadDetailView = () => {
 
         {tabIndex === 2 && (
           <Box>
-            <ProductPage 
-            leadId={leadId} 
-            leadData={leadData} 
-            fetchLeadFromId={fetchLeadFromId} 
-            itemsData={itemsData} 
+            <ProductPage
+              leadId={leadId}
+              leadData={leadData}
+              fetchLeadFromId={fetchLeadFromId}
+              itemsData={itemsData}
+              dealFnCall={dealFnCall}
+              items={dataItems}
             />
           </Box>
         )}
@@ -627,7 +674,7 @@ const LeadDetailView = () => {
             fullWidth
             variant='contained'
             color='primary'
-            onClick={() => dealFnCall(leadData?._id, leadData?.lead_name)}
+            onClick={() => dealFunCall(leadData?._id, leadData?.lead_name)}
           >
             {' '}
             {loading ? <CircularProgress size={18} /> : 'Convert to Opportunity'}
@@ -700,8 +747,8 @@ const LeadDetailView = () => {
           ))}
         </Box>
         <ConvertDealDialog
-          open={confirm}
-          onClose={handleClose}
+          open={dealConfirm}
+          onClose={handleDealClose}
           accountName={accountName}
           contactName={contactName}
           createDeal={createDeal}
@@ -712,6 +759,14 @@ const LeadDetailView = () => {
           leadData={leadData}
           dealData={dealData}
           setDealData={setDealData}
+        />
+        <ProposalDialogPage
+          open={confirm}
+          onClose={handleClose}
+          leadData={leadData}
+          orderId={orderId}
+          dataItems={dataItems}
+          handleQtyChange={handleQtyChange}
         />
       </Grid>
     </Grid>

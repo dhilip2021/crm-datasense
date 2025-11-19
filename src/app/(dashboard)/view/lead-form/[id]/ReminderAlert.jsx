@@ -107,7 +107,7 @@ export default function ReminderAlert() {
         <table style="max-width: 600px; margin: auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
           <tr>
             <td style="background: #2563eb; color: white; padding: 16px 24px; font-size: 20px; font-weight: bold;">
-              📅 CRM Datasense - Reminder Alert
+              📅 Lumivo CRM Datasense - Reminder Alert
             </td>
           </tr>
           <tr>

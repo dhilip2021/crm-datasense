@@ -102,13 +102,13 @@ const ProposalDialogPage = ({ open, onClose, leadData, handleQtyChange, dataItem
     const quoData = {
       from: '"Lumivo CRM Datasense" <no-reply@datasense.in>', // sender address
       to: leadData.values['Email'], // customer email
-      subject: `Quotation for ${leadData.values['Deal Name']} - ${organization_name}`,
+      subject: `Quotation for ${leadData.values['Lead Name']} - ${organization_name}`,
       html: `
       <div style="font-family: Arial, sans-serif; max-width: 700px; margin:auto; border:1px solid #e0e0e0; border-radius:10px; padding:20px; background:#f9fafc;">
         <h2 style="text-align:center; color:#1976d2; margin-bottom:10px;">${organization_name}</h2>
         <h3 style="text-align:center; color:#d1d1d1; margin-bottom:20px;">Quotation No: ${quoNumber}</h3>
         <p>Dear <b>${leadData.values['First Name']} ${leadData.values['Last Name']}</b>,</p>
-        <p>We are pleased to share our quotation for your requirement <b>${leadData.values['Deal Name']}</b>. Please find the details below:</p>
+        <p>We are pleased to share our quotation for your requirement <b>${leadData.values['Lead Name']}</b>. Please find the details below:</p>
         
         <table style="width:100%; border-collapse:collapse; margin-top:10px;">
           <thead>
@@ -307,7 +307,7 @@ const ProposalDialogPage = ({ open, onClose, leadData, handleQtyChange, dataItem
     doc.text(user_name, margin, closingY + lineHeight * 3)
     doc.text('CEO', margin, closingY + lineHeight * 4)
     doc.text(organization_name, margin, closingY + lineHeight * 5)
-    doc.save(`Quotation_${leadData.values['Deal Name']}.pdf`)
+    doc.save(`Quotation_${leadData.values['Lead Name']}.pdf`)
   }
 
   return (
@@ -361,17 +361,17 @@ const ProposalDialogPage = ({ open, onClose, leadData, handleQtyChange, dataItem
             </CardContent>
           </Card>
 
-          {/* DEAL INFO */}
+          {/* Lead INFO */}
           <Card sx={{ mb: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
             <CardContent>
               <Typography variant='h6' fontWeight='bold' gutterBottom>
-                Deal Information
+                Lead Information
               </Typography>
               <Divider sx={{ mb: 2 }} />
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
                   <Typography>
-                    <b>Deal Name:</b> {leadData.values['Deal Name']}
+                    <b>Lead Name:</b> {leadData.values['Lead Name']}
                   </Typography>
                   <Typography>
                     <b>Expected Revenue:</b> ₹{leadData.values['Expected Revenue']}

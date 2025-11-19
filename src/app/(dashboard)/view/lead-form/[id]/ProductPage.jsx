@@ -26,7 +26,7 @@ import { formatCurrency } from '@/helper/frontendHelper'
 // ✅ Utility for currency
 // const formatCurrency = value => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value)
 
-function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData }) {
+function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData,dealFnCall }) {
   const [openDialog, setOpenDialog] = useState(false)
   const [loader, setLoader] = useState(false)
 
@@ -275,6 +275,30 @@ function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData }) {
                 </Typography>
                 <Typography variant='body2' sx={{ fontSize: 13 }}> ---------------------------------</Typography>
               </Box>
+              <Box textAlign='right'>
+                              <Typography variant='body1'>
+                                <Chip
+                                  onClick={() => dealFnCall(order.item_id)}
+                                  label='Confirm Quotation'
+                                  color='primary'
+                                  variant='filled' // ← change this
+                                  sx={{
+                                    fontWeight: 'regular',
+                                    cursor: 'pointer',
+                                    fontSize: '1rem',
+                                    px: 5,
+                                    py: 3,
+                                    borderRadius: '12px',
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                      backgroundColor: '#f3f4f6',
+                                      color: '#009cde',
+                                      boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
+                                    }
+                                  }}
+                                />
+                              </Typography>
+                            </Box>
             </Paper>
           )
         })
