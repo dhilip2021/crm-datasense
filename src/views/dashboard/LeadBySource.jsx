@@ -16,10 +16,11 @@ const LeadBySource = () => {
   const getToken = Cookies.get('_token')
   const organization_id = Cookies.get('organization_id')
 
+  const [leadSource, setLeadSource] = useState([])
+
   const [leadSourceData, setLeadSourceData] = useState([])
   const [opportunitySourceData, setOpportunitySourceData] = useState([])
-  const [leadSource, setLeadSource] = useState([])
-  const [sections, setSections] = useState([])
+
   const [loading, setLoading] = useState(false)
   const [anchorViewEl, setAnchorViewEl] = useState(null)
   const [viewType, setViewType] = useState('This Month')
@@ -68,45 +69,18 @@ const LeadBySource = () => {
         fromDate: today.subtract(6, 'month').startOf('month').format('YYYY-MM-DD'),
         toDate: today.format('YYYY-MM-DD')
       }
-    
+
     if (viewType === 'Last 1 Year') {
-    const fromDate = today.subtract(1, 'year').startOf('month') // 1 year ago
-    return {
-      fromDate: fromDate.format('YYYY-MM-DD'),
-      toDate: today.format('YYYY-MM-DD')
+      const fromDate = today.subtract(1, 'year').startOf('month') // 1 year ago
+      return {
+        fromDate: fromDate.format('YYYY-MM-DD'),
+        toDate: today.format('YYYY-MM-DD')
+      }
     }
-  }
     return { fromDate: today.subtract(7, 'day').format('YYYY-MM-DD'), toDate: today.format('YYYY-MM-DD') }
   }
 
-  // 🔹 Fetch Template
-  const fetchFormTemplate = async () => {
-    const lead_form = 'lead-form'
-    setLoading(true)
-    try {
-      const res = await fetch(
-        `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${lead_form}`,
-        {
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken}` }
-        }
-      )
-      const json = await res.json()
-      if (json?.success && json.data?.sections?.length > 0) {
-        setSections(json.data.sections)
-        const flattened = flattenFields(json.data.sections)
-        const config = {}
-        flattened.forEach(field => {
-          if (field.type === 'Dropdown' && field.options?.length > 0) config[field.label] = field.options
-        })
-        const leadSourceArray = config['Lead Source'] || []
-        setLeadSource(leadSourceArray)
-      }
-    } catch (err) {
-      console.error('fetchFormTemplate error:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
+
 
   // 🔹 Fetch Lead Data
   const fetchData = async () => {
@@ -308,10 +282,6 @@ const LeadBySource = () => {
     }
   }
 
-  // 🔹 Lifecycle
-  useEffect(() => {
-    fetchFormTemplate()
-  }, [])
 
   useEffect(() => {
     if (leadSource.length > 0) {

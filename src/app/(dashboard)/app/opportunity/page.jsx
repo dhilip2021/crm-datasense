@@ -436,6 +436,7 @@ const OpportunityTable = () => {
   }, [sections, fetched])
 
   useEffect(() => {
+    console.log("fetchFormTemplate() call 5")
     fetchFormTemplate()
     getUserListFn()
   }, [page, limit])

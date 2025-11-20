@@ -507,6 +507,7 @@ function LeadFormAppIdPage() {
 
   // ✅ Init load
   useEffect(() => {
+    console.log("fetchFormTemplate() call 3")
     fetchFormTemplate()
   }, [])
 

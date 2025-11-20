@@ -492,6 +492,7 @@ const LeadTable = () => {
   }, [page, limit])
 
   useEffect(() => {
+    console.log("fetchFormTemplate() call 4")
     fetchFormTemplate()
     getUserListFn()
     setFetched(false)

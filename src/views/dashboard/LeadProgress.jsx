@@ -39,7 +39,6 @@ export default function LeadProgress() {
   const [loader, setLoader] = useState(false)
 
   const [fetched, setFetched] = useState(true)
-  const [sections, setSections] = useState([])
   const [fieldConfig, setFieldConfig] = useState({})
   const [userList, setUserList] = useState([])
   const [viewType, setViewType] = useState('This Week')
@@ -60,21 +59,7 @@ export default function LeadProgress() {
     toFollowDate: null
   })
 
-  const flattenFields = sections => {
-    const flat = []
-    sections.forEach(section => {
-      const fieldsObj = section.fields || {} // ← safeguard
-      Object.values(fieldsObj).forEach(fieldGroup => {
-        ;(fieldGroup || []).forEach(field => {
-          flat.push({
-            sectionName: section.title || section.sectionName || '',
-            ...field
-          })
-        })
-      })
-    })
-    return flat
-  }
+
 
 
   const getDateRange = viewType => {
@@ -135,40 +120,7 @@ export default function LeadProgress() {
       }
     }
 
-  // 🔹 Fetch template
-  const fetchFormTemplate = async () => {
-    const lead_form = 'lead-form'
-    setLoader(true)
-    try {
-      const res = await fetch(
-        `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${lead_form}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${getToken}`
-          }
-        }
-      )
-      const json = await res.json()
-      if (json?.success && json.data?.sections?.length > 0) {
-        setSections(json.data.sections)
-
-        const flattened = flattenFields(json.data.sections)
-        const config = {}
-        flattened.forEach(field => {
-          if (field.type === 'Dropdown' && field.options?.length > 0) {
-            config[field.label] = field.options
-          }
-        })
-        setFieldConfig(config)
-      }
-    } catch (err) {
-      console.error('fetchFormTemplate error:', err)
-    } finally {
-      setLoader(false)
-    }
-  }
-
+  
   const fetchData = async () => {
     setLoader(true)
 
@@ -222,14 +174,14 @@ export default function LeadProgress() {
 
 
   useEffect(() => {
-    if (!fetched && sections) {
+    if (!fetched) {
       fetchData()
       setFetched(true)
     }
   }, [filters])
 
   useEffect(() => {
-    fetchFormTemplate()
+   
     setFetched(false)
   }, [])
 

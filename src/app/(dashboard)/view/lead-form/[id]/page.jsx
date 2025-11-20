@@ -580,6 +580,7 @@ const LeadDetailView = () => {
   }, [sections, leadId])
 
   useEffect(() => {
+    console.log("fetchFormTemplate() call 7")
     fetchFormTemplate()
     fetchOpportunityFormTemplate()
   }, [])

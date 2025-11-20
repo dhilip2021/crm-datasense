@@ -155,6 +155,7 @@ function CustomerFormAppIdPage() {
 
   useEffect(() => {
     setCallFlag(true)
+    console.log("fetchFormTemplate() call 2")
     fetchFormTemplate()
   }, [])
 

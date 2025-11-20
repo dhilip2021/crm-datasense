@@ -23,7 +23,7 @@ import dayjs from 'dayjs'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import { getUserListApi } from '@/apiFunctions/ApiAction'
 
-export default function DashboardWidgets() {
+export default function DashboardWidgets({sections}) {
   const router = useRouter()
 
   const user_id = Cookies.get('user_id')
@@ -34,7 +34,6 @@ export default function DashboardWidgets() {
   const [data, setData] = useState([])
   const [loader, setLoader] = useState(false)
   const [fetched, setFetched] = useState(true)
-  const [sections, setSections] = useState([])
   // const [fieldConfig, setFieldConfig] = useState({})
   const [anchorViewEl, setAnchorViewEl] = useState(null)
   const [viewType, setViewType] = useState('This Month')
@@ -156,39 +155,7 @@ export default function DashboardWidgets() {
     }
   }
 
-  // 🔹 Fetch template
-  const fetchFormTemplate = async () => {
-    const lead_form = 'lead-form'
-    setLoader(true)
-    try {
-      const res = await fetch(
-        `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${lead_form}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${getToken}`
-          }
-        }
-      )
-      const json = await res.json()
-      if (json?.success && json.data?.sections?.length > 0) {
-        setSections(json.data.sections)
 
-        const flattened = flattenFields(json.data.sections)
-        const config = {}
-        flattened.forEach(field => {
-          if (field.type === 'Dropdown' && field.options?.length > 0) {
-            config[field.label] = field.options
-          }
-        })
-        // setFieldConfig(config)
-      }
-    } catch (err) {
-      console.error('fetchFormTemplate error:', err)
-    } finally {
-      setLoader(false)
-    }
-  }
 
   const fetchData = async () => {
     setLoader(true)
@@ -282,10 +249,7 @@ export default function DashboardWidgets() {
     }
   }, [user_id])
 
-  useEffect(() => {
-    fetchFormTemplate()
-    setFetched(false)
-  }, [])
+
 
   useEffect(() => {
     const { fromDate, toDate } = getDateRange(viewType)

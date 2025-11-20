@@ -9,7 +9,6 @@ import LineChart from '@views/dashboard/LineChart'
 import DistributedColumnChart from '@views/dashboard/DistributedColumnChart'
 import CardStatVertical from '@components/card-statistics/Vertical'
 import LeadStatus from '@/views/dashboard/LeadStatus'
-import LeadWeekly from '@/views/dashboard/LeadWeekly'
 import LeadByLocation from '@/views/dashboard/LeadByLocation'
 import LeadBySource from '@/views/dashboard/LeadBySource'
 import DashboardWidgets from '@/views/dashboard/DashboardWidgets'
@@ -20,8 +19,10 @@ import { getHierarchyUserListApi } from '@/apiFunctions/ApiAction'
 import LeadJourneyStagesChart from '@/views/dashboard/LeadByJourney'
 import LostLeadAnalysis from '@/views/dashboard/LostLeadAnalysis'
 import LeadProgress from '@/views/dashboard/LeadProgress'
+import { useRouter } from 'next/navigation'
 
 const DashboardAnalytics = () => {
+   const router = useRouter()
   const organization_id = Cookies.get('organization_id')
   const getToken = Cookies.get('_token')
   const user_id = Cookies.get('user_id')
@@ -132,6 +133,22 @@ const DashboardAnalytics = () => {
     }
   }
 
+   const logoutFn = () => {
+      Cookies.remove('riho_token')
+      Cookies.remove('_token')
+      Cookies.remove('_token_expiry')
+      Cookies.remove('privileges')
+      Cookies.remove('role_id')
+      Cookies.remove('role_name')
+      Cookies.remove('user_name')
+      Cookies.remove('organization_id')
+      Cookies.remove('organization_name')
+      Cookies.remove('user_id')
+      Cookies.remove('c_version')
+      Cookies.remove('endedAt')
+      router.push('/login')
+    }
+
   // 🔹 Flatten Fields Safely
   const flattenFields = sections => {
     const flat = []
@@ -152,8 +169,6 @@ const DashboardAnalytics = () => {
         `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=lead-form`
       )
       const json = await res.json()
-
-      console.log(json, '<<< json')
       if (json.success && json.data?.sections?.length) {
         setSections(json.data.sections)
         const flat = flattenFields(json.data.sections)
@@ -161,10 +176,11 @@ const DashboardAnalytics = () => {
         flat.forEach(f => {
           if (f.type === 'Dropdown' && f.options?.length) config[f.label] = f.options
         })
-
-        console.log(config, '<<< configgggg')
-
         setFieldConfig(config)
+      }else{
+        if(!json.success){
+          logoutFn()
+        }
       }
     } catch (err) {
       console.error(err)
@@ -183,6 +199,7 @@ const DashboardAnalytics = () => {
 
   // 🔹 Initialize
   useEffect(() => {
+    console.log("fetchFormTemplate() call 1")
     fetchFormTemplate()
     getUserListFn()
     const { fromDate, toDate } = getDateRange('This Month')
@@ -382,15 +399,14 @@ const cardConfigOverView = useMemo(() => {
       </Grid>
       
       <Grid item xs={12} md={6} lg={6}>
-        {/* <LeadWeekly /> */}
-        <LeadProgress />
+        <LeadProgress sections={sections}/>
       </Grid>
       <Grid item xs={12} md={6} lg={6}>
         <LeadByLocation viewType={viewType} dataFilter={dataFilter} loading={loading} />
       </Grid>
 
       <Grid item xs={12} md={12} lg={12}>
-        <DashboardWidgets />
+        <DashboardWidgets sections={sections} />
       </Grid>
 
       {/* <Grid item xs={12} md={6} lg={6}>
