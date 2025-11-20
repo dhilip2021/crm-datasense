@@ -2,7 +2,7 @@
 'use client'
 
 // React Imports
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 // Next Imports
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -68,7 +68,6 @@ function normalizeEmail(email) {
 
 const Register = ({ mode }) => {
   const router = useRouter()
-  const fileInputRef = useRef(null)
 
   // States
   const [inputs, setInputs] = useState({
@@ -80,7 +79,6 @@ const Register = ({ mode }) => {
     first_name: '',
     last_name: '',
     email: '',
-    countryCode: '',
     mobile: '',
     otp: ''
   })
@@ -94,16 +92,12 @@ const Register = ({ mode }) => {
     first_name: false,
     last_name: false,
     email: false,
-    countryCode: false,
     mobile: false,
     otp: false
   })
 
-  const [userInfo, setUserInfo] = useState(true)
-  const [otpInfo, setOtpInfo] = useState(false)
-  const [orgInfo, setOrgInfo] = useState(false)
-
   const [loader, setLoader] = useState(false)
+
   const [errOrgName, setErrOrgName] = useState('')
   const [errOrgEmpCount, setErrOrgEmpCount] = useState('')
   const [errFname, setErrFname] = useState('')
@@ -112,13 +106,15 @@ const Register = ({ mode }) => {
   const [errOtp, setErrOtp] = useState('')
   const [otpCheck, setOtpCheck] = useState(false)
   const [otpVerify, setOtpVerify] = useState(false)
+
   const [errEmail, setErrEmail] = useState('')
   const [errEmailCheck, setErrEmailCheck] = useState('')
   const [loaderEmail, setLoaderEmail] = useState(false)
 
   const [countryCodes, setCountryCodes] = useState([])
-
-  const [logoPreview, setLogoPreview] = useState(null)
+  const [userInfo, setUserInfo] = useState(false)
+  const [otpInfo, setOtpInfo] = useState(false)
+  const [orgInfo, setOrgInfo] = useState(true)
 
   const isEmail = email => {
     var emailFormat = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/
@@ -320,15 +316,14 @@ const Register = ({ mode }) => {
     }
   }
 
-  // Logo Upload Handler
-  const handleLogoUpload = async file => {
-    if (!file) return
+  const handleLogoUpload = async () => {
 
-    // Show preview immediately
-    setLogoPreview(URL.createObjectURL(file))
+    
+
+    if (!inputs.organization_logo) return
 
     const formData = new FormData()
-    formData.append('file', file)
+    formData.append('file', inputs.organization_logo)
 
     try {
       const res = await fetch('/api/v1/admin/upload-logo', {
@@ -337,39 +332,12 @@ const Register = ({ mode }) => {
       })
 
       const data = await res.json()
-
       if (data.success) {
         toast.success('Logo uploaded successfully!')
-        // Save the uploaded file path in your inputs (server URL)
-        setInputs(prev => ({ ...prev, organization_logo: data.filePath }))
-        // Optional: Update preview with server URL
-        setLogoPreview(data.filePath)
+        // Save the uploaded file path in your inputs
+        setInputs(prev => ({ ...prev, organization_logo_url: data.filePath }))
       } else {
         toast.error('Failed to upload logo')
-      }
-    } catch (err) {
-      console.error(err)
-      toast.error('Something went wrong')
-    }
-  }
-
-  const handleLogoDelete = async () => {
-    if (!inputs.organization_logo) return
-
-    try {
-      const res = await fetch('/api/v1/admin/delete-logo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filePath: inputs.organization_logo }) // send server path
-      })
-      const data = await res.json()
-
-      if (data.success) {
-        toast.success('Logo deleted successfully!')
-        setInputs(prev => ({ ...prev, organization_logo: '' }))
-        setLogoPreview(null)
-      } else {
-        toast.error('Failed to delete logo')
       }
     } catch (err) {
       console.error(err)
@@ -397,9 +365,32 @@ const Register = ({ mode }) => {
     }
   }
 
-  
+  const handleSubmit = () => {
+    const body = {
+      organization_name: inputs?.organaization_name,
+      organization_logo: inputs?.organization_logo,
+      organization_address: inputs?.organization_address,
+      organization_emp_count: inputs?.organization_emp_count,
+      organization_currency: inputs?.organization_currency,
+      c_version: 'Trial'
+    }
 
-  const handleSubmit = async () => {
+    const body1 = {
+      first_name: inputs?.first_name,
+      last_name: inputs?.last_name,
+      c_about_user: 'Admin',
+      email: inputs?.email,
+      mobile: inputs?.mobile,
+      role: 'Admin',
+      c_user_img_url: '',
+      c_role_id: '16f01165898b'
+    }
+
+    console.log(body, '<<<< ORG BODY')
+    console.log(body1, '<<<< USER BODY')
+  }
+
+  const handleSubmit1 = async () => {
     const body = {
       organization_name: inputs?.organaization_name,
       organization_logo: inputs?.organization_logo,
@@ -424,26 +415,26 @@ const Register = ({ mode }) => {
           last_name: inputs?.last_name,
           c_about_user: 'Admin',
           email: inputs?.email,
-          mobile: `${inputs?.countryCode}${inputs?.mobile}`,
+          mobile: inputs?.mobile,
           role: '',
           c_role_id: '16f01165898b',
           c_user_img_url: ''
         }
         setLoader(true)
 
-        const body2 = {
+        const body = {
           organization_id: result?.payloadJson?.organization_id,
           first_name: inputs?.first_name,
           last_name: inputs?.last_name,
           c_about_user: 'Admin',
           email: inputs?.email,
-          mobile: `${inputs?.countryCode}${inputs?.mobile}`,
+          mobile: inputs?.mobile,
           role: '',
           c_user_img_url: '',
           c_role_id: '16f01165898b'
         }
 
-        const enycryptDAta = encryptCryptoResponse(body2)
+        const enycryptDAta = encryptCryptoResponse(body)
 
         const dataValue = {
           data: enycryptDAta
@@ -879,40 +870,23 @@ const Register = ({ mode }) => {
                         type='file'
                         hidden
                         accept='image/*'
-                        ref={fileInputRef}
+                        name='organization_logo'
                         onChange={e => {
                           const file = e.target.files[0]
-                          if (file) {
-                            handleLogoUpload(file) // upload & set preview
-                          }
+                          setInputs({ ...inputs, organization_logo: file })
+                          handleLogoUpload(file) // call your function here
                         }}
                       />
                     </Button>
 
-                    {logoPreview && (
+                    {inputs?.organization_logo && (
                       <Box mt={1} display='flex' alignItems='center' gap={1}>
                         <img
-                          src={logoPreview}
+                          src={URL.createObjectURL(inputs.organization_logo)}
                           alt='logo'
                           style={{ width: 50, height: 50, borderRadius: 5, objectFit: 'cover' }}
                         />
-                        <Typography variant='body2'>
-                          {inputs.organization_logo instanceof File ? inputs.organization_logo.name : 'Uploaded'}
-                        </Typography>
-                        <Button
-                          size='small'
-                          color='error'
-                          variant='outlined'
-                          onClick={() => {
-                            setInputs(prev => ({ ...prev, organization_logo: '' }))
-                            setLogoPreview(null)
-                            handleLogoDelete()
-                            if (fileInputRef.current) fileInputRef.current.value = '' // reset input
-                          }}
-                          sx={{ minWidth: '30px', padding: '2px 6px' }}
-                        >
-                          Delete
-                        </Button>
+                        <Typography variant='body2'>{inputs.organization_logo.name}</Typography>
                       </Box>
                     )}
 

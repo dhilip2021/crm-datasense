@@ -1,58 +1,75 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 
-var Schema = mongoose.Schema;
-var validator = require("validator");
+var Schema = mongoose.Schema
+var validator = require('validator')
 
 const OrganizationSchema = new Schema(
   {
     organization_name: {
       type: String,
-      required: [true, "Organization Name is required"],
+      required: [true, 'Organization Name is required'],
       trim: true,
+      unique: true
     },
     organization_id: {
       type: String,
-      required: [true, "Organization Id is required"],
+      required: [true, 'Organization Id is required'],
       trim: true,
       unique: true
+    },
+    organization_logo: {
+      type: String,
+      trim: true
+    },
+    organization_address: {
+      type: String,
+      trim: true
+    },
+    organization_emp_count: {
+      type: String,
+      trim: true
+    },
+     organization_currency: {
+      type: String,
+      trim: true
     },
     n_status: {
       type: Number,
       required: true,
       enum: [0, 1],
-      default: 1,
+      default: 1
     },
     n_published: {
       type: Number,
       required: true,
       enum: [0, 1],
-      default: 1,
+      default: 1
     },
     c_version: {
-      type: String,
+      type: String
     },
     c_createdBy: {
-      type: String,
+      type: String
     },
     c_updatedBy: {
-      type: String,
+      type: String
     },
     c_deletedBy: {
-      type: String,
+      type: String
     },
     token: {
-      type: String,
+      type: String
     },
     key: {
-      type: String,
+      type: String
     },
     endedAt: {
       type: Date,
-      default: null,
-    },
+      default: null
+    }
   },
   { strict: false, versionKey: false, timestamps: true }
-);
+)
 
-
-export const Organization = mongoose.models.Organization || mongoose.model("Organization", OrganizationSchema,"organizations");
+export const Organization =
+  mongoose.models.Organization || mongoose.model('Organization', OrganizationSchema, 'organizations')

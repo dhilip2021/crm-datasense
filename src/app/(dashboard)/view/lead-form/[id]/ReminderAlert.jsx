@@ -77,7 +77,7 @@ export default function ReminderAlert() {
         const orgId = Cookies.get('organization_id')
         const userId = Cookies.get('user_id')
 
-        if (!orgId || !userId) return console.error('organization id or user id missing')
+        if (!orgId || !userId) return console.error('organization id or user id missing...')
 
         const res = await fetch(`/api/cron/reminder?organization_id=${orgId}&user_id=${userId}`)
         const data = await res.json()

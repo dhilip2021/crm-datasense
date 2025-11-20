@@ -63,10 +63,10 @@ const NavbarContent = ({c_version, endedAt}) => {
             Your trial version is valid for 14 days only and will expire on{' '}
             <span style={{ textDecoration: 'underline' }}>{converDayJsDatewithOutTime(endedAt)}</span>.
           </p>
-          <Box display={"flex"} justifyContent={"space-evenly"}>
+          {/* <Box display={"flex"} justifyContent={"space-evenly"}>
           <Button variant='contained' className="golden-btn" onClick={()=>handlePopChange("Gold")}>Gold Plan</Button>
           <Button variant='contained' className="silver-btn" onClick={()=>handlePopChange("Silver")}>Silver Plan</Button>
-          </Box>
+          </Box> */}
           
         </Box>
          

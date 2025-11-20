@@ -1,281 +1,283 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server'
 
-import { Organization } from "@/models/organizationModel";
-import connectMongoDB from "@/libs/mongodb";
-import { verifyAccessToken } from "@/helper/clientHelper";
-
-
+import { Organization } from '@/models/organizationModel'
+import connectMongoDB from '@/libs/mongodb'
+import { verifyAccessToken } from '@/helper/clientHelper'
 
 let sendResponse = {
-  appStatusCode: "",
-  message: "",
+  appStatusCode: '',
+  message: '',
   payloadJson: [],
-  error: "",
-};
-
+  error: ''
+}
 
 export async function GET(request) {
-  const id = request.nextUrl.searchParams.get("id");
-  const name = request.nextUrl.searchParams.get("name");
+  const id = request.nextUrl.searchParams.get('id')
+  const name = request.nextUrl.searchParams.get('name')
 
-   const verified = verifyAccessToken();
-   if (verified.success) {
-    
+  const verified = verifyAccessToken()
+  if (verified.success) {
     if (id) {
-    await connectMongoDB();
+      await connectMongoDB()
 
-      const checkId = await Organization.findOne({ organization_id: id });
+      const checkId = await Organization.findOne({ organization_id: id })
 
       if (checkId) {
+        let _search = {}
 
-        let _search = {};
-
-        _search["$and"] = [
-            {
-              $and: [
-                { n_status: 1 }, 
-                { n_published: 1 }, 
-                { organization_id: id },
-              ],
-            },
-          ];
+        _search['$and'] = [
+          {
+            $and: [{ n_status: 1 }, { n_published: 1 }, { organization_id: id }]
+          }
+        ]
 
         try {
-          
           await Organization.aggregate([
             { $match: _search },
             {
               $group: {
-                _id: "$_id",
-                organization_name: { $first: "$organization_name" },
-                organization_id: { $first: "$organization_id" },
-                c_version: { $first: "$c_version" },
-                createdAt: { $first: "$createdAt" },
-                n_status: { $first: "$n_status" },
-                n_published: { $first: "$n_published" },
-              },
+                _id: '$_id',
+                organization_name: { $first: '$organization_name' },
+                organization_logo: { $first: '$organization_logo' },
+                organization_address: { $first: '$organization_address' },
+                organization_emp_count: { $first: '$organization_emp_count' },
+                organization_currency: { $first: '$organization_currency' },
+                organization_id: { $first: '$organization_id' },
+                c_version: { $first: '$c_version' },
+                createdAt: { $first: '$createdAt' },
+                n_status: { $first: '$n_status' },
+                n_published: { $first: '$n_published' }
+              }
             },
             {
               $project: {
                 _id: 1,
                 organization_name: 1,
                 organization_id: 1,
+                organization_logo: 1,
+                organization_address: 1,
+                organization_emp_count: 1,
+                organization_currency: 1,
                 c_version: 1,
                 createdAt: 1,
                 n_status: 1,
-                n_published: 1,
-              },
+                n_published: 1
+              }
             },
             {
-              $sort: { createdAt: -1 },
-            },
+              $sort: { createdAt: -1 }
+            }
           ])
-            .then((data) => {
+            .then(data => {
               if (data.length > 0) {
-                sendResponse["appStatusCode"] = 0;
-                sendResponse["message"] = "";
-                sendResponse["payloadJson"] = data[0];
-                sendResponse["error"] = [];
+                sendResponse['appStatusCode'] = 0
+                sendResponse['message'] = ''
+                sendResponse['payloadJson'] = data[0]
+                sendResponse['error'] = []
               } else {
-                sendResponse["appStatusCode"] = 0;
-                sendResponse["message"] = "Record not found!";
-                sendResponse["payloadJson"] = [];
-                sendResponse["error"] = [];
+                sendResponse['appStatusCode'] = 0
+                sendResponse['message'] = 'Record not found!'
+                sendResponse['payloadJson'] = []
+                sendResponse['error'] = []
               }
             })
-            .catch((err) => {
-              sendResponse["appStatusCode"] = 4;
-              sendResponse["message"] = "";
-              sendResponse["payloadJson"] = [];
-              sendResponse["error"] = err;
-            });
+            .catch(err => {
+              sendResponse['appStatusCode'] = 4
+              sendResponse['message'] = ''
+              sendResponse['payloadJson'] = []
+              sendResponse['error'] = err
+            })
 
-          return NextResponse.json(sendResponse, { status: 200 });
+          return NextResponse.json(sendResponse, { status: 200 })
         } catch (err) {
-          sendResponse["appStatusCode"] = 4;
-          sendResponse["message"] = "";
-          sendResponse["payloadJson"] = [];
-          sendResponse["error"] = "Something went wrong!";
+          sendResponse['appStatusCode'] = 4
+          sendResponse['message'] = ''
+          sendResponse['payloadJson'] = []
+          sendResponse['error'] = 'Something went wrong!'
 
-          return NextResponse.json(sendResponse, { status: 400 });
+          return NextResponse.json(sendResponse, { status: 400 })
         }
       } else {
-        sendResponse["appStatusCode"] = 4;
-        sendResponse["message"] = "";
-        sendResponse["payloadJson"] = [];
-        sendResponse["error"] = "Invalid Id!";
+        sendResponse['appStatusCode'] = 4
+        sendResponse['message'] = ''
+        sendResponse['payloadJson'] = []
+        sendResponse['error'] = 'Invalid Id!'
 
-        return NextResponse.json(sendResponse, { status: 400 });
+        return NextResponse.json(sendResponse, { status: 400 })
       }
-    }else if (name) {
+    } else if (name) {
+      await connectMongoDB()
 
-        await connectMongoDB();
+      const checkName = await Organization.findOne({ organization_name: name })
 
-        const checkName = await Organization.findOne({ organization_name: name });
+      if (checkName) {
+        let _search = {}
 
-        if (checkName) {
-          let _search = {};
-  
-          _search["$and"] = [
-              {
-                $and: [
-                  { n_status: 1 }, 
-                  { n_published: 1 }, 
-                  { organization_name: name },
-                ],
-              },
-            ];
-  
-          try {
-            
-  
-            await Organization.aggregate([
-              { $match: _search },
-              {
-                $group: {
-                  _id: "$_id",
-                  organization_name: { $first: "$organization_name" },
-                  c_version: { $first: "$c_version" },
-                  organization_id: { $first: "$organization_id" },
-                  createdAt: { $first: "$createdAt" },
-                  n_status: { $first: "$n_status" },
-                  n_published: { $first: "$n_published" },
-                },
-              },
-              {
-                $project: {
-                  _id: 1,
-                  organization_name: 1,
-                  c_version: 1,
-                  organization_id: 1,
-                  createdAt: 1,
-                  n_status: 1,
-                  n_published: 1,
-                },
-              },
-              {
-                $sort: { createdAt: -1 },
-              },
-            ])
-              .then((data) => {
-                if (data.length > 0) {
-                  sendResponse["appStatusCode"] = 0;
-                  sendResponse["message"] = "";
-                  sendResponse["payloadJson"] = data;
-                  sendResponse["error"] = [];
-                } else {
-                  sendResponse["appStatusCode"] = 0;
-                  sendResponse["message"] = "Record not found!";
-                  sendResponse["payloadJson"] = [];
-                  sendResponse["error"] = [];
-                }
-              }).catch((err) => {
-                sendResponse["appStatusCode"] = 4;
-                sendResponse["message"] = "";
-                sendResponse["payloadJson"] = [];
-                sendResponse["error"] = err;
-              });
-  
-            return NextResponse.json(sendResponse, { status: 200 });
-          } catch (err) {
-            sendResponse["appStatusCode"] = 4;
-            sendResponse["message"] = "";
-            sendResponse["payloadJson"] = [];
-            sendResponse["error"] = "Something went wrong!";
-
-            return NextResponse.json(sendResponse, { status: 400 });
+        _search['$and'] = [
+          {
+            $and: [{ n_status: 1 }, { n_published: 1 }, { organization_name: name }]
           }
-        } else {
-          sendResponse["appStatusCode"] = 4;
-          sendResponse["message"] = "";
-          sendResponse["payloadJson"] = [];
-          sendResponse["error"] = "Record not found!";
+        ]
 
-          return NextResponse.json(sendResponse, { status: 200 });
+        try {
+          await Organization.aggregate([
+            { $match: _search },
+            {
+              $group: {
+                _id: '$_id',
+                organization_name: { $first: '$organization_name' },
+                organization_logo: { $first: '$organization_logo' },
+                organization_address: { $first: '$organization_address' },
+                organization_emp_count: { $first: '$organization_emp_count' },
+                organization_currency: { $first: '$organization_currency' },
+                c_version: { $first: '$c_version' },
+                organization_id: { $first: '$organization_id' },
+                createdAt: { $first: '$createdAt' },
+                n_status: { $first: '$n_status' },
+                n_published: { $first: '$n_published' }
+              }
+            },
+            {
+              $project: {
+                _id: 1,
+                organization_name: 1,
+                organization_logo: 1,
+                organization_address: 1,
+                organization_emp_count: 1,
+                organization_currency: 1,
+                c_version: 1,
+                organization_id: 1,
+                createdAt: 1,
+                n_status: 1,
+                n_published: 1
+              }
+            },
+            {
+              $sort: { createdAt: -1 }
+            }
+          ])
+            .then(data => {
+              if (data.length > 0) {
+                sendResponse['appStatusCode'] = 0
+                sendResponse['message'] = ''
+                sendResponse['payloadJson'] = data
+                sendResponse['error'] = []
+              } else {
+                sendResponse['appStatusCode'] = 0
+                sendResponse['message'] = 'Record not found!'
+                sendResponse['payloadJson'] = []
+                sendResponse['error'] = []
+              }
+            })
+            .catch(err => {
+              sendResponse['appStatusCode'] = 4
+              sendResponse['message'] = ''
+              sendResponse['payloadJson'] = []
+              sendResponse['error'] = err
+            })
+
+          return NextResponse.json(sendResponse, { status: 200 })
+        } catch (err) {
+          sendResponse['appStatusCode'] = 4
+          sendResponse['message'] = ''
+          sendResponse['payloadJson'] = []
+          sendResponse['error'] = 'Something went wrong!'
+
+          return NextResponse.json(sendResponse, { status: 400 })
         }
       } else {
-      let _search = {};
-      
-      _search["$and"] = [
+        sendResponse['appStatusCode'] = 4
+        sendResponse['message'] = ''
+        sendResponse['payloadJson'] = []
+        sendResponse['error'] = 'Record not found!'
+
+        return NextResponse.json(sendResponse, { status: 200 })
+      }
+    } else {
+      let _search = {}
+
+      _search['$and'] = [
         {
-          $and: [{ n_status: 1 }, { n_published: 1 }],
-        },
-      ];
+          $and: [{ n_status: 1 }, { n_published: 1 }]
+        }
+      ]
 
       try {
-        await connectMongoDB();
+        await connectMongoDB()
         await Organization.aggregate([
           { $match: _search },
           {
             $group: {
-              _id: "$_id",
-              organization_name: { $first: "$organization_name" },
-              organization_id: { $first: "$organization_id" },
-              c_version: { $first: "$c_version" },
-              createdAt: { $first: "$createdAt" },
-              c_createdBy: { $first: "$c_createdBy" },
-              n_status: { $first: "$n_status" },
-              n_published: { $first: "$n_published" },
-            },
+              _id: '$_id',
+              organization_name: { $first: '$organization_name' },
+              organization_id: { $first: '$organization_id' },
+              organization_logo: { $first: '$organization_logo' },
+              organization_address: { $first: '$organization_address' },
+              organization_emp_count: { $first: '$organization_emp_count' },
+              organization_currency: { $first: '$organization_currency' },
+              c_version: { $first: '$c_version' },
+              createdAt: { $first: '$createdAt' },
+              c_createdBy: { $first: '$c_createdBy' },
+              n_status: { $first: '$n_status' },
+              n_published: { $first: '$n_published' }
+            }
           },
           {
             $project: {
               _id: 1,
               organization_name: 1,
               organization_id: 1,
+              organization_logo: 1,
+              organization_address: 1,
+              organization_emp_count: 1,
+              organization_currency: 1,
               c_version: 1,
               createdAt: 1,
               c_createdBy: 1,
               n_status: 1,
-              n_published: 1,
-            },
+              n_published: 1
+            }
           },
           {
-            $sort: { createdAt: -1 },
-          },
+            $sort: { createdAt: -1 }
+          }
         ])
-          .then((data) => {
+          .then(data => {
             if (data.length > 0) {
-              sendResponse["appStatusCode"] = 0;
-              sendResponse["message"] = "";
-              sendResponse["payloadJson"] = data;
-              sendResponse["error"] = [];
+              sendResponse['appStatusCode'] = 0
+              sendResponse['message'] = ''
+              sendResponse['payloadJson'] = data
+              sendResponse['error'] = []
             } else {
-              sendResponse["appStatusCode"] = 0;
-              sendResponse["message"] = "Record not found!";
-              sendResponse["payloadJson"] = [];
-              sendResponse["error"] = [];
+              sendResponse['appStatusCode'] = 0
+              sendResponse['message'] = 'Record not found!'
+              sendResponse['payloadJson'] = []
+              sendResponse['error'] = []
             }
           })
-          .catch((err) => {
-            sendResponse["appStatusCode"] = 4;
-            sendResponse["message"] = "";
-            sendResponse["payloadJson"] = [];
-            sendResponse["error"] = err;
-          });
+          .catch(err => {
+            sendResponse['appStatusCode'] = 4
+            sendResponse['message'] = ''
+            sendResponse['payloadJson'] = []
+            sendResponse['error'] = err
+          })
 
-        return NextResponse.json(sendResponse, { status: 200 });
+        return NextResponse.json(sendResponse, { status: 200 })
       } catch (err) {
-        sendResponse["appStatusCode"] = 4;
-        sendResponse["message"] = "";
-        sendResponse["payloadJson"] = [];
-        sendResponse["error"] = "Something went wrong!";
+        sendResponse['appStatusCode'] = 4
+        sendResponse['message'] = ''
+        sendResponse['payloadJson'] = []
+        sendResponse['error'] = 'Something went wrong!'
 
-        return NextResponse.json(sendResponse, { status: 400 });
+        return NextResponse.json(sendResponse, { status: 400 })
       }
     }
-   }else {
-         sendResponse["appStatusCode"] = 4;
-         sendResponse["message"] = "";
-         sendResponse["payloadJson"] = [];
-         sendResponse["error"] = verified.error;
-   
-         return NextResponse.json(sendResponse, { status: 400 });
-       }
+  } else {
+    sendResponse['appStatusCode'] = 4
+    sendResponse['message'] = ''
+    sendResponse['payloadJson'] = []
+    sendResponse['error'] = verified.error
 
-  
-
-   
-  
+    return NextResponse.json(sendResponse, { status: 400 })
+  }
 }
-

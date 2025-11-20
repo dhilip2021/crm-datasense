@@ -45,7 +45,7 @@ export async function POST(request) {
           let mailData = {
             from: '"No Reply" <dhilipbeece001@gmail.com>',
             to: `${email}`,
-            subject: '🔐 Email OTP Verification - CRM DATA SENSE',
+            subject: '🔐 Email OTP Verification - Lumivo CRM - Datasense Technologies',
             text: 'Your OTP for CRM DATA SENSE verification',
             html: `
   <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 10px; padding: 30px; background: #f9fafc;">
