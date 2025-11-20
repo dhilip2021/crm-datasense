@@ -193,48 +193,43 @@ function LeadFormAppPage() {
   }
 
   // Handle blur
- const handleBlur = (e, field) => {
-  const value = values[field.id]; // ✅ define value at the top
+  const handleBlur = (e, field) => {
+    const value = values[field.id] // ✅ define value at the top
 
-  if (field.type === 'Email') {
-    if (typeof value === 'string') {
-      // ❌ block leading space
-      if (/^\s/.test(value)) {
-        return `${field.label} cannot start with space`
+    if (field.type === 'Email') {
+      if (typeof value === 'string') {
+        // ❌ block leading space
+        if (/^\s/.test(value)) {
+          return `${field.label} cannot start with space`
+        }
+        // ❌ block ANY space in email
+        if (/\s/.test(value)) {
+          return 'Email cannot contain spaces'
+        }
+
+        // ✅ trim before validation
+        const trimmedValue = value.trim()
+
+        if (field.required && !trimmedValue) return `${field.label} is required`
+
+        if (trimmedValue && !isValidEmailPragmatic(trimmedValue)) return 'Invalid email address'
+
+        return ''
       }
-      // ❌ block ANY space in email
-      if (/\s/.test(value)) {
-        return 'Email cannot contain spaces'
-      }
-
-      // ✅ trim before validation
-      const trimmedValue = value.trim()
-
-      if (field.required && !trimmedValue)
-        return `${field.label} is required`
-
-      if (trimmedValue && !isValidEmailPragmatic(trimmedValue))
-        return 'Invalid email address'
-
-      return ''
+    } else if (field.type === 'Phone') {
+      const valueForValidation = values[`${field.id}_number`]
+      const error = validateField(field, valueForValidation)
+      setErrors(prev => ({ ...prev, [field.id]: error || '' }))
+    } else if (field.type === 'Currency') {
+      const valueForValidation = values[field.id]
+      const error = validateField(field, valueForValidation)
+      setErrors(prev => ({ ...prev, [field.id]: error || '' }))
+    } else {
+      const valueForValidation = values[field.id]
+      const error = validateField(field, valueForValidation)
+      setErrors(prev => ({ ...prev, [field.id]: error || '' }))
     }
-  } else if (field.type === 'Phone') {
-    const valueForValidation = values[`${field.id}_number`]
-    const error = validateField(field, valueForValidation)
-    setErrors(prev => ({ ...prev, [field.id]: error || '' }))
-  } else if (field.type === 'Currency') {
-    const valueForValidation = values[field.id]
-    const error = validateField(field, valueForValidation)
-    setErrors(prev => ({ ...prev, [field.id]: error || '' }))
-  } else {
-    const valueForValidation = values[field.id]
-    const error = validateField(field, valueForValidation)
-    setErrors(prev => ({ ...prev, [field.id]: error || '' }))
   }
-}
-
- 
-
 
   // ---- handleSubmit ----
   const handleSubmit = async () => {
@@ -292,7 +287,7 @@ function LeadFormAppPage() {
     }
 
     setLoader(true)
-    
+
     try {
       const res = await fetch('/api/v1/admin/lead-form/form-submit', {
         method: 'POST',
@@ -315,8 +310,7 @@ function LeadFormAppPage() {
       }
 
       if (data.success) {
-
-        console.log(data,"<<< form submited Data")
+        console.log(data, '<<< form submited Data')
 
         toast.success('Form submitted successfully', {
           autoClose: 1500,
@@ -324,12 +318,8 @@ function LeadFormAppPage() {
           hideProgressBar: true
         })
         router.push(`/view/lead-form/${encodeURIComponent(encryptCryptoRes(data.data.lead_id))}`)
-        
 
         // router.push('/app/leads')
-
-
-
       } else {
         toast.error(data.message, { autoClose: 1500, position: 'bottom-center' })
       }
@@ -499,6 +489,7 @@ function LeadFormAppPage() {
               startAdornment: (
                 <InputAdornment position='start'>
                   <Autocomplete
+                  disableClearable
                     options={countryCodes}
                     getOptionLabel={
                       option => (typeof option === 'string' ? option : option.dial_code) // only for dropdown search
@@ -511,13 +502,26 @@ function LeadFormAppPage() {
                         handleChange(`${field.id}_countryCode`, '', field.type)
                       }
                     }}
+                     sx={{
+                                width: '100px', // ⬅️ Sets proper width for flag, code & arrow
+                                minWidth: '100px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                padding: '0px 0px 0px 0px', // ⬅️ Padding-right reserves space for arrow
+                                '& .MuiSelect-select': {
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '1px',
+                                  padding: '0px 0px'
+                                }
+                              }}
                     size='small'
-                    sx={{ minWidth: 140 }}
                     renderOption={(props, option) => (
                       <Box component='li' {...props} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <img
                           loading='lazy'
-                          width='20'
+                          width='22'
+                          height='16'
                           src={option.flag}
                           alt={option.code}
                           style={{ borderRadius: '3px' }}

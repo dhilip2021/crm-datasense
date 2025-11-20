@@ -453,7 +453,7 @@ const staticFiledForm = [
       ]
     },
     id: crypto.randomUUID(),
-    title: 'New Section',
+    title: 'Follow-Up Section',
     layout: 'triple'
   }
 ]
