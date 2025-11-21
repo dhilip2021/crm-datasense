@@ -40,6 +40,7 @@ function capitalizeWords(str) {
     .join(' ')
 }
 
+const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@.#$!%*?&^])[A-Za-z\d@.#$!%*?&]{8,15}$/
 function isValidMobileNumberStrict(value) {
   // if (value?.length > 15) {
   //   return false
@@ -80,6 +81,7 @@ const Register = ({ mode }) => {
     first_name: '',
     last_name: '',
     email: '',
+    password: '',
     countryCode: '',
     mobile: '',
     otp: ''
@@ -94,6 +96,7 @@ const Register = ({ mode }) => {
     first_name: false,
     last_name: false,
     email: false,
+    password: false,
     countryCode: false,
     mobile: false,
     otp: false
@@ -102,7 +105,7 @@ const Register = ({ mode }) => {
   const [userInfo, setUserInfo] = useState(true)
   const [otpInfo, setOtpInfo] = useState(false)
   const [orgInfo, setOrgInfo] = useState(false)
-
+  const [edit, setEdit] = useState(false)
   const [loader, setLoader] = useState(false)
   const [errOrgName, setErrOrgName] = useState('')
   const [errOrgEmpCount, setErrOrgEmpCount] = useState('')
@@ -117,8 +120,10 @@ const Register = ({ mode }) => {
   const [loaderEmail, setLoaderEmail] = useState(false)
 
   const [countryCodes, setCountryCodes] = useState([])
-
+  const [isPasswordShown, setIsPasswordShown] = useState(false)
   const [logoPreview, setLogoPreview] = useState(null)
+
+  const handleClickShowPassword = () => setIsPasswordShown(show => !show)
 
   const isEmail = email => {
     var emailFormat = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/
@@ -190,6 +195,21 @@ const Register = ({ mode }) => {
         setErrorInputs(prev => ({ ...prev, [name]: true }))
         setErrEmail('Please enter valid email')
       }
+    } else if (name === 'password') {
+      if (!inputs?.password.match(passRegex) && !edit) {
+        setErrorInputs({ ...errorInputs, password: true })
+        toast.error('Use strong password with letters, numbers & symbols', {
+          autoClose: 500, // 1 second la close
+          position: 'bottom-center',
+          hideProgressBar: true, // progress bar venam na
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined
+        })
+
+        return
+      }
     } else if (name === 'otp') {
       if (value !== '') {
         if (value.length < 4) {
@@ -243,6 +263,9 @@ const Register = ({ mode }) => {
       //   setErrorInputs({ ...errorInputs, email: false })
       //   setInputs({ ...inputs, [name]: normalizeEmail(value.toLowerCase()) })
       // }
+    } else if (name === 'password') {
+      setErrorInputs({ ...errorInputs, password: false })
+      setInputs({ ...inputs, [name]: value })
     } else if (name === 'otp') {
       const res = isValidOTPStrict(value)
 
@@ -385,10 +408,25 @@ const Register = ({ mode }) => {
   }
 
   const handleOTPSubmit = () => {
-    setUserInfo(false)
-    setOtpInfo(true)
-    setOrgInfo(false)
-    sendOtpfn(inputs?.email)
+    if (!inputs?.password.match(passRegex) && !edit) {
+      setErrorInputs({ ...errorInputs, password: true })
+      toast.error('Use strong password with letters, numbers & symbols', {
+        autoClose: 500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
+
+      return
+    } else {
+      setUserInfo(false)
+      setOtpInfo(true)
+      setOrgInfo(false)
+      sendOtpfn(inputs?.email)
+    }
   }
 
   const handleOTPVerify = () => {
@@ -396,8 +434,6 @@ const Register = ({ mode }) => {
       verrifyOtpfn(inputs.email, inputs.otp)
     }
   }
-
-  
 
   const handleSubmit = async () => {
     const body = {
@@ -419,16 +455,6 @@ const Register = ({ mode }) => {
       const result = await addOrganizationApi(body)
 
       if (result?.appStatusCode === 0) {
-        const body1 = {
-          first_name: inputs?.first_name,
-          last_name: inputs?.last_name,
-          c_about_user: 'Admin',
-          email: inputs?.email,
-          mobile: `${inputs?.countryCode}${inputs?.mobile}`,
-          role: '',
-          c_role_id: '16f01165898b',
-          c_user_img_url: ''
-        }
         setLoader(true)
 
         const body2 = {
@@ -741,6 +767,64 @@ const Register = ({ mode }) => {
                       }}
                     />
 
+                    <TextField
+                      onBlur={handleBlur}
+                      disabled={edit}
+                      autoComplete='new-password'
+                      fullWidth
+                      label='Password *'
+                      placeholder='············'
+                      id='form-layout-basic-password'
+                      name='password'
+                      value={inputs.password}
+                      onChange={handleChange}
+                      error={errorInputs?.password}
+                      helperText={
+                        errorInputs?.password && 'Use 8 or more characters with a mix of letters, numbers & symbols'
+                      }
+                      type={isPasswordShown ? 'text' : 'password'}
+                      sx={{
+                        // Target the root of the input element
+                        '& .MuiOutlinedInput-root': {
+                          position: 'relative', // anchor for the ::before strip
+
+                          // Red strip
+                          '&::before': {
+                            content: '""',
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            width: '4px', // thickness of the strip
+                            backgroundColor: 'error.main',
+                            borderTopLeftRadius: '4px', // match the TextField’s rounded corners
+                            borderBottomLeftRadius: '4px'
+                          }
+                        }
+                      }}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position='start'>
+                            <i className='ri-lock-line'></i>
+                          </InputAdornment>
+                        ),
+                        endAdornment: (
+                          <InputAdornment position='end'>
+                            <IconButton
+                              size='small'
+                              edge='end'
+                              onClick={handleClickShowPassword}
+                              onMouseDown={e => e.preventDefault()}
+                              aria-label='toggle password visibility'
+                            >
+                              <i className={isPasswordShown ? 'ri-eye-off-line' : 'ri-eye-line'} />
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
+                      size='small'
+                    />
+
                     <Button
                       fullWidth
                       variant='contained'
@@ -749,10 +833,12 @@ const Register = ({ mode }) => {
                         inputs.first_name === '' ||
                         inputs.email === '' ||
                         inputs.mobile === '' ||
+                        inputs.password === '' ||
                         errorInputs?.first_name ||
                         errorInputs?.last_name ||
                         errorInputs?.email ||
-                        errorInputs?.mobile
+                        errorInputs?.mobile ||
+                        errorInputs?.password
                       }
                       onClick={handleOTPSubmit}
                     >

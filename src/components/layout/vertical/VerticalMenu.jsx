@@ -46,6 +46,10 @@ const VerticalMenu = ({ scrollMenu, roles }) => {
     Cookies.remove('user_name')
     Cookies.remove('organization_id')
     Cookies.remove('organization_name')
+    Cookies.remove('organization_logo')
+    Cookies.remove('organization_address')
+    Cookies.remove('organization_currency')
+    Cookies.remove('organization_emp_count')
     Cookies.remove('user_id')
     Cookies.remove('c_version')
     Cookies.remove('endedAt')
@@ -102,7 +106,7 @@ const VerticalMenu = ({ scrollMenu, roles }) => {
           <MenuItem href='/items' icon={<i className='ri-archive-2-line' />}>
             Item Master
           </MenuItem>
-           <MenuItem href='/reasons-master' icon={<i className='ri-archive-2-line' />}>
+          <MenuItem href='/reasons-master' icon={<i className='ri-archive-2-line' />}>
             Reasons Master
           </MenuItem>
         </SubMenu>
@@ -124,13 +128,13 @@ const VerticalMenu = ({ scrollMenu, roles }) => {
           <MenuItem href='/tasks' icon={<i className='ri-task-line' />}>
             Tasks
           </MenuItem>
-           <MenuItem href='/calls' icon={<i className='ri-phone-line' />}>
+          <MenuItem href='/calls' icon={<i className='ri-phone-line' />}>
             Calls
           </MenuItem>
           <MenuItem href='/organization' icon={<i className='ri-building-line' />}>
             Organization
           </MenuItem>
-         
+
           <MenuItem href='/emails' icon={<i className='ri-mail-line' />}>
             Emails
           </MenuItem>

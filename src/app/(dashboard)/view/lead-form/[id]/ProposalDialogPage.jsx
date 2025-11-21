@@ -144,7 +144,7 @@ const ProposalDialogPage = ({
               <Table size='small'>
                 <TableHead sx={{ backgroundColor: '#f0f4ff' }}>
                   <TableRow>
-                    {['Item', 'Description', 'Qty', 'Unit Price', 'Total'].map((label, index) => (
+                    {['Item', 'Description', 'Qty', 'Unit Price','Gst', 'Total'].map((label, index) => (
                       <TableCell key={index} align={index > 1 ? 'right' : 'left'}>
                         <b>{label}</b>
                       </TableCell>
@@ -162,6 +162,7 @@ const ProposalDialogPage = ({
                           <TableCell>{item?.itemMasterRef?.description || '-'}</TableCell>
                           <TableCell align='right'>{item.quantity}</TableCell>
                           <TableCell align='right'>₹{item.unitPrice.toFixed(2)}</TableCell>
+                          <TableCell align='right'>{item?.itemMasterRef?.gst} %</TableCell>
                           <TableCell align='right'>
                             <b>₹{subtotal.toFixed(2)}</b>
                           </TableCell>
@@ -176,9 +177,10 @@ const ProposalDialogPage = ({
                     </TableRow>
                   )}
 
+
                   {/* TOTAL SECTION */}
                   <TableRow>
-                    <TableCell colSpan={4} align='right'>
+                    <TableCell colSpan={5} align='right'>
                       <b>Subtotal:</b>
                     </TableCell>
                     <TableCell align='right'>
@@ -187,7 +189,7 @@ const ProposalDialogPage = ({
                   </TableRow>
 
                   <TableRow>
-                    <TableCell colSpan={4} align='right'>
+                    <TableCell colSpan={5} align='right'>
                       <b>Discount:</b>
                     </TableCell>
                     <TableCell align='right' sx={{ color: 'error.main' }}>
@@ -196,14 +198,14 @@ const ProposalDialogPage = ({
                   </TableRow>
 
                   <TableRow>
-                    <TableCell colSpan={4} align='right'>
-                      <b>GST (18%):</b>
+                    <TableCell colSpan={5} align='right'>
+                      <b>GST Amount:</b>
                     </TableCell>
                     <TableCell align='right'>₹{totals.gstAmount.toFixed(2)}</TableCell>
                   </TableRow>
 
                   <TableRow sx={{ backgroundColor: '#e9f7ef' }}>
-                    <TableCell colSpan={4} align='right'>
+                    <TableCell colSpan={5} align='right'>
                       <Typography variant='h6' fontWeight='bold'>
                         Grand Total:
                       </Typography>

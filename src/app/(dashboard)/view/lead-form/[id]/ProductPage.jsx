@@ -22,11 +22,14 @@ import ProductSelectorDialog from './ProductSelectorDialog'
 import ProductBulkEditDialog from './ProductBulkEditDialog'
 import { toast } from 'react-toastify'
 import { formatCurrency } from '@/helper/frontendHelper'
+import EmptyItems from '../../empty-items/EmptyItems'
+import { useRouter } from 'next/navigation'
 
 // ✅ Utility for currency
 // const formatCurrency = value => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value)
 
-function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData,dealFnCall }) {
+function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData, dealFnCall }) {
+  const router = useRouter()
   const [openDialog, setOpenDialog] = useState(false)
   const [loader, setLoader] = useState(false)
 
@@ -269,41 +272,54 @@ function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData,dealFnCall }
                 <Typography variant='body2' sx={{ fontSize: 13 }}>
                   GST: <strong>{formatCurrency(gstAmount)}</strong>
                 </Typography>
-                <Typography variant='body2' sx={{ fontSize: 13 }}> ---------------------------------</Typography>
+                <Typography variant='body2' sx={{ fontSize: 13 }}>
+                  {' '}
+                  ---------------------------------
+                </Typography>
                 <Typography variant='subtitle1' fontWeight={700} color='#4caf50'>
                   Grand Total: {formatCurrency(total)}
                 </Typography>
-                <Typography variant='body2' sx={{ fontSize: 13 }}> ---------------------------------</Typography>
+                <Typography variant='body2' sx={{ fontSize: 13 }}>
+                  {' '}
+                  ---------------------------------
+                </Typography>
               </Box>
               <Box textAlign='right'>
-                              <Typography variant='body1'>
-                                <Chip
-                                  onClick={() => dealFnCall(order.item_id)}
-                                  label='Confirm Quotation'
-                                  color='primary'
-                                  variant='filled' // ← change this
-                                  sx={{
-                                    fontWeight: 'regular',
-                                    cursor: 'pointer',
-                                    fontSize: '1rem',
-                                    px: 5,
-                                    py: 3,
-                                    borderRadius: '12px',
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': {
-                                      backgroundColor: '#f3f4f6',
-                                      color: '#009cde',
-                                      boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
-                                    }
-                                  }}
-                                />
-                              </Typography>
-                            </Box>
+                <Typography variant='body1'>
+                  <Chip
+                    onClick={() => dealFnCall(order.item_id)}
+                    label='Confirm Quotation'
+                    color='primary'
+                    variant='filled' // ← change this
+                    sx={{
+                      fontWeight: 'regular',
+                      cursor: 'pointer',
+                      fontSize: '1rem',
+                      px: 5,
+                      py: 3,
+                      borderRadius: '12px',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        backgroundColor: '#f3f4f6',
+                        color: '#009cde',
+                        boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
+                      }
+                    }}
+                  />
+                </Typography>
+              </Box>
             </Paper>
           )
         })
       ) : (
-        <Typography align='center'>🚫 No items added yet</Typography>
+        // <Typography align='center'>🚫 No items added yett</Typography>
+
+        <EmptyItems
+          onAdd={() => router.push('/items')}
+          primaryText='🚫 No items added yet'
+          secondaryText="You don't have any items yet. Click below to create your first item."
+          buttonText='Create Item'
+        />
       )}
 
       <ProductSelectorDialog

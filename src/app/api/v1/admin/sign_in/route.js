@@ -89,22 +89,16 @@ export async function POST(request) {
                 const nextTenDays = new Date(today.getTime())
                 nextTenDays.setDate(nextTenDays.getDate() + 10)
                 const sampleData = [tokenVerify]
-
                 const secretKey = process.env.NEXT_PUBLIC_ENCY_DECY_SECRET
-
                 const encryptedResults = urlEncoder(secretKey, JSON.stringify(sampleData))
-
-               
-
                 if (data.c_role_id) {
-
-                  
-
-                  
-
                   let dataResults = {
                     organization_id: data.organization_id,
                     organization_name: orgData?.organization_name,
+                    organization_logo: orgData?.organization_logo,
+                    organization_address: orgData?.organization_address,
+                    organization_emp_count: orgData?.organization_emp_count,
+                    organization_currency: orgData?.organization_currency,
                     c_version: orgData?.c_version,
                     endedAt: orgData?.endedAt,
                     first_name: data.first_name,

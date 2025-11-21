@@ -289,9 +289,30 @@ const ItemMasterList = () => {
     setDeleteDialogOpen(true)
   }
 
+
+  const handleItemClick= ()=>{
+     setItem({
+      item_type: 'Product',
+      item_name: '',
+      item_code: '',
+      description: '',
+      uom: '',
+      basePrice: '',
+      mrp: '',
+      distributorPrice: '',
+      gst: '',
+      hsn: '',
+      licenseKey: '',
+      warrantyPeriod: '',
+      billingCycle: '',
+      subscriptionDuration: ''
+    })
+    setOpen(true)
+
+  }
+
   // Edit
   const handleEdit = row => {
-    console.log(row, '<<< rowwwwwww')
     setTitles('Edit')
     setItem({
       item_type: row?.item_type,
@@ -369,7 +390,7 @@ const ItemMasterList = () => {
         />
         <Button
           variant='contained'
-          onClick={() => setOpen(true)}
+          onClick={handleItemClick}
           startIcon={<AddIcon />}
           sx={{
             borderRadius: '8px',

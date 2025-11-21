@@ -14,7 +14,6 @@ const loginSlice = createSlice({
   reducers: {
     loginData: (state, action) => {
       const { appStatusCode, message, payloadJson, error } = action.payload;
-
       state.statuscode = appStatusCode;
       state.message = message;
       state.payloadJson = payloadJson;

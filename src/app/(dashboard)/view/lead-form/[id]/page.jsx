@@ -100,14 +100,16 @@ const LeadDetailView = () => {
   const params = useParams()
   const encryptedId = decodeURIComponent(params.id)
 
-
- 
   const getToken = Cookies.get('_token')
   const organization_name = Cookies.get('organization_name')
   const user_name = Cookies.get('user_name')
   const email = Cookies.get('email')
   const mobile = Cookies.get('mobile')
   const organization_id = Cookies.get('organization_id')
+  const organization_logo = Cookies.get('organization_logo')
+  const organization_address = Cookies.get('organization_address')
+
+  console.log(organization_address, '<< organization_address')
 
   const leadId = decrypCryptoReq(encryptedId)
   const [expanded, setExpanded] = useState(0) // 0 = first open by default
@@ -218,7 +220,7 @@ const LeadDetailView = () => {
     setLoader(true)
     try {
       const res = await fetch(
-        `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${opportunity_form}`,
+        `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${lead_form}`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -281,10 +283,6 @@ const LeadDetailView = () => {
       setLoader(false)
     }
   }
-
-
-
-
 
   const calculateItemTotals = item => {
     const qty = Number(item?.quantity || 0)
@@ -353,48 +351,87 @@ const LeadDetailView = () => {
       to: leadData.values['Email'], // customer email
       subject: `Quotation for ${leadData.values['Company']} - ${organization_name}`,
       html: `
-      <div style="font-family: Arial, sans-serif; max-width: 700px; margin:auto; border:1px solid #e0e0e0; border-radius:10px; padding:20px; background:#f9fafc;">
-        <h2 style="text-align:center; color:#1976d2; margin-bottom:10px;">${organization_name}</h2>
-        <h3 style="text-align:center; color:#d1d1d1; margin-bottom:20px;">Quotation No: ${quoNumber}</h3>
-        <p>Dear <b>${leadData.values['First Name']} ${leadData.values['Last Name']}</b>,</p>
-        <p>We are pleased to share our quotation for your requirement <b>${leadData.values['Company']}</b>. Please find the details below:</p>
-        
-        <table style="width:100%; border-collapse:collapse; margin-top:10px;">
-          <thead>
-            <tr style="background:#2980b9; color:#fff;">
-              <th style="padding:8px; border:1px solid #ddd;">#</th>
-              <th style="padding:8px; border:1px solid #ddd;">Item</th>
-              <th style="padding:8px; border:1px solid #ddd;">Qty</th>
-              <th style="padding:8px; border:1px solid #ddd;">Unit Price</th>
-              <th style="padding:8px; border:1px solid #ddd;">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${itemsHtml}
-          </tbody>
-        </table>
-        <p style="margin-top:15px; text-align:right;">
-          <b>Subtotal:</b> ₹${totals.subtotal.toFixed(2)}<br>
-          <b>Discount:</b> -₹${totals.discountAmount.toFixed(2)}<br>
-          <b>GST:</b> ₹${totals.gstAmount.toFixed(2)}<br>
-          <b>Total Amount:</b> ₹${totals.finalPrice.toFixed(2)}
-        </p>
+<div style="font-family: Arial, sans-serif; max-width:700px; margin:auto; border:1px solid #e0e0e0; border-radius:10px; padding:20px; background:#f9fafc;">
 
+  <!-- ===== Header with Logo and Company Details ===== -->
+  <table style="width:100%; margin-bottom:20px;">
+    <tr>
+      <td style="width:50%;">
+        <img src="${organization_logo}" alt="Company Logo" style="max-width:150px; height:auto;">
+      </td>
+      <td style="text-align:right; font-size:12px; color:#555;">
+        <b>${organization_name}</b><br>
+        ${organization_address}<br>
+        Phone: ${mobile}<br>
+        Email: ${email}<br>
+      </td>
+    </tr>
+  </table>
 
-       ${
-         formattedNotes
-           ? `<p style="margin-top:15px; line-height:1.6;"><b>Terms & Conditions:</b><br>${formattedNotes}</p>`
-           : ''
-       }
+  <!-- ===== Title ===== -->
+  <h2 style="text-align:center; color:#1976d2; margin-bottom:5px;">QUOTATION</h2>
+  <p style="text-align:center; color:#888; margin-bottom:20px;">Quotation No: ${quoNumber}</p>
 
-        <p style="margin-top:20px;">We look forward to doing business with you. Please feel free to contact us for any clarifications.</p>
+  <!-- ===== Greeting ===== -->
+  <p>Dear <b>${leadData.values['First Name']} ${leadData.values['Last Name']}</b>,</p>
+  <p>Thank you for your interest in <b>${organization_name}</b>. Please find below the quotation for your requirement from <b>${leadData.values['Company']}</b>:</p>
 
-        <p style="margin-top:20px;">Best Regards,<br>
-          <b>${user_name}</b><br>
-          CEO, ${organization_name}
-        </p>
-      </div>
-    `
+  <!-- ===== Items Table ===== -->
+  <table style="width:100%; border-collapse:collapse; margin-top:10px;">
+    <thead>
+      <tr style="background:#2980b9; color:#fff;">
+        <th style="padding:8px; border:1px solid #ddd;">#</th>
+        <th style="padding:8px; border:1px solid #ddd;">Item</th>
+        <th style="padding:8px; border:1px solid #ddd; text-align:right;">Qty</th>
+        <th style="padding:8px; border:1px solid #ddd; text-align:right;">GST</th>
+        <th style="padding:8px; border:1px solid #ddd; text-align:right;">Unit Price</th>
+        <th style="padding:8px; border:1px solid #ddd; text-align:right;">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${dataItems
+        .map(
+          (item, idx) => `
+      <tr>
+        <td style="padding:8px; border:1px solid #ddd;">${idx + 1}</td>
+        <td style="padding:8px; border:1px solid #ddd;">${item.itemMasterRef.item_name}</td>
+        <td style="padding:8px; border:1px solid #ddd; text-align:right;">${item.quantity}</td>
+        <td style="padding:8px; border:1px solid #ddd; text-align:right;">${item.itemMasterRef.gst}%</td>
+        <td style="padding:8px; border:1px solid #ddd; text-align:right;">₹${item.unitPrice.toFixed(2)}</td>
+        <td style="padding:8px; border:1px solid #ddd; text-align:right;">₹${item.finalPrice.toFixed(2)}</td>
+      </tr>`
+        )
+        .join('')}
+    </tbody>
+  </table>
+
+ <!-- ===== Total Summary ===== -->
+<div style="margin-top:15px; text-align:right; font-size:14px;">
+  <b>Subtotal:</b> ₹${totals.subtotal.toFixed(2)}<br>
+
+  ${totals.discountAmount > 0 ? `<b>Discount:</b> -₹${totals.discountAmount.toFixed(2)}<br>` : ''}
+
+  <b>GST:</b> ₹${totals.gstAmount.toFixed(2)}<br>
+  <b>Total Amount:</b> <span style="font-size:16px; color:#1976d2;">₹${totals.finalPrice.toFixed(2)}</span>
+</div>
+
+  <!-- ===== Notes / Terms ===== -->
+  ${
+    formattedNotes
+      ? `<p style="margin-top:15px; line-height:1.6;"><b>Terms & Conditions:</b><br>${formattedNotes}</p>`
+      : ''
+  }
+
+  <!-- ===== Footer / Signature ===== -->
+  <p style="margin-top:25px;">We look forward to doing business with you. Please feel free to contact us for any clarifications.</p>
+
+  <p style="margin-top:15px;">Best Regards,<br>
+    <b>${user_name}</b><br>
+    ${email}<br>
+    ${organization_name}
+  </p>
+</div>
+`
     }
 
     handleClose()
@@ -423,15 +460,11 @@ const LeadDetailView = () => {
       })
 
       const result = await res.json()
-      console.log(result,"<<< RESULTSSSS QUOTAUTIONSSS")
-
-       
 
       // setLoader(false)
 
       if (result.success) {
-
-        console.log("toast msg")
+        console.log('toast msg')
 
         toast.success('Quotation updated successfully', {
           autoClose: 500,
@@ -445,7 +478,6 @@ const LeadDetailView = () => {
           hideProgressBar: true
         })
       }
-   
     } catch (err) {
       toast.error('Error while saving note', {
         autoClose: 500,
@@ -455,22 +487,38 @@ const LeadDetailView = () => {
     }
   }
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF2 = () => {
     const doc = new jsPDF('p', 'pt', 'a4')
     const margin = 40
     const lineHeight = 14
 
-    // Header: Company Info
+    // 👉 Add Logo (Base64 or URL) here
+    const logoWidth = 70
+    const logoHeight = 30
+    doc.addImage(organization_logo, 'PNG', margin, 20, logoWidth, logoHeight)
+    // Header text shifted a bit down to avoid overlapping with logo
     doc.setFontSize(18)
     doc.setFont('helvetica', 'bold')
-    doc.text(organization_name, margin, 50)
+    doc.text(organization_name, margin + logoWidth + 10, 50)
+
     doc.setFontSize(10)
     doc.setFont('helvetica', 'normal')
-    doc.text('Address Line 1, Address Line 2', margin, 65)
-    doc.text(`Phone: ${mobile}`, margin, 80)
-    doc.text(`Email: ${email} | Website: www.datasense.in`, margin, 95)
 
-    // Date & Quotation No
+    doc.setFontSize(18)
+    doc.setFont('helvetica', 'bold')
+    doc.text(organization_name, margin + logoWidth + 10, 50)
+
+    // Properly aligned wrapped address
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'normal')
+
+    const wrappedAddress = doc.splitTextToSize(organization_address, 250) // max width 250px
+    doc.text(wrappedAddress, margin + logoWidth + 10, 65)
+
+    doc.text(`Phone: ${mobile}`, margin + logoWidth + 10, 80 + wrappedAddress.length * 5)
+    doc.text(`Email: ${email} | Website: www.datasense.in`, margin + logoWidth + 10, 95 + wrappedAddress.length * 5)
+
+    // Date and Quotation No (Right Side)
     doc.setFont('helvetica', 'bold')
     doc.text(`Date: ${new Date().toLocaleDateString()}`, 380, 50)
     doc.text(`Quotation No: ${quoNumber}`, 380, 65)
@@ -562,15 +610,183 @@ const LeadDetailView = () => {
     doc.text(user_name, margin, closingY + lineHeight * 3)
     doc.text('CEO', margin, closingY + lineHeight * 4)
     doc.text(organization_name, margin, closingY + lineHeight * 5)
-    doc.save(`Quotation_${leadData.values['Company']}.pdf`)
+
+    const companyName = leadData.values['Company']
+      ?.trim()
+      .replace(/\s+/g, '-') // spaces → hyphens
+      .replace(/[^a-zA-Z0-9-]/g, '') // remove special characters
+    doc.save(`Quotation_${companyName}.pdf`)
   }
 
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF('p', 'pt', 'a4')
+    const margin = 40
+    let y = 40
 
+    // ======== HEADER WITH LOGO & ORG DETAILS ========
+    const logoWidth = 70
+    const logoHeight = 40
+    doc.addImage(organization_logo, 'PNG', margin, y, logoWidth, logoHeight)
 
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(16)
+    doc.text(organization_name, margin + logoWidth + 10, y + 15)
 
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(9)
+    const wrappedAddress = doc.splitTextToSize(organization_address, 250)
+    doc.text(wrappedAddress, margin + logoWidth + 10, y + 35)
 
+    doc.text(`Phone: ${mobile}`, margin + logoWidth + 10, y + 60)
+    doc.text(`Email: ${email} | Website: www.datasense.in`, margin + logoWidth + 10, y + 75)
 
+    // Draw line below header
+    y += 90
+    doc.setLineWidth(0.5)
+    doc.line(margin, y, 555, y)
+    y += 20
 
+    // ======== QUOTATION TITLE ========
+    // doc.setFontSize(18)
+    // doc.setFont('helvetica', 'bold')
+    // doc.text('QUOTATION', margin, y)
+    y += 10
+
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'normal')
+    doc.text(`Date: ${new Date().toLocaleDateString()}`, 400, y)
+    doc.text(`Quotation No: ${quoNumber}`, 400, y + 15)
+
+    y += 40
+
+    // ======== CLIENT DETAILS IN BOX ========
+    doc.setFont('helvetica', 'bold')
+    doc.text('Bill To:', margin, y)
+    y += 15
+
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(10)
+    const clientName = `${leadData.values['First Name']} ${leadData.values['Last Name']}` || ''
+    const clientAddress = `${leadData.values['Street']}, ${leadData.values['City']}, ${leadData.values['State']} - ${leadData.values['Pincode']}, ${leadData.values['Country']}`
+
+    doc.text(clientName, margin, y)
+    doc.text(leadData.values['Company'], margin, y + 15)
+    const wrappedClientAddr = doc.splitTextToSize(clientAddress, 500)
+    doc.text(wrappedClientAddr, margin, y + 30)
+
+    y += wrappedClientAddr.length * 10 + 50
+
+    // ======== SUBJECT LINE ========
+    doc.setFont('helvetica', 'bold')
+    doc.text(`Subject: Quotation for ${leadData.items[0]?.item_ref[0]?.itemMasterRef.item_name}`, margin, y)
+    y += 25
+
+    doc.setFont('helvetica', 'normal')
+    doc.text(`Dear ${leadData.values['First Name']},`, margin, y)
+    y += 20
+    doc.text(`We are pleased to submit our quotation for your requirements as below:`, margin, y)
+    y += 20
+
+    // ======== TABLE FOR ITEMS ========
+    const tableColumn = ['#', 'Item', 'Qty', 'GST %', 'Unit Price', 'Total']
+
+    const tableRows = dataItems.map((item, index) => [
+      index + 1,
+      item.itemMasterRef.item_name,
+      item.quantity,
+      `${item.itemMasterRef.gst}%`, // Show GST with %
+      `${item.unitPrice.toFixed(2)}`,
+      `${item.finalPrice.toFixed(2)}`
+    ])
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: y,
+      styles: { fontSize: 10, cellPadding: 4 },
+      columnStyles: {
+        0: { cellWidth: 20 },
+        1: { cellWidth: 150 },
+        2: { cellWidth: 50 },
+        3: { cellWidth: 70 },
+        4: { cellWidth: 80 },
+        5: { cellWidth: 90, halign: 'right' } // ⬅ Total Right Align
+      },
+      headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [245, 245, 245] },
+      margin: { left: margin, right: margin }
+    })
+
+    let finalY = doc.lastAutoTable.finalY + 20
+
+    // ======== TOTALS BOX (RIGHT ALIGNED) ========
+    const totalsBoxX = 350
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'bold')
+
+    // Subtotal
+    doc.text(`Subtotal: `, totalsBoxX, finalY)
+    doc.text(`${totals.subtotal.toFixed(2)}`, totalsBoxX + 150, finalY, { align: 'right' })
+
+    let nextY = finalY + 15
+
+    // 🔥 Show Discount ONLY if not zero
+    if (totals.discountAmount > 0) {
+      doc.text(`Discount: `, totalsBoxX, nextY)
+      doc.text(`-${totals.discountAmount.toFixed(2)}`, totalsBoxX + 150, nextY, { align: 'right' })
+      nextY += 15
+    }
+
+    // GST
+    doc.text(`GST: `, totalsBoxX, nextY)
+    doc.text(`${totals.gstAmount.toFixed(2)}`, totalsBoxX + 150, nextY, { align: 'right' })
+
+    // Draw line before Grand Total
+    doc.line(totalsBoxX, nextY + 10, totalsBoxX + 150, nextY + 10)
+
+    // Grand Total
+    doc.setFontSize(12)
+    doc.text(`Grand Total: `, totalsBoxX, nextY + 30)
+    doc.text(`${totals.finalPrice.toFixed(2)}`, totalsBoxX + 150, nextY + 30, { align: 'right' })
+
+    finalY = nextY + 70
+
+    // ======== TERMS & CONDITIONS ========
+    if (notes && notes.trim() !== '') {
+      doc.setFont('helvetica', 'bold')
+      doc.text('Terms & Conditions:', margin, finalY)
+      doc.setFont('helvetica', 'normal')
+      const wrappedNotes = doc.splitTextToSize(notes, 500)
+      wrappedNotes.forEach((line, i) => {
+        doc.text(line, margin, finalY + 15 + i * 12)
+      })
+      finalY += wrappedNotes.length * 12 + 30
+    }
+
+    // ======== SIGNATURE BLOCK ========
+    doc.text('Best Regards,', margin, finalY)
+    doc.text(user_name, margin, finalY + 20)
+    doc.text(email, margin, finalY + 35)
+    doc.text(organization_name, margin, finalY + 50)
+
+    // ======== FOOTER ========
+    doc.setFontSize(8)
+    doc.setTextColor(120)
+    // doc.text(
+    //   'This is a system-generated quotation. No signature is required.',
+    //   margin,
+    //   820
+    // );
+    doc.text('Thank you for choosing Lumivo Datasense Technologies!', 400, 820, { align: 'right' })
+
+    // ======== SAVE FILE WITH CLEAN NAME ========
+    const companyName = leadData.values['Company']
+      ?.trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-zA-Z0-9-]/g, '')
+
+    doc.save(`Quotation_${companyName}.pdf`)
+  }
 
   useEffect(() => {
     if (sections.length > 0 && leadId) {
@@ -580,7 +796,7 @@ const LeadDetailView = () => {
   }, [sections, leadId])
 
   useEffect(() => {
-    console.log("fetchFormTemplate() call 7")
+    console.log('fetchFormTemplate() call 7')
     fetchFormTemplate()
     fetchOpportunityFormTemplate()
   }, [])
@@ -669,14 +885,13 @@ const LeadDetailView = () => {
     // Find the matching item group by orderId
     const selectedOrder = leadData.items.find(item => item.item_id === order_ID)
     const items = selectedOrder?.item_ref || []
-
     // ✅ Generate Quotation Number
     const quotationNumber = generateQuotationNumber(leadData)
 
     // ✅ Attach quotation number to each item or store globally
     const itemsWithQTN = items.map(item => ({ ...item, quotationNumber }))
 
-    console.log('Generated Quotation Number:', quotationNumber)
+    console.log('Generated itemsWithQTN:', itemsWithQTN)
     setDataItems(itemsWithQTN)
     setOrderId(order_ID)
     setConfirm(true)

@@ -264,7 +264,14 @@ export default function OpportunityReasonsManager() {
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth='xs' fullWidth>
         <DialogTitle>{action === 'add' ? 'Add New Reason' : 'Edit Reason'}</DialogTitle>
         <DialogContent>
-          <TextField fullWidth label='Reason' value={value} onChange={e => setValue(e.target.value)} sx={{ mt: 1 }} />
+          <TextField 
+          autoFocus
+          fullWidth 
+          label='Reason' 
+          value={value} 
+          onChange={e => setValue(e.target.value)} sx={{ mt: 1 }} 
+          onKeyDown={e => e.key === 'Enter' && handleSave()}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>Cancel</Button>

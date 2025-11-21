@@ -1,8 +1,7 @@
 import dayjs from 'dayjs'
 import Cookies from 'js-cookie'
-import CryptoJS from "crypto-js"
-import { parsePhoneNumberFromString } from "libphonenumber-js"
-
+import CryptoJS from 'crypto-js'
+import { parsePhoneNumberFromString } from 'libphonenumber-js'
 
 export function capitalizeWords(str) {
   return str
@@ -46,43 +45,38 @@ export const removeCredentials = () => {
   Cookies.remove('user_name')
   Cookies.remove('organization_id')
   Cookies.remove('organization_name')
+  Cookies.remove('organization_logo')
+  Cookies.remove('organization_address')
+  Cookies.remove('organization_currency')
+  Cookies.remove('organization_emp_count')
   Cookies.remove('user_id')
   Cookies.remove('c_version')
   Cookies.remove('endedAt')
 }
 export function encryptCryptoResponse(data) {
-  const secretPassphrase = `${process.env.NEXT_PUBLIC_ENCY_DECY_SECRET}`;
-  const encryptedResponse = CryptoJS.AES.encrypt(
-    JSON.stringify(data), 
-    secretPassphrase
-  ).toString();
+  const secretPassphrase = `${process.env.NEXT_PUBLIC_ENCY_DECY_SECRET}`
+  const encryptedResponse = CryptoJS.AES.encrypt(JSON.stringify(data), secretPassphrase).toString()
 
-  return encryptedResponse;
+  return encryptedResponse
 }
 
-
 export function decrypCryptoRequest(data) {
-  const secretPassphrase = `${process.env.NEXT_PUBLIC_ENCY_DECY_SECRET}`;
-  const decrypted = CryptoJS.AES.decrypt(
-    data, 
-    secretPassphrase
-  ).toString(CryptoJS.enc.Utf8);
+  const secretPassphrase = `${process.env.NEXT_PUBLIC_ENCY_DECY_SECRET}`
+  const decrypted = CryptoJS.AES.decrypt(data, secretPassphrase).toString(CryptoJS.enc.Utf8)
 
-  const decryptedResponse = JSON.parse(decrypted);
+  const decryptedResponse = JSON.parse(decrypted)
 
-  return decryptedResponse;
+  return decryptedResponse
 }
 
 // Function to mask email
 export function maskEmail(email) {
-  const [name, domain] = email.split("@");
-  if (!domain) return email; // If not a valid email
-  const maskedName = name.length > 3
-    ? name.slice(0, 3) + "*".repeat(name.length - 3)
-    : name[0] + "*".repeat(name.length - 1);
-  return `${maskedName}@${domain}`;
+  const [name, domain] = email.split('@')
+  if (!domain) return email // If not a valid email
+  const maskedName =
+    name.length > 3 ? name.slice(0, 3) + '*'.repeat(name.length - 3) : name[0] + '*'.repeat(name.length - 1)
+  return `${maskedName}@${domain}`
 }
-
 
 export function encryptCryptoRes(data) {
   const secretPassphrase = process.env.NEXT_PUBLIC_ENCY_DECY_SECRET
@@ -101,15 +95,14 @@ export function decrypCryptoReq(data) {
   }
 
   try {
-    return JSON.parse(decrypted)   // will give original lead_id back
+    return JSON.parse(decrypted) // will give original lead_id back
   } catch (err) {
     console.error('Invalid JSON after decrypt:', decrypted)
     return null
   }
 }
 
-
-export function toE164(number, defaultCountry = "IN") {
+export function toE164(number, defaultCountry = 'IN') {
   try {
     const phoneNumber = parsePhoneNumberFromString(number, defaultCountry)
     if (phoneNumber && phoneNumber.isValid()) {
@@ -123,8 +116,7 @@ export function toE164(number, defaultCountry = "IN") {
 
 // ✅ Utility for currency
 export function formatCurrency(value) {
-
   const currency = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value)
 
-  return currency;
+  return currency
 }

@@ -43,22 +43,25 @@ const ChangePasswordView = () => {
     setErrors({ ...errors, [name]: '' }) // reset error msg
   }
 
-   const logoutFn = () => {
-      router.push('/login')
-      Cookies.remove('riho_token')
-      Cookies.remove('_token')
-      Cookies.remove('_token_expiry')
-      Cookies.remove('privileges')
-      Cookies.remove('role_id')
-      Cookies.remove('role_name')
-      Cookies.remove('user_name')
-      Cookies.remove('organization_id')
-      Cookies.remove('organization_name')
-      Cookies.remove('user_id')
-      Cookies.remove('c_version')
-      Cookies.remove('endedAt')
-      
-    }
+  const logoutFn = () => {
+    router.push('/login')
+    Cookies.remove('riho_token')
+    Cookies.remove('_token')
+    Cookies.remove('_token_expiry')
+    Cookies.remove('privileges')
+    Cookies.remove('role_id')
+    Cookies.remove('role_name')
+    Cookies.remove('user_name')
+    Cookies.remove('organization_id')
+    Cookies.remove('organization_name')
+    Cookies.remove('organization_logo')
+    Cookies.remove('organization_address')
+    Cookies.remove('organization_currency')
+    Cookies.remove('organization_emp_count')
+    Cookies.remove('user_id')
+    Cookies.remove('c_version')
+    Cookies.remove('endedAt')
+  }
 
   // ✅ form submit
   const handleSubmit = async e => {
@@ -107,8 +110,6 @@ const ChangePasswordView = () => {
         let results = await changePasswordApi(body, getToken)
 
         if (results) {
-          
-
           if (results?.appStatusCode === 0) {
             setTimeout(() => {
               setLoader(false)
@@ -124,8 +125,6 @@ const ChangePasswordView = () => {
             }, 1500)
 
             logoutFn()
-
-
           } else {
             setTimeout(() => {
               setLoader(false)

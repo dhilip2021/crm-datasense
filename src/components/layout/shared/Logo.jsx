@@ -10,6 +10,8 @@ import MaterioLogo from '@core/svg/Logo'
 
 // Config Imports
 import themeConfig from '@configs/themeConfig'
+import { useSelector } from 'react-redux'
+import Image from 'next/image'
 
 const LogoText = styled.span`
   color: ${({ color }) => color ?? 'var(--mui-palette-text-primary)'};
@@ -22,12 +24,22 @@ const LogoText = styled.span`
 `
 
 const Logo = ({ color }) => {
+  const { payloadJson } = useSelector(state => state.login)
+  console.log(payloadJson, '<<< payloadJson LOGO')
+
   const orgName = Cookies.get('organization_name') || themeConfig.templateName
+  const orgLogo = Cookies.get('organization_logo')
 
   return (
-    <Box display="flex" flexDirection="column" alignItems="center" minHeight={32}>
+    <Box display='flex' flexDirection='column' alignItems='center' minHeight={35}>
       <MaterioLogo className='text-[28px] text-primary' />
-      <LogoText color={color}>{orgName}</LogoText>
+      {orgLogo &&  orgName && 
+        <Box width={"100%"} display='flex' alignItems='center' justifyContent={'space-between'} gap={2}>
+        <Image src={orgLogo} width={24} height={24} alt='org-logo' />
+        <LogoText color={color}>{orgName}</LogoText>
+      </Box>
+      }
+      
     </Box>
   )
 }

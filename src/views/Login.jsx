@@ -552,7 +552,7 @@ const Login = ({ mode }) => {
     } else if (results?.appStatusCode === 0) {
       const resultsPayloadJson = decrypCryptoRequest(results.payloadJson)
 
-      console.log(resultsPayloadJson, '<<< LOGIN RESULTSSS')
+      console.log(resultsPayloadJson, '<<< resultsPayloadJson')
 
       const dispatchLogin = {
         appStatusCode: results?.appStatusCode,
@@ -606,7 +606,6 @@ const Login = ({ mode }) => {
           let dummyArray = []
 
           resultsPayloadJson?.privileges.map(data => dummyArray.push(data?.role_privileage))
-          console.log(resultsPayloadJson,"<<< resultsPayloadJson")
 
           Cookies.set('_token', resultsPayloadJson?.tokenAccess)
           Cookies.set('_token_expiry', resultsPayloadJson?.tokenExpiry)
@@ -616,6 +615,10 @@ const Login = ({ mode }) => {
           Cookies.set('user_id', resultsPayloadJson?.user_id)
           Cookies.set('organization_id', resultsPayloadJson?.organization_id)
           Cookies.set('organization_name', resultsPayloadJson?.organization_name)
+          Cookies.set('organization_logo', resultsPayloadJson?.organization_logo)
+          Cookies.set('organization_address', resultsPayloadJson?.organization_address)
+          Cookies.set('organization_emp_count', resultsPayloadJson?.organization_emp_count)
+          Cookies.set('organization_currency', resultsPayloadJson?.organization_currency)
           Cookies.set('c_version', resultsPayloadJson?.c_version)
           Cookies.set('endedAt', resultsPayloadJson?.endedAt)
           Cookies.set('role_name', resultsPayloadJson?.role)
@@ -675,7 +678,7 @@ const Login = ({ mode }) => {
         Cookies.set('user_name', resultsPayloadJson?.user_name)
         Cookies.set('privileges', JSON.stringify(dummyArray))
 
-        console.log(resultsPayloadJson,"<<< resultsPayloadJson 11")
+        console.log(resultsPayloadJson, '<<< resultsPayloadJson 11')
 
         if (resultsPayloadJson?.c_role_id === '27f01165688z') {
           router.push('/')
@@ -753,13 +756,24 @@ const Login = ({ mode }) => {
     <Box style={loader ? { opacity: 0.3, pointerEvents: 'none' } : { opacity: 1 }}>
       <div className='flex flex-col justify-center items-center min-bs-[100dvh] relative p-6'>
         <Card className='flex flex-col sm:is-[450px]'>
-          <CardContent className='p-6 sm:!p-12'>
-            <Link href='/' className='flex justify-center items-center mbe-6'>
-              <Logo />
+          <CardContent className='p-2 sm:!p-12'>
+            <Link href='/' className='flex  justify-center items-center mbe-6'>
+              <Box display={'flex'} flexDirection={'column'}>
+                <Box>
+                  <Logo />
+                </Box>
+
+                <Box textAlign={'center'}>
+                  <p>
+                    Innovation Begins with Lumivo
+                    {/* Illuminating Ideas, Inspiring Change */}
+                  </p>
+                </Box>
+              </Box>
             </Link>
+
             <div className='flex flex-col gap-5'>
               <div>
-                <Typography variant='h4'>{`Welcome to ${themeConfig.templateName}!`}</Typography>
                 <Typography className='mbs-1'>Please sign-in to your account and start the adventure</Typography>
               </div>
               <form noValidate autoComplete='off' className='flex flex-col gap-5'>

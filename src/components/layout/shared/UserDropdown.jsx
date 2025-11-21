@@ -60,6 +60,10 @@ const UserDropdown = () => {
         Cookies.remove('user_name')
         Cookies.remove('organization_id')
         Cookies.remove('organization_name')
+        Cookies.remove('organization_logo')
+        Cookies.remove('organization_address')
+        Cookies.remove('organization_currency')
+        Cookies.remove('organization_emp_count')
         Cookies.remove('user_id')
         Cookies.remove('c_version')
         Cookies.remove('endedAt')
@@ -205,6 +209,10 @@ const UserDropdown = () => {
                           'user_name',
                           'organization_id',
                           'organization_name',
+                          'organization_logo',
+                          'organization_address',
+                          'organization_currency',
+                          'organization_emp_count',
                           'user_id',
                           'c_version',
                           'endedAt'

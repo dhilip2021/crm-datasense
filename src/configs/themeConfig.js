@@ -10,8 +10,8 @@
  * Another way is to clear the cookie from the browser's Application/Storage tab and then reload the page.
  */
 const themeConfig = {
-  templateName: 'DATASENSE',
-  settingsCookieName: 'crm-datasense-admin',
+  templateName: 'Lumivo',
+  settingsCookieName: 'Lumivo-crm-datasense-admin',
   mode: 'light', // 'light', 'dark'
   layoutPadding: 24, // Common padding for header, content, footer layout components (in px)
   layoutLeftPadding: 24, // Common padding for header, content, footer layout components (in px)
