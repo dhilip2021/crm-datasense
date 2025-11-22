@@ -73,7 +73,7 @@ export default function TaskList() {
       }
 
 
-      console.log(payload,"<<< calender payload")
+     
     
       const res = await fetch('/api/v1/admin/lead-form/calender-list', {
         method: 'POST',
@@ -248,7 +248,7 @@ export default function TaskList() {
               fetchTasks={fetchTasks}
             />
           )}
-          {view === 'google' && <GoogleCalandarList tasks={tasks} fetchTasks={fetchTasks} />}
+          {view === 'google' && <GoogleCalandarList loading={loading} tasks={tasks} fetchTasks={fetchTasks} />}
         </Grid>
       </Box>
     </LocalizationProvider>

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -19,7 +19,9 @@ import {
   Box,
   Chip,
   Divider,
-  Tooltip
+  Tooltip,
+  Stack,
+  Skeleton
 } from '@mui/material'
 import Link from 'next/link'
 import { encryptCryptoRes } from '@/helper/frontendHelper'
@@ -62,12 +64,7 @@ function extractTasksFromLeads(leads) {
   return taskData
 }
 
-export default function GoogleCalandarList({ tasks, fetchTasks }) {
-
-  console.log(tasks,"<<< tasks")
-  console.log(fetchTasks,"<<< fetchTasks")
-
-
+export default function GoogleCalandarList({ loading, tasks, fetchTasks }) {
   const taskData = extractTasksFromLeads(tasks)
 
   const [open, setOpen] = useState(false)
@@ -91,8 +88,6 @@ export default function GoogleCalandarList({ tasks, fetchTasks }) {
     borderColor: task.priority === 'High' ? '#e53935' : task.priority === 'Medium' ? '#fdd835' : '#43a047',
     textColor: '#fff'
   }))
-
-
 
   // 🔹 Custom renderer for event content
   const renderEventContent = eventInfo => {
@@ -139,18 +134,27 @@ export default function GoogleCalandarList({ tasks, fetchTasks }) {
     )
   }
 
-  // 🔹 Fetch tasks by date range
+  const lastFetchedRange = useRef({ from: null, to: null })
+
   const fetchTasksForRange = async dateInfo => {
     const formatDate = date => {
       const d = new Date(date)
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
     }
 
-    const firstDay = dateInfo.view.currentStart
-    const lastDay = new Date(dateInfo.view.currentEnd)
-    lastDay.setDate(lastDay.getDate() - 1)
+    const firstDay = formatDate(dateInfo.view.currentStart)
+    const lastDay = formatDate(new Date(dateInfo.view.currentEnd.setDate(dateInfo.view.currentEnd.getDate() - 1)))
 
-    fetchTasks({ from: formatDate(firstDay), to: formatDate(lastDay) })
+    // 🛑 Prevent multiple calls for the same range
+    if (lastFetchedRange.current.from === firstDay && lastFetchedRange.current.to === lastDay) {
+      return
+    }
+
+    // ✔ Update tracking reference
+    lastFetchedRange.current = { from: firstDay, to: lastDay }
+
+    // 🚀 Make API call
+    fetchTasks({ from: firstDay, to: lastDay })
   }
 
   return (
@@ -180,34 +184,44 @@ export default function GoogleCalandarList({ tasks, fetchTasks }) {
         </Typography>
 
         <Box sx={{ width: '100%', overflow: 'hidden' }}>
-          <FullCalendar
-            plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-            initialView='dayGridMonth'
-            headerToolbar={{
-              left: 'prev,next today',
-              center: 'title',
-              right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-            }}
-            events={events}
-            eventContent={renderEventContent}
-            eventClick={info => {
-              setSelectedEvent({
-                title: info.event.title,
-                ...info.event.extendedProps,
-                date: info.event.start
-              })
-              setOpen(true)
-            }}
-            eventTimeFormat={{
-              hour: '2-digit',
-              minute: '2-digit',
-              hour12: true
-            }}
-            height='calc(100vh - 260px)'
-            aspectRatio={1.5}
-            expandRows
-            datesSet={dateInfo => fetchTasksForRange(dateInfo)}
-          />
+          {loading ? (
+            // 🔹 Skeleton Loader for Calendar
+            <Stack spacing={1} sx={{ px: 2 }}>
+              <Skeleton variant='rectangular' height={60} sx={{ borderRadius: 2 }} /> {/* Toolbar */}
+              <Skeleton variant='rectangular' height={500} sx={{ borderRadius: 2 }} /> {/* Calendar Grid */}
+            </Stack>
+          ) : (
+            <FullCalendar
+              plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+              initialView='dayGridMonth'
+              headerToolbar={{
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+              }}
+              events={events}
+              eventContent={renderEventContent}
+              eventClick={info => {
+                setSelectedEvent({
+                  title: info.event.title,
+                  ...info.event.extendedProps,
+                  date: info.event.start
+                })
+                setOpen(true)
+              }}
+              eventTimeFormat={{
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+              }}
+              height='calc(100vh - 260px)'
+              aspectRatio={1.5}
+              expandRows
+              // datesSet={dateInfo => fetchTasksForRange(dateInfo)}
+              datesSet={fetchTasksForRange} // Keep this
+              viewDidMount={fetchTasksForRange} // Add this
+            />
+          )}
         </Box>
       </CardContent>
 
