@@ -59,7 +59,7 @@ export default function TaskList() {
       const payload = {
         organization_id,
         form_name: 'lead-form',
-        c_createdBy: selectedUsers.length > 0 ? selectedUsers : [loggedInUserId],
+        c_createdBy: selectedUsers.length > 0 ? selectedUsers : [loggedInUserName],
         priority: priority || undefined,
         status: status || undefined,
         from: dateRange ? dayjs(dateRange.from).format('YYYY-MM-DD') : dayjs(from).format('YYYY-MM-DD'),
@@ -71,8 +71,11 @@ export default function TaskList() {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${getToken}`
       }
-      console.log("call task List 1")
-      const res = await fetch('/api/v1/admin/lead-form/list', {
+
+
+      console.log(payload,"<<< calender payload")
+    
+      const res = await fetch('/api/v1/admin/lead-form/calender-list', {
         method: 'POST',
         headers: header,
         body: JSON.stringify(payload)
@@ -186,7 +189,7 @@ export default function TaskList() {
             <TextField
               select
               label='Created By'
-              value={selectedUsers.length > 0 ? selectedUsers : [loggedInUserId]}
+              value={selectedUsers.length > 0 ? selectedUsers : [loggedInUserName]}
               onChange={e =>
                 setSelectedUsers(typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value)
               }
@@ -194,11 +197,11 @@ export default function TaskList() {
               size='small'
               sx={{ minWidth: 200 }}
             >
-              <MenuItem value={loggedInUserId}>{loggedInUserName || 'Me'}</MenuItem>
+              <MenuItem value={loggedInUserName}>{loggedInUserName || 'Me'}</MenuItem>
               {userList
-                .filter(u => u.user_id !== loggedInUserId)
+                .filter(u => u.user_name !== loggedInUserName)
                 .map(u => (
-                  <MenuItem key={u.user_id} value={u.user_id}>
+                  <MenuItem key={u.user_name} value={u.user_name}>
                     {u.user_name || `${u.first_name} ${u.last_name}`}
                   </MenuItem>
                 ))}

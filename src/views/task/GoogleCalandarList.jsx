@@ -63,6 +63,11 @@ function extractTasksFromLeads(leads) {
 }
 
 export default function GoogleCalandarList({ tasks, fetchTasks }) {
+
+  console.log(tasks,"<<< tasks")
+  console.log(fetchTasks,"<<< fetchTasks")
+
+
   const taskData = extractTasksFromLeads(tasks)
 
   const [open, setOpen] = useState(false)
@@ -86,6 +91,8 @@ export default function GoogleCalandarList({ tasks, fetchTasks }) {
     borderColor: task.priority === 'High' ? '#e53935' : task.priority === 'Medium' ? '#fdd835' : '#43a047',
     textColor: '#fff'
   }))
+
+
 
   // 🔹 Custom renderer for event content
   const renderEventContent = eventInfo => {
