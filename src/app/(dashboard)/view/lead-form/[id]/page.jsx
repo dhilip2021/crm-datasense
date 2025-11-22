@@ -837,7 +837,7 @@ const LeadDetailView = () => {
 
   // Line after header
   doc.setLineWidth(0.5)
-  doc.line(margin, y, 400, y)
+  doc.line(margin, y, 555, y)
   y += 30
 
   // ======== DATE & QUOTATION NO ========
