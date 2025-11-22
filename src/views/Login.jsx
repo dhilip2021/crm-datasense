@@ -586,6 +586,7 @@ const Login = ({ mode }) => {
         const resultFields = await addFieldFormApi(body2, header1)
       }
 
+
       if (resultsPayloadJson?.c_version === 'Trial') {
         const localDateStr = new Date()
         const isoUtc = new Date(localDateStr).toISOString()
@@ -665,18 +666,22 @@ const Login = ({ mode }) => {
         resultsPayloadJson?.privileges.map(data => dummyArray.push(data?.role_privileage))
 
         Cookies.set('_token', resultsPayloadJson?.tokenAccess)
-        Cookies.set('_token_expiry', resultsPayloadJson?.tokenExpiry)
-        Cookies.set('role_id', resultsPayloadJson?.c_role_id)
-        Cookies.set('email', resultsPayloadJson?.email)
-        Cookies.set('mobile', resultsPayloadJson?.mobile)
-        Cookies.set('user_id', resultsPayloadJson?.user_id)
-        Cookies.set('organization_id', resultsPayloadJson?.organization_id)
-        Cookies.set('organization_name', resultsPayloadJson?.organization_name)
-        Cookies.set('c_version', resultsPayloadJson?.c_version)
-        Cookies.set('endedAt', resultsPayloadJson?.endedAt)
-        Cookies.set('role_name', resultsPayloadJson?.role)
-        Cookies.set('user_name', resultsPayloadJson?.user_name)
-        Cookies.set('privileges', JSON.stringify(dummyArray))
+          Cookies.set('_token_expiry', resultsPayloadJson?.tokenExpiry)
+          Cookies.set('role_id', resultsPayloadJson?.c_role_id)
+          Cookies.set('email', resultsPayloadJson?.email)
+          Cookies.set('mobile', resultsPayloadJson?.mobile)
+          Cookies.set('user_id', resultsPayloadJson?.user_id)
+          Cookies.set('organization_id', resultsPayloadJson?.organization_id)
+          Cookies.set('organization_name', resultsPayloadJson?.organization_name)
+          Cookies.set('organization_logo', resultsPayloadJson?.organization_logo)
+          Cookies.set('organization_address', resultsPayloadJson?.organization_address)
+          Cookies.set('organization_emp_count', resultsPayloadJson?.organization_emp_count)
+          Cookies.set('organization_currency', resultsPayloadJson?.organization_currency)
+          Cookies.set('c_version', resultsPayloadJson?.c_version)
+          Cookies.set('endedAt', resultsPayloadJson?.endedAt)
+          Cookies.set('role_name', resultsPayloadJson?.role)
+          Cookies.set('user_name', resultsPayloadJson?.user_name)
+          Cookies.set('privileges', JSON.stringify(dummyArray))
 
         console.log(resultsPayloadJson, '<<< resultsPayloadJson 11')
 
