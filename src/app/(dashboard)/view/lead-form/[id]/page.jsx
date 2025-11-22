@@ -618,7 +618,7 @@ const LeadDetailView = () => {
     doc.save(`Quotation_${companyName}.pdf`)
   }
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF3 = () => {
     const doc = new jsPDF('p', 'pt', 'a4')
     const margin = 40
     let y = 40
@@ -634,11 +634,28 @@ const LeadDetailView = () => {
 
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(9)
-    const wrappedAddress = doc.splitTextToSize(organization_address, 250)
-    doc.text(wrappedAddress, margin + logoWidth + 10, y + 35)
+    // const wrappedAddress = doc.splitTextToSize(organization_address, 250)
+    // doc.text(wrappedAddress, margin + logoWidth + 10, y + 35)
 
-    doc.text(`Phone: ${mobile}`, margin + logoWidth + 10, y + 60)
-    doc.text(`Email: ${email} | Website: www.datasense.in`, margin + logoWidth + 10, y + 75)
+    // Decode and split address
+    const decodedAddress = decodeURIComponent(organization_address)
+    const addressLines = decodedAddress.split('\n')
+
+    // Starting point for address print
+    let addressY = y + 35
+
+    // Print each line and adjust y dynamically
+    addressLines.forEach(line => {
+      doc.text(line.trim(), margin + logoWidth + 10, addressY)
+      addressY += 12 // Move to next line
+    })
+
+    // Now print Phone & Email correctly BELOW the address
+    doc.text(`Phone: ${mobile}`, margin + logoWidth + 10, addressY + 5)
+    doc.text(`Email: ${email} | Website: www.datasense.in`, margin + logoWidth + 10, addressY + 20)
+
+    // Update y based on final printed position
+    y = addressY + 40
 
     // Draw line below header
     y += 90
@@ -787,6 +804,171 @@ const LeadDetailView = () => {
 
     doc.save(`Quotation_${companyName}.pdf`)
   }
+
+  const handleDownloadPDF = () => {
+  const doc = new jsPDF('p', 'pt', 'a4')
+  const margin = 40
+  let y = margin
+
+  // ======== HEADER (LOGO + ORG DETAILS) ========
+  const logoWidth = 70
+  const logoHeight = 40
+  doc.addImage(organization_logo, 'PNG', margin, y, logoWidth, logoHeight)
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(16)
+  doc.text(organization_name, margin + logoWidth + 10, y + 15)
+
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(9)
+
+  const decodedAddress = decodeURIComponent(organization_address)
+  const addressLines = decodedAddress.split('\n')
+
+  let addressY = y + 35
+  addressLines.forEach(line => {
+    doc.text(line.trim(), margin + logoWidth + 10, addressY)
+    addressY += 12
+  })
+
+  doc.text(`Phone: ${mobile}`, margin + logoWidth + 10, addressY + 5)
+  doc.text(`Email: ${email}`, margin + logoWidth + 10, addressY + 20)
+  y = addressY + 50
+
+  // Line after header
+  doc.setLineWidth(0.5)
+  doc.line(margin, y, 400, y)
+  y += 30
+
+  // ======== DATE & QUOTATION NO ========
+  doc.setFontSize(10)
+  doc.setFont('helvetica', 'normal')
+  doc.text(`Date: ${new Date().toLocaleDateString()}`, 400, y)
+  doc.text(`Quotation No: ${quoNumber}`, 400, y + 15)
+
+  y += 40
+
+  // ======== CLIENT DETAILS ========
+  doc.setFont('helvetica', 'bold')
+  doc.text('Bill To:', margin, y)
+  y += 15
+
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(10)
+
+  const clientName = `${leadData.values['First Name']} ${leadData.values['Last Name']}` || ''
+  const clientAddress = `${leadData.values['Street']}, ${leadData.values['City']}, ${leadData.values['State']} - ${leadData.values['Pincode']}, ${leadData.values['Country']}`
+
+  doc.text(clientName, margin, y)
+  doc.text(leadData.values['Company'], margin, y + 15)
+
+  const wrappedClientAddr = doc.splitTextToSize(clientAddress, 500)
+  doc.text(wrappedClientAddr, margin, y + 30)
+
+  y += wrappedClientAddr.length * 12 + 50
+
+  // ======== SUBJECT ========
+  doc.setFont('helvetica', 'bold')
+  doc.text(`Subject: Quotation for ${leadData.items[0]?.item_ref[0]?.itemMasterRef.item_name}`, margin, y)
+  y += 25
+
+  doc.setFont('helvetica', 'normal')
+  doc.text(`Dear ${leadData.values['First Name']},`, margin, y)
+  y += 20
+  doc.text(`We are pleased to submit our quotation for your requirements as below:`, margin, y)
+  y += 30
+
+  // ======== ITEMS TABLE ========
+  const tableColumn = ['#', 'Item', 'Qty', 'GST %', 'Unit Price', 'Total']
+  const tableRows = dataItems.map((item, index) => [
+    index + 1,
+    item.itemMasterRef.item_name,
+    item.quantity,
+    `${item.itemMasterRef.gst}%`,
+    `${item.unitPrice.toFixed(2)}`,
+    `${item.finalPrice.toFixed(2)}`
+  ])
+
+  autoTable(doc, {
+    head: [tableColumn],
+    body: tableRows,
+    startY: y,
+    styles: { fontSize: 10, cellPadding: 4 },
+    columnStyles: {
+      0: { cellWidth: 20 },
+      1: { cellWidth: 150 },
+      2: { cellWidth: 50 },
+      3: { cellWidth: 70 },
+      4: { cellWidth: 80 },
+      5: { cellWidth: 90, halign: 'right' }
+    },
+    headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold' },
+    alternateRowStyles: { fillColor: [245, 245, 245] },
+    margin: { left: margin, right: margin }
+  })
+
+  let finalY = doc.lastAutoTable.finalY + 30
+
+  // ======== TOTALS SECTION ========
+  const totalsBoxX = 350
+  doc.setFontSize(10)
+  doc.setFont('helvetica', 'bold')
+
+  doc.text('Subtotal:', totalsBoxX, finalY)
+  doc.text(`${totals.subtotal.toFixed(2)}`, totalsBoxX + 150, finalY, { align: 'right' })
+  finalY += 15
+
+  if (totals.discountAmount > 0) {
+    doc.text('Discount:', totalsBoxX, finalY)
+    doc.text(`-${totals.discountAmount.toFixed(2)}`, totalsBoxX + 150, finalY, { align: 'right' })
+    finalY += 15
+  }
+
+  doc.text('GST:', totalsBoxX, finalY)
+  doc.text(`${totals.gstAmount.toFixed(2)}`, totalsBoxX + 150, finalY, { align: 'right' })
+
+  doc.line(totalsBoxX, finalY + 10, totalsBoxX + 150, finalY + 10)
+
+  doc.setFontSize(12)
+  doc.text('Grand Total:', totalsBoxX, finalY + 30)
+  doc.text(`${totals.finalPrice.toFixed(2)}`, totalsBoxX + 150, finalY + 30, { align: 'right' })
+
+  finalY += 70
+
+  // ======== TERMS & CONDITIONS ========
+  if (notes?.trim()) {
+    doc.setFont('helvetica', 'bold')
+    doc.text('Terms & Conditions:', margin, finalY)
+    doc.setFont('helvetica', 'normal')
+
+    const wrappedNotes = doc.splitTextToSize(notes, 500)
+    wrappedNotes.forEach((line, i) => {
+      doc.text(line, margin, finalY + 15 + i * 12)
+    })
+
+    finalY += wrappedNotes.length * 12 + 30
+  }
+
+  // ======== SIGNATURE ========
+  doc.text('Best Regards,', margin, finalY)
+  doc.text(user_name, margin, finalY + 20)
+  doc.text(email, margin, finalY + 35)
+  doc.text(organization_name, margin, finalY + 50)
+
+  // ======== FOOTER ========
+  doc.setFontSize(8)
+  doc.setTextColor(120)
+  doc.text('Thank you for choosing Lumivo Datasense Technologies!', 555 - margin, 820, { align: 'right' })
+
+  // ======== SAVE PDF ========
+  const companyName = leadData.values['Company']
+    ?.trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-zA-Z0-9-]/g, '')
+
+  doc.save(`Quotation_${companyName || 'Client'}.pdf`)
+}
+
 
   useEffect(() => {
     if (sections.length > 0 && leadId) {
