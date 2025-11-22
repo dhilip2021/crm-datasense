@@ -22,11 +22,10 @@ import { useImageVariant } from '@core/hooks/useImageVariant'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 
 import {
-  addFieldApi,
   addOrganizationApi,
   checkMailApi,
   craeteUserApi,
-  getOrganizationApi,
+  getOrganizationByNameApi,
   sendOtpApi,
   verifyOtpApi
 } from '@/apiFunctions/ApiAction'
@@ -156,7 +155,7 @@ const Register = ({ mode }) => {
         setErrorInputs(prev => ({ ...prev, [name]: true }))
         setErrOrgName('minimum 3 character and maximum 120')
       } else {
-        const checkOrgName = await getOrganizationApi(value)
+        const checkOrgName = await getOrganizationByNameApi(value)
 
         if (checkOrgName.appStatusCode === 0) {
           setErrorInputs({ ...errorInputs, organaization_name: true })
@@ -226,6 +225,7 @@ const Register = ({ mode }) => {
     if (name === 'organaization_name') {
       setErrorInputs({ ...errorInputs, organaization_name: false })
       setInputs({ ...inputs, [name]: capitalizeWords(value) })
+      
     } else if (name === 'organization_emp_count') {
       const res = isValidMobileNumberStrict(value)
 

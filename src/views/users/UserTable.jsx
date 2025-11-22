@@ -103,6 +103,9 @@ const UserTable = () => {
   const getAllOrganizationList = async () => {
     const checkOrg = await getAllOrganizationApi()
     if (checkOrg?.appStatusCode === 0) {
+
+      console.log(checkOrg,"<<< ORG LISTTTT")
+
       setOrgList(checkOrg?.payloadJson)
     } else {
       setOrgList([])

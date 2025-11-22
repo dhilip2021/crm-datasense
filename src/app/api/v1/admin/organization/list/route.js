@@ -16,6 +16,10 @@ export async function GET(request) {
   const name = request.nextUrl.searchParams.get('name')
 
   const verified = verifyAccessToken()
+
+  console.log(verified,"<<< VERIFFFFFFF")
+
+
   if (verified.success) {
     if (id) {
       await connectMongoDB()

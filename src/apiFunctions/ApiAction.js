@@ -241,10 +241,20 @@ export const getFieldListApi = async (body,header) => {
 
 // Organization models apis
 
-
-export const getOrganizationApi = async (body) => {
+export const getOrganizationByNameApi = async (body) => {
   return await axios
     .get(`/api/v1/admin/organization/list?name=${body}`, { headers: AppHeader })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const getOrganizationByIdApi = async (id) => {
+  return await axios
+    .get(`/api/v1/admin/organization/list?id=${id}`, { headers: AppHeader })
     .then((res) => {
       return res.data;
     })
