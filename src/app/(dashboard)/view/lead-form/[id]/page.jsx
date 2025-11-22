@@ -109,7 +109,6 @@ const LeadDetailView = () => {
   const organization_logo = Cookies.get('organization_logo')
   const organization_address = Cookies.get('organization_address')
 
-  console.log(organization_address, '<< organization_address')
 
   const leadId = decrypCryptoReq(encryptedId)
   const [expanded, setExpanded] = useState(0) // 0 = first open by default

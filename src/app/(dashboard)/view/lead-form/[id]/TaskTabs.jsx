@@ -32,6 +32,7 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutline'
 import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined'
 import CallDialog from './CallDialog'
 import CallLog from './CallLog'
+import TaskViewList from './TaskViewList'
 
 const statusColors = {
   'Not Started': { bg: '#F2F3F4', color: '#7F8C8D' },
@@ -41,6 +42,14 @@ const statusColors = {
   'Waiting for input': { bg: '#EBF5FB', color: '#2980B9' }
 }
 
+
+const statusOrder = [
+  'Not Started',
+  'In Progress',
+  'Deferred',
+  'Waiting for input',
+  'Completed'
+]
 const priorityColors = {
   High: { bg: '#C0392B', color: '#FFFFFF' },
   Medium: { bg: '#F39C12', color: '#FFFFFF' },
@@ -55,15 +64,16 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
   const user_id = Cookies.get('user_id')
   const fromPhoneNumber = Cookies.get('mobile')
 
-
   // Filter out completed tasks for display
   const leadArrayTasks = leadData?.values?.Activity?.[0]?.task || []
   const leadArrayMeetings = leadData?.values?.Activity?.[0]?.meeting || []
   const leadArrayCalls = leadData?.values?.Activity?.[0]?.call || []
   // const toPhoneNumber = leadData?.values?.Phone || ""
   const [toPhoneNumber, setToPhoneNumber] = useState(leadData?.values?.Phone)
-  const [callResponse, setCallResponse] = useState("")
-const [openResponseDialog, setOpenResponseDialog] = useState(false)
+  const [callResponse, setCallResponse] = useState('')
+  const [openResponseDialog, setOpenResponseDialog] = useState(false)
+
+
 
   const sortedTasks = useMemo(() => {
     return [...leadArrayTasks]
@@ -83,8 +93,7 @@ const [openResponseDialog, setOpenResponseDialog] = useState(false)
       }))
   }, [leadArrayTasks])
 
-
-    const sortedMeetings = useMemo(() => {
+  const sortedMeetings = useMemo(() => {
     return [...leadArrayMeetings]
       .sort((a, b) => new Date(a.fromDate) - new Date(b.fromDate))
       .map(t => ({
@@ -103,7 +112,7 @@ const [openResponseDialog, setOpenResponseDialog] = useState(false)
       }))
   }, [leadArrayMeetings])
 
-    const sortedCalls = useMemo(() => {
+  const sortedCalls = useMemo(() => {
     return [...leadArrayCalls]
       .sort((a, b) => new Date(a.endTime) - new Date(b.startTime))
       .map(t => ({
@@ -115,16 +124,42 @@ const [openResponseDialog, setOpenResponseDialog] = useState(false)
         endTime: t.endTime || '',
         duration: t.duration || null,
         createdBy: t.createdBy || ''
-       
       }))
   }, [leadArrayCalls])
 
   const today = dayjs().startOf('day')
 
+
+
+  // Usage
+
+  useEffect(() => {
+    console.log(sortedTasks, '<<< sortedTasks')
+  }, [sortedTasks])
+
   // Separate tasks based on dueDate
-  const completedTasks = useMemo(() => sortedTasks.filter(t => dayjs(t.dueDate).isBefore(today, 'day')), [sortedTasks])
-  const currentTasks = useMemo(() => sortedTasks.filter(t => dayjs(t.dueDate).isSame(today, 'day')), [sortedTasks])
-  const upcomingTasks = useMemo(() => sortedTasks.filter(t => dayjs(t.dueDate).isAfter(today, 'day')), [sortedTasks])
+  // const completedTasks = useMemo(() => sortedTasks.filter(t => dayjs(t.dueDate).isBefore(today, 'day')), [sortedTasks])
+  // const currentTasks = useMemo(() => sortedTasks.filter(t => dayjs(t.dueDate).isSame(today, 'day')), [sortedTasks])
+  // const upcomingTasks = useMemo(() => sortedTasks.filter(t => dayjs(t.dueDate).isAfter(today, 'day')), [sortedTasks])
+
+
+
+
+const sortByStatusAndDate = (tasks) => {
+  return tasks.sort((a, b) => {
+    const statusDiff = statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status)
+    if (statusDiff !== 0) return statusDiff
+    return new Date(a.dueDate) - new Date(b.dueDate)
+  })
+}
+
+
+  const currentTasks = sortByStatusAndDate(sortedTasks.filter(task => dayjs(task.dueDate).isSame(today, 'day')))
+  const upcomingTasks = sortByStatusAndDate(sortedTasks.filter(task => dayjs(task.dueDate).isAfter(today, 'day')))
+  const completedTasks = sortByStatusAndDate(sortedTasks.filter(task => dayjs(task.dueDate).isBefore(today, 'day')))
+  // const completedTasks = sortByStatusAndDate(sortedTasks.filter(task => task.status === 'Completed'))
+  // const completedTasks = (sortedTasks.filter(task => task.status === 'Completed'))
+
 
   const completedMeetings = useMemo(
     () => sortedMeetings.filter(t => dayjs(t.fromDate).isBefore(today, 'day')),
@@ -732,7 +767,6 @@ const [openResponseDialog, setOpenResponseDialog] = useState(false)
     }
   }
 
-
   const [isCalling, setIsCalling] = useState(false)
   const [seconds, setSeconds] = useState(0)
   const [startTime, setStartTime] = useState(null)
@@ -754,12 +788,6 @@ const [openResponseDialog, setOpenResponseDialog] = useState(false)
     // Trigger mobile call dialer (will open in phone)
     window.location.href = `tel:${toPhoneNumber}`
   }
-
-
-
-
-
-
 
   // 🔴 STOP CALL + Log to backend
   const handleStopCall = async () => {
@@ -789,7 +817,7 @@ const [openResponseDialog, setOpenResponseDialog] = useState(false)
                 startTime: startTime,
                 endTime: new Date().toISOString(),
                 duration: formatDuration(durationSeconds),
-                response:callResponse,
+                response: callResponse,
                 createdAt: new Date().toISOString(),
                 createdBy: user_name
               }
@@ -813,12 +841,10 @@ const [openResponseDialog, setOpenResponseDialog] = useState(false)
         body: JSON.stringify(payload)
       })
 
-      console.log(res,"<<< RESSSSSSS")
-
+      console.log(res, '<<< RESSSSSSS')
 
       const result = await res.json()
-       if (!res.ok || !result.success) throw new Error(result.message || 'Server Error')
-
+      if (!res.ok || !result.success) throw new Error(result.message || 'Server Error')
 
       if (editingTask) {
         setTasks(prev => prev.map(t => (t._id === formattedTask._id ? formattedTask : t)))
@@ -832,10 +858,6 @@ const [openResponseDialog, setOpenResponseDialog] = useState(false)
         toast.success('Task Added Successfully!', { autoClose: 500, position: 'bottom-center', hideProgressBar: true })
       }
       fetchLeadFromId()
-
-
-   
-
     } catch (err) {
       console.error('❌ Failed to log call', err)
     }
@@ -847,16 +869,12 @@ const [openResponseDialog, setOpenResponseDialog] = useState(false)
   }
 
   const onStopCall = () => {
-  // handleStopCall();       // ungaloda existing stop logic
-  handleCallClose();      // main dialog close
-  setOpenResponseDialog(true); // new response popup open
-}
+    // handleStopCall();       // ungaloda existing stop logic
+    handleCallClose() // main dialog close
+    setOpenResponseDialog(true) // new response popup open
+  }
 
- 
-
-
-
-    // 🟣 Restore last selected tab when component mounts
+  // 🟣 Restore last selected tab when component mounts
   useEffect(() => {
     const savedTab = localStorage.getItem('lastLeadTab')
     if (savedTab) {
@@ -874,13 +892,6 @@ const [openResponseDialog, setOpenResponseDialog] = useState(false)
   }
 
   const progress = Math.min((seconds / maxCallTime) * 100, 100)
-
-
-
-
-
-
-
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -915,54 +926,54 @@ const [openResponseDialog, setOpenResponseDialog] = useState(false)
 
           <Box sx={{ mt: isMobile ? 1 : 0 }}>
             {tab === 0 && (
-               <Box textAlign={'center'}>
-              <Button
-                variant='contained'
-                onClick={() => setOpenTaskDialog(true)}
-                sx={{
-                  bgcolor: '#009cde',
-                  '&:hover': { bgcolor: '#007bb5' },
-                  borderRadius: 2,
-                  textTransform: 'none',
-                  width: isMobile ? 'auto' : 'auto'
-                }}
-              >
-                + Create Task
-              </Button>
+              <Box textAlign={'center'}>
+                <Button
+                  variant='contained'
+                  onClick={() => setOpenTaskDialog(true)}
+                  sx={{
+                    bgcolor: '#009cde',
+                    '&:hover': { bgcolor: '#007bb5' },
+                    borderRadius: 2,
+                    textTransform: 'none',
+                    width: isMobile ? 'auto' : 'auto'
+                  }}
+                >
+                  + Create Task
+                </Button>
               </Box>
             )}
             {tab === 1 && (
-               <Box textAlign={'center'}>
-              <Button
-                variant='contained'
-                onClick={() => setOpenMeetingDialog(true)}
-                sx={{
-                  bgcolor: '#009cde',
-                  '&:hover': { bgcolor: '#007bb5' },
-                  borderRadius: 2,
-                  textTransform: 'none',
-                  width: isMobile ? 'auto' : 'auto'
-                }}
-              >
-                + Create Meeting
-              </Button>
+              <Box textAlign={'center'}>
+                <Button
+                  variant='contained'
+                  onClick={() => setOpenMeetingDialog(true)}
+                  sx={{
+                    bgcolor: '#009cde',
+                    '&:hover': { bgcolor: '#007bb5' },
+                    borderRadius: 2,
+                    textTransform: 'none',
+                    width: isMobile ? 'auto' : 'auto'
+                  }}
+                >
+                  + Create Meeting
+                </Button>
               </Box>
             )}
             {tab === 2 && (
               <Box textAlign={'center'}>
-              <Button
-                variant='contained'
-                onClick={() => setOpenCallDialog(true)}
-                sx={{
-                  bgcolor: '#009cde',
-                  '&:hover': { bgcolor: '#007bb5' },
-                  borderRadius: 2,
-                  textTransform: 'none',
-                  width: isMobile ? 'auto' : 'auto'
-                }}
-              >
-                + Create Call
-              </Button>
+                <Button
+                  variant='contained'
+                  onClick={() => setOpenCallDialog(true)}
+                  sx={{
+                    bgcolor: '#009cde',
+                    '&:hover': { bgcolor: '#007bb5' },
+                    borderRadius: 2,
+                    textTransform: 'none',
+                    width: isMobile ? 'auto' : 'auto'
+                  }}
+                >
+                  + Create Call
+                </Button>
               </Box>
             )}
           </Box>
@@ -973,35 +984,12 @@ const [openResponseDialog, setOpenResponseDialog] = useState(false)
         {tab === 0 &&
           (Array.isArray(leadArrayTasks) && leadArrayTasks.length > 0 ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {/* Current Tasks */}
-              {currentTasks.length > 0 && (
-                <Card>
-                  <Typography variant='subtitle2' sx={{ mt: 1, mb: 0.5, color: '#1976d2', fontWeight: 600 }}>
-                    🟢 Today’s Tasks
-                  </Typography>
-                  {currentTasks.map(task => renderTaskCard(task))}
-                </Card>
-              )}
-
-              {/* Upcoming Tasks */}
-              {upcomingTasks.length > 0 && (
-                <Card>
-                  <Typography variant='subtitle2' sx={{ mt: 2, mb: 0.5, color: '#27ae60', fontWeight: 600 }}>
-                    🚀 Upcoming Tasks
-                  </Typography>
-                  {upcomingTasks.map(task => renderTaskCard(task))}
-                </Card>
-              )}
-
-              {/* Completed / Past Tasks */}
-              {completedTasks.length > 0 && (
-                <Card>
-                  <Typography variant='subtitle2' sx={{ mt: 2, mb: 0.5, color: '#c0392b', fontWeight: 600 }}>
-                    ✅ Completed / Past Tasks
-                  </Typography>
-                  {completedTasks.map(task => renderTaskCard(task))}
-                </Card>
-              )}
+              <TaskViewList
+                currentTasks={currentTasks}
+                upcomingTasks={upcomingTasks}
+                completedTasks={completedTasks}
+                renderTaskCard={renderTaskCard}
+              />
             </Box>
           ) : (
             <Typography textAlign='center' color='text.secondary' sx={{ mt: 4 }}>
@@ -1051,9 +1039,7 @@ const [openResponseDialog, setOpenResponseDialog] = useState(false)
         {tab === 2 &&
           (Array.isArray(leadArrayCalls) && leadArrayCalls.length > 0 ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-
               <CallLog calls={leadArrayCalls} />
-
             </Box>
           ) : (
             <Typography textAlign='center' color='text.secondary' sx={{ mt: 4 }}>
@@ -1102,17 +1088,13 @@ const [openResponseDialog, setOpenResponseDialog] = useState(false)
           handleStartCall={handleStartCall}
           toPhoneNumber={toPhoneNumber}
           setToPhoneNumber={setToPhoneNumber}
-          callResponse={callResponse} 
+          callResponse={callResponse}
           setCallResponse={setCallResponse}
           onStopCall={onStopCall}
           openResponseDialog={openResponseDialog}
           setOpenResponseDialog={setOpenResponseDialog}
           handleStopCall={handleStopCall}
         />
-
-
-         
-
       </Box>
     </LocalizationProvider>
   )

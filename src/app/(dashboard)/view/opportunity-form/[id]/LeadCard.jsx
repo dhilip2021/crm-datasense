@@ -68,7 +68,6 @@ const [leadWonReasons, setWonLeadReasons] = useState(
         })
   
         const result = await res.json()
-         console.log(result.data,"<<< fetch Data resposne 123....")
         if (result.success) setData(result.data)
         setLoading(false)
       } catch (err) {

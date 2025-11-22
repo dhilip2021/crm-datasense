@@ -67,7 +67,6 @@ export default function LeadCard({ fields, leadId, leadData, onToggleFlag, secti
       })
 
       const result = await res.json()
-      console.log(result.data, '<<< fetch Data resposne....')
       if (result.success) setData(result.data)
       setLoading(false)
     } catch (err) {
