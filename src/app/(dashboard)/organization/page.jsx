@@ -27,7 +27,7 @@ import Image from 'next/image'
 import LoaderGif from '@assets/gif/loader.gif'
 import { toast } from 'react-toastify'
 import { useRouter } from 'next/navigation'
-
+import Autocomplete from '@mui/material/Autocomplete'
 
 function isValidMobileNumberStrict(value) {
   if (!/^\d+$/.test(value)) return false
@@ -37,12 +37,18 @@ function isValidMobileNumberStrict(value) {
 }
 
 const Organization = () => {
-   const router = useRouter()
+  const router = useRouter()
   const organization_id = Cookies.get('organization_id')
-  const [orgList, setOrgList] = useState(null)
+  const [orgList, setOrgList] = useState({
+    organization_currency: 'INR',
+    organization_address: '',
+    organization_emp_count: '',
+    organization_logo: ''
+  })
   const [loading, setLoading] = useState(false)
   const [updating, setUpdating] = useState(false)
   const [logoPreview, setLogoPreview] = useState(null)
+  const [currencyCode, setCurrencyCode] = useState([])
 
   // Fetch Organization details
   const orgFunctionCall = async organization_id => {
@@ -167,10 +173,6 @@ const Organization = () => {
     }
   }
 
-  useEffect(() => {
-    if (organization_id) orgFunctionCall(organization_id)
-  }, [organization_id])
-
   // Handle input change
   const handleInputChange = e => {
     const { name, value } = e.target
@@ -243,8 +245,24 @@ const Organization = () => {
   }
 
   useEffect(() => {
+    if (organization_id) orgFunctionCall(organization_id)
+  }, [organization_id])
+
+  useEffect(() => {
     setLogoPreview(orgList?.organization_logo || null)
   }, [orgList?.organization_logo])
+
+  // Fetch country codes + users
+  useEffect(() => {
+    fetch('/json/currency.json')
+      .then(res => res.json())
+      .then(data => setCurrencyCode(data))
+      .catch(() => setCurrencyCode([]))
+  }, [])
+
+  useEffect(() => {
+    console.log(currencyCode, '<<<< currency code')
+  }, [currencyCode])
 
   if (loading) {
     return (
@@ -287,14 +305,13 @@ const Organization = () => {
           }}
         >
           <BusinessIcon fontSize='large' />
-          <Typography variant='h5' fontWeight={600} color={"#fff"}>
+          <Typography variant='h5' fontWeight={600} color={'#fff'}>
             Organization Profile
           </Typography>
         </Box>
 
         {orgList ? (
           <>
-
             {/* Logo Section */}
             <Grid container spacing={3} alignItems='center'>
               <Grid item xs={12} md={3}>
@@ -393,7 +410,7 @@ const Organization = () => {
               </Grid>
 
               <Grid item xs={12} md={6}>
-                <TextField
+                {/* <TextField
                   fullWidth
                   label='Currency'
                   name='organization_currency'
@@ -402,40 +419,58 @@ const Organization = () => {
                   InputProps={{
                     startAdornment: <MonetizationOnIcon sx={{ mr: 1 }} />
                   }}
+                /> */}
+
+                <Autocomplete
+                  options={currencyCode}
+                  getOptionLabel={option => `${option.country} - ${option.symbol} (${option.code})`}
+                  value={currencyCode.find(c => c.code === orgList.organization_currency) || null}
+                  onChange={(event, newValue) => {
+                    setOrgList(prev => ({
+                      ...prev,
+                      organization_currency: newValue ? newValue.code : ''
+                    }))
+                  }}
+                  renderInput={params => (
+                    <TextField
+                      {...params}
+                      label='Currency'
+                      InputProps={{
+                        ...params.InputProps,
+                        startAdornment: <MonetizationOnIcon sx={{ mr: 1 }} />
+                      }}
+                    />
+                  )}
+                  fullWidth
                 />
               </Grid>
 
-              <Grid item xs={12} md={6}>
+              {/* <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
                   label='Created At'
                   value={new Date(orgList.createdAt).toLocaleDateString()}
                   InputProps={{ readOnly: true, startAdornment: <CalendarTodayIcon sx={{ mr: 1 }} /> }}
                 />
-              </Grid>
+              </Grid> */}
 
               <Grid item xs={12} md={6}>
-                <Chip label={`Version: ${orgList.c_version}`} color='primary' variant='outlined' />
+                {/* <Chip label={`Version: ${orgList.c_version}`} color='primary' variant='outlined' /> */}
               </Grid>
-               <Grid item xs={12} md={6}>
-                     <Box display={'flex'} justifyContent={'flex-end'} gap={2}>
-                     <Button
-                  variant='contained'
-                  size='large'
-                  
-                  sx={{ py: 1.2, fontWeight: 600 }}
-                  onClick={handleSave}
-                  disabled={updating}
-                >
-                  {updating ?  "Updating...": 'Save Changes'}
-                </Button>
-                  </Box>
-               </Grid>
-                 
-               
-            
+              <Grid item xs={12} md={6}>
+                <Box display={'flex'} justifyContent={'flex-end'} gap={2}>
+                  <Button
+                    variant='contained'
+                    size='large'
+                    sx={{ py: 1.2, fontWeight: 600 }}
+                    onClick={handleSave}
+                    disabled={updating}
+                  >
+                    {updating ? 'Updating...' : 'Save Changes'}
+                  </Button>
+                </Box>
+              </Grid>
             </Grid>
-            
           </>
         ) : (
           <Typography>No Organization Data Found</Typography>
