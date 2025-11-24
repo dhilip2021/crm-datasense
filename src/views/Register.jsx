@@ -29,7 +29,7 @@ import {
   sendOtpApi,
   verifyOtpApi
 } from '@/apiFunctions/ApiAction'
-import { Box, Grid, IconButton, InputAdornment, MenuItem, Select } from '@mui/material'
+import { Box, CircularProgress, Grid, IconButton, InputAdornment, MenuItem, Select, Stack } from '@mui/material'
 import { encryptCryptoResponse } from '@/helper/frontendHelper'
 
 function capitalizeWords(str) {
@@ -69,6 +69,7 @@ function normalizeEmail(email) {
 const Register = ({ mode }) => {
   const router = useRouter()
   const fileInputRef = useRef(null)
+  const inputsRef = useRef([])
 
   // States
   const [inputs, setInputs] = useState({
@@ -81,6 +82,7 @@ const Register = ({ mode }) => {
     last_name: '',
     email: '',
     password: '',
+    c_password: '',
     countryCode: '',
     mobile: '',
     otp: ''
@@ -96,6 +98,7 @@ const Register = ({ mode }) => {
     last_name: false,
     email: false,
     password: false,
+    c_password: false,
     countryCode: false,
     mobile: false,
     otp: false
@@ -104,6 +107,9 @@ const Register = ({ mode }) => {
   const [userInfo, setUserInfo] = useState(true)
   const [otpInfo, setOtpInfo] = useState(false)
   const [orgInfo, setOrgInfo] = useState(false)
+
+
+
   const [edit, setEdit] = useState(false)
   const [loader, setLoader] = useState(false)
   const [errOrgName, setErrOrgName] = useState('')
@@ -118,11 +124,17 @@ const Register = ({ mode }) => {
   const [errEmailCheck, setErrEmailCheck] = useState('')
   const [loaderEmail, setLoaderEmail] = useState(false)
 
+  const [errPasswordCheck, setErrPasswordCheck] = useState('')
+  const [errCPasswordCheck, setErrCPasswordCheck] = useState('')
+
   const [countryCodes, setCountryCodes] = useState([])
   const [isPasswordShown, setIsPasswordShown] = useState(false)
+  const [isCPasswordShown, setIsCPasswordShown] = useState(false)
+
   const [logoPreview, setLogoPreview] = useState(null)
 
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
+  const handleClickShowCPassword = () => setIsCPasswordShown(show => !show)
 
   const isEmail = email => {
     var emailFormat = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/
@@ -195,9 +207,10 @@ const Register = ({ mode }) => {
         setErrEmail('Please enter valid email')
       }
     } else if (name === 'password') {
-      if (!inputs?.password.match(passRegex) && !edit) {
+      if (inputs?.password === '') {
+        setErrPasswordCheck('Please enter valid password')
         setErrorInputs({ ...errorInputs, password: true })
-        toast.error('Use strong password with letters, numbers & symbols', {
+        toast.error('Please enter  Password', {
           autoClose: 500, // 1 second la close
           position: 'bottom-center',
           hideProgressBar: true, // progress bar venam na
@@ -206,6 +219,84 @@ const Register = ({ mode }) => {
           draggable: false,
           progress: undefined
         })
+      } else if (inputs?.c_password?.length > 0) {
+        if (inputs?.password !== inputs?.c_password) {
+          setErrorInputs({ ...errorInputs, password: true })
+          setErrPasswordCheck('Mis Match Password and Confirm Password')
+          toast.error('Mis Match Password and Confirm Password', {
+            autoClose: 500, // 1 second la close
+            position: 'bottom-center',
+            hideProgressBar: true, // progress bar venam na
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: false,
+            progress: undefined
+          })
+        }
+      } else if (!inputs?.password.match(passRegex) && !edit) {
+        setErrorInputs({ ...errorInputs, password: true })
+        setErrPasswordCheck(
+          'Password must be at least 8 characters long and include letters, numbers, symbols, and one capital letter'
+        )
+        toast.error(
+          'Password must be at least 8 characters long and include letters, numbers, symbols, and one capital letter',
+          {
+            autoClose: 500, // 1 second la close
+            position: 'bottom-center',
+            hideProgressBar: true, // progress bar venam na
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: false,
+            progress: undefined
+          }
+        )
+
+        return
+      }
+    } else if (name === 'c_password') {
+      if (inputs?.c_password === '') {
+        setErrCPasswordCheck('Please enter valid confirm password')
+        setErrorInputs({ ...errorInputs, c_password: true })
+        toast.error('Please enter Confirm Password', {
+          autoClose: 500, // 1 second la close
+          position: 'bottom-center',
+          hideProgressBar: true, // progress bar venam na
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined
+        })
+      } else if (inputs?.password !== inputs?.c_password) {
+        setErrCPasswordCheck('Mis Match Password and Confirm Password')
+        setErrorInputs({ ...errorInputs, c_password: true })
+        toast.error('Mis Match Password and Confirm Password', {
+          autoClose: 500, // 1 second la close
+          position: 'bottom-center',
+          hideProgressBar: true, // progress bar venam na
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined
+        })
+
+        return
+      } else if (!inputs?.c_password.match(passRegex) && !edit) {
+        setErrCPasswordCheck(
+          'Password must be at least 8 characters long and include letters, numbers, symbols, and one capital letter'
+        )
+        setErrorInputs({ ...errorInputs, c_password: true })
+        toast.error(
+          'Password must be at least 8 characters long and include letters, numbers, symbols, and one capital letter',
+          {
+            autoClose: 500, // 1 second la close
+            position: 'bottom-center',
+            hideProgressBar: true, // progress bar venam na
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: false,
+            progress: undefined
+          }
+        )
 
         return
       }
@@ -219,13 +310,35 @@ const Register = ({ mode }) => {
     }
   }
 
+const handleOTPChange = (e, index) => {
+  const val = e.target.value
+  if (!/^\d*$/.test(val)) return // Only digits
+
+  const otpArr = inputs.otp.split('') // Use current otp state
+  otpArr[index] = val
+
+  setInputs(prev => ({ ...prev, otp: otpArr.join('') }))
+
+  // Move focus
+  if (val && index < 3) {
+    inputsRef.current[index + 1].focus()
+  }
+}
+
+
+const handleKeyDown = (e, index) => {
+  if (e.key === 'Backspace' && !inputs.otp[index] && index > 0) {
+    inputsRef.current[index - 1].focus()
+  }
+}
+
+
   const handleChange = e => {
     const { name, value } = e.target
 
     if (name === 'organaization_name') {
       setErrorInputs({ ...errorInputs, organaization_name: false })
       setInputs({ ...inputs, [name]: capitalizeWords(value) })
-      
     } else if (name === 'organization_emp_count') {
       const res = isValidMobileNumberStrict(value)
 
@@ -265,6 +378,9 @@ const Register = ({ mode }) => {
       // }
     } else if (name === 'password') {
       setErrorInputs({ ...errorInputs, password: false })
+      setInputs({ ...inputs, [name]: value })
+    } else if (name === 'c_password') {
+      setErrorInputs({ ...errorInputs, c_password: false })
       setInputs({ ...inputs, [name]: value })
     } else if (name === 'otp') {
       const res = isValidOTPStrict(value)
@@ -758,12 +874,13 @@ const Register = ({ mode }) => {
                         }
                       }}
                       InputProps={{
-                        endAdornment:
-                          errEmailCheck === 'success' ? (
-                            <i className='ri-check-double-fill' style={{ color: '#4caf50' }}></i>
-                          ) : (
-                            ''
-                          )
+                        endAdornment: loaderEmail ? (
+                          <CircularProgress size={20} /> // MUI loader
+                        ) : errEmailCheck === 'success' ? (
+                          <i className='ri-check-double-fill' style={{ color: '#4caf50' }}></i>
+                        ) : errEmailCheck === 'error' ? (
+                          <i className='ri-close-circle-fill' style={{ color: '#f44336' }}></i>
+                        ) : null
                       }}
                     />
 
@@ -779,9 +896,7 @@ const Register = ({ mode }) => {
                       value={inputs.password}
                       onChange={handleChange}
                       error={errorInputs?.password}
-                      helperText={
-                        errorInputs?.password && 'Use 8 or more characters with a mix of letters, numbers & symbols'
-                      }
+                      helperText={errorInputs?.password && errPasswordCheck}
                       type={isPasswordShown ? 'text' : 'password'}
                       sx={{
                         // Target the root of the input element
@@ -824,6 +939,61 @@ const Register = ({ mode }) => {
                       }}
                       size='small'
                     />
+                    <TextField
+                      onBlur={handleBlur}
+                      disabled={edit}
+                      autoComplete='new-password'
+                      fullWidth
+                      label='Confirm Password *'
+                      placeholder='············'
+                      id='form-layout-basic-password'
+                      name='c_password'
+                      value={inputs.c_password}
+                      onChange={handleChange}
+                      error={errorInputs?.c_password}
+                      helperText={errorInputs?.c_password && errCPasswordCheck}
+                      type={isCPasswordShown ? 'text' : 'password'}
+                      sx={{
+                        // Target the root of the input element
+                        '& .MuiOutlinedInput-root': {
+                          position: 'relative', // anchor for the ::before strip
+
+                          // Red strip
+                          '&::before': {
+                            content: '""',
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            width: '4px', // thickness of the strip
+                            backgroundColor: 'error.main',
+                            borderTopLeftRadius: '4px', // match the TextField’s rounded corners
+                            borderBottomLeftRadius: '4px'
+                          }
+                        }
+                      }}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position='start'>
+                            <i className='ri-lock-line'></i>
+                          </InputAdornment>
+                        ),
+                        endAdornment: (
+                          <InputAdornment position='end'>
+                            <IconButton
+                              size='small'
+                              edge='end'
+                              onClick={handleClickShowCPassword}
+                              onMouseDown={e => e.preventDefault()}
+                              aria-label='toggle password visibility'
+                            >
+                              <i className={isCPasswordShown ? 'ri-eye-off-line' : 'ri-eye-line'} />
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
+                      size='small'
+                    />
 
                     <Button
                       fullWidth
@@ -834,11 +1004,13 @@ const Register = ({ mode }) => {
                         inputs.email === '' ||
                         inputs.mobile === '' ||
                         inputs.password === '' ||
+                        inputs.c_password === '' ||
                         errorInputs?.first_name ||
                         errorInputs?.last_name ||
                         errorInputs?.email ||
                         errorInputs?.mobile ||
-                        errorInputs?.password
+                        errorInputs?.password ||
+                        errorInputs?.c_password
                       }
                       onClick={handleOTPSubmit}
                     >
@@ -857,7 +1029,7 @@ const Register = ({ mode }) => {
                         Change
                       </Typography>
                     </Box>
-                    <TextField
+                    {/* <TextField
                       disabled={!otpCheck}
                       fullWidth
                       onBlur={handleBlur}
@@ -882,7 +1054,32 @@ const Register = ({ mode }) => {
                         minLength: 4,
                         maxLength: 4
                       }}
-                    />
+                    /> */}
+                    <Stack direction="row"  spacing={10}>
+                         {[0, 1, 2, 3].map(i => (
+
+                      <TextField
+                        key={i}
+                        inputRef={el => (inputsRef.current[i] = el)}
+                        value={inputs.otp[i] || ''}
+                        onChange={e => handleOTPChange(e, i)}
+                        onKeyDown={e => handleKeyDown(e, i)}
+                        error={errorInputs.otp}
+                        variant='outlined'
+                        size='small'
+                        inputProps={{ maxLength: 1, style: { textAlign: 'center', fontSize: '1.5rem' } }}
+                        sx={{
+                          width: '60px',
+                          '& .MuiOutlinedInput-root': {
+                            '&.Mui-error': {
+                              borderColor: 'error.main'
+                            }
+                          }
+                        }}
+                      />
+                    ))}
+                    </Stack>
+                   
 
                     <Button
                       fullWidth

@@ -165,7 +165,7 @@ export async function POST(request) {
           sendResponse['appStatusCode'] = 4
           sendResponse['message'] = ''
           sendResponse['payloadJson'] = err
-          sendResponse['error'] = 'Please contact your administrator'
+          sendResponse['error'] = '🛡️ Your role does not have access. Please request permission from your administrator.'
         })
       return NextResponse.json(sendResponse, { status: 200 })
     } else {
