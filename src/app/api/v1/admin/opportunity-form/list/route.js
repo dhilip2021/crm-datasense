@@ -6,17 +6,27 @@ import { NextResponse } from 'next/server'
 
 export async function GET(req) {
   await connectMongoDB()
+   const { searchParams } = new URL(req.url)
 
   const verified = verifyAccessToken()
+  const organization_id = searchParams.get('organization_id')
+
+  const verfiedOrgId = verified?.data?.organization_id
+
+  console.log(verfiedOrgId,"<< verifiedddddd organization_id")
 
   if (!verified.success) {
     return NextResponse.json({ success: false, error: 'token expired!' }, { status: 400 })
   }
 
-  try {
-    const { searchParams } = new URL(req.url)
+  if(verfiedOrgId !== organization_id){
+    return NextResponse.json({ success: false, error: 'your id mismatch please check !' }, { status: 400 })
+  }
 
-    const organization_id = searchParams.get('organization_id')
+  try {
+   
+
+    
     const form_name = searchParams.get('form_name')
     const search = searchParams.get('search') || ''
     const status = searchParams.get('status') || ''
@@ -33,7 +43,7 @@ export async function GET(req) {
     // 🟢 STEP 1: Find current user role
     const userRole = await UserRole.findOne({ c_role_id: verified.data.c_role_id }).lean()
 
-    console.log(userRole,"<<< USER ROLESSSSSS")
+    
 
 
     if (!userRole) {
@@ -57,6 +67,20 @@ export async function GET(req) {
       query.form_name = form_name
 
       if (userRole.c_role_name === 'Sales Executive') {
+        // 🔥 Sales Exec => only own leads
+        // query.c_createdBy = verified.data.user_id
+        const lowerRoles = await UserRole.find({ c_role_priority: { $gt: currentPriority } })
+          .select('c_role_id')
+          .lean()
+
+        let lowerRoleIds = lowerRoles.map(r => r.c_role_id)
+
+        query.$or = [
+          // { c_createdBy: verified.data.user_id }, // ✅ own leads always
+          { c_role_id: { $in: lowerRoleIds } }, // ✅ lower roles
+          { 'values.Assigned To': String(verified.data.user_id) } // ✅ assigned to me
+        ]
+      }else if (userRole.c_role_name === 'Manager') {
         // 🔥 Sales Exec => only own leads
         // query.c_createdBy = verified.data.user_id
         const lowerRoles = await UserRole.find({ c_role_priority: { $gt: currentPriority } })
