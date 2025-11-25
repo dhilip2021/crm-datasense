@@ -727,7 +727,7 @@ const OpportunityTable = () => {
               </Box>
             </Grid>
             <Grid item xs={12} sm={12}>
-              <Box sx={{ width: '100%', overflowX: 'auto', maxHeight: 500 }}>
+              <Box sx={{ width: '100%', overflowX: 'auto', maxHeight: 800 }}>
                 <Table
                   stickyHeader
                   size='small'
