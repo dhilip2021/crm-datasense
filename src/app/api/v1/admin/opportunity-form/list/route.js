@@ -178,6 +178,14 @@ export async function GET(req) {
         },
         {
           $lookup: {
+            from: 'users', // 🔥 collection name in DB
+            localField: 'o_createdBy',
+            foreignField: 'user_id',
+            as: 'opp_createdUser'
+          }
+        },
+        {
+          $lookup: {
             from: 'users',
             let: { assignedId: '$values.Assigned To' }, // 👈 take from nested field
             pipeline: [
@@ -190,13 +198,15 @@ export async function GET(req) {
         {
           $addFields: {
             createdByName: { $arrayElemAt: ['$createdUser.user_name', 0] },
+            createdByOppName: { $arrayElemAt: ['$opp_createdUser.user_name', 0] },
             assignedTo: { $arrayElemAt: ['$assignedTo.user_name', 0] } // 👈 pick assigned user name
           }
         },
         {
           $project: {
             __v: 0,
-            createdUser: 0
+            createdUser: 0,
+            opp_createdUser: 0
           }
         }
       ]),

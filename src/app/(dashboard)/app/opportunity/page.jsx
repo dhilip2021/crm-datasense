@@ -268,6 +268,7 @@ const OpportunityTable = () => {
       })
       const json = await res.json()
       if (json.success) {
+        console.log(json.data,"<<<< json dataaaa Dhilip")
         setData(json.data)
         setDataFilter(json.data)
         setTotal(json.total)
@@ -783,7 +784,8 @@ const OpportunityTable = () => {
                         Last Contact Date
                       </TableCell>
 
-                      <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Created By</TableCell>
+                      <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Lead Created By</TableCell>
+                      <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Opportunity Created By</TableCell>
                       {/* <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>Action</TableCell> */}
                     </TableRow>
                   </TableHead>
@@ -792,7 +794,7 @@ const OpportunityTable = () => {
                     {loading
                       ? [...Array(limit)].map((_, i) => (
                           <TableRow key={i}>
-                            {Array.from({ length: 14 }).map((_, j) => (
+                            {Array.from({ length: 17 }).map((_, j) => (
                               <TableCell key={j}>
                                 <Skeleton variant='text' width='100%' />
                               </TableCell>
@@ -969,6 +971,9 @@ const OpportunityTable = () => {
 
                             <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
                               {row.createdByName}
+                            </TableCell>
+                            <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>
+                              {row.createdByOppName}
                             </TableCell>
 
                             {/* <TableCell sx={{ minWidth: 100, maxWidth: 200, whiteSpace: 'nowrap' }}>

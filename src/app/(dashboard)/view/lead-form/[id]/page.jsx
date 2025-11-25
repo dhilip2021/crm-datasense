@@ -20,7 +20,7 @@ import EventIcon from '@mui/icons-material/Event'
 import Cookies from 'js-cookie'
 import { useParams, useRouter } from 'next/navigation'
 import { toast } from 'react-toastify'
-import { decrypCryptoReq } from '@/helper/frontendHelper'
+import { decrypCryptoReq, encryptCryptoRes } from '@/helper/frontendHelper'
 import EditableField from './EditableField'
 import NotesSection from './NotesSection'
 import LeadCard from './LeadCard'
@@ -32,7 +32,7 @@ import Link from 'next/link'
 // import ProductSelectorDialog from './ProductSelectorDialog'
 import ProductPage from './ProductPage'
 import TaskTabs from './TaskTabs'
-import { getUserAllListApi } from '@/apiFunctions/ApiAction'
+import { getHierarchyUserListApi, getUserAllListApi } from '@/apiFunctions/ApiAction'
 import slugify from 'slugify'
 import ConvertDealDialog from './ConvertDealDialog'
 import ProposalDialogPage from './ProposalDialogPage'
@@ -103,12 +103,12 @@ const LeadDetailView = () => {
   const getToken = Cookies.get('_token')
   const organization_name = Cookies.get('organization_name')
   const user_name = Cookies.get('user_name')
+  const user_id = Cookies.get('user_id')
   const email = Cookies.get('email')
   const mobile = Cookies.get('mobile')
   const organization_id = Cookies.get('organization_id')
   const organization_logo = Cookies.get('organization_logo')
   const organization_address = Cookies.get('organization_address')
-
 
   const leadId = decrypCryptoReq(encryptedId)
   const [expanded, setExpanded] = useState(0) // 0 = first open by default
@@ -140,11 +140,13 @@ const LeadDetailView = () => {
 
   const quoNumber = dataItems[0]?.quotationNumber
   // 🧩 Prefill default values from leadData
+
   const [dealData, setDealData] = useState({
     amount: '',
     dealName: leadData?.values?.Company || accountName || '',
     closingDate: null,
-    stage: leadData?.values?.['Lead Status'] || 'Qualification'
+    stage: leadData?.values?.['Lead Status'] || 'Qualification',
+    'Assigned To': user_id
   })
 
   // 🔹 Flatten helper
@@ -219,7 +221,7 @@ const LeadDetailView = () => {
     setLoader(true)
     try {
       const res = await fetch(
-        `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${lead_form}`,
+        `/api/v1/admin/lead-form-template/single?organization_id=${organization_id}&form_name=${opportunity_form}`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -251,7 +253,7 @@ const LeadDetailView = () => {
   // Fetch user list
   const getUserListFn = async () => {
     try {
-      const results = await getUserAllListApi()
+      const results = await getHierarchyUserListApi()
       if (results?.appStatusCode === 0 && Array.isArray(results.payloadJson)) {
         setUserList(results.payloadJson)
       } else {
@@ -805,169 +807,168 @@ const LeadDetailView = () => {
   }
 
   const handleDownloadPDF = () => {
-  const doc = new jsPDF('p', 'pt', 'a4')
-  const margin = 40
-  let y = margin
+    const doc = new jsPDF('p', 'pt', 'a4')
+    const margin = 40
+    let y = margin
 
-  // ======== HEADER (LOGO + ORG DETAILS) ========
-  const logoWidth = 70
-  const logoHeight = 40
-  doc.addImage(organization_logo, 'PNG', margin, y, logoWidth, logoHeight)
+    // ======== HEADER (LOGO + ORG DETAILS) ========
+    const logoWidth = 70
+    const logoHeight = 40
+    doc.addImage(organization_logo, 'PNG', margin, y, logoWidth, logoHeight)
 
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(16)
-  doc.text(organization_name, margin + logoWidth + 10, y + 15)
-
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(9)
-
-  const decodedAddress = decodeURIComponent(organization_address)
-  const addressLines = decodedAddress.split('\n')
-
-  let addressY = y + 35
-  addressLines.forEach(line => {
-    doc.text(line.trim(), margin + logoWidth + 10, addressY)
-    addressY += 12
-  })
-
-  doc.text(`Phone: ${mobile}`, margin + logoWidth + 10, addressY + 5)
-  doc.text(`Email: ${email}`, margin + logoWidth + 10, addressY + 20)
-  y = addressY + 50
-
-  // Line after header
-  doc.setLineWidth(0.5)
-  doc.line(margin, y, 555, y)
-  y += 30
-
-  // ======== DATE & QUOTATION NO ========
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'normal')
-  doc.text(`Date: ${new Date().toLocaleDateString()}`, 400, y)
-  doc.text(`Quotation No: ${quoNumber}`, 400, y + 15)
-
-  y += 40
-
-  // ======== CLIENT DETAILS ========
-  doc.setFont('helvetica', 'bold')
-  doc.text('Bill To:', margin, y)
-  y += 15
-
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(10)
-
-  const clientName = `${leadData.values['First Name']} ${leadData.values['Last Name']}` || ''
-  const clientAddress = `${leadData.values['Street']}, ${leadData.values['City']}, ${leadData.values['State']} - ${leadData.values['Pincode']}, ${leadData.values['Country']}`
-
-  doc.text(clientName, margin, y)
-  doc.text(leadData.values['Company'], margin, y + 15)
-
-  const wrappedClientAddr = doc.splitTextToSize(clientAddress, 500)
-  doc.text(wrappedClientAddr, margin, y + 30)
-
-  y += wrappedClientAddr.length * 12 + 50
-
-  // ======== SUBJECT ========
-  doc.setFont('helvetica', 'bold')
-  doc.text(`Subject: Quotation for ${leadData.items[0]?.item_ref[0]?.itemMasterRef.item_name}`, margin, y)
-  y += 25
-
-  doc.setFont('helvetica', 'normal')
-  doc.text(`Dear ${leadData.values['First Name']},`, margin, y)
-  y += 20
-  doc.text(`We are pleased to submit our quotation for your requirements as below:`, margin, y)
-  y += 30
-
-  // ======== ITEMS TABLE ========
-  const tableColumn = ['#', 'Item', 'Qty', 'GST %', 'Unit Price', 'Total']
-  const tableRows = dataItems.map((item, index) => [
-    index + 1,
-    item.itemMasterRef.item_name,
-    item.quantity,
-    `${item.itemMasterRef.gst}%`,
-    `${item.unitPrice.toFixed(2)}`,
-    `${item.finalPrice.toFixed(2)}`
-  ])
-
-  autoTable(doc, {
-    head: [tableColumn],
-    body: tableRows,
-    startY: y,
-    styles: { fontSize: 10, cellPadding: 4 },
-    columnStyles: {
-      0: { cellWidth: 20 },
-      1: { cellWidth: 150 },
-      2: { cellWidth: 50 },
-      3: { cellWidth: 70 },
-      4: { cellWidth: 80 },
-      5: { cellWidth: 90, halign: 'right' }
-    },
-    headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold' },
-    alternateRowStyles: { fillColor: [245, 245, 245] },
-    margin: { left: margin, right: margin }
-  })
-
-  let finalY = doc.lastAutoTable.finalY + 30
-
-  // ======== TOTALS SECTION ========
-  const totalsBoxX = 350
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'bold')
-
-  doc.text('Subtotal:', totalsBoxX, finalY)
-  doc.text(`${totals.subtotal.toFixed(2)}`, totalsBoxX + 150, finalY, { align: 'right' })
-  finalY += 15
-
-  if (totals.discountAmount > 0) {
-    doc.text('Discount:', totalsBoxX, finalY)
-    doc.text(`-${totals.discountAmount.toFixed(2)}`, totalsBoxX + 150, finalY, { align: 'right' })
-    finalY += 15
-  }
-
-  doc.text('GST:', totalsBoxX, finalY)
-  doc.text(`${totals.gstAmount.toFixed(2)}`, totalsBoxX + 150, finalY, { align: 'right' })
-
-  doc.line(totalsBoxX, finalY + 10, totalsBoxX + 150, finalY + 10)
-
-  doc.setFontSize(12)
-  doc.text('Grand Total:', totalsBoxX, finalY + 30)
-  doc.text(`${totals.finalPrice.toFixed(2)}`, totalsBoxX + 150, finalY + 30, { align: 'right' })
-
-  finalY += 70
-
-  // ======== TERMS & CONDITIONS ========
-  if (notes?.trim()) {
     doc.setFont('helvetica', 'bold')
-    doc.text('Terms & Conditions:', margin, finalY)
-    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(16)
+    doc.text(organization_name, margin + logoWidth + 10, y + 15)
 
-    const wrappedNotes = doc.splitTextToSize(notes, 500)
-    wrappedNotes.forEach((line, i) => {
-      doc.text(line, margin, finalY + 15 + i * 12)
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(9)
+
+    const decodedAddress = decodeURIComponent(organization_address)
+    const addressLines = decodedAddress.split('\n')
+
+    let addressY = y + 35
+    addressLines.forEach(line => {
+      doc.text(line.trim(), margin + logoWidth + 10, addressY)
+      addressY += 12
     })
 
-    finalY += wrappedNotes.length * 12 + 30
+    doc.text(`Phone: ${mobile}`, margin + logoWidth + 10, addressY + 5)
+    doc.text(`Email: ${email}`, margin + logoWidth + 10, addressY + 20)
+    y = addressY + 50
+
+    // Line after header
+    doc.setLineWidth(0.5)
+    doc.line(margin, y, 555, y)
+    y += 30
+
+    // ======== DATE & QUOTATION NO ========
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'normal')
+    doc.text(`Date: ${new Date().toLocaleDateString()}`, 400, y)
+    doc.text(`Quotation No: ${quoNumber}`, 400, y + 15)
+
+    y += 40
+
+    // ======== CLIENT DETAILS ========
+    doc.setFont('helvetica', 'bold')
+    doc.text('Bill To:', margin, y)
+    y += 15
+
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(10)
+
+    const clientName = `${leadData.values['First Name']} ${leadData.values['Last Name']}` || ''
+    const clientAddress = `${leadData.values['Street']}, ${leadData.values['City']}, ${leadData.values['State']} - ${leadData.values['Pincode']}, ${leadData.values['Country']}`
+
+    doc.text(clientName, margin, y)
+    doc.text(leadData.values['Company'], margin, y + 15)
+
+    const wrappedClientAddr = doc.splitTextToSize(clientAddress, 500)
+    doc.text(wrappedClientAddr, margin, y + 30)
+
+    y += wrappedClientAddr.length * 12 + 50
+
+    // ======== SUBJECT ========
+    doc.setFont('helvetica', 'bold')
+    doc.text(`Subject: Quotation for ${leadData.items[0]?.item_ref[0]?.itemMasterRef.item_name}`, margin, y)
+    y += 25
+
+    doc.setFont('helvetica', 'normal')
+    doc.text(`Dear ${leadData.values['First Name']},`, margin, y)
+    y += 20
+    doc.text(`We are pleased to submit our quotation for your requirements as below:`, margin, y)
+    y += 30
+
+    // ======== ITEMS TABLE ========
+    const tableColumn = ['#', 'Item', 'Qty', 'GST %', 'Unit Price', 'Total']
+    const tableRows = dataItems.map((item, index) => [
+      index + 1,
+      item.itemMasterRef.item_name,
+      item.quantity,
+      `${item.itemMasterRef.gst}%`,
+      `${item.unitPrice.toFixed(2)}`,
+      `${item.finalPrice.toFixed(2)}`
+    ])
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: y,
+      styles: { fontSize: 10, cellPadding: 4 },
+      columnStyles: {
+        0: { cellWidth: 20 },
+        1: { cellWidth: 150 },
+        2: { cellWidth: 50 },
+        3: { cellWidth: 70 },
+        4: { cellWidth: 80 },
+        5: { cellWidth: 90, halign: 'right' }
+      },
+      headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [245, 245, 245] },
+      margin: { left: margin, right: margin }
+    })
+
+    let finalY = doc.lastAutoTable.finalY + 30
+
+    // ======== TOTALS SECTION ========
+    const totalsBoxX = 350
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'bold')
+
+    doc.text('Subtotal:', totalsBoxX, finalY)
+    doc.text(`${totals.subtotal.toFixed(2)}`, totalsBoxX + 150, finalY, { align: 'right' })
+    finalY += 15
+
+    if (totals.discountAmount > 0) {
+      doc.text('Discount:', totalsBoxX, finalY)
+      doc.text(`-${totals.discountAmount.toFixed(2)}`, totalsBoxX + 150, finalY, { align: 'right' })
+      finalY += 15
+    }
+
+    doc.text('GST:', totalsBoxX, finalY)
+    doc.text(`${totals.gstAmount.toFixed(2)}`, totalsBoxX + 150, finalY, { align: 'right' })
+
+    doc.line(totalsBoxX, finalY + 10, totalsBoxX + 150, finalY + 10)
+
+    doc.setFontSize(12)
+    doc.text('Grand Total:', totalsBoxX, finalY + 30)
+    doc.text(`${totals.finalPrice.toFixed(2)}`, totalsBoxX + 150, finalY + 30, { align: 'right' })
+
+    finalY += 70
+
+    // ======== TERMS & CONDITIONS ========
+    if (notes?.trim()) {
+      doc.setFont('helvetica', 'bold')
+      doc.text('Terms & Conditions:', margin, finalY)
+      doc.setFont('helvetica', 'normal')
+
+      const wrappedNotes = doc.splitTextToSize(notes, 500)
+      wrappedNotes.forEach((line, i) => {
+        doc.text(line, margin, finalY + 15 + i * 12)
+      })
+
+      finalY += wrappedNotes.length * 12 + 30
+    }
+
+    // ======== SIGNATURE ========
+    doc.text('Best Regards,', margin, finalY)
+    doc.text(user_name, margin, finalY + 20)
+    doc.text(email, margin, finalY + 35)
+    doc.text(organization_name, margin, finalY + 50)
+
+    // ======== FOOTER ========
+    doc.setFontSize(8)
+    doc.setTextColor(120)
+    doc.text('Thank you for choosing Lumivo Datasense Technologies!', 555 - margin, 820, { align: 'right' })
+
+    // ======== SAVE PDF ========
+    const companyName = leadData.values['Company']
+      ?.trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-zA-Z0-9-]/g, '')
+
+    doc.save(`Quotation_${companyName || 'Client'}.pdf`)
   }
-
-  // ======== SIGNATURE ========
-  doc.text('Best Regards,', margin, finalY)
-  doc.text(user_name, margin, finalY + 20)
-  doc.text(email, margin, finalY + 35)
-  doc.text(organization_name, margin, finalY + 50)
-
-  // ======== FOOTER ========
-  doc.setFontSize(8)
-  doc.setTextColor(120)
-  doc.text('Thank you for choosing Lumivo Datasense Technologies!', 555 - margin, 820, { align: 'right' })
-
-  // ======== SAVE PDF ========
-  const companyName = leadData.values['Company']
-    ?.trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-zA-Z0-9-]/g, '')
-
-  doc.save(`Quotation_${companyName || 'Client'}.pdf`)
-}
-
 
   useEffect(() => {
     if (sections.length > 0 && leadId) {
@@ -1055,6 +1056,14 @@ const LeadDetailView = () => {
 
   const dealFunCall = (id, lead_name) => {
     setDealConfirm(true)
+    setDealData({
+      amount: '',
+      dealName: leadData?.values?.Company || accountName || '',
+      closingDate: null,
+      stage: 'New Opportunity',
+      // stage: leadData?.values?.['Lead Status'] || 'Qualification',
+      'Assigned To': user_id
+    })
   }
 
   const dealFnCall = order_ID => {
@@ -1095,7 +1104,7 @@ const LeadDetailView = () => {
   }
 
   const convertLeadFn = async (leadData, createDeal, dealData) => {
-    console.log(createDeal)
+   
 
     try {
       const id = leadData?._id
@@ -1110,11 +1119,9 @@ const LeadDetailView = () => {
       const createdAt = leadData?.createdAt
       const updatedAt = new Date().toISOString()
 
-      // 💡 Build new lead_name based on createDeal flag
       const originalName = leadData?.lead_name || ''
       const nextLeadName = createDeal ? originalName.replace(/lead/i, 'OPPORTUNITY') : originalName
 
-      // 💡 Slugify for URL safe name
       const slugLeadString = nextLeadName.replace(/[^\w\s]|_/g, '')
       const slug_lead_name = slugify(slugLeadString, {
         replacement: '-',
@@ -1124,7 +1131,8 @@ const LeadDetailView = () => {
 
       // 📌 Base values (always included)
       const values = {
-        'Lead Status': createDeal ? dealData?.stage : 'Contacted / Qualification'
+        'Lead Status': createDeal ? dealData?.stage : 'Contacted / Qualification',
+        'Assigned To': createDeal ? dealData['Assigned To'] : user_id
       }
 
       // 📌 Only include deal fields WHEN createDeal is true
@@ -1145,6 +1153,7 @@ const LeadDetailView = () => {
         updatedAt: new Date().toISOString()
       }
 
+      console.log(payload, '<<< paylaod convert to lead')
       // 🔹 If you want to update to API, uncomment below:
 
       const res = await fetch(`/api/v1/admin/lead-form/${lead_id}`, {
@@ -1158,12 +1167,15 @@ const LeadDetailView = () => {
 
       const result = await res.json()
       if (result.success) {
+
+
+        console.log(createDeal,"<<< ceratetetetete")
         toast.success(createDeal ? 'Lead successfully converted to Opportunity' : 'Lead updated successfully', {
           autoClose: 1000,
           position: 'bottom-center',
           hideProgressBar: true
         })
-        router.push(createDeal ? '/app/opportunity' : '/app/leads')
+        router.push(createDeal ? `/view/opportunity-form/${encodeURIComponent(encryptCryptoRes(leadData.lead_id))}` : '/app/leads')
       } else {
         toast.error('Update failed, please try again!')
       }
@@ -1460,6 +1472,8 @@ const LeadDetailView = () => {
           leadData={leadData}
           dealData={dealData}
           setDealData={setDealData}
+          userList={userList}
+          user_id={user_id}
         />
         <ProposalDialogPage
           open={confirm}

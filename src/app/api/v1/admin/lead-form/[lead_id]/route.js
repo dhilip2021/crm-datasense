@@ -316,7 +316,8 @@ export async function PUT(req, { params }) {
 
     const updateFields = {
       values: { ...mergedValues, Score: lead_score, Label: lead_label },
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      o_createdBy: verified.data.user_id
     }
 
     if (body.lead_name) updateFields.lead_name = body.lead_name

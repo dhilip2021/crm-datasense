@@ -15,7 +15,8 @@ import {
   TextField,
   InputAdornment,
   MenuItem,
-  FormHelperText
+  FormHelperText,
+  Grid
 } from '@mui/material'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
@@ -33,12 +34,19 @@ const ConvertDealDialog = ({
   fieldOpportunityConfig,
   leadData,
   dealData,
-  setDealData
+  setDealData,
+  userList,
+  user_id
 }) => {
-  const ownerName = leadData?.c_createdByName || 'Unknown'
-  const stageOptions = fieldOpportunityConfig?.['Lead Status'] || []
 
+
+  console.log(user_id,"<<< user Id")
+
+  // const ownerName = leadData?.c_createdByName || 'Unknown'
+  const stageOptions = fieldOpportunityConfig?.['Lead Status'] || []
   const [errors, setErrors] = useState({})
+
+  console.log(stageOptions,"<<< stageOptions")
 
   // 🧩 Prefill values from leadData
   useEffect(() => {
@@ -47,7 +55,8 @@ const ConvertDealDialog = ({
         amount: '',
         dealName: leadData?.values?.Company || accountName || '',
         closingDate: null,
-        stage: 'New Opportunity'
+        stage: 'New Opportunity',
+        'Assigned To': user_id
       })
       setErrors({})
     }
@@ -232,7 +241,7 @@ const ConvertDealDialog = ({
                 <DatePicker
                   value={dealData.closingDate}
                   onChange={handleDateChange}
-                  format="DD/MM/YYYY"
+                  format='DD/MM/YYYY'
                   disablePast
                   slotProps={{
                     textField: {
@@ -282,11 +291,29 @@ const ConvertDealDialog = ({
         {/* 👑 Owner Info */}
         <Box mt={3}>
           <Typography variant='body2' color='text.secondary'>
-            Owner of the New Records
+            Assign to
           </Typography>
-          <Typography variant='body1' fontWeight={500}>
-            {ownerName}
-          </Typography>
+      
+          <Grid item xs={6}>
+            <TextField
+              fullWidth
+              select
+              size='small'
+              variant='outlined'
+              defaultValue={dealData['Assigned To'] || ''}
+              value={dealData['Assigned To'] || ''} // 🛠 Bracket notation
+              onChange={e => {
+                setDealData({ ...dealData, ['Assigned To']: e.target.value }) // 🛠 Correct update
+              }}
+              sx={{ minWidth: 150 }}
+            >
+              {userList.map(u => (
+                <MenuItem key={u.user_id} value={u.user_id}>
+                  {u.user_name}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Grid>
         </Box>
       </DialogContent>
 

@@ -154,7 +154,10 @@ const LeadFormSchema = new mongoose.Schema(
     c_role_id: { type: String },
     c_createdBy: { type: String },
     c_updatedBy: { type: String },
-    c_deletedBy: { type: String }
+    c_deletedBy: { type: String },
+    o_createdBy: { type: String },
+    o_updatedBy: { type: String },
+    o_deletedBy: { type: String },
   },
   { strict: false, versionKey: false, timestamps: true }
 )
