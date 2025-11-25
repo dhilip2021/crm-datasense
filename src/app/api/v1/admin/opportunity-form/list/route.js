@@ -32,6 +32,10 @@ export async function GET(req) {
 
     // 🟢 STEP 1: Find current user role
     const userRole = await UserRole.findOne({ c_role_id: verified.data.c_role_id }).lean()
+
+    console.log(userRole,"<<< USER ROLESSSSSS")
+
+
     if (!userRole) {
       return NextResponse.json({ success: false, message: 'Invalid role' }, { status: 403 })
     }
@@ -62,7 +66,7 @@ export async function GET(req) {
         let lowerRoleIds = lowerRoles.map(r => r.c_role_id)
 
         query.$or = [
-          { c_createdBy: verified.data.user_id }, // ✅ own leads always
+          // { c_createdBy: verified.data.user_id }, // ✅ own leads always
           { c_role_id: { $in: lowerRoleIds } }, // ✅ lower roles
           { 'values.Assigned To': String(verified.data.user_id) } // ✅ assigned to me
         ]

@@ -21,10 +21,19 @@ import CancelIcon from '@mui/icons-material/Close'
 import Cookies from 'js-cookie'
 import { createItemMaster } from '@/apiFunctions/ApiAction'
 
-
-const AddItemDialog = ({ open, onClose, fetchItems, uomList, taxList, titles, item, handleSubmit, handleChange }) => {
-
-
+const AddItemDialog = ({
+  open,
+  onClose,
+  fetchItems,
+  uomList,
+  taxList,
+  titles,
+  item,
+  handleSubmit,
+  handleChange,
+  addUOMChanges,
+  addTaxChanges
+}) => {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth='md'>
       <DialogTitle
@@ -102,6 +111,7 @@ const AddItemDialog = ({ open, onClose, fetchItems, uomList, taxList, titles, it
                 fullWidth
                 select
                 size='small'
+                name='uom'
                 value={item.uom}
                 onChange={e => handleChange('uom', e.target.value)}
               >
@@ -110,12 +120,32 @@ const AddItemDialog = ({ open, onClose, fetchItems, uomList, taxList, titles, it
                     {u.uom_code} ({u.uom_label})
                   </MenuItem>
                 ))}
+                <MenuItem
+                  onClick={() => addUOMChanges()}
+                  sx={{
+                    mt: 1,
+                    border: '1px dashed #4CAF50',
+                    borderRadius: 1,
+                    color: '#4CAF50',
+                    fontWeight: 600,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    py: 1.2,
+                    '&:hover': {
+                      backgroundColor: '#E8F5E9',
+                      border: '1px solid #4CAF50'
+                    }
+                  }}
+                >
+                  ➕ Add New UOM
+                </MenuItem>
               </TextField>
             </Grid>
 
             {/* Base Price - common */}
             <Grid item xs={12} sm={6} md={3}>
               <TextField
+                name='basePrice'
                 autoComplete='off'
                 label='Base Price *'
                 fullWidth
@@ -140,7 +170,7 @@ const AddItemDialog = ({ open, onClose, fetchItems, uomList, taxList, titles, it
                     onChange={e => handleChange('mrp', e.target.value)}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                {/* <Grid item xs={12} sm={6} md={3}>
                   <TextField
                     autoComplete='off'
                     label='Distributor Price'
@@ -150,7 +180,7 @@ const AddItemDialog = ({ open, onClose, fetchItems, uomList, taxList, titles, it
                     value={item.distributorPrice}
                     onChange={e => handleChange('distributorPrice', e.target.value)}
                   />
-                </Grid>
+                </Grid> */}
               </>
             )}
 
@@ -232,11 +262,31 @@ const AddItemDialog = ({ open, onClose, fetchItems, uomList, taxList, titles, it
                   value={item.gst}
                   onChange={e => handleChange('gst', e.target.value)}
                 >
-                  {taxList.map((g,i) => (
+                  {taxList.map((g, i) => (
                     <MenuItem key={i} value={g.tax_value}>
                       {g.tax_value}%
                     </MenuItem>
+
                   ))}
+                  <MenuItem
+                  onClick={() => addTaxChanges()}
+                  sx={{
+                    mt: 1,
+                    border: '1px dashed #4CAF50',
+                    borderRadius: 1,
+                    color: '#4CAF50',
+                    fontWeight: 600,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    py: 1.2,
+                    '&:hover': {
+                      backgroundColor: '#E8F5E9',
+                      border: '1px solid #4CAF50'
+                    }
+                  }}
+                >
+                  ➕ Add New Tax
+                </MenuItem>
                 </TextField>
               </Grid>
             )}

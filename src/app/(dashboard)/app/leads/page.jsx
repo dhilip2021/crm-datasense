@@ -45,7 +45,7 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import GridOnIcon from '@mui/icons-material/GridOn'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import { toast, ToastContainer } from 'react-toastify'
-import { getUserAllListApi } from '@/apiFunctions/ApiAction'
+import { getHierarchyUserListApi, getUserAllListApi } from '@/apiFunctions/ApiAction'
 import FlagIcon from '@mui/icons-material/Flag' // ✅ MUI icon
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload'
@@ -419,7 +419,7 @@ const LeadTable = () => {
 
   const getUserListFn = async () => {
     try {
-      const results = await getUserAllListApi()
+      const results = await getHierarchyUserListApi()
       if (results?.appStatusCode === 0 && Array.isArray(results.payloadJson)) {
         setUserList(results.payloadJson)
       } else {
@@ -529,7 +529,7 @@ const LeadTable = () => {
         {/* Title */}
         <Grid item xs={12} md='auto' sx={{ mb: isMobile ? 2 : 0 }}>
           <Typography variant='h6' fontWeight='bold'>
-            Leads
+            Lead List
           </Typography>
         </Grid>
 

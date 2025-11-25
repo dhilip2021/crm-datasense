@@ -41,7 +41,7 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import GridOnIcon from '@mui/icons-material/GridOn'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import { toast, ToastContainer } from 'react-toastify'
-import { getUserAllListApi } from '@/apiFunctions/ApiAction'
+import { getHierarchyUserListApi, getUserAllListApi } from '@/apiFunctions/ApiAction'
 import FlagIcon from '@mui/icons-material/Flag' // ✅ MUI icon
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import SearchIcon from '@mui/icons-material/Search'
@@ -262,7 +262,7 @@ const OpportunityTable = () => {
 
     try {
       console.log('cal3')
-      const res = await fetch(`/api/v1/admin/lead-form/list?${query}`, {
+      const res = await fetch(`/api/v1/admin/opportunity-form/list?${query}`, {
         method: 'GET',
         headers: header
       })
@@ -331,7 +331,7 @@ const OpportunityTable = () => {
         Authorization: `Bearer ${getToken}`
       }
       console.log('cal4')
-      const res = await fetch(`/api/v1/admin/lead-form/list?${query}`, {
+      const res = await fetch(`/api/v1/admin/opportunity-form/list?${query}`, {
         method: 'GET',
         headers: header
       })
@@ -356,7 +356,7 @@ const OpportunityTable = () => {
 
   const getUserListFn = async () => {
     try {
-      const results = await getUserAllListApi()
+      const results = await getHierarchyUserListApi()
       if (results?.appStatusCode === 0 && Array.isArray(results.payloadJson)) {
         setUserList(results.payloadJson)
       } else {
@@ -565,7 +565,7 @@ const OpportunityTable = () => {
                   handleViewClose()
                 }}
               >
-                List View
+                 List View
               </MenuItem>
               <MenuItem
                 onClick={() => {

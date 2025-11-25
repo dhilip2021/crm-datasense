@@ -29,7 +29,20 @@ import {
   sendOtpApi,
   verifyOtpApi
 } from '@/apiFunctions/ApiAction'
-import { Box, CircularProgress, Grid, IconButton, InputAdornment, MenuItem, Select, Stack } from '@mui/material'
+import {
+  Box,
+  Checkbox,
+  CircularProgress,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
+  Grid,
+  IconButton,
+  InputAdornment,
+  MenuItem,
+  Select,
+  Stack
+} from '@mui/material'
 import { encryptCryptoResponse } from '@/helper/frontendHelper'
 
 function capitalizeWords(str) {
@@ -41,14 +54,10 @@ function capitalizeWords(str) {
 
 const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@.#$!%*?&^])[A-Za-z\d@.#$!%*?&]{8,15}$/
 function isValidMobileNumberStrict(value) {
-  // if (value?.length > 15) {
-  //   return false
-  // } else {
   if (!/^\d+$/.test(value)) return false
   const digitsOnly = String(value).replace(/\D/g, '') // removes all non-digit characters
   const regex = /^[0-9][0-9]*$/
   return regex.test(digitsOnly)
-  // }
 }
 
 function isValidOTPStrict(value) {
@@ -78,6 +87,7 @@ const Register = ({ mode }) => {
     organization_address: '',
     organization_emp_count: '',
     organization_currency: '',
+    companyType: [],
     first_name: '',
     last_name: '',
     email: '',
@@ -86,6 +96,7 @@ const Register = ({ mode }) => {
     countryCode: '',
     mobile: '',
     otp: ''
+    
   })
 
   const [errorInputs, setErrorInputs] = useState({
@@ -94,6 +105,7 @@ const Register = ({ mode }) => {
     organization_address: false,
     organization_emp_count: false,
     organization_currency: false,
+    companyType: false,
     first_name: false,
     last_name: false,
     email: false,
@@ -101,14 +113,12 @@ const Register = ({ mode }) => {
     c_password: false,
     countryCode: false,
     mobile: false,
-    otp: false
+    otp: false,
   })
 
   const [userInfo, setUserInfo] = useState(true)
   const [otpInfo, setOtpInfo] = useState(false)
   const [orgInfo, setOrgInfo] = useState(false)
-
-
 
   const [edit, setEdit] = useState(false)
   const [loader, setLoader] = useState(false)
@@ -232,6 +242,9 @@ const Register = ({ mode }) => {
             draggable: false,
             progress: undefined
           })
+        } else if (inputs?.password === inputs?.c_password) {
+          setErrorInputs({ ...errorInputs, password: false })
+          setErrorInputs({ ...errorInputs, c_password: false })
         }
       } else if (!inputs?.password.match(passRegex) && !edit) {
         setErrorInputs({ ...errorInputs, password: true })
@@ -299,6 +312,9 @@ const Register = ({ mode }) => {
         )
 
         return
+      } else if (inputs?.password === inputs?.c_password) {
+        setErrorInputs({ ...errorInputs, password: false })
+        setErrorInputs({ ...errorInputs, c_password: false })
       }
     } else if (name === 'otp') {
       if (value !== '') {
@@ -310,31 +326,29 @@ const Register = ({ mode }) => {
     }
   }
 
-const handleOTPChange = (e, index) => {
-  const val = e.target.value
-  if (!/^\d*$/.test(val)) return // Only digits
+  const handleOTPChange = (e, index) => {
+    const val = e.target.value
+    if (!/^\d*$/.test(val)) return // Only digits
 
-  const otpArr = inputs.otp.split('') // Use current otp state
-  otpArr[index] = val
+    const otpArr = inputs.otp.split('') // Use current otp state
+    otpArr[index] = val
 
-  setInputs(prev => ({ ...prev, otp: otpArr.join('') }))
+    setInputs(prev => ({ ...prev, otp: otpArr.join('') }))
 
-  // Move focus
-  if (val && index < 3) {
-    inputsRef.current[index + 1].focus()
+    // Move focus
+    if (val && index < 3) {
+      inputsRef.current[index + 1].focus()
+    }
   }
-}
 
-
-const handleKeyDown = (e, index) => {
-  if (e.key === 'Backspace' && !inputs.otp[index] && index > 0) {
-    inputsRef.current[index - 1].focus()
+  const handleKeyDown = (e, index) => {
+    if (e.key === 'Backspace' && !inputs.otp[index] && index > 0) {
+      inputsRef.current[index - 1].focus()
+    }
   }
-}
-
 
   const handleChange = e => {
-    const { name, value } = e.target
+    const { name, value, checked } = e.target
 
     if (name === 'organaization_name') {
       setErrorInputs({ ...errorInputs, organaization_name: false })
@@ -389,6 +403,24 @@ const handleKeyDown = (e, index) => {
         setErrorInputs({ ...errorInputs, otp: false })
         setInputs({ ...inputs, [name]: value })
       }
+    } else if (
+      name === 'product' ||
+      name === 'service' ||
+      name === 'license' ||
+      name === 'warranty' ||
+      name === 'subscription'
+    ) {
+      setErrorInputs({ ...errorInputs, companyType: false })
+
+      // Add or remove from array
+      let updated = [...inputs.companyType]
+      if (checked) {
+        updated.push(name)
+      } else {
+        updated = updated.filter(item => item !== name)
+      }
+
+      setInputs({ ...inputs, companyType: updated })
     }
   }
 
@@ -552,12 +584,15 @@ const handleKeyDown = (e, index) => {
   }
 
   const handleSubmit = async () => {
+    console.log(inputs, '<< inputsss')
+
     const body = {
       organization_name: inputs?.organaization_name,
       organization_logo: inputs?.organization_logo,
       organization_address: inputs?.organization_address,
       organization_emp_count: inputs?.organization_emp_count,
       organization_currency: inputs?.organization_currency,
+      companyType: inputs?.companyType,
       c_version: 'Trial'
     }
 
@@ -567,6 +602,9 @@ const handleKeyDown = (e, index) => {
     } else if (!isEmail(inputs?.email)) {
       setErrorInputs({ ...errorInputs, email: true })
       setErrEmail('Please enter valid email')
+    } else if (inputs.companyType === '') {
+      setErrorInputs(prev => ({ ...prev, companyType: true }))
+      return toast.error('Please select company type')
     } else {
       const result = await addOrganizationApi(body)
 
@@ -579,6 +617,7 @@ const handleKeyDown = (e, index) => {
           last_name: inputs?.last_name,
           c_about_user: 'Admin',
           email: inputs?.email,
+          password: inputs?.password,
           mobile: `${inputs?.countryCode}${inputs?.mobile}`,
           role: '',
           c_user_img_url: '',
@@ -1055,31 +1094,29 @@ const handleKeyDown = (e, index) => {
                         maxLength: 4
                       }}
                     /> */}
-                    <Stack direction="row"  spacing={10}>
-                         {[0, 1, 2, 3].map(i => (
-
-                      <TextField
-                        key={i}
-                        inputRef={el => (inputsRef.current[i] = el)}
-                        value={inputs.otp[i] || ''}
-                        onChange={e => handleOTPChange(e, i)}
-                        onKeyDown={e => handleKeyDown(e, i)}
-                        error={errorInputs.otp}
-                        variant='outlined'
-                        size='small'
-                        inputProps={{ maxLength: 1, style: { textAlign: 'center', fontSize: '1.5rem' } }}
-                        sx={{
-                          width: '60px',
-                          '& .MuiOutlinedInput-root': {
-                            '&.Mui-error': {
-                              borderColor: 'error.main'
+                    <Stack direction='row' spacing={10}>
+                      {[0, 1, 2, 3].map(i => (
+                        <TextField
+                          key={i}
+                          inputRef={el => (inputsRef.current[i] = el)}
+                          value={inputs.otp[i] || ''}
+                          onChange={e => handleOTPChange(e, i)}
+                          onKeyDown={e => handleKeyDown(e, i)}
+                          error={errorInputs.otp}
+                          variant='outlined'
+                          size='small'
+                          inputProps={{ maxLength: 1, style: { textAlign: 'center', fontSize: '1.5rem' } }}
+                          sx={{
+                            width: '60px',
+                            '& .MuiOutlinedInput-root': {
+                              '&.Mui-error': {
+                                borderColor: 'error.main'
+                              }
                             }
-                          }
-                        }}
-                      />
-                    ))}
+                          }}
+                        />
+                      ))}
                     </Stack>
-                   
 
                     <Button
                       fullWidth
@@ -1199,11 +1236,77 @@ const handleKeyDown = (e, index) => {
                       </Box>
                     )}
 
+                    <Box mt={1}>
+                      <FormControl component='fieldset' error={errorInputs.companyType}>
+                        <Typography>Company Type *</Typography>
+                        <FormGroup row>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={inputs.companyType.includes('product')}
+                                onChange={handleChange}
+                                name='product'
+                              />
+                            }
+                            label='Product'
+                          />
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={inputs.companyType.includes('service')}
+                                onChange={handleChange}
+                                name='service'
+                              />
+                            }
+                            label='Service'
+                          />
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={inputs.companyType.includes('license')}
+                                onChange={handleChange}
+                                name='license'
+                              />
+                            }
+                            label='License'
+                          />
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={inputs.companyType.includes('warranty')}
+                                onChange={handleChange}
+                                name='warranty'
+                              />
+                            }
+                            label='Warranty'
+                          />
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={inputs.companyType.includes('subscription')}
+                                onChange={handleChange}
+                                name='subscription'
+                              />
+                            }
+                            label='Subscription'
+                          />
+                        </FormGroup>
+                        {errorInputs.companyType && (
+                          <FormHelperText>Please select at least one company type</FormHelperText>
+                        )}
+                      </FormControl>
+                    </Box>
+
                     <Button
                       fullWidth
                       variant='contained'
                       type='submit'
-                      disabled={inputs.organaization_name === '' || errorInputs?.organaization_name}
+                      disabled={
+                        inputs.organaization_name === '' ||
+                        errorInputs?.organaization_name ||
+                        inputs.companyType.length === 0 ||
+                        errorInputs?.companyType
+                      }
                       onClick={handleSubmit}
                     >
                       Register

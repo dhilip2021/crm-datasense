@@ -13,7 +13,7 @@ let sendResponse = {
 };
 
 export async function POST(request) {
-  const { organization_name,organization_logo,organization_address,organization_emp_count,organization_currency, Id, n_status, c_version } = await request.json();
+  const { organization_name,organization_logo,organization_address,organization_emp_count,organization_currency, companyType, Id, n_status, c_version } = await request.json();
 
   try {
     await connectMongoDB();
@@ -37,6 +37,7 @@ export async function POST(request) {
           organization_address: organization_address,
           organization_emp_count: organization_emp_count,
           organization_currency: organization_currency,
+          companyType: companyType,
           c_version: c_version,
           n_status: n_status,
         };
@@ -87,6 +88,7 @@ export async function POST(request) {
           organization_address,
           organization_emp_count,
           organization_currency,
+          companyType,
           c_version,
           organization_id: create_UUID(),
           endedAt: fourteenDaysLater,

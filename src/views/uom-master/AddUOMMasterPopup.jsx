@@ -17,11 +17,12 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 export default function AddUOMMasterPopup(props) {
   const { open, close, titles, inputs, handleChange, handleSubmit, errors, handleBlur, loader } = props
 
+  console.log(inputs,"<<< inputsssss UOM")
+
   const theme = useTheme()
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'))
 
   return (
-    <React.Fragment>
       <Dialog
         fullScreen={fullScreen}
         maxWidth={'md'}
@@ -125,11 +126,10 @@ export default function AddUOMMasterPopup(props) {
               sx={{ color: '#fff', ml: 2 }}
               type='submit'
             >
-              {inputs._id === '' ? 'Submit' : 'Update'}
+              {(inputs._id === '' || inputs._id === undefined) ? 'Submit' : 'Update'}
             </Button>
           </Box>
         </DialogActions>
       </Dialog>
-    </React.Fragment>
   )
 }

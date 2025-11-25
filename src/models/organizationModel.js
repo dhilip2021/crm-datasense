@@ -29,9 +29,20 @@ const OrganizationSchema = new Schema(
       type: String,
       trim: true
     },
-     organization_currency: {
+    organization_currency: {
       type: String,
       trim: true
+    },
+    companyType: {
+      type: [String], // Always store as array of strings
+      trim: true,
+      validate: {
+        validator: function (values) {
+          const allowed = ['product', 'service', 'license', 'warranty', 'subscription']
+          return values.every(v => allowed.includes(v.toLowerCase()))
+        },
+        message: props => `${props.value} is not a valid company type`
+      }
     },
     n_status: {
       type: Number,
