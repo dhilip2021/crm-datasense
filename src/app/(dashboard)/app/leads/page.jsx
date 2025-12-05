@@ -57,6 +57,8 @@ import { DemoContainer } from '@mui/x-date-pickers/internals/demo'
 import { LocalizationProvider } from '@mui/x-date-pickers-pro/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers-pro/AdapterDayjs'
 import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker'
+import { useRouter } from 'next/navigation'
+import { useSelector } from 'react-redux'
 
 const LeadTable = () => {
   const theme = useTheme()
@@ -86,8 +88,22 @@ const LeadTable = () => {
   const handleOpenFilter = () => setOpenFilter(true)
   const handleCloseFilter = () => setOpenFilter(false)
 
-  // const dynamicPdfFields = data.length > 0 ? Object.keys(data[0].values) : []
-  // const fieldsPdf = [...new Set([...dynamicPdfFields])]
+
+  const router = useRouter()
+  const { payloadJson } = useSelector(state => state.menu)
+
+  const hasViewPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Leads' && m.sub_menu_privileage_name === '')
+
+    return found?.view_status === true
+  }
+
+
+
+
+
 
   const [anchorExcelEl, setAnchorExcelEl] = useState(null)
   const [selectedExcelFields, setSelectedExcelFields] = useState([])
@@ -484,6 +500,15 @@ const LeadTable = () => {
       setLoader(false)
     }
   }
+
+
+  useEffect(() => {
+    if (payloadJson.length > 0) {
+      if (!hasViewPermission()) {
+        router.push('/')
+      }
+    }
+  }, [payloadJson])
 
   useEffect(() => {
     if (!fetched && sections) {

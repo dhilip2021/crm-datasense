@@ -169,12 +169,12 @@ const ProductMasterList = () => {
     <Box sx={{ p: 4, bgcolor: '#f9fafb', minHeight: '100vh' }}>
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-            <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#374151' }}>
+          <Box display='flex' justifyContent='space-between' alignItems='center' mb={3}>
+            <Typography variant='h5' sx={{ fontWeight: 'bold', color: '#374151' }}>
               Product List
             </Typography>
             <Button
-              variant="contained"
+              variant='contained'
               onClick={() => setOpen(true)}
               startIcon={<AddIcon />}
               sx={{
@@ -191,7 +191,9 @@ const ProductMasterList = () => {
         </Grid>
 
         <Grid item xs={12}>
-          <Box sx={{ bgcolor: 'white', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
+          <Box
+            sx={{ bgcolor: 'white', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', overflow: 'hidden' }}
+          >
             <Table>
               <TableHead>
                 <TableRow sx={{ bgcolor: '#f3f4f6' }}>
@@ -208,27 +210,78 @@ const ProductMasterList = () => {
                 {products.map((p, i) => (
                   <React.Fragment key={p._id}>
                     <TableRow sx={{ '&:hover': { bgcolor: '#f9fafb' } }}>
-                      <TableCell>{editingIndex === i ? <TextField size="small" value={editData.code} onChange={e => setEditData({ ...editData, code: e.target.value })} sx={{ '& .MuiInputBase-root': { borderRadius: '8px' } }} /> : p.code}</TableCell>
-                      <TableCell>{editingIndex === i ? <TextField size="small" value={editData.name} onChange={e => setEditData({ ...editData, name: e.target.value })} sx={{ '& .MuiInputBase-root': { borderRadius: '8px' } }} /> : p.name}</TableCell>
-                      <TableCell>{editingIndex === i ? <TextField size="small" select value={editData.category} onChange={e => setEditData({ ...editData, category: e.target.value })} sx={{ '& .MuiInputBase-root': { borderRadius: '8px' } }}><MenuItem value="Product">Product</MenuItem><MenuItem value="Service">Service</MenuItem><MenuItem value="Subscription">Subscription</MenuItem><MenuItem value="License">License</MenuItem></TextField> : p.category}</TableCell>
-                      <TableCell>{editingIndex === i ? <TextField size="small" type="number" value={editData.basePrice} onChange={e => setEditData({ ...editData, basePrice: e.target.value })} sx={{ '& .MuiInputBase-root': { borderRadius: '8px' } }} /> : p.basePrice}</TableCell>
                       <TableCell>
                         {editingIndex === i ? (
                           <TextField
-                            size="small"
+                            size='small'
+                            value={editData.code}
+                            onChange={e => setEditData({ ...editData, code: e.target.value })}
+                            sx={{ '& .MuiInputBase-root': { borderRadius: '8px' } }}
+                          />
+                        ) : (
+                          p.code
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {editingIndex === i ? (
+                          <TextField
+                            size='small'
+                            value={editData.name}
+                            onChange={e => setEditData({ ...editData, name: e.target.value })}
+                            sx={{ '& .MuiInputBase-root': { borderRadius: '8px' } }}
+                          />
+                        ) : (
+                          p.name
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {editingIndex === i ? (
+                          <TextField
+                            size='small'
+                            select
+                            value={editData.category}
+                            onChange={e => setEditData({ ...editData, category: e.target.value })}
+                            sx={{ '& .MuiInputBase-root': { borderRadius: '8px' } }}
+                          >
+                            <MenuItem value='Product'>Product</MenuItem>
+                            <MenuItem value='Service'>Service</MenuItem>
+                            <MenuItem value='Subscription'>Subscription</MenuItem>
+                            <MenuItem value='License'>License</MenuItem>
+                          </TextField>
+                        ) : (
+                          p.category
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {editingIndex === i ? (
+                          <TextField
+                            size='small'
+                            type='number'
+                            value={editData.basePrice}
+                            onChange={e => setEditData({ ...editData, basePrice: e.target.value })}
+                            sx={{ '& .MuiInputBase-root': { borderRadius: '8px' } }}
+                          />
+                        ) : (
+                          p.basePrice
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {editingIndex === i ? (
+                          <TextField
+                            size='small'
                             select
                             value={editData.status}
                             onChange={e => setEditData({ ...editData, status: e.target.value })}
                             sx={{ '& .MuiInputBase-root': { borderRadius: '8px' } }}
                           >
-                            <MenuItem value="Active">Active</MenuItem>
-                            <MenuItem value="Inactive">Inactive</MenuItem>
+                            <MenuItem value='Active'>Active</MenuItem>
+                            <MenuItem value='Inactive'>Inactive</MenuItem>
                           </TextField>
                         ) : (
                           <Chip
                             label={p.status}
                             color={p.status === 'Active' ? 'success' : 'default'}
-                            size="small"
+                            size='small'
                             sx={{ borderRadius: '6px' }}
                           />
                         )}
@@ -236,19 +289,31 @@ const ProductMasterList = () => {
                       <TableCell>
                         {editingIndex === i ? (
                           <>
-                            <IconButton onClick={() => handleSaveEdit(p._id)} sx={{ color: '#009CDE', '&:hover': { bgcolor: '#e3f2fd' } }}>
+                            <IconButton
+                              onClick={() => handleSaveEdit(p._id)}
+                              sx={{ color: '#009CDE', '&:hover': { bgcolor: '#e3f2fd' } }}
+                            >
                               <SaveIcon />
                             </IconButton>
-                            <IconButton onClick={handleCancelEdit} sx={{ color: '#ef4444', '&:hover': { bgcolor: '#fee2e2' } }}>
+                            <IconButton
+                              onClick={handleCancelEdit}
+                              sx={{ color: '#ef4444', '&:hover': { bgcolor: '#fee2e2' } }}
+                            >
                               <CancelIcon />
                             </IconButton>
                           </>
                         ) : (
                           <>
-                            <IconButton onClick={() => handleEdit(i)} sx={{ color: '#009CDE', '&:hover': { bgcolor: '#e3f2fd' } }}>
+                            <IconButton
+                              onClick={() => handleEdit(i)}
+                              sx={{ color: '#009CDE', '&:hover': { bgcolor: '#e3f2fd' } }}
+                            >
                               <EditIcon />
                             </IconButton>
-                            <IconButton onClick={() => openDeleteDialog(p._id)} sx={{ color: '#ef4444', '&:hover': { bgcolor: '#fee2e2' } }}>
+                            <IconButton
+                              onClick={() => openDeleteDialog(p._id)}
+                              sx={{ color: '#ef4444', '&:hover': { bgcolor: '#fee2e2' } }}
+                            >
                               <DeleteIcon />
                             </IconButton>
                           </>
@@ -315,7 +380,7 @@ const ProductMasterList = () => {
                 {products.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={7}>
-                      <Typography textAlign="center" color="text.secondary" sx={{ py: 4 }}>
+                      <Typography textAlign='center' color='text.secondary' sx={{ py: 4 }}>
                         No products found
                       </Typography>
                     </TableCell>
@@ -344,7 +409,7 @@ const ProductMasterList = () => {
           Confirm Delete
         </DialogTitle>
         <DialogContent sx={{ p: 3 }}>
-          <Typography variant="body1" sx={{ color: '#374151' }}>
+          <Typography variant='body1' sx={{ color: '#374151' }}>
             Are you sure you want to delete this product? This action cannot be undone.
           </Typography>
         </DialogContent>
@@ -363,7 +428,7 @@ const ProductMasterList = () => {
           </Button>
           <Button
             onClick={() => handleDelete(deleteProductId)}
-            variant="contained"
+            variant='contained'
             sx={{
               borderRadius: '8px',
               textTransform: 'none',

@@ -28,7 +28,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import LoaderGif from '@assets/gif/loader.gif'
-import { getUserAllListApi } from '@/apiFunctions/ApiAction'
+import { getHierarchyUserListApi, getTypeItemMasterListApi, getUserAllListApi } from '@/apiFunctions/ApiAction'
 import { encryptCryptoRes } from '@/helper/frontendHelper'
 
 // Short name (ORG)
@@ -75,8 +75,11 @@ function LeadFormAppPage() {
   const organization_id = Cookies.get('organization_id')
   const user_id = Cookies.get('user_id')
   const organization_name = Cookies.get('organization_name')
+  const item_access = Cookies.get('item_access')
+  const itemTypes = item_access ? item_access.split(',').map(item => item.trim()) : []
   const lead_form = 'lead-form'
   const router = useRouter()
+
 
   const [sections, setSections] = useState([])
   const [values, setValues] = useState({})
@@ -84,16 +87,18 @@ function LeadFormAppPage() {
   const [loader, setLoader] = useState(false)
   const [countryCodes, setCountryCodes] = useState([])
   const [userList, setUserList] = useState([])
+  const [itemList, setItemList] = useState([])
 
   // 🚨 Duplicate Dialog States
   const [duplicateDialog, setDuplicateDialog] = useState(false)
   const [duplicateLead, setDuplicateLead] = useState(null)
   const [pendingPayload, setPendingPayload] = useState(null)
+  const [itemType, setItemType] = useState(itemTypes?.length > 0 ? itemTypes[0] : '')
 
   // Fetch user list
   const getUserListFn = async () => {
     try {
-      const results = await getUserAllListApi()
+      const results = await getHierarchyUserListApi()
       if (results?.appStatusCode === 0 && Array.isArray(results.payloadJson)) {
         setUserList(results.payloadJson)
       } else {
@@ -102,6 +107,26 @@ function LeadFormAppPage() {
     } catch (err) {
       console.error('User list error:', err)
       setUserList([])
+    }
+  }
+
+  // Fetch user list
+  const getItemListFn = async itemType => {
+    try {
+      // const itemType = "Product"
+      const header = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getToken}`
+      }
+
+      const results = await getTypeItemMasterListApi(itemType, header)
+      if (results?.appStatusCode === 0 && Array.isArray(results.payloadJson)) {
+        setItemList(results.payloadJson)
+      } else {
+        setItemList([])
+      }
+    } catch (err) {
+      setItemList([])
     }
   }
 
@@ -169,7 +194,7 @@ function LeadFormAppPage() {
   }
 
   // Handle change
-  const handleChange = (id, value, type) => {
+  const handleChange = (label, id, value, type) => {
     if (typeof value === 'string') {
       if (/^\s/.test(value)) {
         value = value.replace(/^\s+/, '') // remove only leading spaces
@@ -178,6 +203,9 @@ function LeadFormAppPage() {
     if (type === 'Email') {
       // ❌ remove all spaces while typing
       value = value.replace(/\s+/g, '')
+    }
+    if (label === 'Company Type') {
+      setItemType(value)
     }
 
     if (type === 'Phone') {
@@ -231,6 +259,61 @@ function LeadFormAppPage() {
     }
   }
 
+  const handleSubmit1 = async () => {
+    const payload = {
+      organization_id,
+      organization_name: shortName(organization_name),
+      form_name: lead_form,
+      values: {},
+      submittedAt: new Date().toISOString()
+    }
+
+    const newErrors = {}
+
+    sections.forEach(section => {
+      const fields = [...(section.fields.left || []), ...(section.fields.center || []), ...(section.fields.right || [])]
+      fields.forEach(field => {
+        const valueForValidation = field.type === 'Phone' ? values[`${field.id}_number`] : values[field.id]
+        const error = validateField(field, valueForValidation)
+        if (error) {
+          newErrors[field.id] = error
+        } else {
+          if (field.type === 'Phone') {
+            const country = values[`${field.id}_countryCode`] || field.countryCode || '+91'
+            const number = values[`${field.id}_number`] || ''
+            if (number) payload.values[field.label] = `${country}${number.replace(/\s+/g, '')}`
+          } else {
+            const v = values[field.id]
+            if (v !== undefined && v !== '') payload.values[field.label] = v
+          }
+        }
+      })
+    })
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+
+      const firstErrorFieldId = Object.keys(newErrors)[0]
+      const el = document.getElementById(firstErrorFieldId)
+
+      if (el) {
+        // scroll smooth ah pogum
+        el.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'nearest'
+        })
+
+        // focus kuduthu highlight panna
+        setTimeout(() => {
+          el.focus()
+        }, 300)
+      }
+
+      return
+    }
+
+  }
   // ---- handleSubmit ----
   const handleSubmit = async () => {
     const payload = {
@@ -415,7 +498,7 @@ function LeadFormAppPage() {
         </>
       ),
       value: values[field.id] || '',
-      onChange: e => handleChange(field.id, e.target.value, field.type),
+      onChange: e => handleChange(field.label, field.id, e.target.value, field.type),
       onBlur: e => handleBlur(e, field),
       error: !!errors[field.id],
       helperText: errors[field.id],
@@ -433,6 +516,43 @@ function LeadFormAppPage() {
               label: user.user_name
             }))
         }
+        if (field.label === 'Company Type' && itemTypes.length > 0) {
+          options = itemTypes.map(item => ({
+            value: item,
+            label: item
+          }))
+        }
+        if (field.label === 'Product List' && itemList.length > 0) {
+          options = itemList.map(item => {
+            const type = item?.item_type?.trim()?.toLowerCase() // safe normalize
+
+            let value = item?.product_name // default fallback
+            let label = item?.product_name // default fallback
+
+            if (type === 'product') {
+              value = item?.product_name
+              label = item?.product_name
+            } else if (type === 'service') {
+              value = item?.service_name
+              label = item?.service_name
+            } else if (type === 'license') {
+              value = item?.license_name
+              label = item?.license_name
+            } else if (type === 'warranty') {
+              value = item?.warranty_plan
+              label = item?.warranty_plan
+            } else if (type === 'subscription') {
+              value = item?.subscription_name
+              label = item?.subscription_name
+            }
+
+            return {
+              value: value || 'Unnamed Value',
+              label: label || 'Unnamed Item'
+            }
+          })
+        }
+
         return (
           <TextField id={field.id} select {...commonProps} autoComplete='off' InputLabelProps={{ shrink: true }}>
             {options.map((opt, i) => (
@@ -453,7 +573,7 @@ function LeadFormAppPage() {
             <RadioGroup
               row
               value={values[field.id] || ''}
-              onChange={e => handleChange(field.id, e.target.value, field.type)}
+              onChange={e => handleChange(field.label, field.id, e.target.value, field.type)}
             >
               {field.options?.map((opt, i) => (
                 <FormControlLabel key={i} value={opt} control={<Radio />} label={opt} />
@@ -482,14 +602,14 @@ function LeadFormAppPage() {
             autoComplete='off'
             InputLabelProps={{ shrink: true }}
             value={values[`${field.id}_number`] || ''}
-            onChange={e => handleChange(`${field.id}_number`, e.target.value, field.type)}
+            onChange={e => handleChange(field.label, `${field.id}_number`, e.target.value, field.type)}
             type='tel'
             inputProps={{ maxLength: field.maxLength }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position='start'>
                   <Autocomplete
-                  disableClearable
+                    disableClearable
                     options={countryCodes}
                     getOptionLabel={
                       option => (typeof option === 'string' ? option : option.dial_code) // only for dropdown search
@@ -497,24 +617,24 @@ function LeadFormAppPage() {
                     value={countryCodes.find(c => c.dial_code === (values[`${field.id}_countryCode`] || '+91')) || null}
                     onChange={(_, newValue) => {
                       if (newValue && 'dial_code' in newValue) {
-                        handleChange(`${field.id}_countryCode`, newValue.dial_code, field.type)
+                        handleChange(field.label, `${field.id}_countryCode`, newValue.dial_code, field.type)
                       } else {
-                        handleChange(`${field.id}_countryCode`, '', field.type)
+                        handleChange(field.label, `${field.id}_countryCode`, '', field.type)
                       }
                     }}
-                     sx={{
-                                width: '100px', // ⬅️ Sets proper width for flag, code & arrow
-                                minWidth: '100px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                padding: '0px 0px 0px 0px', // ⬅️ Padding-right reserves space for arrow
-                                '& .MuiSelect-select': {
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '1px',
-                                  padding: '0px 0px'
-                                }
-                              }}
+                    sx={{
+                      width: '100px', // ⬅️ Sets proper width for flag, code & arrow
+                      minWidth: '100px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '0px 0px 0px 0px', // ⬅️ Padding-right reserves space for arrow
+                      '& .MuiSelect-select': {
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1px',
+                        padding: '0px 0px'
+                      }
+                    }}
                     size='small'
                     renderOption={(props, option) => (
                       <Box component='li' {...props} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -589,7 +709,7 @@ function LeadFormAppPage() {
             control={
               <Switch
                 checked={values[field.id] || false}
-                onChange={e => handleChange(field.id, e.target.checked, field.type)}
+                onChange={e => handleChange(field.label, field.id, e.target.checked, field.type)}
               />
             }
             label={field.label || 'Toggle'}
@@ -638,6 +758,12 @@ function LeadFormAppPage() {
     )
   }
 
+  useEffect(() => {
+    getItemListFn(itemType)
+  }, [itemType])
+
+
+
   // Fetch country codes + users
   useEffect(() => {
     fetch('/json/country.json')
@@ -646,6 +772,7 @@ function LeadFormAppPage() {
       .catch(() => setCountryCodes([]))
 
     getUserListFn()
+
     fetchForm()
   }, [])
 

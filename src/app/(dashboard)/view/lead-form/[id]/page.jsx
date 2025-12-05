@@ -32,7 +32,7 @@ import Link from 'next/link'
 // import ProductSelectorDialog from './ProductSelectorDialog'
 import ProductPage from './ProductPage'
 import TaskTabs from './TaskTabs'
-import { getHierarchyUserListApi, getUserAllListApi } from '@/apiFunctions/ApiAction'
+import { getHierarchyUserListApi, getTypeItemMasterListApi, getUserAllListApi } from '@/apiFunctions/ApiAction'
 import slugify from 'slugify'
 import ConvertDealDialog from './ConvertDealDialog'
 import ProposalDialogPage from './ProposalDialogPage'
@@ -109,12 +109,16 @@ const LeadDetailView = () => {
   const organization_id = Cookies.get('organization_id')
   const organization_logo = Cookies.get('organization_logo')
   const organization_address = Cookies.get('organization_address')
+  const item_access = Cookies.get('item_access')
+  const itemTypes = item_access ? item_access.split(',').map(item => item.trim()) : []
 
   const leadId = decrypCryptoReq(encryptedId)
   const [expanded, setExpanded] = useState(0) // 0 = first open by default
   const [tabIndex, setTabIndex] = useState(0)
   const [open, setOpen] = useState(false)
   const [userList, setUserList] = useState([])
+  const [itemList, setItemList] = useState([])
+  const [itemType, setItemType] = useState(itemTypes?.length > 0 ? itemTypes[0] : '')
 
   const lead_form = 'lead-form'
   const opportunity_form = 'opportunities-form'
@@ -339,7 +343,7 @@ const LeadDetailView = () => {
         (item, idx) => `
     <tr>
       <td style="padding: 8px; border: 1px solid #ddd;">${idx + 1}</td>
-      <td style="padding: 8px; border: 1px solid #ddd;">${item.itemMasterRef.item_name}</td>
+      <td style="padding: 8px; border: 1px solid #ddd;">${item.itemMasterRef.product_name}</td>
       <td style="padding: 8px; border: 1px solid #ddd; text-align:right;">${item.quantity}</td>
       <td style="padding: 8px; border: 1px solid #ddd; text-align:right;">₹${item.unitPrice.toFixed(2)}</td>
       <td style="padding: 8px; border: 1px solid #ddd; text-align:right;">₹${item.finalPrice.toFixed(2)}</td>
@@ -395,7 +399,7 @@ const LeadDetailView = () => {
           (item, idx) => `
       <tr>
         <td style="padding:8px; border:1px solid #ddd;">${idx + 1}</td>
-        <td style="padding:8px; border:1px solid #ddd;">${item.itemMasterRef.item_name}</td>
+        <td style="padding:8px; border:1px solid #ddd;">${item.itemMasterRef.product_name}</td>
         <td style="padding:8px; border:1px solid #ddd; text-align:right;">${item.quantity}</td>
         <td style="padding:8px; border:1px solid #ddd; text-align:right;">${item.itemMasterRef.gst}%</td>
         <td style="padding:8px; border:1px solid #ddd; text-align:right;">₹${item.unitPrice.toFixed(2)}</td>
@@ -542,7 +546,7 @@ const LeadDetailView = () => {
 
     // Subject & Greeting
     doc.setFont('helvetica', 'bold')
-    doc.text(`Subject: Quotation for ${leadData.items[0]?.item_ref[0]?.itemMasterRef.item_name}`, margin, y)
+    doc.text(`Subject: Quotation for ${leadData.items[0]?.item_ref[0]?.itemMasterRef.product_name}`, margin, y)
     y += lineHeight * 2
     doc.setFont('helvetica', 'normal')
     doc.text(`Dear ${leadData.values['First Name']},`, margin, y)
@@ -554,7 +558,7 @@ const LeadDetailView = () => {
     const tableColumn = ['Item', 'Description', 'Qty', 'Unit Price', 'Total']
     const tableRows = dataItems.map((item, index) => [
       index + 1,
-      item.itemMasterRef.item_name,
+      item.itemMasterRef.product_name,
       item.quantity,
       `${item.unitPrice.toFixed(2)}`,
       `${item.finalPrice.toFixed(2)}`
@@ -696,7 +700,7 @@ const LeadDetailView = () => {
 
     // ======== SUBJECT LINE ========
     doc.setFont('helvetica', 'bold')
-    doc.text(`Subject: Quotation for ${leadData.items[0]?.item_ref[0]?.itemMasterRef.item_name}`, margin, y)
+    doc.text(`Subject: Quotation for ${leadData.items[0]?.item_ref[0]?.itemMasterRef.product_name}`, margin, y)
     y += 25
 
     doc.setFont('helvetica', 'normal')
@@ -710,7 +714,7 @@ const LeadDetailView = () => {
 
     const tableRows = dataItems.map((item, index) => [
       index + 1,
-      item.itemMasterRef.item_name,
+      item.itemMasterRef.product_name,
       item.quantity,
       `${item.itemMasterRef.gst}%`, // Show GST with %
       `${item.unitPrice.toFixed(2)}`,
@@ -870,7 +874,7 @@ const LeadDetailView = () => {
 
     // ======== SUBJECT ========
     doc.setFont('helvetica', 'bold')
-    doc.text(`Subject: Quotation for ${leadData.items[0]?.item_ref[0]?.itemMasterRef.item_name}`, margin, y)
+    doc.text(`Subject: Quotation for ${leadData.items[0]?.item_ref[0]?.itemMasterRef.product_name}`, margin, y)
     y += 25
 
     doc.setFont('helvetica', 'normal')
@@ -883,7 +887,7 @@ const LeadDetailView = () => {
     const tableColumn = ['#', 'Item', 'Qty', 'GST %', 'Unit Price', 'Total']
     const tableRows = dataItems.map((item, index) => [
       index + 1,
-      item.itemMasterRef.item_name,
+      item.itemMasterRef.product_name,
       item.quantity,
       `${item.itemMasterRef.gst}%`,
       `${item.unitPrice.toFixed(2)}`,
@@ -1104,8 +1108,6 @@ const LeadDetailView = () => {
   }
 
   const convertLeadFn = async (leadData, createDeal, dealData) => {
-   
-
     try {
       const id = leadData?._id
       const organization_id = leadData?.organization_id
@@ -1167,20 +1169,40 @@ const LeadDetailView = () => {
 
       const result = await res.json()
       if (result.success) {
-
-
-        console.log(createDeal,"<<< ceratetetetete")
+        console.log(createDeal, '<<< ceratetetetete')
         toast.success(createDeal ? 'Lead successfully converted to Opportunity' : 'Lead updated successfully', {
           autoClose: 1000,
           position: 'bottom-center',
           hideProgressBar: true
         })
-        router.push(createDeal ? `/view/opportunity-form/${encodeURIComponent(encryptCryptoRes(leadData.lead_id))}` : '/app/leads')
+        router.push(
+          createDeal ? `/view/opportunity-form/${encodeURIComponent(encryptCryptoRes(leadData.lead_id))}` : '/app/leads'
+        )
       } else {
         toast.error('Update failed, please try again!')
       }
     } catch (err) {
       console.error('❌ Error converting lead:', err)
+    }
+  }
+
+  // Fetch user list
+  const getItemListFn = async itemType => {
+    try {
+      // const itemType = "Product"
+      const header = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getToken}`
+      }
+
+      const results = await getTypeItemMasterListApi(itemType, header)
+      if (results?.appStatusCode === 0 && Array.isArray(results.payloadJson)) {
+        setItemList(results.payloadJson)
+      } else {
+        setItemList([])
+      }
+    } catch (err) {
+      setItemList([])
     }
   }
 
@@ -1195,6 +1217,10 @@ const LeadDetailView = () => {
       setOwnerName(leadData.c_createdByName || '—')
     }
   }, [leadData])
+
+  useEffect(() => {
+    getItemListFn(itemType)
+  }, [itemType])
 
   // 🔹 Save handler
   const handleFieldSave = async (label, newValue, reasonKey, selectedReasons) => {
@@ -1374,6 +1400,7 @@ const LeadDetailView = () => {
               itemsData={itemsData}
               dealFnCall={dealFnCall}
               items={dataItems}
+              itemTypes={itemTypes}
             />
           </Box>
         )}
@@ -1450,6 +1477,9 @@ const LeadDetailView = () => {
                               handleFieldSave(field.label, newValue)
                             }}
                             userList={userList}
+                            itemTypes={itemTypes}
+                            itemList={itemList}
+                            setItemType={setItemType}
                           />
                         </Grid>
                       ))}

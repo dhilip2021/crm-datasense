@@ -261,8 +261,8 @@ const staticFiledForm = [
           label: 'Company Type',
           placeholder: 'Select a Company Type',
           required: false,
-          options: ['product', 'service', 'license', 'warranty', 'subscription'],
-          defaultValue: 'product',
+          options: ['Product', 'Service', 'License', 'Warranty', 'Subscription'],
+          defaultValue: 'Product',
           sortOrder: 'entered',
           trackHistory: false,
           enableColor: false,
@@ -647,6 +647,7 @@ const Login = ({ mode }) => {
           Cookies.set('email', resultsPayloadJson?.email)
           Cookies.set('mobile', resultsPayloadJson?.mobile)
           Cookies.set('user_id', resultsPayloadJson?.user_id)
+          Cookies.set('item_access', resultsPayloadJson?.item_access)
           Cookies.set('organization_id', resultsPayloadJson?.organization_id)
           Cookies.set('organization_name', resultsPayloadJson?.organization_name)
           Cookies.set('organization_logo', resultsPayloadJson?.organization_logo)
@@ -704,6 +705,7 @@ const Login = ({ mode }) => {
         Cookies.set('email', resultsPayloadJson?.email)
         Cookies.set('mobile', resultsPayloadJson?.mobile)
         Cookies.set('user_id', resultsPayloadJson?.user_id)
+        Cookies.set('item_access', resultsPayloadJson?.item_access)
         Cookies.set('organization_id', resultsPayloadJson?.organization_id)
         Cookies.set('organization_name', resultsPayloadJson?.organization_name)
         Cookies.set('organization_logo', resultsPayloadJson?.organization_logo)

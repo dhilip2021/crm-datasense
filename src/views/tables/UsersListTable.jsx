@@ -18,13 +18,16 @@ import CustomAvatar from '@core/components/mui/Avatar'
 
 // Styles Imports
 import tableStyles from '@core/styles/table.module.css'
-import { allUserListApi, deleteUserApi } from '@/apiFunctions/ApiAction'
-import LoaderGif from '@assets/gif/loader1.gif'
+import { allUserListApi, deleteUserApi, getHierarchyUserListApi, postHierarchyUserListApi } from '@/apiFunctions/ApiAction'
+import LoaderGif from '@assets/gif/loader.gif'
 import DeleteConformPopup from '../leads/DeleteConformPopup'
 import { toast, ToastContainer } from 'react-toastify'
 import { decrypCryptoRequest } from '@/helper/frontendHelper'
+import EmptyItems from '@/app/(dashboard)/view/empty-items/EmptyItems'
+import { useRouter } from 'next/navigation'
 
 const UsersListTable = () => {
+  const router = useRouter()
   const organization_id = Cookies.get('organization_id')
   const getToken = Cookies.get('_token')
   const [usersList, setUsersList] = useState([])
@@ -113,7 +116,7 @@ const UsersListTable = () => {
         organization_id: organization_id
       }
 
-      const res = await allUserListApi(body, header)
+      const res = await postHierarchyUserListApi(body, header)
 
       const results = decrypCryptoRequest(res?.payloadJson)
 
@@ -225,15 +228,23 @@ const UsersListTable = () => {
         )}
 
         {!loader && usersList?.length === 0 && (
-          <Box textAlign={'center'} width={'100%'}>
-            <Card className='w-full shadow-md rounded-lg'>
-              <CardContent className='text-center'>
-                <Box p={40}>
-                  <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Users Found</p>
-                </Box>
-              </CardContent>
-            </Card>
-          </Box>
+
+          <EmptyItems
+          onAdd={() => router.push('/items')}
+          primaryText='🚫 No Users found yet'
+          secondaryText="You don't have any items yet. Click below to create your first item."
+          buttonText='Create Item'
+        />
+          // <Box textAlign={'center'} width={'100%'}>
+          //   <Card className='w-full shadow-md rounded-lg'>
+          //     <CardContent className='text-center'>
+          //       <Box p={40}>
+          //         <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Users Found</p>
+          //       </Box>
+                
+          //     </CardContent>
+          //   </Card>
+          // </Box>
         )}
       </Box>
 

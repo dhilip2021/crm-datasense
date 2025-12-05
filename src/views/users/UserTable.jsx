@@ -18,10 +18,13 @@ import {
   Checkbox,
   FormControl,
   FormControlLabel,
+  FormGroup,
   IconButton,
   InputLabel,
   MenuItem,
   OutlinedInput,
+  Radio,
+  RadioGroup,
   Select
 } from '@mui/material'
 
@@ -54,6 +57,9 @@ const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@.#$!%*?&^])[A-Za-z\d@.#
 
 const UserTable = () => {
   const organization_id = Cookies.get('organization_id')
+  const item_access = Cookies.get('item_access')
+
+  const itemTypes = item_access ? item_access.split(',').map(item => item.trim()) : [];
   const getToken = Cookies.get('_token')
   const rollId = Cookies.get('role_id')
   const router = useRouter()
@@ -77,6 +83,7 @@ const UserTable = () => {
     password: '',
     c_role_id: '',
     c_about_user: '',
+    item_access: [],
     n_status: 1
   })
 
@@ -89,6 +96,7 @@ const UserTable = () => {
     password: false,
     c_role_id: false,
     c_about_user: false,
+    item_access: false,
     n_status: false
   })
 
@@ -103,8 +111,7 @@ const UserTable = () => {
   const getAllOrganizationList = async () => {
     const checkOrg = await getAllOrganizationApi()
     if (checkOrg?.appStatusCode === 0) {
-
-      console.log(checkOrg,"<<< ORG LISTTTT")
+      console.log(checkOrg, '<<< ORG LISTTTT')
 
       setOrgList(checkOrg?.payloadJson)
     } else {
@@ -176,7 +183,7 @@ const UserTable = () => {
   }
 
   const handleOnChange = e => {
-    const { name, value } = e.target
+    const { name, value, checked } = e.target
 
     if (name === 'first_name' || name === 'last_name') {
       setInputs({ ...inputs, [name]: capitalizeWords(value) })
@@ -184,6 +191,24 @@ const UserTable = () => {
     } else if (name === 'email') {
       setInputs({ ...inputs, [name]: normalizeEmail(value) })
       setErrors({ ...errors, [name]: false })
+    } else if (
+      name === 'Product' ||
+      name === 'Service' ||
+      name === 'License' ||
+      name === 'Warranty' ||
+      name === 'Subscription'
+    ) {
+      setErrors({ ...errors, item_access: false })
+
+      // Add or remove from array
+      let updated = [...inputs.item_access]
+      if (checked) {
+        updated.push(name)
+      } else {
+        updated = updated.filter(item => item !== name)
+      }
+
+      setInputs({ ...inputs, item_access: updated })
     } else {
       setInputs({ ...inputs, [name]: value })
       setErrors({ ...errors, [name]: false })
@@ -256,12 +281,11 @@ const UserTable = () => {
         c_about_user: inputs?.c_about_user,
         email: inputs?.email,
         mobile: inputs?.mobile,
+        item_access: inputs?.item_access,
         role: '',
         c_role_id: inputs?.c_role_id,
         n_status: inputs?.n_status
       }
-
-
 
       if (!edit) {
         body['password'] = inputs?.password
@@ -269,11 +293,7 @@ const UserTable = () => {
       if (inputs?.id !== '') {
         body['Id'] = inputs?.id
       }
-
-      console.log(body,"<<< BODYYYYY")
-
-
-
+      console.log(body,"<< mobile checkkk")
       const enycryptDAta = encryptCryptoResponse(body)
       const dataValue = { data: enycryptDAta }
 
@@ -312,7 +332,8 @@ const UserTable = () => {
           mobile: '',
           password: '',
           c_role_id: '',
-          c_about_user: ''
+          c_about_user: '',
+          item_access: []
         })
       }
     } catch (err) {
@@ -352,7 +373,9 @@ const UserTable = () => {
             password: results?.payloadJson[0]?.password,
             c_role_id: results?.payloadJson[0]?.c_role_id,
             c_about_user: results?.payloadJson[0]?.c_about_user,
-            n_status: results?.payloadJson[0]?.n_status
+            n_status: results?.payloadJson[0]?.n_status,
+            item_access: results?.payloadJson[0]?.item_access ? results?.payloadJson[0]?.item_access : [],
+            
           })
         } else {
           console.log('error')
@@ -619,6 +642,103 @@ const UserTable = () => {
                     )
                   }}
                 />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                {/* <RadioGroup row value={inputs.item_access} name='item_access' onChange={e => handleOnChange(e)}>
+                            {['Product', 'Service', 'License', 'Warranty', 'Subscription'].map(option => (
+                              <FormControlLabel key={option} value={option} control={<Radio />} label={option} />
+                            ))}
+                          </RadioGroup> */}
+
+                <Box mt={1}>
+                  <FormControl component='fieldset' error={Boolean(errors.item_access)}>
+                    {/* <FormGroup row>
+                      {itemTypes.map(type => (
+                        <FormControlLabel
+                          key={type}
+                          control={
+                            <Checkbox
+                              checked={inputs.item_access.includes(type)}
+                              onChange={handleOnChange}
+                              name={type}
+                            />
+                          }
+                          label={type}
+                        />
+                      ))}
+                    </FormGroup> */}
+
+                    {/* <FormGroup row>
+                      {itemTypes.map(option => (
+                        <FormControlLabel
+                          key={option}
+                          control={
+                            <Checkbox
+                              name={option}
+                              checked={inputs.item_access.includes(option)} // array ல check பண்ண
+                              onChange={handleOnChange}
+                            />
+                          }
+                          label={option}
+                        />
+                      ))}
+                    </FormGroup> */}
+                     <FormGroup row>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={inputs.item_access.includes('Product')}
+                            onChange={handleOnChange}
+                            name='Product'
+                          />
+                        }
+                        label='Product'
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={inputs.item_access.includes('Service')}
+                            onChange={handleOnChange}
+                            name='Service'
+                          />
+                        }
+                        label='Service'
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={inputs.item_access.includes('License')}
+                            onChange={handleOnChange}
+                            name='License'
+                          />
+                        }
+                        label='License'
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={inputs.item_access.includes('Warranty')}
+                            onChange={handleOnChange}
+                            name='Warranty'
+                          />
+                        }
+                        label='Warranty'
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={inputs.item_access.includes('Subscription')}
+                            onChange={handleOnChange}
+                            name='Subscription'
+                          />
+                        }
+                        label='Subscription'
+                      />
+                    </FormGroup>
+
+                    {errors.item_access && <FormHelperText>Please select at least one item access</FormHelperText>}
+                  </FormControl>
+                </Box>
               </Grid>
               <Grid item xs={12} md={12}>
                 <FormControlLabel

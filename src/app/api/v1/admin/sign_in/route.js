@@ -43,6 +43,7 @@ export async function POST(request) {
   const { data } = await request.json()
 
   const dData = decrypCryptoRequest(data)
+ 
   // const encEmail = encryptCryptoResponse(dData?.email)
 
   try {
@@ -58,19 +59,30 @@ export async function POST(request) {
             email: user.email
           }))
 
+         
+
           const matchedUser = findUserByEmail(dbUsers, dData?.email)
 
-          const dataArray = respon.filter(user => user.email.startsWith(matchedUser.email))
-          const data = dataArray?.length > 0 ? dataArray[0] : {}
+           
 
+          const dataArray = respon.filter(user => user.email.startsWith(matchedUser.email))
+           
+          const data = dataArray?.length > 0 ? dataArray[0] : {}
+          
           const listRes = await UserRole.findOne({ c_role_id: data.c_role_id.trim() })
 
+         
+
           const orgData = await Organization.findOne({ organization_id: data.organization_id })
+          
 
           await bcrypt
             .compare(dData?.password, data.password)
             .then(async response => {
               if (response) {
+
+                 
+
                 const UserPrivilege = await UserPrivileges.findOne({ c_role_id: data.c_role_id })
                 const date_time = getDateTime()
                 const tokenVerify = generateAccessToken({
@@ -91,6 +103,10 @@ export async function POST(request) {
                 const sampleData = [tokenVerify]
                 const secretKey = process.env.NEXT_PUBLIC_ENCY_DECY_SECRET
                 const encryptedResults = urlEncoder(secretKey, JSON.stringify(sampleData))
+               
+                 
+                  console.log(data,"<<< data")
+
                 if (data.c_role_id) {
                   let dataResults = {
                     organization_id: data.organization_id,
@@ -105,7 +121,7 @@ export async function POST(request) {
                     last_name: data.last_name,
                     user_name: data.user_name,
                     c_about_user: data.c_about_user,
-                    // email: maskEmail(decrypCryptoRequest(data.email)),
+                    item_access: data.item_access,
                     email: decrypCryptoRequest(data.email),
                     mobile: decrypCryptoRequest(data.mobile),
                     c_role_id: data.c_role_id,
@@ -117,8 +133,8 @@ export async function POST(request) {
                   }
 
 
-                  
-
+                 
+                    
                    
 
                   const consolelogdata = new Consolelog({
@@ -165,7 +181,7 @@ export async function POST(request) {
           sendResponse['appStatusCode'] = 4
           sendResponse['message'] = ''
           sendResponse['payloadJson'] = err
-          sendResponse['error'] = '🛡️ Your role does not have access. Please request permission from your administrator.'
+          sendResponse['error'] = 'Your role does not have access. Please request permission from your administrator.'
         })
       return NextResponse.json(sendResponse, { status: 200 })
     } else {

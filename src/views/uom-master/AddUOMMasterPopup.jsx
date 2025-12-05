@@ -17,7 +17,6 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 export default function AddUOMMasterPopup(props) {
   const { open, close, titles, inputs, handleChange, handleSubmit, errors, handleBlur, loader } = props
 
-  console.log(inputs,"<<< inputsssss UOM")
 
   const theme = useTheme()
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'))

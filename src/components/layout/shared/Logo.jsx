@@ -25,7 +25,6 @@ const LogoText = styled.span`
 
 const Logo = ({ color }) => {
   const { payloadJson } = useSelector(state => state.login)
-  console.log(payloadJson, '<<< payloadJson LOGO')
 
   const orgName = Cookies.get('organization_name') || themeConfig.templateName
   const orgLogo = Cookies.get('organization_logo')

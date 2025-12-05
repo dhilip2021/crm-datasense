@@ -13,12 +13,18 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
 import { getUserAllListApi } from '@/apiFunctions/ApiAction'
 
-const EditableField = ({ label, field = {}, value: initialValue, type = 'text', options = [], onSave, userList }) => {
-
- 
-
-
-
+const EditableField = ({
+  label,
+  field = {},
+  value: initialValue,
+  type = 'text',
+  options = [],
+  onSave,
+  userList,
+  itemTypes,
+  itemList,
+  setItemType
+}) => {
   const [value, setValue] = useState(initialValue)
   const [editing, setEditing] = useState(false)
   const [hover, setHover] = useState(false)
@@ -102,6 +108,15 @@ const EditableField = ({ label, field = {}, value: initialValue, type = 'text', 
     setHelperText('')
   }
 
+   const handleSelectChange = (e, label) => {
+    if (label === 'Company Type') {
+      setItemType(e.target.value)
+      setValue(e.target.value)
+    } else {
+      setValue(e.target.value)
+    }
+  }
+
   const handleDateChange = newValue => {
     const formatted = newValue ? newValue.format('YYYY-MM-DD') : ''
     setValue(formatted)
@@ -119,11 +134,7 @@ const EditableField = ({ label, field = {}, value: initialValue, type = 'text', 
 
   useEffect(() => {
     setValue(initialValue)
-    
   }, [initialValue])
-
-
-  
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -147,7 +158,8 @@ const EditableField = ({ label, field = {}, value: initialValue, type = 'text', 
                   select
                   size='small'
                   value={value}
-                  onChange={e => setValue(e.target.value)}
+                  // onChange={e => setValue(e.target.value)}
+                   onChange={e => handleSelectChange(e, label)}
                   error={Boolean(error)}
                   helperText={helperText}
                   sx={{ flex: 1, backgroundColor: '#f9fafb' }}
@@ -160,17 +172,53 @@ const EditableField = ({ label, field = {}, value: initialValue, type = 'text', 
                             {u.user_name}
                           </MenuItem>
                         ))
-                    : options.map(opt => (
-                        <MenuItem key={opt} value={opt}>
-                          {opt}
-                        </MenuItem>
-                      ))}
+                    : label === 'Company Type'
+                      ? itemTypes.map(u => (
+                          <MenuItem key={u} value={u}>
+                            {u}
+                          </MenuItem>
+                        ))
+                      : label === 'Product List'
+                        ? itemList.map(u => {
+                            const type = u?.item_type?.trim()?.toLowerCase()
+
+                            let itemValue = u?.product_name // default fallback
+                            let itemLabel = u?.product_name // default fallback
+
+                            if (type === 'product') {
+                              itemValue = u?.product_name
+                              itemLabel = u?.product_name
+                            } else if (type === 'service') {
+                              itemValue = u?.service_name
+                              itemLabel = u?.service_name
+                            } else if (type === 'license') {
+                              itemValue = u?.license_name
+                              itemLabel = u?.license_name
+                            } else if (type === 'warranty') {
+                              itemValue = u?.warranty_plan
+                              itemLabel = u?.warranty_plan
+                            } else if (type === 'subscription') {
+                              itemValue = u?.subscription_name
+                              itemLabel = u?.subscription_name
+                            }
+
+                            return (
+                              <MenuItem key={u.item_id} value={itemValue}>
+                                {itemLabel}
+                              </MenuItem>
+                            )
+                          })
+                        : options.map(opt => (
+                            <MenuItem key={opt} value={opt}>
+                              {opt}
+                            </MenuItem>
+                          ))}
                 </TextField>
               ) : type === 'date' ? (
                 <DatePicker
                   value={value ? dayjs(value) : null}
                   onChange={handleDateChange}
-                  format="DD/MM/YYYY"
+                  format='DD/MM/YYYY'
                   minDate={dayjs()}
                   slotProps={{
                     textField: {

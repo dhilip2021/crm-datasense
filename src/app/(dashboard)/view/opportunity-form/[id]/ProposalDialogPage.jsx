@@ -94,7 +94,7 @@ const ProposalDialogPage = ({ open, onClose, leadData, handleQtyChange, dataItem
         (item, idx) => `
     <tr>
       <td style="padding: 8px; border: 1px solid #ddd;">${idx + 1}</td>
-      <td style="padding: 8px; border: 1px solid #ddd;">${item.itemMasterRef.item_name}</td>
+      <td style="padding: 8px; border: 1px solid #ddd;">${item.itemMasterRef.product_name}</td>
       <td style="padding: 8px; border: 1px solid #ddd; text-align:right;">${item.quantity}</td>
       <td style="padding: 8px; border: 1px solid #ddd; text-align:right;">₹${item.unitPrice.toFixed(2)}</td>
       <td style="padding: 8px; border: 1px solid #ddd; text-align:right;">₹${item.finalPrice.toFixed(2)}</td>
@@ -241,7 +241,7 @@ const ProposalDialogPage = ({ open, onClose, leadData, handleQtyChange, dataItem
 
     // Subject & Greeting
     doc.setFont('helvetica', 'bold')
-    doc.text(`Subject: Quotation for ${leadData.items[0]?.item_ref[0]?.itemMasterRef.item_name}`, margin, y)
+    doc.text(`Subject: Quotation for ${leadData.items[0]?.item_ref[0]?.itemMasterRef.product_name}`, margin, y)
     y += lineHeight * 2
     doc.setFont('helvetica', 'normal')
     doc.text(`Dear ${leadData.values['First Name']},`, margin, y)
@@ -253,7 +253,7 @@ const ProposalDialogPage = ({ open, onClose, leadData, handleQtyChange, dataItem
     const tableColumn = ['Item', 'Description', 'Qty', 'Unit Price', 'Total']
     const tableRows = dataItems.map((item, index) => [
       index + 1,
-      item.itemMasterRef.item_name,
+      item.itemMasterRef.product_name,
       item.quantity,
       `${item.unitPrice.toFixed(2)}`,
       `${item.finalPrice.toFixed(2)}`
@@ -422,7 +422,7 @@ const ProposalDialogPage = ({ open, onClose, leadData, handleQtyChange, dataItem
                       const { subtotal } = calculateItemTotals(item)
                       return (
                         <TableRow key={idx} hover>
-                          <TableCell>{item?.itemMasterRef?.item_name || '-'}</TableCell>
+                          <TableCell>{item?.itemMasterRef?.product_name || '-'}</TableCell>
                           <TableCell>{item?.itemMasterRef?.description || '-'}</TableCell>
                           <TableCell align='right'>{item.quantity}</TableCell>
                           <TableCell align='right'>₹{item.unitPrice.toFixed(2)}</TableCell>

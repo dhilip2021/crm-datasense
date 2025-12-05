@@ -23,13 +23,17 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import Cookies from 'js-cookie'
 import { toast } from 'react-toastify'
 import { formatCurrency } from '@/helper/frontendHelper'
+import { useRouter } from 'next/navigation'
 
 // const formatCurrency = value => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value)
 
 
 const ProductSelectorDialog = ({ itemsData, open, onClose, leadId, fetchLeadFromId }) => {
-  const getToken = Cookies.get('_token')
 
+  console.log(itemsData,"<<< items datatatatatatat")
+
+  const getToken = Cookies.get('_token')
+  const router = useRouter();
   const [selectedItems, setSelectedItems] = useState(null)
   const [quantity, setQuantity] = useState(1)
   const [discount, setDiscount] = useState(0)
@@ -53,7 +57,7 @@ const ProductSelectorDialog = ({ itemsData, open, onClose, leadId, fetchLeadFrom
 
   //     const newItem = {
   //   item_id: selectedItems.item_id,
-  //   item_name: selectedItems.item_name,
+  //   product_name: selectedItems.product_name,
   //   quantity,
   //   unitPrice,
   //   discount,
@@ -66,6 +70,12 @@ const ProductSelectorDialog = ({ itemsData, open, onClose, leadId, fetchLeadFrom
   //     setQuantity(1)
   //     setDiscount(0)
   //   }
+
+  const handleAddProduct =() =>{
+    console.log("add productttt")
+    router.push('/items')
+  }
+
   const handleAdd = () => {
     if (!selectedItems) return
 
@@ -115,7 +125,7 @@ const ProductSelectorDialog = ({ itemsData, open, onClose, leadId, fetchLeadFrom
     const newItem = {
       itemMasterRef: selectedItems._id, // ✅ mongo ref
       item_id: selectedItems.item_id,
-      item_name: selectedItems.item_name,
+      product_name: selectedItems.product_name,
       item_type: selectedItems.item_type,
       quantity,
       unitPrice,
@@ -179,22 +189,20 @@ const ProductSelectorDialog = ({ itemsData, open, onClose, leadId, fetchLeadFrom
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth='md'>
-      <DialogTitle>Select Items for Lead</DialogTitle>
+      <DialogTitle>Select Product for Lead</DialogTitle>
       <DialogContent>
         <Box display='flex' gap={2} my={2}>
-          {/* <Autocomplete
-            options={itemsData}
-            getOptionLabel={option => `${option.item_name} (${option.item_type})` || ''}
-            value={selectedItems}
-            onChange={(e, newVal) => setSelectedItems(newVal)}
-            sx={{ flex: 2 }}
-            size='small'
-            renderInput={params => <TextField {...params} label='Select Items' />}
-          /> */}
+         
 
           <Autocomplete
-            options={itemsData}
-            getOptionLabel={option => `${option.item_name} (${option.item_type})` || ''}
+            // options={itemsData}
+            options={itemsData.filter(item => item.item_type === 'Product')} // 🔥 Filter Products only
+            noOptionsText={
+    <Button size='small' variant='outlined' onClick={handleAddProduct}>
+      ➕ Add Products
+    </Button>
+  }
+            getOptionLabel={option => `${option.product_name} (${option.item_type})` || ''}
             value={selectedItems}
             onChange={(e, newVal) => setSelectedItems(newVal)}
             sx={{ flex: 2 }}
@@ -212,28 +220,12 @@ const ProductSelectorDialog = ({ itemsData, open, onClose, leadId, fetchLeadFrom
                     cursor: isDisabled ? 'not-allowed' : 'pointer'
                   }}
                 >
-                  {option.item_name} ({option.item_type})
+                  {option.product_name} ({option.item_type})
                 </li>
               )
             }}
-            renderInput={params => <TextField {...params} label='Select Items' />}
+            renderInput={params => <TextField {...params} label='Select Product' />}
           />
-          {/* <TextField
-            label='Qty'
-            type='number'
-            value={quantity}
-            onChange={e => setQuantity(Number(e.target.value))}
-            sx={{ width: 100 }}
-            size='small'
-          />
-          <TextField
-            label={selectedItems?.discountType === 'Flat Amount' ? 'Discount Amount' : 'Discount %'}
-            type='number'
-            value={discount}
-            onChange={e => setDiscount(Number(e.target.value))}
-            sx={{ width: 120 }}
-            size='small'
-          /> */}
           <TextField
             label='Qty'
             type='number'
@@ -290,7 +282,7 @@ const ProductSelectorDialog = ({ itemsData, open, onClose, leadId, fetchLeadFrom
             {addedItems.map((order, i) =>
               order.item_ref.map((p, j) => (
                 <TableRow key={`${i}-${j}`}>
-                  <TableCell>{p.item_name}</TableCell>
+                  <TableCell>{p.product_name}</TableCell>
                   <TableCell>{p.item_type}</TableCell>
                   <TableCell>{p.quantity}</TableCell>
                   <TableCell>{p.unitPrice}</TableCell>

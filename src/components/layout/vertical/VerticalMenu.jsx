@@ -27,7 +27,7 @@ const RenderExpandIcon = ({ open, transitionDuration }) => (
   </StyledVerticalNavExpandIcon>
 )
 
-const VerticalMenu = ({ scrollMenu, roles }) => {
+const VerticalMenu = ({ scrollMenu, roles, fetchRolesPrevileges }) => {
   const router = useRouter()
   const role_id = Cookies.get('role_id')
 
@@ -36,6 +36,13 @@ const VerticalMenu = ({ scrollMenu, roles }) => {
   const { isBreakpointReached, transitionDuration } = useVerticalNav()
   const ScrollWrapper = isBreakpointReached ? 'div' : PerfectScrollbar
 
+  const hasPrivilege = (menu, subMenu = '') => {
+    if (!roles) return false
+
+    const found = roles.find(r => r.menu_privileage_name === menu && r.sub_menu_privileage_name === subMenu)
+
+    return found?.view_status === true
+  }
   const logoutFn = () => {
     Cookies.remove('riho_token')
     Cookies.remove('_token')
@@ -56,10 +63,17 @@ const VerticalMenu = ({ scrollMenu, roles }) => {
     router.push('/login')
   }
 
-  const hasMenu = index =>
-    Array.isArray(roles?.c_menu_privileges) &&
-    roles?.c_menu_privileges.length > index &&
-    roles?.c_menu_privileges[index]?.menu_privileage_status
+  const handleMenuClick = href => {
+    if (typeof fetchRolesPrevileges === 'function') {
+      if (href === '/login') {
+        router.push(href)
+        logoutFn()
+      } else {
+        router.push(href)
+        fetchRolesPrevileges()
+      }
+    }
+  }
 
   return (
     <ScrollWrapper
@@ -80,95 +94,173 @@ const VerticalMenu = ({ scrollMenu, roles }) => {
         menuSectionStyles={menuSectionStyles(theme)}
       >
         {/* 🟩 Dashboard Section */}
-        <SubMenu label='Dashboard' icon={<i className='ri-dashboard-line' />}>
-          <MenuItem href='/' icon={<i className='ri-user-3-line' />}>
-            Leads
-          </MenuItem>
-          <MenuItem href='/opportunity' icon={<i className='ri-bar-chart-grouped-line' />}>
-            Opportunity
-          </MenuItem>
-        </SubMenu>
+        {hasPrivilege('Dashboard', '') && (
+          <SubMenu label='Dashboard' icon={<i className='ri-dashboard-line' />}>
+            {hasPrivilege('Dashboard', 'Leads') && (
+              <MenuItem onClick={() => handleMenuClick('/')} icon={<i className='ri-user-3-line' />}>
+                Leads
+              </MenuItem>
+            )}
+
+            {hasPrivilege('Dashboard', 'Opportunity') && (
+              <MenuItem
+                onClick={() => handleMenuClick('/opportunity')}
+                icon={<i className='ri-bar-chart-grouped-line' />}
+              >
+                Opportunity
+              </MenuItem>
+            )}
+          </SubMenu>
+        )}
 
         {/* 🟦 Master Section */}
-        <SubMenu label='Master' icon={<i className='ri-database-2-line' />}>
-          <MenuItem href='/territory' icon={<i className='ri-map-pin-2-line' />}>
-            Territory
-          </MenuItem>
-          <MenuItem href='/campaign-type' icon={<i className='ri-megaphone-line' />}>
-            Campaign Type
-          </MenuItem>
-          <MenuItem href='/tax-master' icon={<i className='ri-percent-line' />}>
-            Tax Master
-          </MenuItem>
-          <MenuItem href='/uom-master' icon={<i className='ri-ruler-line' />}>
-            UOM Master
-          </MenuItem>
-          <MenuItem href='/items' icon={<i className='ri-archive-2-line' />}>
-            Item Master
-          </MenuItem>
-          <MenuItem href='/reasons-master' icon={<i className='ri-archive-2-line' />}>
-            Reasons Master
-          </MenuItem>
-        </SubMenu>
+        {hasPrivilege('Master', '') && (
+          <SubMenu label='Master' icon={<i className='ri-database-2-line' />}>
+            {hasPrivilege('Master', 'Territory') && (
+              <MenuItem onClick={() => handleMenuClick('/territory')} icon={<i className='ri-map-pin-2-line' />}>
+                Territory
+              </MenuItem>
+            )}
+
+            {hasPrivilege('Master', 'Campaign Type') && (
+              <MenuItem onClick={() => handleMenuClick('/campaign-type')} icon={<i className='ri-megaphone-line' />}>
+                Campaign Type
+              </MenuItem>
+            )}
+
+            {hasPrivilege('Master', 'Tax Master') && (
+              <MenuItem onClick={() => handleMenuClick('/tax-master')} icon={<i className='ri-percent-line' />}>
+                Tax Master
+              </MenuItem>
+            )}
+
+            {hasPrivilege('Master', 'UOM Master') && (
+              <MenuItem onClick={() => handleMenuClick('/uom-master')} icon={<i className='ri-ruler-line' />}>
+                UOM Master
+              </MenuItem>
+            )}
+
+            {hasPrivilege('Master', 'Category Master') && (
+              <MenuItem onClick={() => handleMenuClick('/category-master')} icon={<i className='ri-ruler-line' />}>
+                Category Master
+              </MenuItem>
+            )}
+
+            {hasPrivilege('Master', 'Item Master') && (
+              <MenuItem onClick={() => handleMenuClick('items')} icon={<i className='ri-archive-2-line' />}>
+                Item Master
+              </MenuItem>
+            )}
+
+            {hasPrivilege('Master', 'Reasons Master') && (
+              <MenuItem onClick={() => handleMenuClick('/reasons-master')} icon={<i className='ri-archive-2-line' />}>
+                Reasons Master
+              </MenuItem>
+            )}
+          </SubMenu>
+        )}
 
         {/* 🟨 Apps & Pages Section */}
-        <MenuSection label='Apps & Pages'>
-          <MenuItem href='/app/leads' icon={<i className='ri-user-star-line' />}>
-            Leads
-          </MenuItem>
-          <MenuItem href='/app/opportunity' icon={<i className='ri-briefcase-line' />}>
-            Opportunity
-          </MenuItem>
-          <MenuItem href='/app/contacts' icon={<i className='ri-user-settings-line' />}>
-            Contacts
-          </MenuItem>
-          <MenuItem href='/notes' icon={<i className='ri-sticky-note-line' />}>
-            Notes
-          </MenuItem>
-          <MenuItem href='/tasks' icon={<i className='ri-task-line' />}>
-            Tasks
-          </MenuItem>
-          <MenuItem href='/calls' icon={<i className='ri-phone-line' />}>
-            Calls
-          </MenuItem>
-          <MenuItem href='/organization' icon={<i className='ri-building-line' />}>
-            Organization
-          </MenuItem>
+        <MenuSection label='Leads'>
+          {hasPrivilege('Leads') && (
+            <MenuItem onClick={() => handleMenuClick('/app/leads')} icon={<i className='ri-user-star-line' />}>
+              Leads
+            </MenuItem>
+          )}
 
-          <MenuItem href='/emails' icon={<i className='ri-mail-line' />}>
-            Emails
-          </MenuItem>
-          <MenuItem href='/comments' icon={<i className='ri-chat-1-line' />}>
-            Comments
-          </MenuItem>
+          {hasPrivilege('Opportunity') && (
+            <MenuItem onClick={() => handleMenuClick('/app/opportunity')} icon={<i className='ri-briefcase-line' />}>
+              Opportunity
+            </MenuItem>
+          )}
+
+          {hasPrivilege('Contacts') && (
+            <MenuItem onClick={() => handleMenuClick('/app/contacts')} icon={<i className='ri-user-settings-line' />}>
+              Contacts
+            </MenuItem>
+          )}
+
+          {hasPrivilege('Notes') && (
+            <MenuItem onClick={() => handleMenuClick('/notes')} icon={<i className='ri-sticky-note-line' />}>
+              Notes
+            </MenuItem>
+          )}
+
+          {hasPrivilege('Tasks') && (
+            <MenuItem onClick={() => handleMenuClick('/tasks')} icon={<i className='ri-task-line' />}>
+              Tasks
+            </MenuItem>
+          )}
+
+          {hasPrivilege('Calls') && (
+            <MenuItem onClick={() => handleMenuClick('/calls')} icon={<i className='ri-phone-line' />}>
+              Calls
+            </MenuItem>
+          )}
+
+          {hasPrivilege('Organization') && (
+            <MenuItem onClick={() => handleMenuClick('/organization')} icon={<i className='ri-building-line' />}>
+              Organization
+            </MenuItem>
+          )}
+
+          {hasPrivilege('Emails') && (
+            <MenuItem onClick={() => handleMenuClick('/emails')} icon={<i className='ri-mail-line' />}>
+              Emails
+            </MenuItem>
+          )}
+
+          {hasPrivilege('Comments') && (
+            <MenuItem onClick={() => handleMenuClick('/comments')} icon={<i className='ri-chat-1-line' />}>
+              Comments
+            </MenuItem>
+          )}
         </MenuSection>
 
         {/* ⚙️ Settings Section */}
+
         <MenuSection label='Settings'>
-          <SubMenu label='Settings' icon={<i className='ri-settings-3-line' />}>
-            <MenuItem href='/profile-settings' icon={<i className='ri-profile-line' />}>
-              Profile Setting
-            </MenuItem>
-            <MenuItem href='/users-list' icon={<i className='ri-user-line' />}>
-              User List
-            </MenuItem>
-            <SubMenu label='Roles & Permissions' icon={<i className='ri-lock-line' />}>
-              <MenuItem href='/roles' icon={<i className='ri-vip-crown-line' />}>
+          {hasPrivilege('Settings') && (
+            <SubMenu label='Settings' icon={<i className='ri-settings-3-line' />}>
+              {hasPrivilege('Settings', 'Profile Setting') && (
+                <MenuItem onClick={() => handleMenuClick('/profile-settings')} icon={<i className='ri-profile-line' />}>
+                  Profile Setting
+                </MenuItem>
+              )}
+
+              {hasPrivilege('Settings', 'User List') && (
+                <MenuItem onClick={() => handleMenuClick('/users-list')} icon={<i className='ri-user-line' />}>
+                  User List
+                </MenuItem>
+              )}
+
+              {hasPrivilege('Settings', 'Roles & Permission') && (
+                <MenuItem onClick={() => handleMenuClick('/roles-permission')} icon={<i className='ri-lock-line' />}>
+                  Roles & Permission
+                </MenuItem>
+              )}
+            </SubMenu>
+          )}
+
+          {/* <SubMenu label='Roles & Permissions' icon={<i className='ri-lock-line' />}>
+              <MenuItem onClick={() => handleMenuClick('/tax-master')} href='/roles' icon={<i className='ri-vip-crown-line' />}>
                 Roles
               </MenuItem>
-              <MenuItem href='/permissions' icon={<i className='ri-key-2-line' />}>
+              <MenuItem onClick={() => handleMenuClick('/tax-master')} href='/permissions' icon={<i className='ri-key-2-line' />}>
                 Permissions
               </MenuItem>
-            </SubMenu>
-          </SubMenu>
+            </SubMenu> */}
+          {hasPrivilege('Setup') && (
+            <MenuItem onClick={() => handleMenuClick('/builder')} icon={<i className='ri-tools-line' />}>
+              Setup
+            </MenuItem>
+          )}
 
-          <MenuItem href='/builder' icon={<i className='ri-tools-line' />}>
-            Setup
-          </MenuItem>
-
-          <MenuItem href='/login' icon={<i className='ri-logout-box-line' />} onClick={logoutFn}>
-            Logout
-          </MenuItem>
+          {hasPrivilege('Logout') && (
+            <MenuItem onClick={() => handleMenuClick('/login')} icon={<i className='ri-logout-box-line' />}>
+              Logout
+            </MenuItem>
+          )}
         </MenuSection>
       </Menu>
     </ScrollWrapper>

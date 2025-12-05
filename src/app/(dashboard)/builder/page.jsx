@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Table,
   TableBody,
@@ -18,6 +18,8 @@ import {
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useSelector } from 'react-redux'
 
 const sampleData = [
   { id: 1, name: 'Leads', module_name: 'Leads', href: '/builder/lead-form' },
@@ -34,6 +36,33 @@ export default function BuilderPage() {
   const [orderBy, setOrderBy] = useState('name')
   const [order, setOrder] = useState('asc')
   const [searchText, setSearchText] = useState('')
+
+
+  const router = useRouter()
+    const { payloadJson } = useSelector(state => state.menu)
+  
+  const hasViewPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false;
+  
+    const found = payloadJson.find(
+      m =>
+        m.menu_privileage_name === 'Setup' &&
+        m.sub_menu_privileage_name === ''
+    );
+  
+    return found?.view_status === true;
+  };
+  
+    useEffect(() => {
+    if (payloadJson.length > 0) {
+      if (!hasViewPermission()) {
+        router.push('/');
+      }
+    }
+  }, [payloadJson]);
+
+
+
 
   const handleSort = property => {
     const isAsc = orderBy === property && order === 'asc'

@@ -50,7 +50,7 @@ export async function POST(request) {
             html: `
   <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 10px; padding: 30px; background: #f9fafc;">
     
-    <h2 style="text-align: center; color: #1976d2; margin-bottom: 20px;">CRM DATA SENSE</h2>
+    <h2 style="text-align: center; color: #1976d2; margin-bottom: 20px;">Lumivo CRM Datasense Technologies</h2>
     
     <p style="font-size: 15px; color: #333;">Hi,</p>
     <p style="font-size: 15px; color: #333; line-height: 1.6;">
@@ -70,7 +70,7 @@ export async function POST(request) {
     
     <p style="font-size: 14px; color: #555; text-align: center;">
       Regards, <br />
-      <b style="color: #1976d2;">CRM DATA SENSE Team</b>
+      <b style="color: #1976d2;">Lumivo CRM Datasense Technologies Team</b>
     </p>
   </div>
   `

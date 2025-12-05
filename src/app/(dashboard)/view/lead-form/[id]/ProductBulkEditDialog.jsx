@@ -77,7 +77,7 @@ const ProductBulkEditDialog = ({ open, onClose, leadId, itemId, products, fetchL
     const newItem = {
       itemMasterRef: selectedItems._id,
       item_id: selectedItems.item_id,
-      item_name: selectedItems.item_name,
+      product_name: selectedItems.product_name,
       item_type: selectedItems.item_type,
       quantity,
       unitPrice,
@@ -175,7 +175,7 @@ const ProductBulkEditDialog = ({ open, onClose, leadId, itemId, products, fetchL
         <Box display='flex' gap={2} my={2}>
           {/* <Autocomplete
             options={itemsData}
-            getOptionLabel={option => `${option.item_name} (${option.item_type})` || ''}
+            getOptionLabel={option => `${option.product_name} (${option.item_type})` || ''}
             value={selectedItems}
             onChange={(e, newVal) => setSelectedItems(newVal)}
             sx={{ flex: 2 }}
@@ -184,7 +184,7 @@ const ProductBulkEditDialog = ({ open, onClose, leadId, itemId, products, fetchL
           /> */}
           <Autocomplete
             options={itemsData}
-            getOptionLabel={option => `${option.item_name} (${option.item_type})` || ''}
+            getOptionLabel={option => `${option.product_name} (${option.item_type})` || ''}
             value={selectedItems}
             onChange={(e, newVal) => setSelectedItems(newVal)}
             sx={{ flex: 2 }}
@@ -202,7 +202,7 @@ const ProductBulkEditDialog = ({ open, onClose, leadId, itemId, products, fetchL
                     cursor: isDisabled ? 'not-allowed' : 'pointer'
                   }}
                 >
-                  {option.item_name} ({option.item_type})
+                  {option.product_name} ({option.item_type})
                 </li>
               )
             }}
@@ -273,7 +273,7 @@ const ProductBulkEditDialog = ({ open, onClose, leadId, itemId, products, fetchL
           <TableBody>
             {editedProducts.map((p, i) => (
               <TableRow key={p.item_id || i}>
-                <TableCell>{p.itemMasterRef?.item_name || p.item_name}</TableCell>
+                <TableCell>{p.itemMasterRef?.product_name || p.product_name}</TableCell>
                 <TableCell>
                   <TextField
                     type='number'

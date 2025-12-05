@@ -13,10 +13,6 @@ let sendResponse = {
   error: ''
 }
 
-/**
- * POST API - Paginated Users List
- * Filters based on current user's role priority
- */
 export async function POST(request) {
   const { organization_id, n_page, n_limit, c_search_term } = await request.json()
 

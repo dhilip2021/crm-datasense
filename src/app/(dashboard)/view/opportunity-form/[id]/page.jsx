@@ -32,7 +32,7 @@ import OpenActivities from './OpenActivities'
 import ProductSelectorDialog from './ProductSelectorDialog'
 import ProductPage from './ProductPage'
 import TaskTabs from './TaskTabs'
-import { getUserAllListApi } from '@/apiFunctions/ApiAction'
+import { getTypeItemMasterListApi, getUserAllListApi } from '@/apiFunctions/ApiAction'
 import slugify from 'slugify'
 import ProposalDialogPage from './ProposalDialogPage'
 
@@ -78,8 +78,9 @@ const LeadDetailView = () => {
   const [expanded, setExpanded] = useState(0) // 0 = first open by default
   const [tabIndex, setTabIndex] = useState(0)
   const [open, setOpen] = useState(false)
-  const [userList, setUserList] = useState([])
   const organization_id = Cookies.get('organization_id')
+    const item_access = Cookies.get('item_access')
+    const itemTypes = item_access ? item_access.split(',').map(item => item.trim()) : []
   const lead_form = 'lead-form'
   const opportunity_form = 'opportunities-form'
   const getToken = Cookies.get('_token')
@@ -93,6 +94,9 @@ const LeadDetailView = () => {
   const [itemsData, setItemsData] = useState([])
   const [confirm, setConfirm] = useState(false)
   const [orderId, setOrderId] = useState('')
+    const [userList, setUserList] = useState([])
+    const [itemList, setItemList] = useState([])
+    const [itemType, setItemType] = useState(itemTypes?.length > 0 ? itemTypes[0] : '')
 
   // 🧠 leadData = API response object you shared above
   const [accountName, setAccountName] = useState('')
@@ -233,12 +237,36 @@ const LeadDetailView = () => {
     }
   }
 
+    // Fetch user list
+    const getItemListFn = async itemType => {
+      try {
+        // const itemType = "Product"
+        const header = {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken}`
+        }
+  
+        const results = await getTypeItemMasterListApi(itemType, header)
+        if (results?.appStatusCode === 0 && Array.isArray(results.payloadJson)) {
+          setItemList(results.payloadJson)
+        } else {
+          setItemList([])
+        }
+      } catch (err) {
+        setItemList([])
+      }
+    }
+
   useEffect(() => {
     if (sections.length > 0 && leadId) {
       fetchLeadFromId()
       getUserListFn()
     }
   }, [sections, leadId])
+
+    useEffect(() => {
+      getItemListFn(itemType)
+    }, [itemType])
 
   useEffect(() => {
     console.log("fetchFormTemplate() call 8")
@@ -691,6 +719,9 @@ const LeadDetailView = () => {
                               handleFieldSave(field.label, newValue)
                             }}
                             userList={userList}
+                             itemTypes={itemTypes}
+                            itemList={itemList}
+                            setItemType={setItemType}
                           />
                         </Grid>
                       ))}

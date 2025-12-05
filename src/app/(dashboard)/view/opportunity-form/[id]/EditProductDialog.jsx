@@ -92,7 +92,7 @@ const EditProductDialog = ({ open, onClose, productRef, leadId, fetchLeadFromId 
       <DialogTitle>Edit Product</DialogTitle>
       <DialogContent>
         <Box my={2}>
-          <Typography fontWeight={600}>{productRef.item_name}</Typography>
+          <Typography fontWeight={600}>{productRef.product_name}</Typography>
           <Typography variant='body2' color='text.secondary'>
             Unit Price: {formatCurrency(unitPrice)}
           </Typography>

@@ -73,7 +73,6 @@ export async function POST(request) {
         return NextResponse.json(sendResponse, { status: 200 })
       } else {
         const lastRole = await UserRole.findOne().sort({ c_role_priority: -1 })
-        console.log(lastRole.c_role_priority,"<<< ROLE PRIORITY")
 
         let userrole = new UserRole({
           c_role_name,

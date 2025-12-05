@@ -34,8 +34,9 @@ const OrganizationSchema = new Schema(
       trim: true
     },
     companyType: {
-      type: [String], // Always store as array of strings
+      type: [String],
       trim: true,
+      set: values => values.map(v => v.charAt(0).toUpperCase() + v.slice(1).toLowerCase()),
       validate: {
         validator: function (values) {
           const allowed = ['product', 'service', 'license', 'warranty', 'subscription']

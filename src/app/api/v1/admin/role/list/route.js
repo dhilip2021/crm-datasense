@@ -35,6 +35,11 @@ export async function GET(request) {
   })
 
 
+  const userRoleId = verified.data.c_role_id
+        const updatedAllowedIds = [...checkArray, userRoleId]
+
+
+
   if (verified.success) {
 
 
@@ -147,7 +152,7 @@ export async function GET(request) {
           $and: [
             { n_status: 1 }, 
             { n_published: 1 },
-            { c_role_id: {$in: checkArray}}
+            { c_role_id: {$in: updatedAllowedIds}}
           ],
         },
       ];

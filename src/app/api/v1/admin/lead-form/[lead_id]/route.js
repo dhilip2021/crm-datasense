@@ -97,7 +97,7 @@ export async function GET(req, { params }) {
     if (lead?.items?.length) {
       await ItemMaster.populate(
         lead.items.flatMap(i => i.item_ref),
-        { path: 'itemMasterRef', select: 'item_code item_name item_type uom gst description mrp' }
+        { path: 'itemMasterRef', select: 'product_code product_name item_type uom gst description mrp' }
       )
     }
 

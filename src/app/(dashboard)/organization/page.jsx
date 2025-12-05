@@ -12,11 +12,22 @@ import {
   Avatar,
   Box,
   Card,
-  CardContent
+  CardContent,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
+  Checkbox,
+  FormHelperText
 } from '@mui/material'
 import Cookies from 'js-cookie'
 import { useEffect, useState } from 'react'
-import { addOrganizationApi, getOrganizationByIdApi } from '@/apiFunctions/ApiAction'
+import {
+  addOrganizationApi,
+  craeteUserApi,
+  getOrganizationByIdApi,
+  getUserListApi,
+  getUserProfileApi
+} from '@/apiFunctions/ApiAction'
 import BusinessIcon from '@mui/icons-material/Business'
 import LocationOnIcon from '@mui/icons-material/LocationOn'
 import GroupIcon from '@mui/icons-material/Group'
@@ -28,6 +39,8 @@ import LoaderGif from '@assets/gif/loader.gif'
 import { toast } from 'react-toastify'
 import { useRouter } from 'next/navigation'
 import Autocomplete from '@mui/material/Autocomplete'
+import { encryptCryptoResponse } from '@/helper/frontendHelper'
+import { useSelector } from 'react-redux'
 
 function isValidMobileNumberStrict(value) {
   if (!/^\d+$/.test(value)) return false
@@ -39,12 +52,47 @@ function isValidMobileNumberStrict(value) {
 const Organization = () => {
   const router = useRouter()
   const organization_id = Cookies.get('organization_id')
+  const user_id = Cookies.get('user_id')
+  const getToken = Cookies.get('_token')
+
+
+  const { payloadJson } = useSelector(state => state.menu)
+
+  const hasViewPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Organization' && m.sub_menu_privileage_name === '')
+
+    return found?.view_status === true
+  }
+
+  useEffect(() => {
+    if (payloadJson.length > 0) {
+      if (!hasViewPermission()) {
+        router.push('/')
+      }
+    }
+  }, [payloadJson])
+
+
+
+
   const [orgList, setOrgList] = useState({
     organization_currency: 'INR',
     organization_address: '',
     organization_emp_count: '',
-    organization_logo: ''
+    organization_logo: '',
+    companyType: ''
   })
+
+  const [errorOrgList, setErrorOrgList] = useState({
+    organization_currency: false,
+    organization_address: false,
+    organization_emp_count: false,
+    organization_logo: false,
+    companyType: false
+  })
+
   const [loading, setLoading] = useState(false)
   const [updating, setUpdating] = useState(false)
   const [logoPreview, setLogoPreview] = useState(null)
@@ -175,7 +223,7 @@ const Organization = () => {
 
   // Handle input change
   const handleInputChange = e => {
-    const { name, value } = e.target
+    const { name, value, checked } = e.target
 
     if (name === 'organization_emp_count') {
       const res = isValidMobileNumberStrict(value)
@@ -186,6 +234,24 @@ const Organization = () => {
       if (value === '' || res) {
         setOrgList(prev => ({ ...prev, [name]: value }))
       }
+    } else if (
+      name === 'Product' ||
+      name === 'Service' ||
+      name === 'License' ||
+      name === 'Warranty' ||
+      name === 'Subscription'
+    ) {
+      setErrorOrgList({ ...errorOrgList, companyType: false })
+
+      // Add or remove from array
+      let updated = [...orgList.companyType]
+      if (checked) {
+        updated.push(name)
+      } else {
+        updated = updated.filter(item => item !== name)
+      }
+
+      setOrgList({ ...orgList, companyType: updated })
     } else {
       setOrgList(prev => ({ ...prev, [name]: value }))
     }
@@ -195,18 +261,49 @@ const Organization = () => {
   const handleSave = async () => {
     if (!orgList) return
 
+    if (orgList.companyType.length === 0) {
+      setErrorOrgList({ ...errorOrgList, companyType: false })
+      return
+    }
+
     const payload = {
       Id: orgList._id,
       organization_address: orgList.organization_address,
       organization_currency: orgList.organization_currency,
       organization_emp_count: orgList.organization_emp_count,
-      organization_logo: orgList.organization_logo
+      organization_logo: orgList.organization_logo,
+      companyType: orgList.companyType
     }
 
     setUpdating(true)
     try {
       const updateRes = await addOrganizationApi(payload)
+
       if (updateRes?.appStatusCode === 0) {
+        const header = {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken}`
+        }
+
+        const userDetails = await getUserProfileApi(user_id)
+
+        console.log(userDetails, '<<< userDetails')
+
+        const body2 = {
+          Id: userDetails?.payloadJson[0]?._id,
+          organization_id: userDetails?.payloadJson[0]?.organization_id,
+          item_access: orgList?.companyType
+        }
+
+        const enycryptDAta = encryptCryptoResponse(body2)
+
+        const dataValue = {
+          data: enycryptDAta
+        }
+
+        const resultData = await craeteUserApi(dataValue)
+
+        Cookies.set('item_access', orgList?.companyType)
         Cookies.set('organization_logo', orgList?.organization_logo)
         toast.success('Organization Updated Successfully!', {
           autoClose: 500, // 1 second la close
@@ -259,10 +356,6 @@ const Organization = () => {
       .then(data => setCurrencyCode(data))
       .catch(() => setCurrencyCode([]))
   }, [])
-
-  useEffect(() => {
-    console.log(currencyCode, '<<<< currency code')
-  }, [currencyCode])
 
   if (loading) {
     return (
@@ -444,6 +537,68 @@ const Organization = () => {
                   fullWidth
                 />
               </Grid>
+              <Grid item xs={12} md={6}>
+                <Box mt={1}>
+                  <FormControl component='fieldset' error={errorOrgList.companyType}>
+                    <Typography>Company Type *</Typography>
+                    <FormGroup row>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={orgList.companyType.includes('Product')}
+                            onChange={handleInputChange}
+                            name='Product'
+                          />
+                        }
+                        label='Product'
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={orgList.companyType.includes('Service')}
+                            onChange={handleInputChange}
+                            name='Service'
+                          />
+                        }
+                        label='Service'
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={orgList.companyType.includes('License')}
+                            onChange={handleInputChange}
+                            name='License'
+                          />
+                        }
+                        label='License'
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={orgList.companyType.includes('Warranty')}
+                            onChange={handleInputChange}
+                            name='Warranty'
+                          />
+                        }
+                        label='Warranty'
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={orgList.companyType.includes('Subscription')}
+                            onChange={handleInputChange}
+                            name='Subscription'
+                          />
+                        }
+                        label='Subscription'
+                      />
+                    </FormGroup>
+                    {errorOrgList.companyType && (
+                      <FormHelperText>Please select at least one company type</FormHelperText>
+                    )}
+                  </FormControl>
+                </Box>
+              </Grid>
 
               {/* <Grid item xs={12} md={6}>
                 <TextField
@@ -464,7 +619,7 @@ const Organization = () => {
                     size='large'
                     sx={{ py: 1.2, fontWeight: 600 }}
                     onClick={handleSave}
-                    disabled={updating}
+                    disabled={updating || orgList?.companyType?.length === 0 || orgList?.organization_emp_count === ''}
                   >
                     {updating ? 'Updating...' : 'Save Changes'}
                   </Button>

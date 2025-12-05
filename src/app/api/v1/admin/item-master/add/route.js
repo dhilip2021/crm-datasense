@@ -13,20 +13,61 @@ let sendResponse = {
 
 export async function POST(request) {
   const {
-    item_code,
-    item_name,
+    product_code,
+    product_name,
     item_type,
-    description,
+    product_category,
     uom,
     basePrice,
-    gst,
     mrp,
+    gst,
     distributorPrice,
+    stock,
+    warranty_available,
+    product_status,
+    service_code,
+    service_name,
+    service_category,
+    service_type,
+    service_duration,
+    service_charge,
     hsn,
-    licenseKey,
-    warrantyPeriod,
-    billingCycle,
-    subscriptionDuration,
+    selling_price,
+    warranty_on_service,
+    service_status,
+    license_code,
+    license_name,
+    license_category,
+    license_key,
+    license_validity,
+    license_price,
+    license_renewal_price,
+    no_of_users,
+    activation_type,
+    subscription_included,
+    license_status,
+    warranty_code,
+    warranty_plan,
+    warranty_covered_product,
+    coverage_type,
+    warranty_duration,
+    warranty_cost,
+    warranty_provider,
+    warranty_claim_limits,
+    warranty_expiry_date,
+    warranty_status,
+    subscription_code,
+    subscription_name,
+    plan_type,
+    billing_cycle,
+    subscription_price,
+    subscription_renewal_price,
+    auto_renewal_price,
+    no_of_devices,
+    subscription_start_date,
+    subscription_end_date,
+    subscription_status,
+    description,
     Id,
     n_status
   } = await request.json()
@@ -51,21 +92,63 @@ export async function POST(request) {
           return NextResponse.json(sendResponse, { status: 200 })
         } else {
           const body = {
-            item_code: item_code,
-            item_name: item_name,
+            product_code: product_code,
+            product_name: product_name,
             item_type,
-            description: description ? description : '',
+            product_category: product_category ? product_category : '',
             uom: uom ? uom : '',
             basePrice: basePrice ? basePrice : '',
-            gst: gst ? gst : '',
             mrp: mrp ? mrp : '',
+            gst: gst ? gst : '',
             distributorPrice: distributorPrice ? distributorPrice : '',
+            stock: stock ? stock : '',
+            warranty_available: warranty_available,
+            product_status: product_status,
+            service_code: service_code ? service_code : '',
+            service_name: service_name ? service_name : '',
+            service_category: service_category ? service_category : '',
+            service_type: service_type ? service_type : '',
+            service_duration: service_duration ? service_duration : '',
+            service_charge: service_charge ? service_charge : '',
             hsn: hsn ? hsn : '',
-            licenseKey: licenseKey ? licenseKey : '',
-            warrantyPeriod: warrantyPeriod ? warrantyPeriod : '',
-            billingCycle: billingCycle ? billingCycle : '',
-            subscriptionDuration: subscriptionDuration ? subscriptionDuration : '',
-            n_status: n_status
+            selling_price: selling_price ? selling_price : '',
+            warranty_on_service: warranty_on_service ? warranty_on_service : '',
+            service_status: service_status ? service_status : '',
+            license_code: license_code ? license_code : '',
+            license_name: license_name ? license_name : '',
+            license_category: license_category ? license_category : '',
+            license_key: license_key ? license_key : '',
+            license_validity: license_validity ? license_validity : '',
+            license_price: license_price ? license_price : '',
+            license_renewal_price: license_renewal_price ? license_renewal_price : '',
+            no_of_users: no_of_users ? no_of_users : '',
+            activation_type: activation_type ? activation_type : '',
+            subscription_included: subscription_included ? subscription_included : '',
+            license_status: license_status ? license_status : '',
+            warranty_code: warranty_code ? warranty_code : '',
+            warranty_plan: warranty_plan ? warranty_plan : '',
+            warranty_covered_product: warranty_covered_product ? warranty_covered_product : '',
+            coverage_type: coverage_type ? coverage_type : '',
+            warranty_duration: warranty_duration ? warranty_duration : '',
+            warranty_cost: warranty_cost ? warranty_cost : '',
+            warranty_provider: warranty_provider ? warranty_provider : '',
+            warranty_claim_limits: warranty_claim_limits ? warranty_claim_limits : '',
+            warranty_expiry_date: warranty_expiry_date ? warranty_expiry_date : '',
+            warranty_status: warranty_status ? warranty_status : '',
+            subscription_code: subscription_code ? subscription_code : '',
+            subscription_name: subscription_name ? subscription_name : '',
+            plan_type: plan_type ? plan_type : '',
+            billing_cycle: billing_cycle ? billing_cycle : '',
+            subscription_price: subscription_price ? subscription_price : '',
+            subscription_renewal_price: subscription_renewal_price ? subscription_renewal_price : '',
+            auto_renewal_price: auto_renewal_price ? auto_renewal_price : '',
+            no_of_devices: no_of_devices ? no_of_devices : '',
+            subscription_start_date: subscription_start_date ? subscription_start_date : '',
+            subscription_end_date: subscription_end_date ? subscription_end_date : '',
+            subscription_status: subscription_status ? subscription_status : '',
+            description: description ? description : '',
+            n_status: n_status,
+            c_updatedBy: verified?.data?.user_id
           }
           await ItemMaster.findByIdAndUpdate(Id, body)
             .then(() => {
@@ -83,49 +166,89 @@ export async function POST(request) {
           return NextResponse.json(sendResponse, { status: 200 })
         }
       } else {
-        const uomValue = await ItemMaster.findOne({
+        
+        const itemValue = await ItemMaster.findOne({
           organization_id: organizationId,
-          item_name: item_name,
+          product_name: product_name
         })
-        if (item_code === '') {
+        if (item_type === "Product" && product_code === '') {
           sendResponse['appStatusCode'] = 4
           sendResponse['message'] = []
           sendResponse['payloadJson'] = []
-          sendResponse['error'] = 'Please enter uom code!'
+          sendResponse['error'] = 'Please enter product code!'
           return NextResponse.json(sendResponse, { status: 200 })
-        } else if (uomValue) {
+        } else if (item_type === "Product" && itemValue) {
           sendResponse['appStatusCode'] = 4
           sendResponse['message'] = []
           sendResponse['payloadJson'] = []
-          sendResponse['error'] = ' UOM value already exist'
-
+          sendResponse['error'] = ' Item value already exist'
           return NextResponse.json(sendResponse, { status: 200 })
         } else {
-          let uomValue = new ItemMaster({
+          let itemValue = new ItemMaster({
             item_id: create_UUID(),
             organization_id: organizationId,
-            item_code,
-            item_name,
+            product_code: product_code,
+            product_name: product_name,
             item_type,
-            description: description ? description : '',
+            product_category: product_category ? product_category : '',
             uom: uom ? uom : '',
             basePrice: basePrice ? basePrice : '',
-            gst: gst ? gst : '',
             mrp: mrp ? mrp : '',
+            gst: gst ? gst : '',
             distributorPrice: distributorPrice ? distributorPrice : '',
+            stock: stock ? stock : '',
+            warranty_available: warranty_available,
+            product_status: product_status,
+            service_code: service_code ? service_code : '',
+            service_name: service_name ? service_name : '',
+            service_category: service_category ? service_category : '',
+            service_type: service_type ? service_type : '',
+            service_duration: service_duration ? service_duration : '',
+            service_charge: service_charge ? service_charge : '',
             hsn: hsn ? hsn : '',
-            licenseKey: licenseKey ? licenseKey : '',
-            warrantyPeriod: warrantyPeriod ? warrantyPeriod : '',
-            billingCycle: billingCycle ? billingCycle : '',
-            subscriptionDuration: subscriptionDuration ? subscriptionDuration : '',
+            selling_price: selling_price ? selling_price : '',
+            warranty_on_service: warranty_on_service ? warranty_on_service : '',
+            service_status: service_status ? service_status : '',
+            license_code: license_code ? license_code : '',
+            license_name: license_name ? license_name : '',
+            license_category: license_category ? license_category : '',
+            license_key: license_key ? license_key : '',
+            license_validity: license_validity ? license_validity : '',
+            license_price: license_price ? license_price : '',
+            license_renewal_price: license_renewal_price ? license_renewal_price : '',
+            no_of_users: no_of_users ? no_of_users : '',
+            activation_type: activation_type ? activation_type : '',
+            subscription_included: subscription_included ? subscription_included : '',
+            license_status: license_status ? license_status : '',
+            warranty_code: warranty_code ? warranty_code : '',
+            warranty_plan: warranty_plan ? warranty_plan : '',
+            warranty_covered_product: warranty_covered_product ? warranty_covered_product : '',
+            coverage_type: coverage_type ? coverage_type : '',
+            warranty_duration: warranty_duration ? warranty_duration : '',
+            warranty_cost: warranty_cost ? warranty_cost : '',
+            warranty_provider: warranty_provider ? warranty_provider : '',
+            warranty_claim_limits: warranty_claim_limits ? warranty_claim_limits : '',
+            warranty_expiry_date: warranty_expiry_date ? warranty_expiry_date : '',
+            warranty_status: warranty_status ? warranty_status : '',
+            subscription_code: subscription_code ? subscription_code : '',
+            subscription_name: subscription_name ? subscription_name : '',
+            plan_type: plan_type ? plan_type : '',
+            billing_cycle: billing_cycle ? billing_cycle : '',
+            subscription_price: subscription_price ? subscription_price : '',
+            subscription_renewal_price: subscription_renewal_price ? subscription_renewal_price : '',
+            auto_renewal_price: auto_renewal_price ? auto_renewal_price : '',
+            no_of_devices: no_of_devices ? no_of_devices : '',
+            subscription_start_date: subscription_start_date ? subscription_start_date : '',
+            subscription_end_date: subscription_end_date ? subscription_end_date : '',
+            subscription_status: subscription_status ? subscription_status : '',
+            description: description ? description : '',
+            n_status: n_status,
             c_createdBy: verified.data.user_id
           })
 
-          await uomValue
-            .save()
-            .then(() => {
+          await itemValue.save().then(() => {
               sendResponse['appStatusCode'] = 0
-              sendResponse['message'] = 'UOM Value added Successfully!'
+              sendResponse['message'] = 'Product added Successfully!'
               sendResponse['payloadJson'] = []
               sendResponse['error'] = []
             })

@@ -85,8 +85,8 @@ export async function GET(req) {
                                   }
                                 },
                                 in: {
-                                  item_name: '$$matched.item_name',
-                                  item_code: '$$matched.item_id'
+                                  product_name: '$$matched.product_name',
+                                  product_code: '$$matched.product_code'
                                 }
                               }
                             }

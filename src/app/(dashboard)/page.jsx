@@ -20,9 +20,11 @@ import LeadJourneyStagesChart from '@/views/dashboard/LeadByJourney'
 import LostLeadAnalysis from '@/views/dashboard/LostLeadAnalysis'
 import LeadProgress from '@/views/dashboard/LeadProgress'
 import { useRouter } from 'next/navigation'
+import { useSelector } from 'react-redux'
 
 const DashboardAnalytics = () => {
-   const router = useRouter()
+  const router = useRouter()
+  const { payloadJson } = useSelector(state => state.menu)
   const organization_id = Cookies.get('organization_id')
   const getToken = Cookies.get('_token')
   const user_id = Cookies.get('user_id')
@@ -55,6 +57,16 @@ const DashboardAnalytics = () => {
   const [fieldConfig, setFieldConfig] = useState({})
   const [sections, setSections] = useState([])
   const [userList, setUserList] = useState([])
+
+  const hasViewPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(
+      m => m.menu_privileage_name === 'Dashboard' && m.sub_menu_privileage_name === 'Leads'
+    )
+
+    return found?.view_status === true
+  }
 
   // 🔹 Date Range Logic
   const getDateRange = type => {
@@ -133,25 +145,25 @@ const DashboardAnalytics = () => {
     }
   }
 
-   const logoutFn = () => {
-      Cookies.remove('riho_token')
-      Cookies.remove('_token')
-      Cookies.remove('_token_expiry')
-      Cookies.remove('privileges')
-      Cookies.remove('role_id')
-      Cookies.remove('role_name')
-      Cookies.remove('user_name')
-      Cookies.remove('organization_id')
-      Cookies.remove('organization_name')
-      Cookies.remove('organization_logo')
-      Cookies.remove('organization_address')
-      Cookies.remove('organization_currency')
-      Cookies.remove('organization_emp_count')
-      Cookies.remove('user_id')
-      Cookies.remove('c_version')
-      Cookies.remove('endedAt')
-      router.push('/login')
-    }
+  const logoutFn = () => {
+    Cookies.remove('riho_token')
+    Cookies.remove('_token')
+    Cookies.remove('_token_expiry')
+    Cookies.remove('privileges')
+    Cookies.remove('role_id')
+    Cookies.remove('role_name')
+    Cookies.remove('user_name')
+    Cookies.remove('organization_id')
+    Cookies.remove('organization_name')
+    Cookies.remove('organization_logo')
+    Cookies.remove('organization_address')
+    Cookies.remove('organization_currency')
+    Cookies.remove('organization_emp_count')
+    Cookies.remove('user_id')
+    Cookies.remove('c_version')
+    Cookies.remove('endedAt')
+    router.push('/login')
+  }
 
   // 🔹 Flatten Fields Safely
   const flattenFields = sections => {
@@ -181,8 +193,8 @@ const DashboardAnalytics = () => {
           if (f.type === 'Dropdown' && f.options?.length) config[f.label] = f.options
         })
         setFieldConfig(config)
-      }else{
-        if(!json.success){
+      } else {
+        if (!json.success) {
           logoutFn()
         }
       }
@@ -203,7 +215,7 @@ const DashboardAnalytics = () => {
 
   // 🔹 Initialize
   useEffect(() => {
-    console.log("fetchFormTemplate() call 1")
+    console.log('fetchFormTemplate() call 1')
     fetchFormTemplate()
     getUserListFn()
     const { fromDate, toDate } = getDateRange('This Month')
@@ -218,6 +230,15 @@ const DashboardAnalytics = () => {
     const { fromDate, toDate } = getDateRange(viewType)
     setFilters(prev => ({ ...prev, fromDate, toDate }))
   }, [viewType])
+
+  useEffect(() => {
+    if (payloadJson.length > 0) {
+      if (!hasViewPermission()) {
+        logoutFn()
+        router.push('/login')
+      }
+    }
+  }, [payloadJson])
 
   // 🔹 Lead Status Counts
   const leadStatusCounts = useMemo(() => {
@@ -277,83 +298,81 @@ const DashboardAnalytics = () => {
     return cards
   }, [leadStatusCounts])
 
-
   // 🔹 Group Summary Counts
-const leadSummaryCounts = useMemo(() => {
-  const totalLeads = dataFilter.length
+  const leadSummaryCounts = useMemo(() => {
+    const totalLeads = dataFilter.length
 
-  // Active = any lead that is not Closed Won, Closed Lost, or Invalid
-  const activeLeads = dataFilter.filter(
-    l =>
-      !['Closed Won', 'Closed Lost', 'Invalid / Junk / Wrong Contact','Demo / Proposal Stage'].includes(
-        l?.values?.['Lead Status']
-      )
-  ).length
+    // Active = any lead that is not Closed Won, Closed Lost, or Invalid
+    const activeLeads = dataFilter.filter(
+      l =>
+        !['Closed Won', 'Closed Lost', 'Invalid / Junk / Wrong Contact', 'Demo / Proposal Stage'].includes(
+          l?.values?.['Lead Status']
+        )
+    ).length
 
-  // Demo Scheduled = Demo / Proposal Stage
-  const demoScheduled = dataFilter.filter(
-    l => l?.values?.['Lead Status'] === 'Demo / Proposal Stage'
-  ).length
+    // Demo Scheduled = Demo / Proposal Stage
+    const demoScheduled = dataFilter.filter(l => l?.values?.['Lead Status'] === 'Demo / Proposal Stage').length
 
-  // Closed Won
-  const closedWon = dataFilter.filter(
-    l => l?.values?.['Lead Status'] === 'Closed Won'
-  ).length
+    // Closed Won
+    const closedWon = dataFilter.filter(l => l?.values?.['Lead Status'] === 'Closed Won').length
 
-  // Closed Lost
+    // Closed Lost
     const closedLost = dataFilter.filter(
-    l =>
-      !['New / Attempted Contact', 'Contacted / Qualification', 'Demo / Proposal Stage', 'Negotiation / Ready to Close', 'Call Back', 'Closed Won'].includes(
-        l?.values?.['Lead Status']
-      )
-  ).length
+      l =>
+        ![
+          'New / Attempted Contact',
+          'Contacted / Qualification',
+          'Demo / Proposal Stage',
+          'Negotiation / Ready to Close',
+          'Call Back',
+          'Closed Won'
+        ].includes(l?.values?.['Lead Status'])
+    ).length
 
-  return { totalLeads, activeLeads, demoScheduled, closedWon, closedLost }
-}, [dataFilter])
+    return { totalLeads, activeLeads, demoScheduled, closedWon, closedLost }
+  }, [dataFilter])
 
-const cardConfigOverView = useMemo(() => {
-  const cards = [
-    {
-      title: 'Total Leads',
-      count: leadSummaryCounts.totalLeads,
-      color: '#60B527', 
-      // icon: '👥'
-      icon: '/images/icons/icon-total.svg'
-    },
-    {
-      title: 'Active Leads',
-      count: leadSummaryCounts.activeLeads,
-      color: '#009CDE', 
-      // icon: '🔥'
-      icon: '/images/icons/icon-active.svg'
-    },
-    {
-      title: 'Demo Scheduled',
-      count: leadSummaryCounts.demoScheduled,
-      color: '#F71D09', 
-      // icon: '📅'
-      icon: '/images/icons/icon-demo.svg'
-    },
-    {
-      title: 'Closed Won',
-      count: leadSummaryCounts.closedWon,
-      color: '#AB09F7',
-      // icon: '🏆'
-      icon: '/images/icons/icon-won.svg'
-    },
-    {
-      title: 'Lost Leads',
-      count: leadSummaryCounts.closedLost,
-      color: '#B52781', 
-      // icon: '❌'
-      icon: '/images/icons/icon-loss.svg'
-    }
-  ]
+  const cardConfigOverView = useMemo(() => {
+    const cards = [
+      {
+        title: 'Total Leads',
+        count: leadSummaryCounts.totalLeads,
+        color: '#60B527',
+        // icon: '👥'
+        icon: '/images/icons/icon-total.svg'
+      },
+      {
+        title: 'Active Leads',
+        count: leadSummaryCounts.activeLeads,
+        color: '#009CDE',
+        // icon: '🔥'
+        icon: '/images/icons/icon-active.svg'
+      },
+      {
+        title: 'Demo Scheduled',
+        count: leadSummaryCounts.demoScheduled,
+        color: '#F71D09',
+        // icon: '📅'
+        icon: '/images/icons/icon-demo.svg'
+      },
+      {
+        title: 'Closed Won',
+        count: leadSummaryCounts.closedWon,
+        color: '#AB09F7',
+        // icon: '🏆'
+        icon: '/images/icons/icon-won.svg'
+      },
+      {
+        title: 'Lost Leads',
+        count: leadSummaryCounts.closedLost,
+        color: '#B52781',
+        // icon: '❌'
+        icon: '/images/icons/icon-loss.svg'
+      }
+    ]
 
-  return cards
-}, [leadSummaryCounts])
-
-
+    return cards
+  }, [leadSummaryCounts])
 
   // const uniqueSources = useMemo(() => [...new Set(fieldConfig.map(d => d.values?.Source).filter(Boolean))], [fieldConfig])
   const uniqueCities = useMemo(() => [...new Set(dataFilter.map(d => d.values?.City).filter(Boolean))], [dataFilter])
@@ -369,11 +388,6 @@ const cardConfigOverView = useMemo(() => {
   const uniqueEmployeeSizes = useMemo(() => fieldConfig['Employees Size'] || [], [fieldConfig])
 
   const uniqueAssignedTo = useMemo(() => fieldConfig['Assigned To'] || [], [fieldConfig])
-
-
-
-
-
 
   return (
     <Grid container spacing={6}>
@@ -401,9 +415,9 @@ const cardConfigOverView = useMemo(() => {
       <Grid item xs={12} md={6} lg={6}>
         <LostLeadAnalysis dataFilter={dataFilter} loading={loading} />
       </Grid>
-      
+
       <Grid item xs={12} md={6} lg={6}>
-        <LeadProgress sections={sections}/>
+        <LeadProgress sections={sections} />
       </Grid>
       <Grid item xs={12} md={6} lg={6}>
         <LeadByLocation viewType={viewType} dataFilter={dataFilter} loading={loading} />

@@ -326,7 +326,7 @@ export default function KanbanView() {
                                       ? lead.items.map(order => (
                                           <Box key={order.item_id} sx={{ mb: 0.5 }}>
                                             <strong>{order.item_id}:</strong> <br />
-                                            {order.item_ref.map(i => i.item_name).join(', ')}
+                                            {order.item_ref.map(i => i.product_name).join(', ')}
                                           </Box>
                                         ))
                                       : lead.lead_name}

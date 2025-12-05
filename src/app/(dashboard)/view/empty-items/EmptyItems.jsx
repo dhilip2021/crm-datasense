@@ -40,12 +40,12 @@ const EmptyItems = ({ onAdd, primaryText = "No items added yet", secondaryText =
         </Typography>
 
         {/* Secondary helper text */}
-        <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 420 }}>
+        {/* <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 420 }}>
           {secondaryText}
-        </Typography>
+        </Typography> */}
 
         {/* Action button (optional) */}
-        {onAdd && (
+        {/* {onAdd && (
           <Button
             startIcon={<AddIcon />}
             variant="contained"
@@ -54,7 +54,7 @@ const EmptyItems = ({ onAdd, primaryText = "No items added yet", secondaryText =
           >
             {buttonText}
           </Button>
-        )}
+        )} */}
       </Stack>
     </Box>
   )

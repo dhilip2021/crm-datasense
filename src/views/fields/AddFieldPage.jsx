@@ -17,10 +17,6 @@ import slugify from 'slugify'
 
 import { addFieldApi, getFieldListApi } from '@/apiFunctions/ApiAction'
 
-
-
-
-import LoaderGif1 from '@assets/gif/loader1.gif'
 import LoaderGif from '@assets/gif/loader.gif'
 
 
@@ -399,7 +395,7 @@ const AddFieldPage = () => {
                 variant='contained'
                 sx={{ color: '#fff', ml: 2 }}
                 type='submit'
-                endIcon={ loader && <Image src={LoaderGif1} width={30} height={30} alt='loader'/>}
+                endIcon={ loader && <Image src={LoaderGif} width={30} height={30} alt='loader'/>}
                 disabled={loader}
               >
                 {!loader && "Submit" }

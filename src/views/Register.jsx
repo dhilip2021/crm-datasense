@@ -20,6 +20,9 @@ import Logo from '@components/layout/shared/Logo'
 // Hook Imports
 import { useImageVariant } from '@core/hooks/useImageVariant'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn'
+import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee'
+
 
 import {
   addOrganizationApi,
@@ -30,6 +33,7 @@ import {
   verifyOtpApi
 } from '@/apiFunctions/ApiAction'
 import {
+  Autocomplete,
   Box,
   Checkbox,
   CircularProgress,
@@ -86,7 +90,7 @@ const Register = ({ mode }) => {
     organization_logo: '',
     organization_address: '',
     organization_emp_count: '',
-    organization_currency: '',
+    organization_currency: 'INR',
     companyType: [],
     first_name: '',
     last_name: '',
@@ -138,6 +142,8 @@ const Register = ({ mode }) => {
   const [errCPasswordCheck, setErrCPasswordCheck] = useState('')
 
   const [countryCodes, setCountryCodes] = useState([])
+    const [currencyCode, setCurrencyCode] = useState([])
+  
   const [isPasswordShown, setIsPasswordShown] = useState(false)
   const [isCPasswordShown, setIsCPasswordShown] = useState(false)
 
@@ -404,11 +410,11 @@ const Register = ({ mode }) => {
         setInputs({ ...inputs, [name]: value })
       }
     } else if (
-      name === 'product' ||
-      name === 'service' ||
-      name === 'license' ||
-      name === 'warranty' ||
-      name === 'subscription'
+      name === 'Product' ||
+      name === 'Service' ||
+      name === 'License' ||
+      name === 'Warranty' ||
+      name === 'Subscription'
     ) {
       setErrorInputs({ ...errorInputs, companyType: false })
 
@@ -584,7 +590,7 @@ const Register = ({ mode }) => {
   }
 
   const handleSubmit = async () => {
-    console.log(inputs, '<< inputsss')
+   
 
     const body = {
       organization_name: inputs?.organaization_name,
@@ -618,11 +624,13 @@ const Register = ({ mode }) => {
           c_about_user: 'Admin',
           email: inputs?.email,
           password: inputs?.password,
+          item_access: inputs?.companyType,
           mobile: `${inputs?.countryCode}${inputs?.mobile}`,
           role: '',
           c_user_img_url: '',
           c_role_id: '16f01165898b'
         }
+        
 
         const enycryptDAta = encryptCryptoResponse(body2)
 
@@ -708,7 +716,17 @@ const Register = ({ mode }) => {
       .then(res => res.json())
       .then(data => setCountryCodes(data))
       .catch(() => setCountryCodes([]))
+
+      fetch('/json/currency.json')
+        .then(res => res.json())
+        .then(data => setCurrencyCode(data))
+        .catch(() => setCurrencyCode([]))
   }, [])
+
+    // Fetch country codes + users
+    useEffect(() => {
+      
+    }, [])
 
   return (
     <Box style={loader ? { opacity: 0.3, pointerEvents: 'none' } : { opacity: 1 }}>
@@ -1243,9 +1261,9 @@ const Register = ({ mode }) => {
                           <FormControlLabel
                             control={
                               <Checkbox
-                                checked={inputs.companyType.includes('product')}
+                                checked={inputs.companyType.includes('Product')}
                                 onChange={handleChange}
-                                name='product'
+                                name='Product'
                               />
                             }
                             label='Product'
@@ -1253,9 +1271,9 @@ const Register = ({ mode }) => {
                           <FormControlLabel
                             control={
                               <Checkbox
-                                checked={inputs.companyType.includes('service')}
+                                checked={inputs.companyType.includes('Service')}
                                 onChange={handleChange}
-                                name='service'
+                                name='Service'
                               />
                             }
                             label='Service'
@@ -1263,9 +1281,9 @@ const Register = ({ mode }) => {
                           <FormControlLabel
                             control={
                               <Checkbox
-                                checked={inputs.companyType.includes('license')}
+                                checked={inputs.companyType.includes('License')}
                                 onChange={handleChange}
-                                name='license'
+                                name='License'
                               />
                             }
                             label='License'
@@ -1273,9 +1291,9 @@ const Register = ({ mode }) => {
                           <FormControlLabel
                             control={
                               <Checkbox
-                                checked={inputs.companyType.includes('warranty')}
+                                checked={inputs.companyType.includes('Warranty')}
                                 onChange={handleChange}
-                                name='warranty'
+                                name='Warranty'
                               />
                             }
                             label='Warranty'
@@ -1283,9 +1301,9 @@ const Register = ({ mode }) => {
                           <FormControlLabel
                             control={
                               <Checkbox
-                                checked={inputs.companyType.includes('subscription')}
+                                checked={inputs.companyType.includes('Subscription')}
                                 onChange={handleChange}
-                                name='subscription'
+                                name='Subscription'
                               />
                             }
                             label='Subscription'
@@ -1296,6 +1314,32 @@ const Register = ({ mode }) => {
                         )}
                       </FormControl>
                     </Box>
+                    <Box>
+                          <Autocomplete
+                                            options={currencyCode}
+                                            getOptionLabel={option => `${option.country} - ${option.symbol} (${option.code})`}
+                                            value={currencyCode.find(c => c.code === inputs.organization_currency) || null}
+                                            onChange={(event, newValue) => {
+                                              setInputs(prev => ({
+                                                ...prev,
+                                                organization_currency: newValue ? newValue.code : ''
+                                              }))
+                                            }}
+                                            renderInput={params => (
+                                              <TextField
+                                                {...params}
+                                                label='Currency'
+                                                InputProps={{
+                                                  ...params.InputProps,
+                                                  startAdornment: <CurrencyRupeeIcon sx={{ mr: 1 }} />
+                                                }}
+                                              />
+                                            )}
+                                            fullWidth
+                                          />
+                    </Box>
+
+
 
                     <Button
                       fullWidth
@@ -1305,7 +1349,8 @@ const Register = ({ mode }) => {
                         inputs.organaization_name === '' ||
                         errorInputs?.organaization_name ||
                         inputs.companyType.length === 0 ||
-                        errorInputs?.companyType
+                        errorInputs?.companyType ||
+                        inputs.organization_currency === '' 
                       }
                       onClick={handleSubmit}
                     >

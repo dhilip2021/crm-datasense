@@ -22,15 +22,12 @@ export async function POST(request) {
 
     if (email !== '' && email !== undefined) {
       await User.find().then(response => {
-
-
         const emailList = response.map(u => {
           return {
             ...u._doc, // full user object
             decryptedEmail: decrypCryptoRequest(u.email)
           }
         })
-
 
         const matched = response.find(u => decrypCryptoRequest(u.email) === email)
         if (!matched) {

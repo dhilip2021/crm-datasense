@@ -1,102 +1,112 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 
-var Schema = mongoose.Schema;
+var Schema = mongoose.Schema
 
 const UserSchema = new Schema(
   {
     organization_id: {
       type: String,
-      required: [true, "Organization Id is required!"],
-      trim: true,
+      required: [true, 'Organization Id is required!'],
+      trim: true
     },
     first_name: {
       type: String,
-      required: [true, "Firstname is required"],
-      trim: true,
+      required: [true, 'Firstname is required'],
+      trim: true
     },
     last_name: {
       type: String,
-      trim: true,
+      trim: true
     },
     user_name: {
       type: String,
-      required: [true, "Username is required"],
-      trim: true,
+      required: [true, 'Username is required'],
+      trim: true
     },
     user_id: {
       type: String,
-      required: [true, "User Id is required"],
+      required: [true, 'User Id is required'],
       trim: true,
       unique: true
     },
     email: {
       type: String,
-      required: [true, "Email is is required"],
-      unique: true,
+      required: [true, 'Email is is required'],
+      unique: true
     },
     mobile: {
       type: String,
-      unique: true,
+      unique: true
     },
     password: {
       type: String,
-      required: [true, "Password is required"],
+      required: [true, 'Password is required'],
       trim: true,
-      timestamp: true,
+      timestamp: true
     },
     slug_name: {
       type: String,
-      trim: true,
+      trim: true
     },
     role: {
       type: String,
       required: true,
-      enum: ["admin", "user"],
-      default: "user",
+      enum: ['admin', 'user'],
+      default: 'user'
     },
     c_user_img_url: {
       type: String,
+      trim: true
+    },
+    item_access: {
+      type: [String],
       trim: true,
+      set: values => values.map(v => v.charAt(0).toUpperCase() + v.slice(1).toLowerCase()),
+      validate: {
+        validator: function (values) {
+          const allowed = ['product', 'service', 'license', 'warranty', 'subscription']
+          return values.every(v => allowed.includes(v.toLowerCase()))
+        },
+        message: props => `${props.value} is not a valid company type`
+      }
     },
     c_role_id: {
       type: String,
-      trim: true,
+      trim: true
     },
     c_about_user: {
       type: String,
-      trim: true,
+      trim: true
     },
     n_status: {
       type: Number,
       required: true,
       enum: [0, 1],
-      default: 1,
+      default: 1
     },
     n_published: {
       type: Number,
       required: true,
       enum: [0, 1],
-      default: 1,
+      default: 1
     },
     c_createdBy: {
-      type: String,
+      type: String
     },
     c_updatedBy: {
-      type: String,
+      type: String
     },
     c_deletedBy: {
-      type: String,
+      type: String
     },
     token: {
-      type: String,
+      type: String
     },
     key: {
-      type: String,
-    },
+      type: String
+    }
   },
   { strict: false, versionKey: false, timestamps: true }
-);
+)
 
-
-export const User = mongoose.models.User || mongoose.model("User", UserSchema,"users");
-
+export const User = mongoose.models.User || mongoose.model('User', UserSchema, 'users')

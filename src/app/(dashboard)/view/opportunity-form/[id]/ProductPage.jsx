@@ -202,8 +202,8 @@ function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData, dealFnCall 
                 <TableHead>
                   <TableRow sx={{ bgcolor: '#f5f5f5' }}>
                     {[
-                      'Item Code',
-                      'Item Name',
+                      'Product Code',
+                      'Product Name',
                       'Item Type',
                       'Qty',
                       'UOM',
@@ -226,7 +226,7 @@ function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData, dealFnCall 
                   {order.item_ref.map((p, idx) => (
                     <TableRow key={p._id || idx}>
                       <TableCell sx={{ py: 2, fontSize: 13 }}>{p.item_id}</TableCell>
-                      <TableCell sx={{ py: 2, fontSize: 13 }}>{p.itemMasterRef?.item_name || '—'}</TableCell>
+                      <TableCell sx={{ py: 2, fontSize: 13 }}>{p.itemMasterRef?.product_name || '—'}</TableCell>
                       <TableCell sx={{ py: 1.5 }}>
                         <Chip label={p.itemMasterRef?.item_type || '—'} size='small' />
                       </TableCell>

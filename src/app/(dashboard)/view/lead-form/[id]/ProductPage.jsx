@@ -16,7 +16,9 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  Menu,
+  MenuItem
 } from '@mui/material'
 import ProductSelectorDialog from './ProductSelectorDialog'
 import ProductBulkEditDialog from './ProductBulkEditDialog'
@@ -24,13 +26,54 @@ import { toast } from 'react-toastify'
 import { formatCurrency } from '@/helper/frontendHelper'
 import EmptyItems from '../../empty-items/EmptyItems'
 import { useRouter } from 'next/navigation'
+import ServiceSelectorDialog from './ServiceSelectorDialog'
+import ProductList from './ProductList'
+import ServiceList from './ServiceList'
 
 // ✅ Utility for currency
 // const formatCurrency = value => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value)
 
-function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData, dealFnCall }) {
+function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData, dealFnCall, itemTypes }) {
+
+
+  const [anchorEl, setAnchorEl] = useState(null)
+  const open = Boolean(anchorEl)
+
+  const menuActions = {
+    Product: () => setOpenProductDialog(true),
+    Service: () => setOpenServiceDialog(true),
+    Subscription: () => alert('Subscription Selected'),
+    License: () => alert('License Selected'),
+    Warranty: () => alert('Warranty Selected')
+  }
+
+  const getIcon = type => {
+    switch (type) {
+      case 'Product':
+        return '📦'
+      case 'Service':
+        return '🛠'
+      case 'Subscription':
+        return '🎫'
+      case 'License':
+        return '🔐'
+      case 'Warranty':
+        return '📝'
+      default:
+        return '📁'
+    }
+  }
+  const handleClick = event => {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleClose = () => {
+    setAnchorEl(null)
+  }
+
   const router = useRouter()
-  const [openDialog, setOpenDialog] = useState(false)
+  const [openProductDialog, setOpenProductDialog] = useState(false)
+  const [openServiceDialog, setOpenServiceDialog] = useState(false)
   const [loader, setLoader] = useState(false)
 
   const [deleteProductId, setDeleteProductId] = useState(null)
@@ -38,33 +81,6 @@ function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData, dealFnCall 
 
   const [openBulkEdit, setOpenBulkEdit] = useState(false)
   const [editingOrder, setEditingOrder] = useState(null)
-  const summary = useMemo(() => {
-    if (!leadData?.items?.length) return { qty: 0, subtotal: 0, discount: 0, gstAmount: 0, total: 0 }
-
-    let qty = 0,
-      subtotal = 0,
-      discount = 0,
-      gstAmount = 0
-
-    leadData.items.forEach(order => {
-      order.item_ref.forEach(p => {
-        const itemQty = p.quantity || 0
-        const unitPrice = p.unitPrice || 0
-        const itemSubtotal = itemQty * unitPrice
-        const itemDiscount = p.discountType === 'Flat %' ? (itemSubtotal * (p.discount || 0)) / 100 : p.discount || 0
-        const itemGst = ((itemSubtotal - itemDiscount) * (p.itemMasterRef?.gst || 0)) / 100
-
-        qty += itemQty
-        subtotal += itemSubtotal
-        discount += itemDiscount
-        gstAmount += itemGst
-      })
-    })
-
-    const total = subtotal - discount + gstAmount
-
-    return { qty, subtotal, discount, gstAmount, total }
-  }, [leadData])
 
   const confirmDeleteProduct = productId => {
     setDeleteProductId(productId)
@@ -88,15 +104,12 @@ function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData, dealFnCall 
 
   // 🔹 Order-specific bulk edit
   const handleOpenBulkEdit = order => {
-    console.log(order, '<<< orderrrrr')
     setEditingOrder(order)
     setOpenBulkEdit(true)
   }
 
   // 🔹 Order Delete Function
   const handleDeleteOrder = async itemId => {
-    console.log(itemId, '<<< order idddd')
-
     if (!itemId) return
 
     try {
@@ -144,176 +157,56 @@ function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData, dealFnCall 
       <Box display='flex' justifyContent='flex-end' mb={2}>
         <Button
           variant='contained'
-          onClick={() => setOpenDialog(true)}
-          sx={{ bgcolor: '#009cde', '&:hover': { bgcolor: '#007bb5' }, borderRadius: 1, textTransform: 'none' }}
+          onClick={handleClick}
+          sx={{
+            bgcolor: '#009cde',
+            '&:hover': { bgcolor: '#007bb5' },
+            borderRadius: 1,
+            textTransform: 'none'
+          }}
         >
           + Add Items
         </Button>
+
+        <Menu
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        >
+          {itemTypes.map(type => (
+            <MenuItem
+              key={type}
+              onClick={() => {
+                menuActions[type]()
+                handleClose()
+              }}
+            >
+              {getIcon(type)}&nbsp; {type}
+            </MenuItem>
+          ))}
+        </Menu>
       </Box>
 
       {leadData?.items?.length > 0 ? (
-        leadData.items.map(order => {
-          // 🔹 Calculate summary per order
-          let qty = 0,
-            subtotal = 0,
-            discount = 0,
-            gstAmount = 0
-
-          order.item_ref.forEach(p => {
-            const itemQty = p.quantity || 0
-            const unitPrice = p.unitPrice || 0
-            const itemSubtotal = itemQty * unitPrice
-            const itemDiscount =
-              p.discountType === 'Flat %' ? (itemSubtotal * (p.discount || 0)) / 100 : p.discount || 0
-            const itemGst = ((itemSubtotal - itemDiscount) * (p.itemMasterRef?.gst || 0)) / 100
-
-            qty += itemQty
-            subtotal += itemSubtotal
-            discount += itemDiscount
-            gstAmount += itemGst
-          })
-
-          const total = subtotal - discount + gstAmount
-
-          return (
-            <Paper
-              key={order._id}
-              sx={{ mb: 3, p: 2, borderRadius: 2, border: '1px solid #e0e0e0', overflowX: 'auto' }}
-            >
-              <Box display='flex' justifyContent='space-between'>
-                <Typography variant='subtitle1' fontWeight={700} mb={1}>
-                  Item ID: {order.item_id}
-                </Typography>
-                <Box display={'flex'} justifyContent={'space-between'} gap={2}>
-                  <Button variant='contained' color='success' size='small' onClick={() => handleOpenBulkEdit(order)}>
-                    Edit Items
-                  </Button>
-
-                  <Button
-                    variant='contained'
-                    color='error'
-                    size='small'
-                    onClick={() => handleDeleteOrder(order.item_id)}
-                  >
-                    Delete Items
-                  </Button>
-                </Box>
-              </Box>
-
-              {/* Items Table */}
-              <Table size='small'>
-                <TableHead>
-                  <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-                    {[
-                      'Item Code',
-                      'Item Name',
-                      'Item Type',
-                      'Qty',
-                      'UOM',
-                      'Unit Price',
-                      'Discount',
-                      'GST',
-                      'Final Price'
-                    ].map(head => (
-                      <TableCell
-                        key={head}
-                        sx={{ fontWeight: 700, fontSize: 13, textTransform: 'uppercase', color: '#555' }}
-                        align={['Qty', 'Unit Price', 'Discount', 'Final Price'].includes(head) ? 'right' : 'left'}
-                      >
-                        {head}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {order.item_ref.map((p, idx) => (
-                    <TableRow key={p._id || idx}>
-                      <TableCell sx={{ py: 2, fontSize: 13 }}>{p.item_id}</TableCell>
-                      <TableCell sx={{ py: 2, fontSize: 13 }}>{p.itemMasterRef?.item_name || '—'}</TableCell>
-                      <TableCell sx={{ py: 1.5 }}>
-                        <Chip label={p.itemMasterRef?.item_type || '—'} size='small' />
-                      </TableCell>
-                      <TableCell align='center' sx={{ py: 2, fontSize: 13 }}>
-                        {p.quantity}
-                      </TableCell>
-                      <TableCell align='center' sx={{ py: 2, fontSize: 13 }}>
-                        {p.itemMasterRef?.uom || '—'}
-                      </TableCell>
-                      <TableCell align='right' sx={{ py: 2, fontSize: 13 }}>
-                        {formatCurrency(p.unitPrice)}
-                      </TableCell>
-                      <TableCell align='right' sx={{ py: 2, fontSize: 13 }}>
-                        {p.discountType === 'Flat Amount' ? `₹${p.discount}` : `${p.discount || 0}%`}
-                      </TableCell>
-                      <TableCell align='center' sx={{ py: 2, fontSize: 13 }}>
-                        {`${p.itemMasterRef?.gst || 0}%`}
-                      </TableCell>
-                      <TableCell align='right' sx={{ py: 2, fontSize: 13, fontWeight: 600, color: '#4caf50' }}>
-                        {formatCurrency(p.finalPrice)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-
-              {/* 🔹 Per Order Summary */}
-
-              <Box mt={2} textAlign='right'>
-                <Divider sx={{ mb: 1 }} />
-                <Typography variant='body2' sx={{ fontSize: 13 }}>
-                  Total Qty: <strong>{qty}</strong>
-                </Typography>
-                <Typography variant='body2' sx={{ fontSize: 13 }}>
-                  Subtotal: <strong>{formatCurrency(subtotal)}</strong>
-                </Typography>
-                <Typography variant='body2' color='error' sx={{ fontSize: 13 }}>
-                  Discount: -{formatCurrency(discount)}
-                </Typography>
-                <Typography variant='body2' sx={{ fontSize: 13 }}>
-                  GST: <strong>{formatCurrency(gstAmount)}</strong>
-                </Typography>
-                <Typography variant='body2' sx={{ fontSize: 13 }}>
-                  {' '}
-                  ---------------------------------
-                </Typography>
-                <Typography variant='subtitle1' fontWeight={700} color='#4caf50'>
-                  Grand Total: {formatCurrency(total)}
-                </Typography>
-                <Typography variant='body2' sx={{ fontSize: 13 }}>
-                  {' '}
-                  ---------------------------------
-                </Typography>
-              </Box>
-              <Box textAlign='right'>
-                <Typography variant='body1'>
-                  <Chip
-                    onClick={() => dealFnCall(order.item_id)}
-                    label='Confirm Quotation'
-                    color='primary'
-                    variant='filled' // ← change this
-                    sx={{
-                      fontWeight: 'regular',
-                      cursor: 'pointer',
-                      fontSize: '1rem',
-                      px: 5,
-                      py: 3,
-                      borderRadius: '12px',
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        backgroundColor: '#f3f4f6',
-                        color: '#009cde',
-                        boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
-                      }
-                    }}
-                  />
-                </Typography>
-              </Box>
-            </Paper>
-          )
-        })
+        <>
+          <ProductList
+            leadData={leadData}
+            handleDeleteOrder={handleDeleteOrder}
+            handleOpenBulkEdit={handleOpenBulkEdit}
+            dealFnCall={dealFnCall}
+            formatCurrency={formatCurrency}
+          />
+          <ServiceList
+            leadData={leadData}
+            handleDeleteOrder={handleDeleteOrder}
+            handleOpenBulkEdit={handleOpenBulkEdit}
+            dealFnCall={dealFnCall}
+            formatCurrency={formatCurrency}
+          />
+        </>
       ) : (
-        // <Typography align='center'>🚫 No items added yett</Typography>
-
         <EmptyItems
           onAdd={() => router.push('/items')}
           primaryText='🚫 No items added yet'
@@ -323,8 +216,15 @@ function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData, dealFnCall 
       )}
 
       <ProductSelectorDialog
-        open={openDialog}
-        onClose={() => setOpenDialog(false)}
+        open={openProductDialog}
+        onClose={() => setOpenProductDialog(false)}
+        leadId={leadId}
+        fetchLeadFromId={fetchLeadFromId}
+        itemsData={itemsData}
+      />
+      <ServiceSelectorDialog
+        open={openServiceDialog}
+        onClose={() => setOpenServiceDialog(false)}
         leadId={leadId}
         fetchLeadFromId={fetchLeadFromId}
         itemsData={itemsData}

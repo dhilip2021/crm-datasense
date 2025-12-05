@@ -70,22 +70,52 @@ export async function POST(request) {
         const encMobile = encryptCryptoResponse(dData?.mobile)
         const body = {
           organization_id: dData?.organization_id,
-          first_name: dData?.first_name,
-          last_name: dData?.last_name,
-          user_name: user_name,
-          c_about_user: dData?.c_about_user,
-          slug_name: slug_name,
-          email: encEmail,
-          mobile: encMobile,
-          role: dData?.role,
-          c_role_id: dData?.c_role_id,
-          c_user_img_url: dData?.c_user_img_url,
-          n_status: dData?.n_status
         }
+
+        console.log(dData,"<<< dData ")
 
         if (dData?.password !== '' && dData?.password !== undefined) {
           body['password'] = hashPass
+        } 
+        if (dData?.first_name !== '' && dData?.first_name !== undefined) {
+          body['first_name'] = dData?.first_name
+        } 
+        if (dData?.last_name !== '' && dData?.last_name !== undefined) {
+          body['last_name'] = dData?.last_name
+        } 
+        if (dData?.user_name !== '' && dData?.user_name !== undefined) {
+          body['user_name'] = dData?.user_name
+        } 
+        if (dData?.c_about_user !== '' && dData?.c_about_user !== undefined) {
+          body['c_about_user'] = dData?.c_about_user
+        } 
+        if (dData?.slug_name !== '' && dData?.slug_name !== undefined) {
+          body['slug_name'] = dData?.slug_name
+        } 
+        if (dData?.email !== '' && dData?.email !== undefined) {
+          body['email'] = encEmail
+        } 
+        if (dData?.mobile !== '' && dData?.mobile !== undefined) {
+          body['mobile'] = encMobile
+        } 
+        if (dData?.role !== '' && dData?.role !== undefined) {
+          body['role'] = dData?.role
+        } 
+        if (dData?.c_role_id !== '' && dData?.c_role_id !== undefined) {
+          body['c_role_id'] = dData?.c_role_id
+        } 
+        if (dData?.c_user_img_url !== '' && dData?.c_user_img_url !== undefined) {
+          body['c_user_img_url'] = dData?.c_user_img_url
         }
+         if (dData?.item_access !== '' && dData?.item_access !== undefined) {
+          body['item_access'] = dData?.item_access
+        }
+         if (dData?.n_status !== '' && dData?.n_status !== undefined) {
+          body['n_status'] = dData?.n_status
+        }
+
+        console.log(body,"<<< update bodyyyyyyyy")
+
 
         await User.findByIdAndUpdate(dData?.Id, body)
           .then(async () => {
@@ -198,6 +228,7 @@ export async function POST(request) {
                 c_role_id: dData?.c_role_id,
                 c_user_img_url: dData?.c_user_img_url,
                 password: hashPass,
+                item_access: dData?.item_access,
                 n_status: dData?.n_status ? dData?.n_status : 1
               })
 
@@ -222,7 +253,7 @@ export async function POST(request) {
           overflow: hidden;
         ">
           <div style="background-color: #1976d2; padding: 20px; text-align: center;">
-            <h2 style="color: #fff; margin: 0;">CRM Datasense</h2>
+            <h2 style="color: #fff; margin: 0;">Lumivo CRM Datasense</h2>
             <p style="color: #e0e0e0; margin: 5px 0 0;">Your trusted CRM partner</p>
           </div>
 
@@ -309,6 +340,7 @@ export async function POST(request) {
                   c_role_id: dData?.c_role_id,
                   c_user_img_url: dData?.c_user_img_url,
                   password: hashPass,
+                  item_access: dData?.item_access,
                   n_status: dData?.n_status ? dData?.n_status : 1
                 })
 
@@ -316,12 +348,12 @@ export async function POST(request) {
                   let mailData = {
                     from: '"No Reply" <dhilipbeece001@gmail.com>', // sender address
                     to: `${dData?.email}`, // receiver
-                    subject: '🔑 CRM Datasense - Login Credentials',
-                    text: 'Your login credentials for CRM Datasense',
+                    subject: '🔑 Lumivo CRM Datasense - Login Credentials',
+                    text: 'Your login credentials for Lumivo CRM Datasense',
                     html: `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 10px; padding: 30px; background: #f9fafc;">
       
-      <h2 style="text-align: center; color: #1976d2; margin-bottom: 20px;">CRM Datasense</h2>
+      <h2 style="text-align: center; color: #1976d2; margin-bottom: 20px;">Lumivo CRM Datasense</h2>
       
       <p style="font-size: 15px; color: #333;">Hi <b>${user_name}</b>,</p>
       <p style="font-size: 15px; color: #333; line-height: 1.6;">
@@ -329,6 +361,7 @@ export async function POST(request) {
       </p>
       
       <div style="margin: 25px 0; padding: 15px; background: #e3f2fd; border-radius: 8px;">
+      <p><b>Login URL:</b> <a href="https://crm-datasense-bj4n.vercel.app/login" style="color: #1976d2;">https://crm-datasense-bj4n.vercel.app/login</a></p>
         <p style="font-size: 16px; color: #333; margin: 5px 0;">
           📧 <b>Email:</b> <span style="color: #1976d2;">${dData?.email}</span>
         </p>
@@ -343,7 +376,7 @@ export async function POST(request) {
       
       <p style="font-size: 14px; color: #555; text-align: center;">
         Thank you, <br />
-        <b style="color: #1976d2;">CRM Datasense Tech</b>
+        <b style="color: #1976d2;">Lumivo CRM Datasense Technologies</b>
       </p>
     </div>
   `
@@ -390,6 +423,7 @@ export async function POST(request) {
                 role: dData?.role,
                 c_role_id: dData?.c_role_id,
                 c_user_img_url: dData?.c_user_img_url,
+                item_access: dData?.item_access,
                 password: hashPass,
                 n_status: dData?.n_status ? dData?.n_status : 1
               })

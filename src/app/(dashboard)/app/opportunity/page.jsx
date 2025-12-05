@@ -51,6 +51,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers-pro/LocalizationProvid
 import { AdapterDayjs } from '@mui/x-date-pickers-pro/AdapterDayjs'
 import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker'
 import KanbanView from '@/views/dashboard/KanbanView'
+import { useRouter } from 'next/navigation'
+import { useSelector } from 'react-redux'
 
 const OpportunityTable = () => {
   const organization_id = Cookies.get('organization_id')
@@ -85,6 +87,30 @@ const OpportunityTable = () => {
 
   const open = Boolean(anchorEl)
   const view = Boolean(anchorViewEl)
+
+
+
+    const router = useRouter()
+  const { payloadJson } = useSelector(state => state.menu)
+
+  const hasViewPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Opportunity' && m.sub_menu_privileage_name === '')
+
+    return found?.view_status === true
+  }
+
+  useEffect(() => {
+    if (payloadJson.length > 0) {
+      if (!hasViewPermission()) {
+        router.push('/')
+      }
+    }
+  }, [payloadJson])
+
+
+
 
   const handleClick = event => {
     setAnchorEl(event.currentTarget)

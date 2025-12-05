@@ -73,7 +73,7 @@ export async function POST(req, { params }) {
     }
 
     // 🔹 Generate one single item_id
-    const item_id = `ITEM-${Date.now()}-${Math.floor(Math.random() * 1000)}`
+    const item_id = `PROD-ITEM-${Date.now()}-${Math.floor(Math.random() * 1000)}`
     const orderObject = {
       item_id,
       item_ref: []
@@ -98,7 +98,8 @@ export async function POST(req, { params }) {
           orderObject.item_ref.push({
             itemMasterRef: itemData._id,
             item_id: item.item_id,
-            item_name: item.item_name,
+            product_code: item.product_code,
+            product_name: item.product_name,
             item_type: item.item_type,
             quantity: item.quantity,
             unitPrice: item.unitPrice,

@@ -145,7 +145,7 @@ const summary = useMemo(() => {
                 order.item_ref.map((p, idx) => (
                   <TableRow key={p._id || idx}>
                     <TableCell sx={{ py: 2, fontSize: 13 }}>{p.item_id}</TableCell>
-                    <TableCell sx={{ py: 2, fontSize: 13 }}>{p.itemMasterRef?.item_name || '—'}</TableCell>
+                    <TableCell sx={{ py: 2, fontSize: 13 }}>{p.itemMasterRef?.product_name || '—'}</TableCell>
                     <TableCell sx={{ py: 1.5 }}>
                       <Chip label={p.itemMasterRef?.item_type || '—'} size='small' />
                     </TableCell>

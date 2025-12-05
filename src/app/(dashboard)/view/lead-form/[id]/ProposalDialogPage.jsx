@@ -29,7 +29,7 @@ import { toast, ToastContainer } from 'react-toastify'
 import SendIcon from '@mui/icons-material/Send'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 
-const ProposalDialogPage = ({ 
+const ProposalProductDialogPage = ({ 
   open, 
   onClose, 
   leadData, 
@@ -158,7 +158,7 @@ const ProposalDialogPage = ({
                       const { subtotal } = calculateItemTotals(item)
                       return (
                         <TableRow key={idx} hover>
-                          <TableCell>{item?.itemMasterRef?.item_name || '-'}</TableCell>
+                          <TableCell>{item?.itemMasterRef?.product_name || '-'}</TableCell>
                           <TableCell>{item?.itemMasterRef?.description || '-'}</TableCell>
                           <TableCell align='right'>{item.quantity}</TableCell>
                           <TableCell align='right'>₹{item.unitPrice.toFixed(2)}</TableCell>
@@ -276,4 +276,4 @@ const ProposalDialogPage = ({
   )
 }
 
-export default ProposalDialogPage
+export default ProposalProductDialogPage

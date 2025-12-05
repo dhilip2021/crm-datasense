@@ -62,6 +62,21 @@ export const craeteUserApi = async (body) => {
         return err;
       });
   };
+
+    export const getUserProfileApi = async (body) => {
+    return await axios
+      .get(`/api/v1/admin/list_user_profile?id=${body}`,{ headers: AppHeader })
+      .then((res) => {
+        return res.data;
+      })
+      .catch((err) => {
+        return err;
+      });
+  };
+
+
+
+
     export const getAllUserListApi = async () => {
     return await axios
       .get(`/api/v1/admin/list_user`,{ headers: AppHeader })
@@ -76,6 +91,15 @@ export const craeteUserApi = async (body) => {
      export const getHierarchyUserListApi = async () => {
     return await axios
       .get(`/api/v1/admin/list_hierarchy`,{ headers: AppHeader })
+      .then((res) => {
+        return res.data;
+      })
+      .catch((err) => {
+        return err;
+      });
+  };
+     export const postHierarchyUserListApi = async (body,header) => {
+    return await axios.post(`/api/v1/admin/list_hierarchy`, body,{ headers: header })
       .then((res) => {
         return res.data;
       })
@@ -874,11 +898,111 @@ export const getItemMasterListApi = async (header) => {
     });
 };
 
+export const getTypeItemMasterListApi = async (type,header) => {
+  return await axios
+    .get(`/api/v1/admin/item-master/list?type=${type}`,{ headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
 export const deleteItemMasterApi = async (body,header) => {
   return await axios
     .delete(`/api/v1/admin/Item-master/delete?id=${body}`, {
       headers: header,
     })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+
+
+// Category Master model api's
+  
+export const createCategoryMaster = async (body, header) => {
+  
+  return await axios.post(`/api/v1/admin/category-master/add`, body,{ headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const postCategoryMasterListApi = async (body,header) => {
+  return await axios
+    .post(`/api/v1/admin/category-master/list`, body, { headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const getCategoryMasterListApi = async (body) => {
+  return await axios
+    .get(`/api/v1/admin/category-master/list?name=${body}`,{ headers: AppHeader })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const deleteCategoryMasterApi = async (body,header) => {
+  return await axios
+    .delete(`/api/v1/admin/category-master/delete?id=${body}`, {
+      headers: header,
+    })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+  export const postRolesAndPermissionAddApi = async (body, header) => {
+    return await axios
+      .post(`/api/v1/admin/roles-permission/add`, body, {
+        headers: header,
+      })
+      .then((res) => {
+        return res.data;
+      })
+      .catch((err) => {
+        return err;
+      });
+  };
+
+  export const postRolesAndPermissionListApi = async (body, header) => {
+    return await axios
+      .post(`/api/v1/admin/roles-permission/list`, body, {
+        headers: header,
+      })
+      .then((res) => {
+        return res.data;
+      })
+      .catch((err) => {
+        return err;
+      });
+  };
+
+
+
+  export const getRolesAndPermissionListApi = async (uId) => {
+  return await axios
+    .get(`/api/v1/admin/roles-permission/list?user_id=${uId}`,{ headers: AppHeader })
     .then((res) => {
       return res.data;
     })

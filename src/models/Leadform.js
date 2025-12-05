@@ -7,11 +7,27 @@ const ItemRefSchema = new mongoose.Schema(
   {
     itemMasterRef: { type: mongoose.Schema.Types.ObjectId, ref: 'ItemMaster' },
     item_id: { type: String },
+    item_type: { type: String },
+    product_code: { type: String, trim: true },
+    product_name: { type: String, trim: true },
+    product_category: { type: String, trim: true },
+    basePrice: { type: Number, min: 0 },
+    mrp: { type: Number },
     quantity: { type: Number, default: 1 },
     unitPrice: { type: Number },
     discount: { type: Number, default: 0 },
     finalPrice: { type: Number },
-    discountType: { type: String }
+    discountType: { type: String },
+    service_name: { type: String },
+    service_code: { type: String },
+    hsn: { type: String },
+    uom: { type: String },
+    service_charge: { type: String },
+    service_duration: { type: String },
+    service_type: { type: String },
+    warranty_on_service: { type: String },
+    
+    
   },
   { _id: true } // keep _id for each item
 )

@@ -17,6 +17,8 @@ import dayjs from 'dayjs'
 import { Box, Button, Menu, MenuItem } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import OpportunityStatus from '@/views/dashboard/OpportunityStatus'
+import { useRouter } from 'next/navigation'
+import { useSelector } from 'react-redux'
 
 
 // const opportunityData = [
@@ -83,6 +85,24 @@ const [opportunityData, setOpportunityData] = useState([])
   const [anchorViewEl, setAnchorViewEl] = useState(null)
   const [viewType, setViewType] = useState('This Month')
   const view = Boolean(anchorViewEl)
+
+
+
+
+    const router = useRouter()
+    const { payloadJson } = useSelector(state => state.menu)
+  
+    const hasViewPermission = () => {
+      if (!payloadJson || payloadJson.length === 0) return false
+  
+      const found = payloadJson.find(
+        m => m.menu_privileage_name === 'Dashboard' && m.sub_menu_privileage_name === 'Opportunity'
+      )
+  
+      return found?.view_status === true
+    }
+  
+
 
   const handleViewClick = event => {
     setAnchorViewEl(event.currentTarget)
@@ -245,6 +265,14 @@ const [opportunityData, setOpportunityData] = useState([])
       toDate: today.format('YYYY-MM-DD')
     }
   }
+
+    useEffect(() => {
+      if (payloadJson.length > 0) {
+        if (!hasViewPermission()) {
+          router.push('/')
+        }
+      }
+    }, [payloadJson])
 
   useEffect(() => {
     console.log("fetchFormTemplate() call6")

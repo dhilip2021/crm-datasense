@@ -20,6 +20,9 @@ import useVerticalNav from '@menu/hooks/useVerticalNav'
 // Style Imports
 import navigationCustomStyles from '@core/styles/vertical/navigationCustomStyles'
 import Cookies from 'js-cookie'
+import { getRolesAndPermissionListApi } from '@/apiFunctions/ApiAction'
+import { menuData } from '@/app/store/menuSlice'
+import { useDispatch } from 'react-redux'
 
 const StyledBoxForShadow = styled('div')(({ theme }) => ({
   top: 80,
@@ -37,26 +40,32 @@ const StyledBoxForShadow = styled('div')(({ theme }) => ({
   }
 }))
 
-
 // Fetch Privileges API
 
-const fetchPrivilegesById = async (token, id) => {
-  const res = await fetch(`/api/v1/admin/user_privileges/list?roll=${id}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
-    }
-  })
-  if (!res.ok) throw new Error(`API Error: ${res.status}`)
-  const data = await res.json()
-  return data.payloadJson
-}
+// const fetchPrivilegesById = async (token, id) => {
+//   const res = await fetch(`/api/v1/admin/user_privileges/list?roll=${id}`, {
+//     method: 'GET',
+//     headers: {
+//       'Content-Type': 'application/json',
+//       Authorization: `Bearer ${token}`
+//     }
+//   })
+//   if (!res.ok) throw new Error(`API Error: ${res.status}`)
+//   const data = await res.json()
+//   return data.payloadJson
+// }
+
+
 
 const Navigation = () => {
-   const getToken = Cookies.get('_token')
-   const rollId = Cookies.get('role_id')
-   const [roles, setRoles] = useState("")
+  const dispatch = useDispatch()
+  const getToken = Cookies.get('_token')
+  const rollId = Cookies.get('role_id')
+  const userId = Cookies.get('user_id')
+
+  const [roles, setRoles] = useState([])
+  const [loader, setLoader] = useState(false)
+
   // Hooks
   const theme = useTheme()
   const { isBreakpointReached, toggleVerticalNav } = useVerticalNav()
@@ -79,29 +88,49 @@ const Navigation = () => {
     }
   }
 
+  const fetchRolesPrevileges = async () => {
+    setLoader(true)
 
-    // useEffect(() => {
-    //   const loadData = async () => {
-    //     try {
-    //       if (!getToken) {
-    //         console.error('Token missing in cookies')
-    //         return
-    //       }
-    //       const data = await fetchPrivilegesById(getToken, rollId)
-    //       console.log(data,"<<< ROLESSS DATAAA")
-    //       setRoles(data)
-    //     } catch (err) {
-    //       console.error('Error fetching privileges:', err)
-    //     }
-    //   }
-    //   loadData()
-    // }, [getToken])
+    try {
+      const result = await getRolesAndPermissionListApi(userId)
 
-  
-    
+      const dispatchMenu = {
+        appStatusCode: result?.appStatusCode,
+        message: result?.message,
+        payloadJson: result?.payloadJson,
+        error: result?.error
+      }
 
+      dispatch(menuData(dispatchMenu))
 
+      console.log(result, '<<<< results getUserRoles')
+      setLoader(false)
+      setRoles(result?.payloadJson)
+    } catch (err) {
+      setRoles([])
+      console.error('API Error:', err)
+      // toast.error('Failed to load roles & permissions')
+    }
 
+    setLoader(false)
+  }
+
+  useEffect(() => {
+   
+
+    const loadData = async () => {
+      try {
+        if (!getToken) {
+          console.error('Token missing in cookies')
+          return
+        }
+        const data = await fetchRolesPrevileges()
+      } catch (err) {
+        console.error('Error fetching privileges:', err)
+      }
+    }
+    loadData()
+  }, [getToken])
 
   return (
     // eslint-disable-next-line lines-around-comment
@@ -115,7 +144,7 @@ const Navigation = () => {
         {isBreakpointReached && <i className='ri-close-line text-xl' onClick={() => toggleVerticalNav(false)} />}
       </NavHeader>
       <StyledBoxForShadow ref={shadowRef} />
-      <VerticalMenu scrollMenu={scrollMenu} roles={roles} />
+      <VerticalMenu scrollMenu={scrollMenu} roles={roles} fetchRolesPrevileges={fetchRolesPrevileges}/>
     </VerticalNav>
   )
 }

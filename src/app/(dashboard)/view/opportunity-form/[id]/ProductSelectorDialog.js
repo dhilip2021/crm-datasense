@@ -53,7 +53,7 @@ const ProductSelectorDialog = ({ itemsData, open, onClose, leadId, fetchLeadFrom
 
   //     const newItem = {
   //   item_id: selectedItems.item_id,
-  //   item_name: selectedItems.item_name,
+  //   product_name: selectedItems.product_name,
   //   quantity,
   //   unitPrice,
   //   discount,
@@ -115,7 +115,7 @@ const ProductSelectorDialog = ({ itemsData, open, onClose, leadId, fetchLeadFrom
     const newItem = {
       itemMasterRef: selectedItems._id, // ✅ mongo ref
       item_id: selectedItems.item_id,
-      item_name: selectedItems.item_name,
+      product_name: selectedItems.product_name,
       item_type: selectedItems.item_type,
       quantity,
       unitPrice,
@@ -184,7 +184,7 @@ const ProductSelectorDialog = ({ itemsData, open, onClose, leadId, fetchLeadFrom
         <Box display='flex' gap={2} my={2}>
           {/* <Autocomplete
             options={itemsData}
-            getOptionLabel={option => `${option.item_name} (${option.item_type})` || ''}
+            getOptionLabel={option => `${option.product_name} (${option.item_type})` || ''}
             value={selectedItems}
             onChange={(e, newVal) => setSelectedItems(newVal)}
             sx={{ flex: 2 }}
@@ -194,7 +194,7 @@ const ProductSelectorDialog = ({ itemsData, open, onClose, leadId, fetchLeadFrom
 
           <Autocomplete
             options={itemsData}
-            getOptionLabel={option => `${option.item_name} (${option.item_type})` || ''}
+            getOptionLabel={option => `${option.product_name} (${option.item_type})` || ''}
             value={selectedItems}
             onChange={(e, newVal) => setSelectedItems(newVal)}
             sx={{ flex: 2 }}
@@ -212,7 +212,7 @@ const ProductSelectorDialog = ({ itemsData, open, onClose, leadId, fetchLeadFrom
                     cursor: isDisabled ? 'not-allowed' : 'pointer'
                   }}
                 >
-                  {option.item_name} ({option.item_type})
+                  {option.product_name} ({option.item_type})
                 </li>
               )
             }}
@@ -290,7 +290,7 @@ const ProductSelectorDialog = ({ itemsData, open, onClose, leadId, fetchLeadFrom
             {addedItems.map((order, i) =>
               order.item_ref.map((p, j) => (
                 <TableRow key={`${i}-${j}`}>
-                  <TableCell>{p.item_name}</TableCell>
+                  <TableCell>{p.product_name}</TableCell>
                   <TableCell>{p.item_type}</TableCell>
                   <TableCell>{p.quantity}</TableCell>
                   <TableCell>{p.unitPrice}</TableCell>
