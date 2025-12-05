@@ -42,6 +42,15 @@ const RolesAndPermissionSchema = new Schema(
         },
         delete_status: {
           type: Boolean
+        },
+        import_status: {
+          type: Boolean
+        },
+        export_status: {
+          type: Boolean
+        },
+        convert_status: {
+          type: Boolean
         }
       }
     ],

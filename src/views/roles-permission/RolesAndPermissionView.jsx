@@ -29,7 +29,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   },
   {
     menu_privileage_name: 'Dashboard',
@@ -37,7 +40,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   },
   {
     menu_privileage_name: 'Dashboard',
@@ -45,7 +51,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   },
   {
     menu_privileage_name: 'Master',
@@ -53,7 +62,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   },
   {
     menu_privileage_name: 'Master',
@@ -61,7 +73,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   },
   {
     menu_privileage_name: 'Master',
@@ -69,7 +84,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   },
   {
     menu_privileage_name: 'Master',
@@ -77,7 +95,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   },
   {
     menu_privileage_name: 'Master',
@@ -85,7 +106,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   },
   {
     menu_privileage_name: 'Master',
@@ -93,7 +117,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   },
   {
     menu_privileage_name: 'Master',
@@ -101,7 +128,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   },
   {
     menu_privileage_name: 'Leads',
@@ -109,7 +139,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   },
   {
     menu_privileage_name: 'Opportunity',
@@ -117,7 +150,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   },
   {
     menu_privileage_name: 'Contacts',
@@ -125,7 +161,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   },
   {
     menu_privileage_name: 'Notes',
@@ -133,7 +172,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   },
   {
     menu_privileage_name: 'Tasks',
@@ -141,7 +183,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   },
   {
     menu_privileage_name: 'Calls',
@@ -149,7 +194,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   },
   {
     menu_privileage_name: 'Organization',
@@ -157,7 +205,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   },
   {
     menu_privileage_name: 'Emails',
@@ -165,7 +216,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   },
   {
     menu_privileage_name: 'Comments',
@@ -173,7 +227,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   },
   {
     menu_privileage_name: 'Settings',
@@ -181,7 +238,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   },
   {
     menu_privileage_name: 'Settings',
@@ -189,7 +249,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   },
   {
     menu_privileage_name: 'Settings',
@@ -197,7 +260,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   },
   {
     menu_privileage_name: 'Settings',
@@ -213,7 +279,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   },
   {
     menu_privileage_name: 'Logout',
@@ -221,7 +290,10 @@ const menu_privileges_status_array = [
     add_status: true,
     edit_status: true,
     view_status: true,
-    delete_status: true
+    delete_status: true,
+    import_status: false,
+    export_status: false,
+    convert_status: false
   }
 ]
 
@@ -506,6 +578,9 @@ const RolesAndPermissionView = () => {
                 <th className='p-2 border'>Edit</th>
                 <th className='p-2 border'>View</th>
                 <th className='p-2 border'>Delete</th>
+                <th className='p-2 border'>Import</th>
+                <th className='p-2 border'>Export</th>
+                <th className='p-2 border'>Convert</th>
               </tr>
             </thead>
             <tbody>
@@ -532,6 +607,24 @@ const RolesAndPermissionView = () => {
                     <Checkbox
                       checked={menu.delete_status}
                       onChange={() => handleMenuCheckboxChange(idx, 'delete_status')}
+                    />
+                  </td>
+                   <td className='p-2 border' align='center'>
+                    <Checkbox
+                      checked={menu.import_status}
+                      onChange={() => handleMenuCheckboxChange(idx, 'import_status')}
+                    />
+                  </td>
+                   <td className='p-2 border' align='center'>
+                    <Checkbox
+                      checked={menu.export_status}
+                      onChange={() => handleMenuCheckboxChange(idx, 'export_status')}
+                    />
+                  </td>
+                   <td className='p-2 border' align='center'>
+                    <Checkbox
+                      checked={menu.convert_status}
+                      onChange={() => handleMenuCheckboxChange(idx, 'convert_status')}
                     />
                   </td>
                 </tr>

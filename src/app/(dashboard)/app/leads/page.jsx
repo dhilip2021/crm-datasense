@@ -92,15 +92,50 @@ const LeadTable = () => {
   const router = useRouter()
   const { payloadJson } = useSelector(state => state.menu)
 
-  const hasViewPermission = () => {
+ 
+
+   const hasAddPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Leads' && m.sub_menu_privileage_name === '')
+
+    return found?.add_status === true
+  }
+   const hasEditPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Leads' && m.sub_menu_privileage_name === '')
+
+    return found?.edit_status === true
+  }
+   const hasViewPermission = () => {
     if (!payloadJson || payloadJson.length === 0) return false
 
     const found = payloadJson.find(m => m.menu_privileage_name === 'Leads' && m.sub_menu_privileage_name === '')
 
     return found?.view_status === true
   }
+      const hasDeletePermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
 
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Leads' && m.sub_menu_privileage_name === '')
 
+    return found?.delete_status === true
+  }
+   const hasImportPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Leads' && m.sub_menu_privileage_name === '')
+
+    return found?.import_status === true
+  }
+   const hasExportPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Leads' && m.sub_menu_privileage_name === '')
+
+    return found?.export_status === true
+  }
 
 
 
@@ -567,7 +602,10 @@ const LeadTable = () => {
             justifyContent={isMobile ? 'flex-start' : 'flex-end'}
           >
             {/* Export Button */}
-            <Button
+            {
+              hasExportPermission() &&
+              <>
+                <Button
               variant='outlined'
               size='small'
               endIcon={<KeyboardArrowDownIcon />}
@@ -576,7 +614,7 @@ const LeadTable = () => {
             >
               Export
             </Button>
-            <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+               <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
               <MenuItem
                 onClick={() => {
                   handleExcelClick()
@@ -594,8 +632,13 @@ const LeadTable = () => {
                 Export PDF
               </MenuItem>
             </Menu>
+              </>
+               
+            }
+           
 
-            {/* Import */}
+           {
+            hasImportPermission() && 
             <Button
               variant='outlined'
               size='small'
@@ -620,6 +663,9 @@ const LeadTable = () => {
                 }}
               />
             </Button>
+           }
+
+           
 
             {/* Sample Data */}
             <Button
@@ -640,7 +686,9 @@ const LeadTable = () => {
             </Button>
 
             {/* New Lead */}
-            <Button
+            {
+              hasAddPermission() &&
+               <Button
               href='/app/lead-form'
               variant='contained'
               size='small'
@@ -656,6 +704,8 @@ const LeadTable = () => {
             >
               + New Lead
             </Button>
+            }
+           
           </Stack>
         </Grid>
       </Grid>

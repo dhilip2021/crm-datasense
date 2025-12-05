@@ -39,6 +39,7 @@ import ProposalDialogPage from './ProposalDialogPage'
 
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import { useSelector } from 'react-redux'
 // import CloseActivities from './closeActivities'
 
 // ✅ Validation rules
@@ -152,6 +153,42 @@ const LeadDetailView = () => {
     stage: leadData?.values?.['Lead Status'] || 'Qualification',
     'Assigned To': user_id
   })
+
+
+    const { payloadJson } = useSelector(state => state.menu)
+  
+    const hasViewPermission = () => {
+      if (!payloadJson || payloadJson.length === 0) return false
+  
+      const found = payloadJson.find(
+        m => m.menu_privileage_name === 'Leads' && m.sub_menu_privileage_name === ''
+      )
+  
+      return found?.view_status === true
+    }
+
+    const hasConvertPermission = () => {
+      if (!payloadJson || payloadJson.length === 0) return false
+  
+      const found = payloadJson.find(
+        m => m.menu_privileage_name === 'Leads' && m.sub_menu_privileage_name === ''
+      )
+  
+      return found?.convert_status === true
+    }
+  
+    useEffect(() => {
+      if (payloadJson.length > 0) {
+        if (!hasViewPermission()) {
+          router.push('/')
+        }
+      }
+    }, [payloadJson])
+
+
+
+
+
 
   // 🔹 Flatten helper
   const flattenFields = sections => {
@@ -1409,7 +1446,9 @@ const LeadDetailView = () => {
       {/* Right side */}
       <Grid item xs={12} md={4}>
         <Box>
-          <Button
+          {
+            hasConvertPermission() &&
+            <Button
             disabled={loading}
             fullWidth
             variant='contained'
@@ -1419,6 +1458,9 @@ const LeadDetailView = () => {
             {' '}
             {loading ? <CircularProgress size={18} /> : 'Convert to Opportunity'}
           </Button>
+          }
+          
+
         </Box>
         <Box
           sx={{
