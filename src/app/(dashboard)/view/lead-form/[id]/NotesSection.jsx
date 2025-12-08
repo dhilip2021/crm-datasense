@@ -31,7 +31,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import NoteDialog from './NoteDialog'
 
-const NotesSection = ({ leadId, leadData }) => {
+const NotesSection = ({ leadId, leadData, hasEditPermission }) => {
   const getToken = Cookies.get('_token')
   const user_name = Cookies.get('user_name')
 
@@ -262,7 +262,7 @@ const NotesSection = ({ leadId, leadData }) => {
         <Grid item xs={12} md={10}>
           <TextField
             autoComplete='off'
-            placeholder='Search notes'
+            placeholder='Search notes ...'
             variant='outlined'
             fullWidth
             value={search}
@@ -451,7 +451,9 @@ const NotesSection = ({ leadId, leadData }) => {
                     </Box>
 
                     {/* Actions */}
-                    <Box display='flex' alignItems='center' gap={1}>
+                    {
+                      hasEditPermission() && 
+                       <Box display='flex' alignItems='center' gap={1}>
                       <img
                         onClick={() => {
                           setEditingNote(n) // set the note to edit
@@ -466,6 +468,8 @@ const NotesSection = ({ leadId, leadData }) => {
                         style={{ cursor: 'pointer' }}
                       />
                     </Box>
+                    }
+                   
                   </Box>
                 </Card>
                 {editingNote && editingNote._id === n._id && (

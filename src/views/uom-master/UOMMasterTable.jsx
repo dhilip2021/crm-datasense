@@ -40,7 +40,7 @@ import { capitalizeWords } from '@/helper/frontendHelper'
 import AddUOMMasterPopup from './AddUOMMasterPopup'
 import DeleteConformPopup from './DeleteConformPopup'
 
-const UOMMasterTable = () => {
+const UOMMasterTable = ({ hasAddPermission, hasViewPermission, hasEditPermission, hasDeletePermission }) => {
   const getToken = Cookies.get('_token')
   const [callFlag, setCallFlag] = useState(false)
   const [search, setSearch] = useState('')
@@ -322,15 +322,16 @@ const UOMMasterTable = () => {
           }}
           size='small'
         />
-
-        <Button
-          onClick={() => addChanges()}
-          startIcon={<i className='ri-add-line'></i>}
-          variant='contained'
-          className='mis-4'
-        >
-          Add UOM
-        </Button>
+        {hasAddPermission() && (
+          <Button
+            onClick={() => addChanges()}
+            startIcon={<i className='ri-add-line'></i>}
+            variant='contained'
+            className='mis-4'
+          >
+            Add UOM
+          </Button>
+        )}
       </Box>
 
       <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
@@ -390,46 +391,59 @@ const UOMMasterTable = () => {
                   <TableCell sx={{ fontWeight: 800 }}>UOM Code</TableCell>
                   <TableCell sx={{ fontWeight: 800 }}>UOM Label</TableCell>
                   <TableCell sx={{ fontWeight: 800 }}>UOM id </TableCell>
-                  <TableCell sx={{ fontWeight: 800 }}>Status</TableCell>
-                  <TableCell sx={{ fontWeight: 800 }}>Action</TableCell>
+                  {hasEditPermission() && <TableCell sx={{ fontWeight: 800 }}>Status</TableCell>}
+                  {(hasEditPermission() || hasDeletePermission()) && (
+                    <TableCell sx={{ fontWeight: 800 }}>Action</TableCell>
+                  )}
                 </TableRow>
               </TableHead>
 
               <TableBody>
-                {uomMasterDataList.map((row, index) => (
-                  <TableRow hover role='checkbox' tabIndex={-1} key={row._id}>
-                    <TableCell sx={{ width: '60px' }}>{index + 1}</TableCell>
-                    <TableCell>
-                      <b onClick={() => editChanges(row)} style={{ color: '#000', cursor: 'pointer' }}>
-                        {row?.uom_code}
-                      </b>
-                    </TableCell>
-                    <TableCell>{row?.uom_label}</TableCell>
-                    <TableCell>{row?.uom_id}</TableCell>
-                    <TableCell>
-                      <Switch checked={row.n_status === 1} onChange={handleSwitchChange(index)} />
-                    </TableCell>
+                {hasViewPermission() &&
+                  uomMasterDataList.map((row, index) => (
+                    <TableRow hover role='checkbox' tabIndex={-1} key={row._id}>
+                      <TableCell sx={{ width: '60px' }}>{index + 1}</TableCell>
+                      <TableCell>
+                        {hasEditPermission() ? (
+                          <b onClick={() => editChanges(row)} style={{ color: '#000', cursor: 'pointer' }}>
+                            {row?.uom_code}
+                          </b>
+                        ) : (
+                          row?.uom_code
+                        )}
+                      </TableCell>
+                      <TableCell>{row?.uom_label}</TableCell>
+                      <TableCell>{row?.uom_id}</TableCell>
+                      {hasEditPermission() && (
+                        <TableCell>
+                          <Switch checked={row.n_status === 1} onChange={handleSwitchChange(index)} />
+                        </TableCell>
+                      )}
 
-                    <TableCell>
-                      <IconButton
-                        onClick={() => editChanges(row)}
-                        sx={{ color: '#009CDE', '&:hover': { bgcolor: '#e3f2fd' } }}
-                      >
-                        <Tooltip title='Edit UOM' arrow>
-                          <EditIcon />
-                        </Tooltip>
-                      </IconButton>
-                      <IconButton
-                        onClick={() => deleteFn(row?._id)}
-                        sx={{ color: '#ef4444', '&:hover': { bgcolor: '#fee2e2' } }}
-                      >
-                        <Tooltip title='Delete UOM' arrow>
-                          <DeleteIcon />
-                        </Tooltip>
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      <TableCell>
+                        {hasEditPermission() && (
+                          <IconButton
+                            onClick={() => editChanges(row)}
+                            sx={{ color: '#009CDE', '&:hover': { bgcolor: '#e3f2fd' } }}
+                          >
+                            <Tooltip title='Edit UOM' arrow>
+                              <EditIcon />
+                            </Tooltip>
+                          </IconButton>
+                        )}
+                        {hasDeletePermission() && (
+                          <IconButton
+                            onClick={() => deleteFn(row?._id)}
+                            sx={{ color: '#ef4444', '&:hover': { bgcolor: '#fee2e2' } }}
+                          >
+                            <Tooltip title='Delete UOM' arrow>
+                              <DeleteIcon />
+                            </Tooltip>
+                          </IconButton>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>

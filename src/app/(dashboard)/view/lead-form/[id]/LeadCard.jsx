@@ -25,7 +25,7 @@ import { useEffect, useState } from 'react'
 import Cookies from 'js-cookie'
 import { useRouter } from 'next/navigation'
 
-export default function LeadCard({ fields, leadId, leadData, onToggleFlag, sections, handleFieldSave }) {
+export default function LeadCard({ fields, leadId, leadData, onToggleFlag, sections, handleFieldSave, hasEditPermission }) {
   const organization_id = Cookies.get('organization_id')
   const getToken = Cookies.get('_token')
   const router = useRouter()
@@ -195,7 +195,7 @@ export default function LeadCard({ fields, leadId, leadData, onToggleFlag, secti
         </Box>
 
         <Box>
-          {editing ? (
+          {(editing && hasEditPermission())  ? (
             <TextField
               select
               value={leadStatus}

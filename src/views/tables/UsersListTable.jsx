@@ -18,7 +18,12 @@ import CustomAvatar from '@core/components/mui/Avatar'
 
 // Styles Imports
 import tableStyles from '@core/styles/table.module.css'
-import { allUserListApi, deleteUserApi, getHierarchyUserListApi, postHierarchyUserListApi } from '@/apiFunctions/ApiAction'
+import {
+  allUserListApi,
+  deleteUserApi,
+  getHierarchyUserListApi,
+  postHierarchyUserListApi
+} from '@/apiFunctions/ApiAction'
 import LoaderGif from '@assets/gif/loader.gif'
 import DeleteConformPopup from '../leads/DeleteConformPopup'
 import { toast, ToastContainer } from 'react-toastify'
@@ -26,7 +31,7 @@ import { decrypCryptoRequest } from '@/helper/frontendHelper'
 import EmptyItems from '@/app/(dashboard)/view/empty-items/EmptyItems'
 import { useRouter } from 'next/navigation'
 
-const UsersListTable = () => {
+const UsersListTable = ({ hasAddPermission, hasViewPermission, hasEditPermission, hasDeletePermission }) => {
   const router = useRouter()
   const organization_id = Cookies.get('organization_id')
   const getToken = Cookies.get('_token')
@@ -189,15 +194,13 @@ const UsersListTable = () => {
           //   fontSize: { xs: '0.85rem', sm: '1rem' }
           // }}
         />
-        <Link href={'/add-user'}>
-          <Button
-            startIcon={<i className='ri-add-line'></i>}
-            variant='contained'
-            className='mis-4'
-          >
-            Add user
-          </Button>
-        </Link>
+        {hasAddPermission() && (
+          <Link href={'/add-user'}>
+            <Button startIcon={<i className='ri-add-line'></i>} variant='contained' className='mis-4'>
+              Add user
+            </Button>
+          </Link>
+        )}
       </Box>
 
       <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
@@ -205,43 +208,41 @@ const UsersListTable = () => {
           <Box textAlign={'center'} width={'100%'}>
             <Card className='w-full shadow-md rounded-lg'>
               <CardContent className='text-center'>
-                 <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        height: "100vh", // full screen center
-                        width: "100vw",
-                        bgcolor: "rgba(255, 255, 255, 0.7)", // semi-transparent overlay
-                        position: "fixed",
-                        top: 0,
-                        left: 0,
-                        zIndex: 1300, // above all dialogs
-                      }}
-                    >
-                        <Image src={LoaderGif} alt="loading" width={100} height={100} />
-                       
-                    </Box>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '100vh', // full screen center
+                    width: '100vw',
+                    bgcolor: 'rgba(255, 255, 255, 0.7)', // semi-transparent overlay
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    zIndex: 1300 // above all dialogs
+                  }}
+                >
+                  <Image src={LoaderGif} alt='loading' width={100} height={100} />
+                </Box>
               </CardContent>
             </Card>
           </Box>
         )}
 
         {!loader && usersList?.length === 0 && (
-
           <EmptyItems
-          onAdd={() => router.push('/items')}
-          primaryText='🚫 No Users found yet'
-          secondaryText="You don't have any items yet. Click below to create your first item."
-          buttonText='Create Item'
-        />
+            onAdd={() => router.push('/items')}
+            primaryText='🚫 No Users found yet'
+            secondaryText="You don't have any items yet. Click below to create your first item."
+            buttonText='Create Item'
+          />
           // <Box textAlign={'center'} width={'100%'}>
           //   <Card className='w-full shadow-md rounded-lg'>
           //     <CardContent className='text-center'>
           //       <Box p={40}>
           //         <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Users Found</p>
           //       </Box>
-                
+
           //     </CardContent>
           //   </Card>
           // </Box>
@@ -258,13 +259,14 @@ const UsersListTable = () => {
                   <th>Email</th>
                   <th>Role</th>
                   <th>Status</th>
-                  <th>Action</th>
+                  {(hasEditPermission() || hasDeletePermission()) && <th>Action</th>}
                 </tr>
               </thead>
             )}
 
             <tbody>
               {Array.isArray(usersList) &&
+                hasViewPermission() &&
                 usersList?.map((row, index) => (
                   <tr key={index}>
                     <td className='!plb-1'>
@@ -305,20 +307,24 @@ const UsersListTable = () => {
                     <td className='!pb-1'>
                       <Box display={'flex'}>
                         {' '}
-                        <Tooltip title='Edit User' arrow>
-                          <Link href={`/edit-user/${row?.user_id}`}>
-                            <i className='ri-edit-box-line' style={{ color: '#4caf50', cursor: 'pointer' }}></i>
-                          </Link>
-                        </Tooltip>{' '}
-                        <Box>
-                          <Tooltip title='Delete User' arrow>
-                            <i
-                              className='ri-delete-bin-3-fill'
-                              style={{ color: '#ff5555', cursor: 'pointer' }}
-                              onClick={() => deleteFn(row?._id)}
-                            ></i>
+                        {hasEditPermission() && (
+                          <Tooltip title='Edit User' arrow>
+                            <Link href={`/edit-user/${row?.user_id}`}>
+                              <i className='ri-edit-box-line' style={{ color: '#4caf50', cursor: 'pointer' }}></i>
+                            </Link>
                           </Tooltip>
-                        </Box>
+                        )}{' '}
+                        {hasDeletePermission() && (
+                          <Box>
+                            <Tooltip title='Delete User' arrow>
+                              <i
+                                className='ri-delete-bin-3-fill'
+                                style={{ color: '#ff5555', cursor: 'pointer' }}
+                                onClick={() => deleteFn(row?._id)}
+                              ></i>
+                            </Tooltip>
+                          </Box>
+                        )}
                       </Box>
                     </td>
                   </tr>

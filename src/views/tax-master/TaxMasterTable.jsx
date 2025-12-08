@@ -41,7 +41,7 @@ import AddTaxMasterPopup from './AddTaxMasterPopup'
 import DeleteConformPopup from './DeleteConformPopup'
 // import DeleteConformPopup from './DeleteConformPopup'
 
-const TaxMasterTable = () => {
+const TaxMasterTable = ({ hasAddPermission, hasViewPermission, hasEditPermission, hasDeletePermission }) => {
   const getToken = Cookies.get('_token')
   const [callFlag, setCallFlag] = useState(false)
   const [search, setSearch] = useState('')
@@ -306,15 +306,16 @@ const TaxMasterTable = () => {
           }}
           size='small'
         />
-
-        <Button
-          onClick={() => addChanges()}
-          startIcon={<i className='ri-add-line'></i>}
-          variant='contained'
-          className='mis-4'
-        >
-          Add Tax
-        </Button>
+        {hasAddPermission() && (
+          <Button
+            onClick={() => addChanges()}
+            startIcon={<i className='ri-add-line'></i>}
+            variant='contained'
+            className='mis-4'
+          >
+            Add Tax
+          </Button>
+        )}
       </Box>
 
       <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
@@ -339,7 +340,7 @@ const TaxMasterTable = () => {
           </Box>
         )}
 
-        {callFlag && !loader && taxMasterDataList?.length === 0 && (
+        {hasViewPermission() && callFlag && !loader && taxMasterDataList?.length === 0 && (
           <Box display='flex' flexDirection='column' alignItems='center' justifyContent='center' width='100%' py={6}>
             <Paper
               elevation={0}
@@ -373,8 +374,10 @@ const TaxMasterTable = () => {
                   <TableCell sx={{ width: '60px', fontWeight: 800 }}> S.no</TableCell>
                   <TableCell sx={{ fontWeight: 800 }}>Tax Value</TableCell>
                   <TableCell sx={{ fontWeight: 800 }}>Tax id </TableCell>
-                  <TableCell sx={{ fontWeight: 800 }}>Status</TableCell>
-                  <TableCell sx={{ fontWeight: 800 }}>Action</TableCell>
+                  {hasEditPermission() && <TableCell sx={{ fontWeight: 800 }}>Status</TableCell>}
+                  {(hasEditPermission() || hasDeletePermission()) && (
+                    <TableCell sx={{ fontWeight: 800 }}>Action</TableCell>
+                  )}
                 </TableRow>
               </TableHead>
 
@@ -383,32 +386,47 @@ const TaxMasterTable = () => {
                   <TableRow hover role='checkbox' tabIndex={-1} key={row._id}>
                     <TableCell sx={{ width: '60px' }}>{index + 1}</TableCell>
                     <TableCell>
-                      <b onClick={() => editChanges(row)} style={{ color: '#000', cursor: 'pointer' }}>
-                        {row?.tax_value}
-                      </b>
+                      {hasEditPermission() ? (
+                        <b onClick={() => editChanges(row)} style={{ color: '#000', cursor: 'pointer' }}>
+                          {row?.tax_value}
+                        </b>
+                      ) : (
+                        row?.tax_value
+                      )}
                     </TableCell>
                     <TableCell>{row?.tax_id}</TableCell>
-                    <TableCell>
-                      <Switch checked={row.n_status === 1} onChange={handleSwitchChange(index)} />
-                    </TableCell>
+
+                    
+                      {
+                        hasEditPermission() && 
+                        <TableCell>
+                        <Switch checked={row.n_status === 1} onChange={handleSwitchChange(index)} />
+                         </TableCell>
+                      }
+                      
+                   
 
                     <TableCell>
-                      <IconButton
-                        onClick={() => editChanges(row)}
-                        sx={{ color: '#009CDE', '&:hover': { bgcolor: '#e3f2fd' } }}
-                      >
-                        <Tooltip title='Edit Tax' arrow>
-                          <EditIcon />
-                        </Tooltip>
-                      </IconButton>
-                      <IconButton
-                        onClick={() => deleteFn(row?._id)}
-                        sx={{ color: '#ef4444', '&:hover': { bgcolor: '#fee2e2' } }}
-                      >
-                        <Tooltip title='Delete Tax' arrow>
-                          <DeleteIcon />
-                        </Tooltip>
-                      </IconButton>
+                      {hasEditPermission() && (
+                        <IconButton
+                          onClick={() => editChanges(row)}
+                          sx={{ color: '#009CDE', '&:hover': { bgcolor: '#e3f2fd' } }}
+                        >
+                          <Tooltip title='Edit Tax' arrow>
+                            <EditIcon />
+                          </Tooltip>
+                        </IconButton>
+                      )}
+                      {hasDeletePermission() && (
+                        <IconButton
+                          onClick={() => deleteFn(row?._id)}
+                          sx={{ color: '#ef4444', '&:hover': { bgcolor: '#fee2e2' } }}
+                        >
+                          <Tooltip title='Delete Tax' arrow>
+                            <DeleteIcon />
+                          </Tooltip>
+                        </IconButton>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

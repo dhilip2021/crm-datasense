@@ -199,6 +199,9 @@ export async function POST(request) {
 
   const verified = verifyAccessToken()
 
+  console.log(verified,"<<< verifieddddd")
+
+
   if (verified.success) {
     const organizationId = verified?.data?.organization_id
     let searchTerm = c_search_term ? c_search_term : ''

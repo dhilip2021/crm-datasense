@@ -14,6 +14,18 @@ const RolesAndPermission = () => {
   const router = useRouter()
   const { payloadJson } = useSelector(state => state.menu)
 
+const hasAddPermission = () => {
+  if (!payloadJson || payloadJson.length === 0) return false;
+
+  const found = payloadJson.find(
+    m =>
+      m.menu_privileage_name === 'Settings' &&
+      m.sub_menu_privileage_name === 'Roles & Permission'
+  );
+
+  return found?.add_status === true;
+};
+
 const hasViewPermission = () => {
   if (!payloadJson || payloadJson.length === 0) return false;
 
@@ -24,6 +36,28 @@ const hasViewPermission = () => {
   );
 
   return found?.view_status === true;
+};
+const hasEditPermission = () => {
+  if (!payloadJson || payloadJson.length === 0) return false;
+
+  const found = payloadJson.find(
+    m =>
+      m.menu_privileage_name === 'Settings' &&
+      m.sub_menu_privileage_name === 'Roles & Permission'
+  );
+
+  return found?.edit_status === true;
+};
+const hasDeletePermission = () => {
+  if (!payloadJson || payloadJson.length === 0) return false;
+
+  const found = payloadJson.find(
+    m =>
+      m.menu_privileage_name === 'Settings' &&
+      m.sub_menu_privileage_name === 'Roles & Permission'
+  );
+
+  return found?.delete_status === true;
 };
 
   useEffect(() => {
@@ -49,7 +83,12 @@ const hasViewPermission = () => {
       </Grid>
 
       <Grid item xs={12}>
-        <RolesAndPermissionView />
+        <RolesAndPermissionView 
+        hasAddPermission={hasAddPermission}
+        hasViewPermission={hasViewPermission}
+        hasEditPermission={hasEditPermission}
+        hasDeletePermission={hasDeletePermission}
+        />
       </Grid>
     </Grid>
   )

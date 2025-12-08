@@ -55,7 +55,7 @@ import AddTaxMasterPopup from '@/views/tax-master/AddTaxMasterPopup'
 import { converDayJsDate, formatCurrency } from '@/helper/frontendHelper'
 import AddCategoryMasterPopup from '@/views/category-master/AddCategoryMasterPopup'
 
-const ItemMasterList = () => {
+const ItemMasterList = ({ hasAddPermission, hasViewPermission, hasEditPermission, hasDeletePermission }) => {
   const getToken = Cookies.get('_token')
   const item_access = Cookies.get('item_access')
   const itemTypes = item_access.split(',').map(item => item.trim())
@@ -1030,19 +1030,21 @@ const ItemMasterList = () => {
               <FormControlLabel key={option} value={option} control={<Radio />} label={option} />
             ))}
         </RadioGroup>
-        <Button
-          variant='contained'
-          onClick={() => handleItemClick(item.item_type)}
-          startIcon={<AddIcon />}
-          sx={{
-            borderRadius: '8px',
-            textTransform: 'none',
-            bgcolor: '#009CDE',
-            '&:hover': { bgcolor: '#009CDE' }
-          }}
-        >
-          Create Item
-        </Button>
+        {hasAddPermission() && (
+          <Button
+            variant='contained'
+            onClick={() => handleItemClick(item.item_type)}
+            startIcon={<AddIcon />}
+            sx={{
+              borderRadius: '8px',
+              textTransform: 'none',
+              bgcolor: '#009CDE',
+              '&:hover': { bgcolor: '#009CDE' }
+            }}
+          >
+            Create Item
+          </Button>
+        )}
       </Box>
       <Divider sx={{ mb: 3, borderColor: '#e5e7eb' }} />
 
@@ -1108,7 +1110,7 @@ const ItemMasterList = () => {
           )}
         </Box>
         <Box sx={{ maxHeight: 500, overflow: 'auto' }}>
-          {!loader && items?.length > 0 && (
+          {hasViewPermission() && !loader && items?.length > 0 && (
             <Table
               stickyHeader
               size='small'
@@ -1225,28 +1227,32 @@ const ItemMasterList = () => {
                       >
                         Mrp
                       </TableCell>
-                      <TableCell
-                        sx={{
-                          fontWeight: 'bold',
-                          color: '#374151',
-                          minWidth: 180,
-                          maxWidth: 200,
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        Product Status
-                      </TableCell>
-                      <TableCell
-                        sx={{
-                          fontWeight: 'bold',
-                          color: '#374151',
-                          minWidth: 180,
-                          maxWidth: 200,
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        Actions
-                      </TableCell>
+                      {hasEditPermission() && (
+                        <TableCell
+                          sx={{
+                            fontWeight: 'bold',
+                            color: '#374151',
+                            minWidth: 180,
+                            maxWidth: 200,
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          Product Status
+                        </TableCell>
+                      )}
+                      {(hasEditPermission() || hasDeletePermission()) && (
+                        <TableCell
+                          sx={{
+                            fontWeight: 'bold',
+                            color: '#374151',
+                            minWidth: 180,
+                            maxWidth: 200,
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          Actions
+                        </TableCell>
+                      )}
                     </>
                   )}
                   {item.item_type == 'Service' && (
@@ -1296,7 +1302,7 @@ const ItemMasterList = () => {
                       >
                         Service Description
                       </TableCell>
-                       <TableCell
+                      <TableCell
                         sx={{
                           fontWeight: 'bold',
                           color: '#374151',
@@ -1307,7 +1313,7 @@ const ItemMasterList = () => {
                       >
                         Service Type
                       </TableCell>
-                       <TableCell
+                      <TableCell
                         sx={{
                           fontWeight: 'bold',
                           color: '#374151',
@@ -1360,7 +1366,7 @@ const ItemMasterList = () => {
                           whiteSpace: 'nowrap'
                         }}
                       >
-                       UOM
+                        UOM
                       </TableCell>
                       <TableCell
                         sx={{
@@ -1371,31 +1377,34 @@ const ItemMasterList = () => {
                           whiteSpace: 'nowrap'
                         }}
                       >
-                       GST (%)
+                        GST (%)
                       </TableCell>
-                      <TableCell
-                        sx={{
-                          fontWeight: 'bold',
-                          color: '#374151',
-                          minWidth: 180,
-                          maxWidth: 200,
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        Service Status
-                      </TableCell>
-
-                      <TableCell
-                        sx={{
-                          fontWeight: 'bold',
-                          color: '#374151',
-                          minWidth: 180,
-                          maxWidth: 200,
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        Actions
-                      </TableCell>
+                      {hasEditPermission() && (
+                        <TableCell
+                          sx={{
+                            fontWeight: 'bold',
+                            color: '#374151',
+                            minWidth: 180,
+                            maxWidth: 200,
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          Service Status
+                        </TableCell>
+                      )}
+                      {(hasEditPermission() || hasDeletePermission()) && (
+                        <TableCell
+                          sx={{
+                            fontWeight: 'bold',
+                            color: '#374151',
+                            minWidth: 180,
+                            maxWidth: 200,
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          Actions
+                        </TableCell>
+                      )}
                     </>
                   )}
                   {item.item_type == 'License' && (
@@ -1511,28 +1520,32 @@ const ItemMasterList = () => {
                       >
                         Active Type
                       </TableCell>
-                      <TableCell
-                        sx={{
-                          fontWeight: 'bold',
-                          color: '#374151',
-                          minWidth: 180,
-                          maxWidth: 200,
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        License Status
-                      </TableCell>
-                      <TableCell
-                        sx={{
-                          fontWeight: 'bold',
-                          color: '#374151',
-                          minWidth: 180,
-                          maxWidth: 200,
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        Actions
-                      </TableCell>
+                      {hasEditPermission() && (
+                        <TableCell
+                          sx={{
+                            fontWeight: 'bold',
+                            color: '#374151',
+                            minWidth: 180,
+                            maxWidth: 200,
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          License Status
+                        </TableCell>
+                      )}
+                      {(hasEditPermission() || hasDeletePermission()) && (
+                        <TableCell
+                          sx={{
+                            fontWeight: 'bold',
+                            color: '#374151',
+                            minWidth: 180,
+                            maxWidth: 200,
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          Actions
+                        </TableCell>
+                      )}
                     </>
                   )}
                   {item.item_type == 'Warranty' && (
@@ -1635,9 +1648,9 @@ const ItemMasterList = () => {
                           whiteSpace: 'nowrap'
                         }}
                       >
-                       Waranty Provider
+                        Waranty Provider
                       </TableCell>
-                       <TableCell
+                      <TableCell
                         sx={{
                           fontWeight: 'bold',
                           color: '#374151',
@@ -1646,7 +1659,7 @@ const ItemMasterList = () => {
                           whiteSpace: 'nowrap'
                         }}
                       >
-                       Waranty Expiry Date
+                        Waranty Expiry Date
                       </TableCell>
                       <TableCell
                         sx={{
@@ -1659,31 +1672,35 @@ const ItemMasterList = () => {
                       >
                         Active Type
                       </TableCell>
-                      <TableCell
-                        sx={{
-                          fontWeight: 'bold',
-                          color: '#374151',
-                          minWidth: 180,
-                          maxWidth: 200,
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        License Status
-                      </TableCell>
-                      <TableCell
-                        sx={{
-                          fontWeight: 'bold',
-                          color: '#374151',
-                          minWidth: 180,
-                          maxWidth: 200,
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        Actions
-                      </TableCell>
+                      {hasEditPermission() && (
+                        <TableCell
+                          sx={{
+                            fontWeight: 'bold',
+                            color: '#374151',
+                            minWidth: 180,
+                            maxWidth: 200,
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          License Status
+                        </TableCell>
+                      )}
+                      {(hasEditPermission() || hasDeletePermission()) && (
+                        <TableCell
+                          sx={{
+                            fontWeight: 'bold',
+                            color: '#374151',
+                            minWidth: 180,
+                            maxWidth: 200,
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          Actions
+                        </TableCell>
+                      )}
                     </>
                   )}
-                   {item.item_type == 'Subscription' && (
+                  {item.item_type == 'Subscription' && (
                     <>
                       <TableCell
                         sx={{
@@ -1772,9 +1789,9 @@ const ItemMasterList = () => {
                           whiteSpace: 'nowrap'
                         }}
                       >
-                       No of Device
+                        No of Device
                       </TableCell>
-                       <TableCell
+                      <TableCell
                         sx={{
                           fontWeight: 'bold',
                           color: '#374151',
@@ -1783,7 +1800,7 @@ const ItemMasterList = () => {
                           whiteSpace: 'nowrap'
                         }}
                       >
-                       Subscription Start Date
+                        Subscription Start Date
                       </TableCell>
                       <TableCell
                         sx={{
@@ -1818,28 +1835,32 @@ const ItemMasterList = () => {
                       >
                         Auto Renewal
                       </TableCell>
-                      <TableCell
-                        sx={{
-                          fontWeight: 'bold',
-                          color: '#374151',
-                          minWidth: 180,
-                          maxWidth: 200,
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        Subscription Status
-                      </TableCell>
-                      <TableCell
-                        sx={{
-                          fontWeight: 'bold',
-                          color: '#374151',
-                          minWidth: 180,
-                          maxWidth: 200,
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        Actions
-                      </TableCell>
+                      {hasEditPermission() && (
+                        <TableCell
+                          sx={{
+                            fontWeight: 'bold',
+                            color: '#374151',
+                            minWidth: 180,
+                            maxWidth: 200,
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          Subscription Status
+                        </TableCell>
+                      )}
+                      {(hasEditPermission() || hasDeletePermission()) && (
+                        <TableCell
+                          sx={{
+                            fontWeight: 'bold',
+                            color: '#374151',
+                            minWidth: 180,
+                            maxWidth: 200,
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          Actions
+                        </TableCell>
+                      )}
                     </>
                   )}
                 </TableRow>
@@ -1847,6 +1868,7 @@ const ItemMasterList = () => {
 
               <TableBody>
                 {Array.isArray(items) &&
+                  hasViewPermission() &&
                   items.map((p, i) => (
                     <React.Fragment key={i}>
                       <TableRow sx={{ '&:hover': { bgcolor: '#f9fafb' } }}>
@@ -1861,9 +1883,13 @@ const ItemMasterList = () => {
                                 minWidth: 120
                               }}
                             >
-                              <b onClick={() => handleEdit(p)} style={{ color: '#000', cursor: 'pointer' }}>
-                                {p.item_type}
-                              </b>
+                              {hasEditPermission() ? (
+                                <b onClick={() => handleEdit(p)} style={{ color: '#000', cursor: 'pointer' }}>
+                                  {p.item_type}
+                                </b>
+                              ) : (
+                                p.item_type
+                              )}
                             </TableCell>
                             <TableCell
                               sx={{
@@ -1887,7 +1913,7 @@ const ItemMasterList = () => {
                             >
                               {p.product_name}
                             </TableCell>
-                              
+
                             <TableCell
                               sx={{
                                 minWidth: 180,
@@ -1944,7 +1970,9 @@ const ItemMasterList = () => {
                             >
                               {formatCurrency(p.mrp)}
                             </TableCell>
-                            <TableCell
+                            {
+                              hasEditPermission() &&
+                              <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200
@@ -1952,6 +1980,8 @@ const ItemMasterList = () => {
                             >
                               <Switch checked={p.product_status === 'Active'} onChange={handleSwitchChange(i)} />
                             </TableCell>
+                            }
+                            
                             <TableCell
                               sx={{
                                 minWidth: 180,
@@ -1962,18 +1992,27 @@ const ItemMasterList = () => {
                               }}
                             >
                               <>
-                                <IconButton
+                              {
+                                hasEditPermission() &&
+                                 <IconButton
                                   onClick={() => handleEdit(p)}
                                   sx={{ color: '#009CDE', '&:hover': { bgcolor: '#e3f2fd' } }}
                                 >
                                   <EditIcon />
                                 </IconButton>
-                                <IconButton
+                              }
+                               {
+                                hasDeletePermission() && 
+                                 <IconButton
                                   onClick={() => openDeleteDialog(p._id)}
                                   sx={{ color: '#ef4444', '&:hover': { bgcolor: '#fee2e2' } }}
                                 >
                                   <DeleteIcon />
                                 </IconButton>
+                               }
+
+
+                               
                               </>
                             </TableCell>
                           </>
@@ -1989,9 +2028,14 @@ const ItemMasterList = () => {
                                 minWidth: 120
                               }}
                             >
-                              <b onClick={() => handleEdit(p)} style={{ color: '#000', cursor: 'pointer' }}>
+                              {
+                                hasEditPermission() ?
+                                <b onClick={() => handleEdit(p)} style={{ color: '#000', cursor: 'pointer' }}>
                                 {p.item_type}
-                              </b>
+                              </b> :
+                                p.item_type
+                              }
+                              
                             </TableCell>
                             <TableCell
                               sx={{
@@ -2027,7 +2071,7 @@ const ItemMasterList = () => {
                             >
                               {p.description}
                             </TableCell>
-                             <TableCell
+                            <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200,
@@ -2050,7 +2094,7 @@ const ItemMasterList = () => {
                               {p.service_duration}
                             </TableCell>
 
-                               <TableCell
+                            <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200,
@@ -2072,7 +2116,7 @@ const ItemMasterList = () => {
                             >
                               {formatCurrency(p.selling_price)}
                             </TableCell>
-                             <TableCell
+                            <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200,
@@ -2083,7 +2127,7 @@ const ItemMasterList = () => {
                             >
                               {p.warranty_on_service} months
                             </TableCell>
-                             <TableCell
+                            <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200,
@@ -2094,7 +2138,7 @@ const ItemMasterList = () => {
                             >
                               {p.uom}
                             </TableCell>
-                             <TableCell
+                            <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200,
@@ -2105,7 +2149,9 @@ const ItemMasterList = () => {
                             >
                               {p.gst} %
                             </TableCell>
-                            <TableCell
+                            {
+                              hasEditPermission() && 
+                               <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200
@@ -2113,6 +2159,8 @@ const ItemMasterList = () => {
                             >
                               <Switch checked={p.service_status === 'Active'} onChange={handleSwitchChange(i)} />
                             </TableCell>
+                            }
+                           
                             <TableCell
                               sx={{
                                 minWidth: 180,
@@ -2123,18 +2171,25 @@ const ItemMasterList = () => {
                               }}
                             >
                               <>
+                              {
+                                hasEditPermission() && 
                                 <IconButton
                                   onClick={() => handleEdit(p)}
                                   sx={{ color: '#009CDE', '&:hover': { bgcolor: '#e3f2fd' } }}
                                 >
                                   <EditIcon />
                                 </IconButton>
-                                <IconButton
+                              }
+                                {
+                                  hasDeletePermission() && 
+                                   <IconButton
                                   onClick={() => openDeleteDialog(p._id)}
                                   sx={{ color: '#ef4444', '&:hover': { bgcolor: '#fee2e2' } }}
                                 >
                                   <DeleteIcon />
                                 </IconButton>
+                                }
+                               
                               </>
                             </TableCell>
                           </>
@@ -2150,9 +2205,12 @@ const ItemMasterList = () => {
                                 minWidth: 120
                               }}
                             >
-                              <b onClick={() => handleEdit(p)} style={{ color: '#000', cursor: 'pointer' }}>
+                              {
+                                hasEditPermission() ?  <b onClick={() => handleEdit(p)} style={{ color: '#000', cursor: 'pointer' }}>
                                 {p.item_type}
-                              </b>
+                              </b>  : p.item_type
+                              }
+                              
                             </TableCell>
                             <TableCell
                               sx={{
@@ -2244,8 +2302,9 @@ const ItemMasterList = () => {
                             >
                               {p.gst} %
                             </TableCell>
-
-                            <TableCell
+                                {
+                                  hasEditPermission() && 
+                                   <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200
@@ -2253,6 +2312,8 @@ const ItemMasterList = () => {
                             >
                               <Switch checked={p.license_status === 'Active'} onChange={handleSwitchChange(i)} />
                             </TableCell>
+                                }
+                           
                             <TableCell
                               sx={{
                                 minWidth: 180,
@@ -2263,23 +2324,30 @@ const ItemMasterList = () => {
                               }}
                             >
                               <>
-                                <IconButton
+                              {
+                                hasEditPermission() &&
+                                 <IconButton
                                   onClick={() => handleEdit(p)}
                                   sx={{ color: '#009CDE', '&:hover': { bgcolor: '#e3f2fd' } }}
                                 >
                                   <EditIcon />
                                 </IconButton>
+                              }
+                               {
+                                hasDeletePermission() && 
                                 <IconButton
                                   onClick={() => openDeleteDialog(p._id)}
                                   sx={{ color: '#ef4444', '&:hover': { bgcolor: '#fee2e2' } }}
                                 >
                                   <DeleteIcon />
                                 </IconButton>
+                               }
+                                
                               </>
                             </TableCell>
                           </>
                         )}
-                         {item.item_type == p.item_type && item.item_type == 'Warranty' && (
+                        {item.item_type == p.item_type && item.item_type == 'Warranty' && (
                           <>
                             <TableCell
                               sx={{
@@ -2290,9 +2358,14 @@ const ItemMasterList = () => {
                                 minWidth: 120
                               }}
                             >
-                              <b onClick={() => handleEdit(p)} style={{ color: '#000', cursor: 'pointer' }}>
+                              {
+                                hasEditPermission() ?
+                                 <b onClick={() => handleEdit(p)} style={{ color: '#000', cursor: 'pointer' }}>
                                 {p.item_type}
-                              </b>
+                              </b> :
+                              p.item_type
+                              }
+                             
                             </TableCell>
                             <TableCell
                               sx={{
@@ -2316,7 +2389,7 @@ const ItemMasterList = () => {
                             >
                               {p.warranty_plan}
                             </TableCell>
-                               <TableCell
+                            <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200,
@@ -2328,7 +2401,7 @@ const ItemMasterList = () => {
                               {p.warranty_covered_product}
                             </TableCell>
 
-                             <TableCell
+                            <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200,
@@ -2339,7 +2412,7 @@ const ItemMasterList = () => {
                             >
                               {p.coverage_type}
                             </TableCell>
-                               <TableCell
+                            <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200,
@@ -2350,7 +2423,7 @@ const ItemMasterList = () => {
                             >
                               {p.warranty_duration}
                             </TableCell>
-                             <TableCell
+                            <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200,
@@ -2361,7 +2434,7 @@ const ItemMasterList = () => {
                             >
                               {p.warranty_cost}
                             </TableCell>
-                             <TableCell
+                            <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200,
@@ -2372,7 +2445,7 @@ const ItemMasterList = () => {
                             >
                               {p.warranty_claim_limits}
                             </TableCell>
-                             <TableCell
+                            <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200,
@@ -2383,7 +2456,7 @@ const ItemMasterList = () => {
                             >
                               {p.warranty_provider}
                             </TableCell>
-                             <TableCell
+                            <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200,
@@ -2406,10 +2479,9 @@ const ItemMasterList = () => {
                             >
                               {p.activation_type}
                             </TableCell>
-
-                           
-
-                            <TableCell
+                              {
+                                hasEditPermission() && 
+                                <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200
@@ -2417,6 +2489,8 @@ const ItemMasterList = () => {
                             >
                               <Switch checked={p.license_status === 'Active'} onChange={handleSwitchChange(i)} />
                             </TableCell>
+                              }
+                            
                             <TableCell
                               sx={{
                                 minWidth: 180,
@@ -2427,22 +2501,29 @@ const ItemMasterList = () => {
                               }}
                             >
                               <>
+                              {
+                                hasEditPermission() && 
                                 <IconButton
                                   onClick={() => handleEdit(p)}
                                   sx={{ color: '#009CDE', '&:hover': { bgcolor: '#e3f2fd' } }}
                                 >
                                   <EditIcon />
                                 </IconButton>
-                                <IconButton
+                              }
+                                {
+                                  hasDeletePermission() && 
+                                   <IconButton
                                   onClick={() => openDeleteDialog(p._id)}
                                   sx={{ color: '#ef4444', '&:hover': { bgcolor: '#fee2e2' } }}
                                 >
                                   <DeleteIcon />
                                 </IconButton>
+                                }
+                               
                               </>
                             </TableCell>
                           </>
-                        )} 
+                        )}
                         {item.item_type == p.item_type && item.item_type == 'Subscription' && (
                           <>
                             <TableCell
@@ -2454,9 +2535,15 @@ const ItemMasterList = () => {
                                 minWidth: 120
                               }}
                             >
-                              <b onClick={() => handleEdit(p)} style={{ color: '#000', cursor: 'pointer' }}>
+                              {
+
+                                hasEditPermission() ? 
+                                <b onClick={() => handleEdit(p)} style={{ color: '#000', cursor: 'pointer' }}>
                                 {p.item_type}
-                              </b>
+                              </b> :
+                              p.item_type
+                              }
+                              
                             </TableCell>
                             <TableCell
                               sx={{
@@ -2480,7 +2567,7 @@ const ItemMasterList = () => {
                             >
                               {p.subscription_name}
                             </TableCell>
-                               <TableCell
+                            <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200,
@@ -2492,7 +2579,7 @@ const ItemMasterList = () => {
                               {p.plan_type}
                             </TableCell>
 
-                             <TableCell
+                            <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200,
@@ -2503,7 +2590,7 @@ const ItemMasterList = () => {
                             >
                               {p.billing_cycle}
                             </TableCell>
-                               <TableCell
+                            <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200,
@@ -2514,7 +2601,7 @@ const ItemMasterList = () => {
                             >
                               {p.subscription_price}
                             </TableCell>
-                             <TableCell
+                            <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200,
@@ -2525,7 +2612,7 @@ const ItemMasterList = () => {
                             >
                               {p.subscription_renewal_price}
                             </TableCell>
-                             <TableCell
+                            <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200,
@@ -2536,7 +2623,7 @@ const ItemMasterList = () => {
                             >
                               {p.no_of_devices}
                             </TableCell>
-                             <TableCell
+                            <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200,
@@ -2548,7 +2635,7 @@ const ItemMasterList = () => {
                               {converDayJsDate(p.subscription_start_date)}
                             </TableCell>
 
-                             <TableCell
+                            <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200,
@@ -2559,7 +2646,7 @@ const ItemMasterList = () => {
                             >
                               {converDayJsDate(p.subscription_end_date)}
                             </TableCell>
-                               <TableCell
+                            <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200,
@@ -2571,7 +2658,7 @@ const ItemMasterList = () => {
                               {p.gst} %
                             </TableCell>
 
-                              <TableCell
+                            <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200,
@@ -2582,13 +2669,9 @@ const ItemMasterList = () => {
                             >
                               {p.auto_renewal_price}
                             </TableCell>
-
-
-                           
-
-                           
-
-                            <TableCell
+                              {
+                                hasEditPermission() && 
+                                <TableCell
                               sx={{
                                 minWidth: 180,
                                 maxWidth: 200
@@ -2596,6 +2679,8 @@ const ItemMasterList = () => {
                             >
                               <Switch checked={p.subscription_status === 'Active'} onChange={handleSwitchChange(i)} />
                             </TableCell>
+                              }
+                            
                             <TableCell
                               sx={{
                                 minWidth: 180,
@@ -2606,18 +2691,26 @@ const ItemMasterList = () => {
                               }}
                             >
                               <>
-                                <IconButton
+                              {
+                                hasEditPermission() && 
+                                 <IconButton
                                   onClick={() => handleEdit(p)}
                                   sx={{ color: '#009CDE', '&:hover': { bgcolor: '#e3f2fd' } }}
                                 >
                                   <EditIcon />
                                 </IconButton>
-                                <IconButton
+                              }
+                              {
+                                hasDeletePermission() && 
+                                 <IconButton
                                   onClick={() => openDeleteDialog(p._id)}
                                   sx={{ color: '#ef4444', '&:hover': { bgcolor: '#fee2e2' } }}
                                 >
                                   <DeleteIcon />
                                 </IconButton>
+                              }
+                               
+                               
                               </>
                             </TableCell>
                           </>

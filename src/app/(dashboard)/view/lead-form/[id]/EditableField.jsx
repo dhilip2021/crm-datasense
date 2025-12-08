@@ -23,8 +23,13 @@ const EditableField = ({
   userList,
   itemTypes,
   itemList,
-  setItemType
+  setItemType,
+  hasEditPermission
 }) => {
+
+  console.log(hasEditPermission(),"<<< hasEditPermission")
+
+
   const [value, setValue] = useState(initialValue)
   const [editing, setEditing] = useState(false)
   const [hover, setHover] = useState(false)
@@ -263,13 +268,17 @@ const EditableField = ({
               {label === 'Assigned To' ? userList.find(u => u.user_id === value)?.user_name || '—' : value || '—'}
             </Typography>
 
-            <IconButton
+            {hasEditPermission() && 
+              <IconButton
               size='small'
               onClick={() => setEditing(true)}
               sx={{ opacity: hover ? 1 : 0, transition: 'opacity 0.2s ease-in-out' }}
             >
               <EditIcon fontSize='small' />
             </IconButton>
+            }
+
+            
           </Box>
         )}
       </Box>

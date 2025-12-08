@@ -33,7 +33,7 @@ import DeleteConformPopup from './DeleteConformPopup'
 import { capitalizeWords } from '@/helper/frontendHelper'
 import AddTerritoryPopup from './AddTerritoryPopup'
 
-const TerritoryTable = () => {
+const TerritoryTable = ({ hasAddPermission, hasEditPermission, hasViewPermission, hasDeletePermission }) => {
   const getToken = Cookies.get('_token')
 
   const header = {
@@ -358,15 +358,16 @@ const TerritoryTable = () => {
           }}
           size='small'
         />
-
-        <Button
-          onClick={() => addChanges()}
-          startIcon={<i className='ri-add-line'></i>}
-          variant='contained'
-          className='mis-4'
-        >
-          Add Territory
-        </Button>
+        {hasAddPermission() && (
+          <Button
+            onClick={() => addChanges()}
+            startIcon={<i className='ri-add-line'></i>}
+            variant='contained'
+            className='mis-4'
+          >
+            Add Territory
+          </Button>
+        )}
       </Box>
 
       <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
@@ -374,23 +375,22 @@ const TerritoryTable = () => {
           <Box textAlign={'center'} width={'100%'}>
             <Card className='w-full shadow-md rounded-lg'>
               <CardContent className='text-center'>
-                 <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        height: "100vh", // full screen center
-                        width: "100vw",
-                        bgcolor: "rgba(255, 255, 255, 0.7)", // semi-transparent overlay
-                        position: "fixed",
-                        top: 0,
-                        left: 0,
-                        zIndex: 1300, // above all dialogs
-                      }}
-                    >
-                        <Image src={LoaderGif} alt="loading" width={100} height={100} />
-                       
-                    </Box>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '100vh', // full screen center
+                    width: '100vw',
+                    bgcolor: 'rgba(255, 255, 255, 0.7)', // semi-transparent overlay
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    zIndex: 1300 // above all dialogs
+                  }}
+                >
+                  <Image src={LoaderGif} alt='loading' width={100} height={100} />
+                </Box>
               </CardContent>
             </Card>
           </Box>
@@ -420,48 +420,64 @@ const TerritoryTable = () => {
                       <TableCell sx={{ width: '60px', fontWeight: 800 }}> S.no</TableCell>
                       <TableCell sx={{ fontWeight: 800 }}>Territory Name</TableCell>
                       <TableCell sx={{ fontWeight: 800 }}>Is Group </TableCell>
-                      <TableCell sx={{ fontWeight: 800 }}>Status</TableCell>
-                      <TableCell sx={{ fontWeight: 800 }}>Action</TableCell>
+                      {hasEditPermission() && <TableCell sx={{ fontWeight: 800 }}>Status</TableCell>}
+                      {(hasEditPermission() || hasDeletePermission()) && (
+                        <TableCell sx={{ fontWeight: 800 }}>Action</TableCell>
+                      )}
                     </TableRow>
                   </TableHead>
 
                   <TableBody>
-                    {territoryDataList.map((row, index) => (
-                      <TableRow hover role='checkbox' tabIndex={-1} key={row._id}>
-                        <TableCell sx={{ width: '60px' }}>{index + 1}</TableCell>
-                        <TableCell>
-                          <b onClick={() => editChanges(row)} style={{ color: '#000', cursor: 'pointer' }}>
-                            {row?.territory_name}
-                          </b>
-                        </TableCell>
-                        <TableCell>{row?.is_group ? 'True' : 'False'}</TableCell>
-                        <TableCell>
-                          <Switch checked={row.n_status === 1} onChange={handleSwitchChange(index)} />
-                        </TableCell>
+                    {hasViewPermission() &&
+                      territoryDataList.map((row, index) => (
+                        <TableRow hover role='checkbox' tabIndex={-1} key={row._id}>
+                          <TableCell sx={{ width: '60px' }}>{index + 1}</TableCell>
+                          <TableCell>
+                            {
+                              hasEditPermission() ? 
+                               <b onClick={() => editChanges(row)} style={{ color: '#000', cursor: 'pointer' }}>
+                              {row?.territory_name}
+                            </b> :
+                            row?.territory_name
+                            }
+                           
 
-                        <TableCell>
-                          <Box display={'flex'}>
-                            {' '}
-                            <Tooltip title='Edit Lead' arrow>
-                              <i
-                                className='ri-edit-box-line'
-                                onClick={() => editChanges(row)}
-                                style={{ color: '#4caf50', cursor: 'pointer' }}
-                              ></i>
-                            </Tooltip>{' '}
-                            <Box>
-                              <Tooltip title='Delete Lead' arrow>
-                                <i
-                                  className='ri-delete-bin-3-fill'
-                                  style={{ color: '#ff5555', cursor: 'pointer' }}
-                                  onClick={() => deleteFn(row?._id)}
-                                ></i>
-                              </Tooltip>
+
+                          </TableCell>
+                          <TableCell>{row?.is_group ? 'True' : 'False'}</TableCell>
+                          <TableCell>
+                            {hasEditPermission() && (
+                              <Switch checked={row.n_status === 1} onChange={handleSwitchChange(index)} />
+                            )}
+                          </TableCell>
+
+                          <TableCell>
+                            <Box display={'flex'}>
+                              {' '}
+                              {hasEditPermission() && (
+                                <Tooltip title='Edit Lead' arrow>
+                                  <i
+                                    className='ri-edit-box-line'
+                                    onClick={() => editChanges(row)}
+                                    style={{ color: '#4caf50', cursor: 'pointer' }}
+                                  ></i>
+                                </Tooltip>
+                              )}{' '}
+                              <Box>
+                                {hasDeletePermission() && (
+                                  <Tooltip title='Delete Lead' arrow>
+                                    <i
+                                      className='ri-delete-bin-3-fill'
+                                      style={{ color: '#ff5555', cursor: 'pointer' }}
+                                      onClick={() => deleteFn(row?._id)}
+                                    ></i>
+                                  </Tooltip>
+                                )}
+                              </Box>
                             </Box>
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
               </TableContainer>

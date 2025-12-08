@@ -33,7 +33,7 @@ import ServiceList from './ServiceList'
 // ✅ Utility for currency
 // const formatCurrency = value => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value)
 
-function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData, dealFnCall, itemTypes }) {
+function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData, dealFnCall, itemTypes,hasEditPermission, hasAddPermission,hasDeletePermission }) {
 
 
   const [anchorEl, setAnchorEl] = useState(null)
@@ -155,6 +155,7 @@ function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData, dealFnCall,
   return (
     <Box>
       <Box display='flex' justifyContent='flex-end' mb={2}>
+        {hasAddPermission() && 
         <Button
           variant='contained'
           onClick={handleClick}
@@ -167,6 +168,8 @@ function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData, dealFnCall,
         >
           + Add Items
         </Button>
+        }
+        
 
         <Menu
           anchorEl={anchorEl}
@@ -197,6 +200,9 @@ function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData, dealFnCall,
             handleOpenBulkEdit={handleOpenBulkEdit}
             dealFnCall={dealFnCall}
             formatCurrency={formatCurrency}
+            hasEditPermission= {hasEditPermission}
+            hasAddPermission= {hasAddPermission}
+            hasDeletePermission= {hasDeletePermission}
           />
           <ServiceList
             leadData={leadData}
@@ -204,6 +210,9 @@ function ProductPage({ leadId, leadData, fetchLeadFromId, itemsData, dealFnCall,
             handleOpenBulkEdit={handleOpenBulkEdit}
             dealFnCall={dealFnCall}
             formatCurrency={formatCurrency}
+            hasEditPermission= {hasEditPermission}
+            hasAddPermission= {hasAddPermission}
+            hasDeletePermission= {hasDeletePermission}
           />
         </>
       ) : (

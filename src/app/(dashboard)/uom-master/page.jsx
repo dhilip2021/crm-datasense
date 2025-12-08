@@ -13,6 +13,15 @@ const UOMMaster = () => {
   const router = useRouter()
     const { payloadJson } = useSelector(state => state.menu)
   
+    const hasAddPermission = () => {
+      if (!payloadJson || payloadJson.length === 0) return false
+  
+      const found = payloadJson.find(
+        m => m.menu_privileage_name === 'Master' && m.sub_menu_privileage_name === 'UOM Master'
+      )
+  
+      return found?.add_status === true
+    }
     const hasViewPermission = () => {
       if (!payloadJson || payloadJson.length === 0) return false
   
@@ -21,6 +30,24 @@ const UOMMaster = () => {
       )
   
       return found?.view_status === true
+    }
+    const hasEditPermission = () => {
+      if (!payloadJson || payloadJson.length === 0) return false
+  
+      const found = payloadJson.find(
+        m => m.menu_privileage_name === 'Master' && m.sub_menu_privileage_name === 'UOM Master'
+      )
+  
+      return found?.edit_status === true
+    }
+    const hasDeletePermission = () => {
+      if (!payloadJson || payloadJson.length === 0) return false
+  
+      const found = payloadJson.find(
+        m => m.menu_privileage_name === 'Master' && m.sub_menu_privileage_name === 'UOM Master'
+      )
+  
+      return found?.delete_status === true
     }
   
     useEffect(() => {
@@ -42,7 +69,12 @@ const UOMMaster = () => {
       </Grid>
 
       <Grid item xs={12}>
-        <UOMMasterTable />
+        <UOMMasterTable 
+        hasAddPermission={hasAddPermission}
+        hasViewPermission={hasViewPermission}
+        hasEditPermission={hasEditPermission}
+        hasDeletePermission={hasDeletePermission}
+        />
       </Grid>
     </Grid>
   )

@@ -18,7 +18,12 @@ import TableContainer from '@mui/material/TableContainer'
 import TablePagination from '@mui/material/TablePagination'
 import { Box, Button, Card, CardContent, InputAdornment, TextField, Tooltip } from '@mui/material'
 
-import { addCampaignTypeApi, deleteCampaignTypeApi, getAllCampaigntypeApi, updateCampaigntypeApi } from '@/apiFunctions/ApiAction'
+import {
+  addCampaignTypeApi,
+  deleteCampaignTypeApi,
+  getAllCampaigntypeApi,
+  updateCampaigntypeApi
+} from '@/apiFunctions/ApiAction'
 
 import LoaderGif from '@assets/gif/loader.gif'
 import { toast, ToastContainer } from 'react-toastify'
@@ -26,7 +31,7 @@ import DeleteConformPopup from './DeleteConformPopup'
 import { capitalizeWords } from '@/helper/frontendHelper'
 import AddCampaignTypePopup from './AddCampaignTypePopup'
 
-const CampaignTypeTable = () => {
+const CampaignTypeTable = ({ hasAddPermission, hasViewPermission, hasEditPermission, hasDeletePermission }) => {
   const getToken = Cookies.get('_token')
   const organization_id = Cookies.get('organization_id')
   const [callFlag, setCallFlag] = useState(false)
@@ -113,14 +118,12 @@ const CampaignTypeTable = () => {
     const deleteRes = await deleteCampaignTypeApi(delId, header)
 
     if (deleteRes?.success) {
-       setLoader(false)
-      getCampaignTypeList()
-      toast.success("Deleted Successfully !!!")
-    } else {
-     
-
       setLoader(false)
-      toast.success("Not Delete !!!")
+      getCampaignTypeList()
+      toast.success('Deleted Successfully !!!')
+    } else {
+      setLoader(false)
+      toast.success('Not Delete !!!')
       getCampaignTypeList()
     }
   }
@@ -155,7 +158,7 @@ const CampaignTypeTable = () => {
           campaign_name: inputs?.campaign_name,
           description: inputs?.description
         }
-        campaignTypeUpdate(id,body)
+        campaignTypeUpdate(id, body)
       }
     }
   }
@@ -171,40 +174,38 @@ const CampaignTypeTable = () => {
 
     if (results?.success) {
       setLoader(false)
-      toast?.success("Added successfully")
+      toast?.success('Added successfully')
       setOpen(false)
       getCampaignTypeList()
     } else {
-      toast?.error("Not Add... please check")
+      toast?.error('Not Add... please check')
       setLoader(false)
       setOpen(false)
       getCampaignTypeList()
     }
   }
 
-  const campaignTypeUpdate = async (id,body) => {
+  const campaignTypeUpdate = async (id, body) => {
     const header = {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${getToken}`
     }
 
     setLoader(true)
-    const results = await updateCampaigntypeApi(id,body, header)
+    const results = await updateCampaigntypeApi(id, body, header)
 
     if (results?.success) {
       setLoader(false)
-      toast?.success("Updated successfully")
+      toast?.success('Updated successfully')
       setOpen(false)
       getCampaignTypeList()
     } else {
-      toast?.error("Not Updated.. Please check")
+      toast?.error('Not Updated.. Please check')
       setLoader(false)
       setOpen(false)
       getCampaignTypeList()
     }
   }
-
-
 
   const handleBlur = () => {}
 
@@ -284,15 +285,16 @@ const CampaignTypeTable = () => {
           }}
           size='small'
         />
-
-        <Button
-          onClick={() => addChanges()}
-          startIcon={<i className='ri-add-line'></i>}
-          variant='contained'
-          className='mis-4'
-        >
-          Add Campaign Type
-        </Button>
+        {hasAddPermission() && (
+          <Button
+            onClick={() => addChanges()}
+            startIcon={<i className='ri-add-line'></i>}
+            variant='contained'
+            className='mis-4'
+          >
+            Add Campaign Type
+          </Button>
+        )}
       </Box>
 
       <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
@@ -300,23 +302,22 @@ const CampaignTypeTable = () => {
           <Box textAlign={'center'} width={'100%'}>
             <Card className='w-full shadow-md rounded-lg'>
               <CardContent className='text-center'>
-                 <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        height: "100vh", // full screen center
-                        width: "100vw",
-                        bgcolor: "rgba(255, 255, 255, 0.7)", // semi-transparent overlay
-                        position: "fixed",
-                        top: 0,
-                        left: 0,
-                        zIndex: 1300, // above all dialogs
-                      }}
-                    >
-                        <Image src={LoaderGif} alt="loading" width={100} height={100} />
-                       
-                    </Box>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '100vh', // full screen center
+                    width: '100vw',
+                    bgcolor: 'rgba(255, 255, 255, 0.7)', // semi-transparent overlay
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    zIndex: 1300 // above all dialogs
+                  }}
+                >
+                  <Image src={LoaderGif} alt='loading' width={100} height={100} />
+                </Box>
               </CardContent>
             </Card>
           </Box>
@@ -346,43 +347,54 @@ const CampaignTypeTable = () => {
                       <TableCell sx={{ width: '60px', fontWeight: 800 }}> S.no</TableCell>
                       <TableCell sx={{ fontWeight: 800 }}>Campaign Name</TableCell>
                       <TableCell sx={{ fontWeight: 800 }}>Description </TableCell>
-                      <TableCell sx={{ fontWeight: 800 }}>Action</TableCell>
+                      {(hasEditPermission() || hasDeletePermission()) && (
+                        <TableCell sx={{ fontWeight: 800 }}>Action</TableCell>
+                      )}
                     </TableRow>
                   </TableHead>
 
                   <TableBody>
-                    {campaignTypeDataList.map((row, index) => (
-                      <TableRow hover role='checkbox' tabIndex={-1} key={row._id}>
-                        <TableCell sx={{ width: '60px' }}>{index + 1}</TableCell>
-                        <TableCell>
-                          <b onClick={() => editChanges(row)} style={{ color: '#000', cursor: 'pointer' }}>
-                            {row?.campaign_name}
-                          </b>
-                        </TableCell>
-                        <TableCell>{row?.description}</TableCell>
-                        <TableCell>
-                          <Box display={'flex'}>
-                            {' '}
-                            <Tooltip title={`Edit ${row?.campaign_name} Campaign`} arrow>
-                              <i
-                                className='ri-edit-box-line'
-                                onClick={() => editChanges(row)}
-                                style={{ color: '#4caf50', cursor: 'pointer' }}
-                              ></i>
-                            </Tooltip>{' '}
-                            <Box>
-                              <Tooltip title={`Delete ${row?.campaign_name} Campaign`} arrow>
-                                <i
-                                  className='ri-delete-bin-3-fill'
-                                  style={{ color: '#ff5555', cursor: 'pointer' }}
-                                  onClick={() => deleteFn(row?._id)}
-                                ></i>
-                              </Tooltip>
+                    {hasViewPermission() &&
+                      campaignTypeDataList.map((row, index) => (
+                        <TableRow hover role='checkbox' tabIndex={-1} key={row._id}>
+                          <TableCell sx={{ width: '60px' }}>{index + 1}</TableCell>
+                          <TableCell>
+                            {hasEditPermission() ? (
+                              <b onClick={() => editChanges(row)} style={{ color: '#000', cursor: 'pointer' }}>
+                                {row?.campaign_name}
+                              </b>
+                            ) : (
+                              row?.campaign_name
+                            )}
+                          </TableCell>
+                          <TableCell>{row?.description}</TableCell>
+                          <TableCell>
+                            <Box display={'flex'}>
+                              {' '}
+                              {hasEditPermission() && (
+                                <Tooltip title={`Edit ${row?.campaign_name} Campaign`} arrow>
+                                  <i
+                                    className='ri-edit-box-line'
+                                    onClick={() => editChanges(row)}
+                                    style={{ color: '#4caf50', cursor: 'pointer' }}
+                                  ></i>
+                                </Tooltip>
+                              )}{' '}
+                              <Box>
+                                {hasDeletePermission() && (
+                                  <Tooltip title={`Delete ${row?.campaign_name} Campaign`} arrow>
+                                    <i
+                                      className='ri-delete-bin-3-fill'
+                                      style={{ color: '#ff5555', cursor: 'pointer' }}
+                                      onClick={() => deleteFn(row?._id)}
+                                    ></i>
+                                  </Tooltip>
+                                )}
+                              </Box>
                             </Box>
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
               </TableContainer>

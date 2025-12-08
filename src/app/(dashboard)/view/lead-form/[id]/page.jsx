@@ -154,41 +154,56 @@ const LeadDetailView = () => {
     'Assigned To': user_id
   })
 
+  const { payloadJson } = useSelector(state => state.menu)
 
-    const { payloadJson } = useSelector(state => state.menu)
-  
-    const hasViewPermission = () => {
-      if (!payloadJson || payloadJson.length === 0) return false
-  
-      const found = payloadJson.find(
-        m => m.menu_privileage_name === 'Leads' && m.sub_menu_privileage_name === ''
-      )
-  
-      return found?.view_status === true
-    }
+  console.log(payloadJson, '<<<< payloadJson 123456')
 
-    const hasConvertPermission = () => {
-      if (!payloadJson || payloadJson.length === 0) return false
-  
-      const found = payloadJson.find(
-        m => m.menu_privileage_name === 'Leads' && m.sub_menu_privileage_name === ''
-      )
-  
-      return found?.convert_status === true
-    }
-  
-    useEffect(() => {
-      if (payloadJson.length > 0) {
-        if (!hasViewPermission()) {
-          router.push('/')
-        }
+  const hasAddPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Leads' && m.sub_menu_privileage_name === '')
+
+    return found?.add_status === true
+  }
+
+  const hasViewPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Leads' && m.sub_menu_privileage_name === '')
+
+    return found?.view_status === true
+  }
+
+  const hasEditPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Leads' && m.sub_menu_privileage_name === '')
+
+    return found?.edit_status === true
+  }
+  const hasDeletePermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Leads' && m.sub_menu_privileage_name === '')
+
+    return found?.delete_status === true
+  }
+
+  const hasConvertPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Leads' && m.sub_menu_privileage_name === '')
+
+    return found?.convert_status === true
+  }
+
+  useEffect(() => {
+    if (payloadJson.length > 0) {
+      if (!hasViewPermission()) {
+        router.push('/')
       }
-    }, [payloadJson])
-
-
-
-
-
+    }
+  }, [payloadJson])
 
   // 🔹 Flatten helper
   const flattenFields = sections => {
@@ -1304,8 +1319,6 @@ const LeadDetailView = () => {
 
       const result = await res.json()
 
-      console.log(result, '<<<responseeee')
-
       if (!result.success) {
         toast.error('Failed to update field')
         fetchLeadFromId() // rollback to latest DB values
@@ -1416,7 +1429,7 @@ const LeadDetailView = () => {
         {/* Tab Panels */}
         {tabIndex === 0 && (
           <Box>
-            <NotesSection leadId={leadId} leadData={leadData} />
+            <NotesSection leadId={leadId} leadData={leadData} hasEditPermission={hasEditPermission} />
           </Box>
         )}
 
@@ -1424,7 +1437,14 @@ const LeadDetailView = () => {
           <Box>
             {/* <OpenActivities leadId={leadId} leadData={leadData} /> */}
 
-            <TaskTabs leadId={leadId} leadData={leadData} fetchLeadFromId={fetchLeadFromId} />
+            <TaskTabs
+              leadId={leadId}
+              leadData={leadData}
+              fetchLeadFromId={fetchLeadFromId}
+              hasEditPermission={hasEditPermission}
+              hasAddPermission={hasAddPermission}
+              hasDeletePermission={hasDeletePermission}
+            />
           </Box>
         )}
 
@@ -1438,6 +1458,9 @@ const LeadDetailView = () => {
               dealFnCall={dealFnCall}
               items={dataItems}
               itemTypes={itemTypes}
+              hasEditPermission={hasEditPermission}
+              hasAddPermission={hasAddPermission}
+              hasDeletePermission={hasDeletePermission}
             />
           </Box>
         )}
@@ -1446,21 +1469,18 @@ const LeadDetailView = () => {
       {/* Right side */}
       <Grid item xs={12} md={4}>
         <Box>
-          {
-            hasConvertPermission() &&
+          {hasConvertPermission() && (
             <Button
-            disabled={loading}
-            fullWidth
-            variant='contained'
-            color='primary'
-            onClick={() => dealFunCall(leadData?._id, leadData?.lead_name)}
-          >
-            {' '}
-            {loading ? <CircularProgress size={18} /> : 'Convert to Opportunity'}
-          </Button>
-          }
-          
-
+              disabled={loading}
+              fullWidth
+              variant='contained'
+              color='primary'
+              onClick={() => dealFunCall(leadData?._id, leadData?.lead_name)}
+            >
+              {' '}
+              {loading ? <CircularProgress size={18} /> : 'Convert to Opportunity'}
+            </Button>
+          )}
         </Box>
         <Box
           sx={{
@@ -1478,6 +1498,7 @@ const LeadDetailView = () => {
             onToggleFlag={onToggleFlag}
             sections={sections}
             handleFieldSave={handleFieldSave}
+            hasEditPermission={hasEditPermission}
           />
 
           {/* 🔹 Dynamic Sections */}
@@ -1522,6 +1543,7 @@ const LeadDetailView = () => {
                             itemTypes={itemTypes}
                             itemList={itemList}
                             setItemType={setItemType}
+                            hasEditPermission={hasEditPermission}
                           />
                         </Grid>
                       ))}

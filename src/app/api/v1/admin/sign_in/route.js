@@ -147,7 +147,11 @@ export async function POST(request) {
                   })
                   consolelogdata.save()
 
+                  console.log(dataResults,"<<< dataResults")
+
+
                   const encdataResults = encryptCryptoResponse(dataResults)
+                  // const decdataResults = decrypCryptoRequest(encdataResults)
 
                 
 

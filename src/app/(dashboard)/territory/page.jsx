@@ -15,7 +15,31 @@ const Territory = () => {
    const router = useRouter()
     const { payloadJson } = useSelector(state => state.menu)
   
-    const hasViewPermission = () => {
+
+   const hasAddPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Master' && m.sub_menu_privileage_name === 'Territory')
+
+    return found?.add_status === true
+  }
+   const hasEditPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Master' && m.sub_menu_privileage_name === 'Territory')
+
+    return found?.edit_status === true
+  }
+
+     const hasDeletePermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Master' && m.sub_menu_privileage_name === 'Territory')
+
+    return found?.delete_status === true
+  }
+
+      const hasViewPermission = () => {
       if (!payloadJson || payloadJson.length === 0) return false
   
       const found = payloadJson.find(
@@ -24,6 +48,7 @@ const Territory = () => {
   
       return found?.view_status === true
     }
+
   
     useEffect(() => {
       if (payloadJson.length > 0) {
@@ -45,7 +70,13 @@ const Territory = () => {
       </Grid>
 
       <Grid item xs={12}>
-        <TerritoryTable />
+        <TerritoryTable
+        hasAddPermission={hasAddPermission}
+        hasEditPermission={hasEditPermission}
+        hasViewPermission={hasViewPermission}
+        hasDeletePermission={hasDeletePermission}
+        
+        />
       </Grid>
     </Grid>
   )

@@ -13,14 +13,36 @@ const TaxMaster = () => {
   const router = useRouter()
   const { payloadJson } = useSelector(state => state.menu)
 
-  const hasViewPermission = () => {
+  const hasAddPermission = () => {
     if (!payloadJson || payloadJson.length === 0) return false
-
     const found = payloadJson.find(
       m => m.menu_privileage_name === 'Master' && m.sub_menu_privileage_name === 'Tax Master'
     )
+    return found?.add_status === true
+  }
 
+  const hasViewPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+    const found = payloadJson.find(
+      m => m.menu_privileage_name === 'Master' && m.sub_menu_privileage_name === 'Tax Master'
+    )
     return found?.view_status === true
+  }
+
+  const hasEditPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+    const found = payloadJson.find(
+      m => m.menu_privileage_name === 'Master' && m.sub_menu_privileage_name === 'Tax Master'
+    )
+    return found?.edit_status === true
+  }
+
+  const hasDeletePermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+    const found = payloadJson.find(
+      m => m.menu_privileage_name === 'Master' && m.sub_menu_privileage_name === 'Tax Master'
+    )
+    return found?.delete_status === true
   }
 
   useEffect(() => {
@@ -42,7 +64,12 @@ const TaxMaster = () => {
       </Grid>
 
       <Grid item xs={12}>
-        <TaxMasterTable />
+        <TaxMasterTable
+          hasAddPermission={hasAddPermission}
+          hasViewPermission={hasViewPermission}
+          hasEditPermission={hasEditPermission}
+          hasDeletePermission={hasDeletePermission}
+        />
       </Grid>
     </Grid>
   )

@@ -13,7 +13,7 @@ import {
 } from '@mui/material'
 import React from 'react'
 
-function ProductList({ leadData, handleDeleteOrder, handleOpenBulkEdit, dealFnCall, formatCurrency }) {
+function ProductList({ leadData, handleDeleteOrder, handleOpenBulkEdit, dealFnCall, formatCurrency, hasEditPermission, hasAddPermission,hasDeletePermission }) {
   return (
     <>
       {leadData?.items?.map(order => {
@@ -53,10 +53,13 @@ function ProductList({ leadData, handleDeleteOrder, handleOpenBulkEdit, dealFnCa
                     Product Item ID: {order.item_id}
                   </Typography>
                   <Box display='flex' gap={2}>
+                    {hasEditPermission() &&
                     <Button variant='contained' color='success' size='small' onClick={() => handleOpenBulkEdit(order)}>
                       Edit Items
                     </Button>
-                    <Button
+                    }
+                    {
+                      hasDeletePermission() && <Button
                       variant='contained'
                       color='error'
                       size='small'
@@ -64,6 +67,8 @@ function ProductList({ leadData, handleDeleteOrder, handleOpenBulkEdit, dealFnCa
                     >
                       Delete Items
                     </Button>
+                    }
+                    
                   </Box>
                 </Box>
 

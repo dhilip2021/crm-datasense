@@ -297,7 +297,7 @@ const menu_privileges_status_array = [
   }
 ]
 
-const RolesAndPermissionView = () => {
+const RolesAndPermissionView = ({hasAddPermission, hasViewPermission, hasEditPermission, hasDeletePermission}) => {
   const token = Cookies.get('_token')
 
   const [rolesData, setRolesData] = useState([])
@@ -457,8 +457,9 @@ const RolesAndPermissionView = () => {
     <Card>
       <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} gap={5}>
         <CardHeader title='User Role Permissions' />
-
-        <Button
+        {
+          hasAddPermission() &&
+           <Button
           variant='contained'
           sx={{
             borderRadius: '8px',
@@ -469,8 +470,10 @@ const RolesAndPermissionView = () => {
           }}
           onClick={e => handleAddclick()}
         >
-          + Add
+          + Add Permission
         </Button>
+        }
+       
       </Box>
 
       <Form>
@@ -482,23 +485,34 @@ const RolesAndPermissionView = () => {
                 <th>First Name</th>
                 <th>Email</th>
                 <th>Mobile</th>
-                <th>Action</th>
+                {
+                  hasEditPermission() && 
+                   <th>Action</th>
+                }
+               
               </tr>
             </thead>
 
             <tbody>
-              {Array.isArray(rolesData) &&
+              {Array.isArray(rolesData) && hasViewPermission() &&
                 rolesData.map((role, index) => (
                   <tr key={role.c_user_id || index}>
                     {/* USERNAME CLICK → OPEN MODAL */}
                     <td
-                      onClick={e =>
+                     
+                    >
+                      {
+                        hasEditPermission() ?
+                         <Typography color='primary' sx={{ cursor: 'pointer' }}
+                         onClick={e =>
                         handleEditClick(role?.menu_privileges_status, role.c_user_name, role.c_user_id, role._id)
                       }
-                    >
-                      <Typography color='primary' sx={{ cursor: 'pointer' }}>
+                      >
                         {role.c_user_name}
-                      </Typography>
+                      </Typography> :
+                      role.c_user_name
+                      }
+                     
                     </td>
                     <td> {role?.userList[0]?.first_name}</td>
                     <td>
@@ -507,7 +521,9 @@ const RolesAndPermissionView = () => {
                     </td>
                     <td> {Array.isArray(role?.userList) && decrypCryptoRequest(role?.userList[0]?.mobile)}</td>
                     <td>
-                      <IconButton
+                      {
+                        hasEditPermission() &&
+                         <IconButton
                         color='primary'
                         size='small'
                         onClick={e =>
@@ -516,6 +532,8 @@ const RolesAndPermissionView = () => {
                       >
                         <EditIcon />
                       </IconButton>
+                      }
+                     
                     </td>
                   </tr>
                 ))}
@@ -569,8 +587,9 @@ const RolesAndPermissionView = () => {
         )}
 
         <DialogContent>
-          <table className='w-full border mt-2'>
-            <thead>
+          <div className="max-h-[550px] overflow-y-auto border rounded">
+                <table className='w-full border mt-2'>
+            <thead className="sticky top-0 bg-white z-10 shadow-sm">
               <tr>
                 <th className='p-2 border'>Menu Name</th>
                 <th className='p-2 border'>Sub Menu Name</th>
@@ -609,19 +628,19 @@ const RolesAndPermissionView = () => {
                       onChange={() => handleMenuCheckboxChange(idx, 'delete_status')}
                     />
                   </td>
-                   <td className='p-2 border' align='center'>
+                  <td className='p-2 border' align='center'>
                     <Checkbox
                       checked={menu.import_status}
                       onChange={() => handleMenuCheckboxChange(idx, 'import_status')}
                     />
                   </td>
-                   <td className='p-2 border' align='center'>
+                  <td className='p-2 border' align='center'>
                     <Checkbox
                       checked={menu.export_status}
                       onChange={() => handleMenuCheckboxChange(idx, 'export_status')}
                     />
                   </td>
-                   <td className='p-2 border' align='center'>
+                  <td className='p-2 border' align='center'>
                     <Checkbox
                       checked={menu.convert_status}
                       onChange={() => handleMenuCheckboxChange(idx, 'convert_status')}
@@ -631,6 +650,8 @@ const RolesAndPermissionView = () => {
               ))}
             </tbody>
           </table>
+          </div>
+        
         </DialogContent>
         <DialogActions>
           {/* <Grid item xs={12} className='flex gap-4 flex-wrap'> */}

@@ -13,7 +13,7 @@ import {
 } from '@mui/material'
 import React from 'react'
 
-function ServiceList({ leadData, handleDeleteOrder, handleOpenBulkEdit, dealFnCall, formatCurrency }) {
+function ServiceList({ leadData, handleDeleteOrder, handleOpenBulkEdit, dealFnCall, formatCurrency, hasAddPermission,hasEditPermission, hasDeletePermission }) {
   return (
     <>
       {leadData?.items?.map(order => {
@@ -54,17 +54,23 @@ function ServiceList({ leadData, handleDeleteOrder, handleOpenBulkEdit, dealFnCa
                     Service Item ID: {order.item_id}
                   </Typography>
                   <Box display='flex' gap={2}>
-                    <Button variant='contained' color='success' size='small' onClick={() => handleOpenBulkEdit(order)}>
+                    {
+                      hasEditPermission() &&
+                       <Button variant='contained' color='success' size='small' onClick={() => handleOpenBulkEdit(order)}>
                       Edit Items
                     </Button>
-                    <Button
+                    }
+                    {hasDeletePermission() &&
+                     <Button
                       variant='contained'
                       color='error'
                       size='small'
                       onClick={() => handleDeleteOrder(order.item_id)}
                     >
                       Delete Items
-                    </Button>
+                    </Button> 
+                    }
+                   
                   </Box>
                 </Box>
 

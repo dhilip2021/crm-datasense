@@ -42,21 +42,14 @@ const statusColors = {
   'Waiting for input': { bg: '#EBF5FB', color: '#2980B9' }
 }
 
-
-const statusOrder = [
-  'Not Started',
-  'In Progress',
-  'Deferred',
-  'Waiting for input',
-  'Completed'
-]
+const statusOrder = ['Not Started', 'In Progress', 'Deferred', 'Waiting for input', 'Completed']
 const priorityColors = {
   High: { bg: '#C0392B', color: '#FFFFFF' },
   Medium: { bg: '#F39C12', color: '#FFFFFF' },
   Low: { bg: '#27AE60', color: '#FFFFFF' }
 }
 
-export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
+export default function TaskTabs({ leadId, leadData, fetchLeadFromId, hasEditPermission, hasAddPermission, hasDeletePermission }) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const getToken = Cookies.get('_token')
@@ -72,8 +65,6 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
   const [toPhoneNumber, setToPhoneNumber] = useState(leadData?.values?.Phone)
   const [callResponse, setCallResponse] = useState('')
   const [openResponseDialog, setOpenResponseDialog] = useState(false)
-
-
 
   const sortedTasks = useMemo(() => {
     return [...leadArrayTasks]
@@ -129,8 +120,6 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
 
   const today = dayjs().startOf('day')
 
-
-
   // Usage
 
   useEffect(() => {
@@ -142,24 +131,19 @@ export default function TaskTabs({ leadId, leadData, fetchLeadFromId }) {
   // const currentTasks = useMemo(() => sortedTasks.filter(t => dayjs(t.dueDate).isSame(today, 'day')), [sortedTasks])
   // const upcomingTasks = useMemo(() => sortedTasks.filter(t => dayjs(t.dueDate).isAfter(today, 'day')), [sortedTasks])
 
-
-
-
-const sortByStatusAndDate = (tasks) => {
-  return tasks.sort((a, b) => {
-    const statusDiff = statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status)
-    if (statusDiff !== 0) return statusDiff
-    return new Date(a.dueDate) - new Date(b.dueDate)
-  })
-}
-
+  const sortByStatusAndDate = tasks => {
+    return tasks.sort((a, b) => {
+      const statusDiff = statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status)
+      if (statusDiff !== 0) return statusDiff
+      return new Date(a.dueDate) - new Date(b.dueDate)
+    })
+  }
 
   const currentTasks = sortByStatusAndDate(sortedTasks.filter(task => dayjs(task.dueDate).isSame(today, 'day')))
   const upcomingTasks = sortByStatusAndDate(sortedTasks.filter(task => dayjs(task.dueDate).isAfter(today, 'day')))
   const completedTasks = sortByStatusAndDate(sortedTasks.filter(task => dayjs(task.dueDate).isBefore(today, 'day')))
   // const completedTasks = sortByStatusAndDate(sortedTasks.filter(task => task.status === 'Completed'))
   // const completedTasks = (sortedTasks.filter(task => task.status === 'Completed'))
-
 
   const completedMeetings = useMemo(
     () => sortedMeetings.filter(t => dayjs(t.fromDate).isBefore(today, 'day')),
@@ -280,24 +264,25 @@ const sortByStatusAndDate = (tasks) => {
           Created By <b>{task.owner}</b>
         </Typography>
       </Box>
-
-      <IconButton
-        size='small'
-        sx={{
-          position: 'absolute',
-          top: 8,
-          right: 8,
-          bgcolor: '#f5f5f5',
-          '&:hover': { bgcolor: '#e0e0e0' }
-        }}
-        onClick={() => {
-          setEditingTask(task)
-          setTaskData(task)
-          setOpenTaskDialog(true)
-        }}
-      >
-        <EditOutlinedIcon fontSize='small' />
-      </IconButton>
+      {hasEditPermission() && (
+        <IconButton
+          size='small'
+          sx={{
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            bgcolor: '#f5f5f5',
+            '&:hover': { bgcolor: '#e0e0e0' }
+          }}
+          onClick={() => {
+            setEditingTask(task)
+            setTaskData(task)
+            setOpenTaskDialog(true)
+          }}
+        >
+          <EditOutlinedIcon fontSize='small' />
+        </IconButton>
+      )}
     </Card>
   )
 
@@ -323,7 +308,8 @@ const sortByStatusAndDate = (tasks) => {
           {meeting.title || 'Untitled Meeting'}
         </Typography>
 
-        <Tooltip title='Edit Meeting'>
+        {hasEditPermission() && (
+          <Tooltip title='Edit Meeting'>
           <IconButton
             size='small'
             sx={{
@@ -339,6 +325,9 @@ const sortByStatusAndDate = (tasks) => {
             <EditOutlinedIcon sx={{ fontSize: 18, color: '#475569' }} />
           </IconButton>
         </Tooltip>
+        )}
+
+        
       </Box>
 
       <Divider sx={{ mb: 2 }} />
@@ -927,7 +916,10 @@ const sortByStatusAndDate = (tasks) => {
           <Box sx={{ mt: isMobile ? 1 : 0 }}>
             {tab === 0 && (
               <Box textAlign={'center'}>
-                <Button
+                {
+                  hasAddPermission() &&
+
+                  <Button
                   variant='contained'
                   onClick={() => setOpenTaskDialog(true)}
                   sx={{
@@ -940,11 +932,15 @@ const sortByStatusAndDate = (tasks) => {
                 >
                   + Create Task
                 </Button>
+                }
+                
               </Box>
             )}
             {tab === 1 && (
               <Box textAlign={'center'}>
-                <Button
+                  {
+                  hasAddPermission() &&
+                  <Button
                   variant='contained'
                   onClick={() => setOpenMeetingDialog(true)}
                   sx={{
@@ -957,11 +953,16 @@ const sortByStatusAndDate = (tasks) => {
                 >
                   + Create Meeting
                 </Button>
+
+}
+                
               </Box>
             )}
             {tab === 2 && (
               <Box textAlign={'center'}>
-                <Button
+                  {
+                  hasAddPermission() &&
+                   <Button
                   variant='contained'
                   onClick={() => setOpenCallDialog(true)}
                   sx={{
@@ -974,6 +975,9 @@ const sortByStatusAndDate = (tasks) => {
                 >
                   + Create Call
                 </Button>
+
+}
+               
               </Box>
             )}
           </Box>

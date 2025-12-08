@@ -10,6 +10,7 @@ const  CryptoJS  = require("crypto-js");
 import {headers} from "next/headers";
 
 import { urlEncoder, urlDecoder } from "encryptdecrypt-everytime/src"
+import TokenBlacklist from "@/models/TokenBlacklist";
 
 
 
@@ -193,6 +194,39 @@ export function verifyAccessToken() {
 
       return { success: true, data: verified };
     }
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function verifyAccessTokenNew() {
+  const headersList = headers();
+  const authToken = headersList.get("authorization");
+
+  try {
+    if (!authToken) {
+      return { success: false, error: "Token missing" };
+    }
+
+    const secretKey = process.env.NEXT_PUBLIC_ENCY_DECY_SECRET;
+    const token = authToken.split("Bearer ")[1];
+    const decryptedResults = urlDecoder(secretKey, token);
+    const tokenString = JSON.parse(decryptedResults).toString();
+
+    // 🔥 Check if blacklisted
+    await connectMongoDB();
+    const isBlacklisted = await TokenBlacklist.findOne({ token: tokenString });
+
+    if (isBlacklisted) {
+      return { success: false, error: "Token expired / logged out" };
+    }
+
+    const verified = jwt.verify(
+      tokenString,
+      process.env.NEXT_PUBLIC_JWT_SECRET
+    );
+
+    return { success: true, data: verified };
   } catch (error) {
     return { success: false, error: error.message };
   }

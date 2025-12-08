@@ -22,7 +22,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import { toast } from 'react-toastify'
 import Cookies from 'js-cookie'
 
-export default function OpportunityReasonsManager() {
+export default function OpportunityReasonsManager({hasAddPermission, hasViewPermission, hasEditPermission, hasDeletePermission}) {
   const organization_id = Cookies.get('organization_id')
   const getToken = Cookies.get('_token')
   const [data, setData] = useState({ winReasons: [], lossReasons: [] })
@@ -151,7 +151,9 @@ export default function OpportunityReasonsManager() {
                 <Typography variant='subtitle1' sx={{ fontWeight: 600 }}>
                   🏆 Win Reasons
                 </Typography>
-                <IconButton
+                {
+                  hasAddPermission() && 
+                   <IconButton
                   color='success'
                   onClick={() => {
                     setType('win')
@@ -162,6 +164,8 @@ export default function OpportunityReasonsManager() {
                 >
                   <AddIcon />
                 </IconButton>
+                }
+               
               </Box>
 
               {data.winReasons.length === 0 ? (
@@ -170,7 +174,7 @@ export default function OpportunityReasonsManager() {
                 </Typography>
               ) : (
                 <Stack direction='row' flexWrap='wrap' gap={1}>
-                  {data.winReasons.map(reason => (
+                  {hasViewPermission() && data.winReasons.map(reason => (
                     <Chip
                       key={reason}
                       label={reason}
@@ -207,7 +211,9 @@ export default function OpportunityReasonsManager() {
                 <Typography variant='subtitle1' sx={{ fontWeight: 600 }}>
                   ❌ Loss Reasons
                 </Typography>
-                <IconButton
+                {
+                  hasAddPermission() && 
+                   <IconButton
                   color='error'
                   onClick={() => {
                     setType('loss')
@@ -218,6 +224,8 @@ export default function OpportunityReasonsManager() {
                 >
                   <AddIcon />
                 </IconButton>
+                }
+               
               </Box>
 
               {data.lossReasons.length === 0 ? (
@@ -236,7 +244,7 @@ export default function OpportunityReasonsManager() {
                 </Box>
               ) : (
                 <Stack direction='row' flexWrap='wrap' gap={1}>
-                  {data.lossReasons.map(reason => (
+                  {hasViewPermission() && data.lossReasons.map(reason => (
                     <Chip
                       key={reason}
                       label={reason}
