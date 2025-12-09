@@ -492,6 +492,501 @@ const staticFiledForm = [
   }
 ]
 
+const staticFiledOpportunityForm = [
+  {
+    fields: {
+      left: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Single Line',
+          label: 'First Name',
+          placeholder: 'Enter a First Name',
+          required: true,
+          minChars: 3,
+          maxChars: 50,
+          allowDuplicate: true,
+          allowSplCharacter: false,
+          autoComplte: true,
+          isPublic: false,
+          isEncrypted: false,
+          isExternal: false,
+          showTooltip: false,
+          options: [],
+          createFor: []
+        },
+        {
+          id: crypto.randomUUID(),
+          type: 'Phone',
+          label: 'Phone',
+          placeholder: 'Enter a phone number',
+          required: true,
+          maxLength: 50,
+          autoComplte: true,
+          noDuplicates: false,
+          isPublic: false,
+          isEncrypted: false,
+          showTooltip: false,
+          tooltipMessage: '',
+          tooltipType: 'icon',
+          options: [],
+          countryCode: '+91',
+          createFor: []
+        }
+      ],
+      center: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Single Line',
+          label: 'Last Name',
+          placeholder: 'Enter a Last Name',
+          required: false,
+          minChars: 3,
+          maxChars: 50,
+          allowDuplicate: true,
+          allowSplCharacter: false,
+          autoComplte: true,
+          isPublic: false,
+          isEncrypted: false,
+          isExternal: false,
+          showTooltip: false,
+          options: [],
+          createFor: []
+        },
+        {
+          id: crypto.randomUUID(),
+          type: 'Dropdown',
+          label: 'Gender',
+          placeholder: 'Select a Gender',
+          required: false,
+          isPublic: false,
+          showTooltip: false,
+          tooltipMessage: '',
+          tooltipType: 'icon',
+          options: ['Male', 'Female', 'Genderqueer', 'Non-Conforming', 'Transgender', 'Other'],
+          defaultValue: 'Male',
+          sortOrder: 'entered',
+          trackHistory: false,
+          enableColor: false,
+          createFor: []
+        }
+      ],
+      right: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Email',
+          label: 'Email',
+          placeholder: 'Enter a Email',
+          required: true,
+          autoComplte: true,
+          noDuplicates: false,
+          isPublic: false,
+          isEncrypted: false,
+          showTooltip: false,
+          options: [],
+          createFor: []
+        }
+      ]
+    },
+
+    id: crypto.randomUUID(),
+    title: 'Contact Information',
+    layout: 'triple'
+  },
+  {
+    fields: {
+      left: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Single Line',
+          label: 'Company',
+          placeholder: 'Enter a Company',
+          required: false,
+          minChars: 3,
+          maxChars: 255,
+          allowDuplicate: true,
+          allowSplCharacter: false,
+          autoComplte: true,
+          isPublic: false,
+          isEncrypted: false,
+          isExternal: false,
+          showTooltip: false,
+          options: [],
+          createFor: []
+        },
+        {
+          id: crypto.randomUUID(),
+          type: 'Dropdown',
+          label: 'Lead Status',
+          placeholder: 'Select a Lead Status',
+          required: false,
+          isPublic: false,
+          showTooltip: false,
+          tooltipMessage: '',
+          tooltipType: 'icon',
+          options: [
+            'New Opportunity',
+            'Proposal Sent',
+            'Negotiation',
+            'Decision Pending',
+            'Ready to Close',
+            'Closed Won',
+            'Closed Lost'
+          ],
+          defaultValue: 'New / Attempted Contact',
+          sortOrder: 'entered',
+          trackHistory: false,
+          enableColor: false,
+          createFor: []
+        },
+        {
+          id: crypto.randomUUID(),
+          type: 'Currency',
+          label: 'Annual Revenue',
+          placeholder: 'Currency',
+          required: false,
+          options: [],
+          minDigits: '',
+          maxDigits: '',
+          decimalPlaces: '2',
+          rounding: 'normal',
+          createFor: []
+        }
+      ],
+      center: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Single Line',
+          label: 'Job Title',
+          placeholder: 'Enter a Job Title',
+          required: false,
+          minChars: 3,
+          maxChars: 255,
+          allowDuplicate: true,
+          allowSplCharacter: false,
+          autoComplte: true,
+          isPublic: false,
+          isEncrypted: false,
+          isExternal: false,
+          showTooltip: false,
+          options: [],
+          createFor: []
+        },
+        {
+          id: crypto.randomUUID(),
+          type: 'Dropdown',
+          label: 'Industry',
+          placeholder: 'Select a Industry',
+          required: false,
+          isPublic: false,
+          showTooltip: false,
+          tooltipMessage: '',
+          tooltipType: 'icon',
+          options: ['Logistics', 'Manufacturing', 'FMCG', 'Education', 'Pharma', 'IT', 'Finance'],
+          defaultValue: '',
+          sortOrder: 'entered',
+          trackHistory: false,
+          enableColor: false,
+          createFor: []
+        },
+        {
+          id: crypto.randomUUID(),
+          type: 'Dropdown',
+          label: 'Company Type',
+          placeholder: 'Select a Company Type',
+          required: false,
+          options: ['Product', 'Service', 'License', 'Warranty', 'Subscription'],
+          defaultValue: 'Product',
+          sortOrder: 'entered',
+          trackHistory: false,
+          enableColor: false,
+          isPublic: false,
+          showTooltip: false,
+          tooltipMessage: '',
+          tooltipType: 'icon',
+          createFor: []
+        }
+      ],
+      right: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Dropdown',
+          label: 'Lead Source',
+          placeholder: 'Select a Lead Source',
+          required: false,
+          isPublic: false,
+          showTooltip: false,
+          tooltipMessage: '',
+          tooltipType: 'icon',
+          options: ['Facebook', 'LinkedIn', 'Email Campaign', 'Referral', 'Trade Show', 'Cold Call'],
+          defaultValue: '',
+          sortOrder: 'entered',
+          trackHistory: false,
+          enableColor: false,
+          createFor: []
+        },
+        {
+          id: crypto.randomUUID(),
+          type: 'Dropdown',
+          label: 'Company Size',
+          placeholder: 'Select a Company Size',
+          required: false,
+          isPublic: false,
+          showTooltip: false,
+          tooltipMessage: '',
+          tooltipType: 'icon',
+          options: ['1 to 10', '11 to 50', '51 to 100', '100 +'],
+          defaultValue: '1 to 10',
+          sortOrder: 'entered',
+          trackHistory: false,
+          enableColor: false,
+          createFor: []
+        },
+        {
+          id: crypto.randomUUID(),
+          type: 'Dropdown',
+          label: 'Product List',
+          placeholder: 'Select a product',
+          required: false,
+          options: ['product 1', 'product 2'],
+          defaultValue: '',
+          sortOrder: 'entered',
+          trackHistory: false,
+          enableColor: false,
+          isPublic: false,
+          showTooltip: false,
+          tooltipMessage: '',
+          tooltipType: 'icon',
+          createFor: []
+        }
+      ]
+    },
+
+    id: crypto.randomUUID(),
+    title: 'Company Information',
+    layout: 'triple'
+  },
+  {
+    fields: {
+      left: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Single Line',
+          label: 'Country',
+          placeholder: 'Enter a Country',
+          required: false,
+          minChars: 3,
+          maxChars: 255,
+          allowDuplicate: true,
+          allowSplCharacter: false,
+          autoComplte: true,
+          isPublic: false,
+          isEncrypted: false,
+          isExternal: false,
+          showTooltip: false,
+          options: [],
+          createFor: []
+        },
+        {
+          id: crypto.randomUUID(),
+          type: 'Single Line',
+          label: 'Street',
+          placeholder: 'Enter a Street',
+          required: false,
+          minChars: 3,
+          maxChars: 255,
+          allowDuplicate: true,
+          allowSplCharacter: false,
+          autoComplte: true,
+          isPublic: false,
+          isEncrypted: false,
+          isExternal: false,
+          showTooltip: false,
+          options: [],
+          createFor: []
+        }
+      ],
+      center: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Single Line',
+          label: 'State',
+          placeholder: 'Enter a State',
+          required: false,
+          minChars: 3,
+          maxChars: 255,
+          allowDuplicate: true,
+          allowSplCharacter: false,
+          autoComplte: true,
+          isPublic: false,
+          isEncrypted: false,
+          isExternal: false,
+          showTooltip: false,
+          options: [],
+          createFor: []
+        },
+        {
+          id: crypto.randomUUID(),
+          type: 'Number',
+          label: 'Pincode',
+          placeholder: 'Enter a Pincode',
+          required: false,
+          options: [],
+          minDigits: '',
+          maxDigits: '',
+          useSeparator: false,
+          createFor: []
+        }
+      ],
+      right: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Single Line',
+          label: 'City',
+          placeholder: 'Enter a City',
+          required: false,
+          minChars: 3,
+          maxChars: 255,
+          allowDuplicate: true,
+          allowSplCharacter: false,
+          autoComplte: true,
+          isPublic: false,
+          isEncrypted: false,
+          isExternal: false,
+          showTooltip: false,
+          options: [],
+          createFor: []
+        }
+      ]
+    },
+    id: crypto.randomUUID(),
+    title: 'Address Information',
+    layout: 'triple'
+  },
+  {
+    fields: {
+      left: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Date',
+          label: 'Next Follow-up Date',
+          placeholder: 'Enter a Follow-up Date',
+          required: false,
+          allowPastDate: true,
+          noDuplicates: false,
+          isPublic: false,
+          isEncrypted: false,
+          showTooltip: false,
+          options: [],
+          createFor: []
+        }
+      ],
+      center: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Dropdown',
+          label: 'Timeline to Buy',
+          placeholder: 'Enter a Timeline to Buy',
+          required: false,
+          isPublic: false,
+          showTooltip: false,
+          tooltipMessage: '',
+          tooltipType: 'icon',
+          options: ['Immediately', '3–6 Months', '6+ Months'],
+          defaultValue: '',
+          sortOrder: 'entered',
+          trackHistory: false,
+          enableColor: false,
+          createFor: []
+        }
+      ],
+      right: [
+        {
+          id: crypto.randomUUID(),
+          type: 'Dropdown',
+          label: 'Assigned To',
+          placeholder: 'Enter a Assigned value',
+          required: false,
+          isPublic: false,
+          showTooltip: false,
+          tooltipMessage: '',
+          tooltipType: 'icon',
+          options: ['Option 1', 'Option 1'],
+          defaultValue: '',
+          sortOrder: 'entered',
+          trackHistory: false,
+          enableColor: false,
+          createFor: []
+        }
+      ]
+    },
+    id: crypto.randomUUID(),
+    title: 'Follow-Up Section',
+    layout: 'triple'
+  },
+  {
+      id: crypto.randomUUID(),
+      title: "Deal Section",
+      layout: "triple",
+      fields: {
+        left: [
+          {
+            id: crypto.randomUUID(),
+            type: "Single Line",
+            label: "Deal Name",
+            placeholder: "Enter Deal Name",
+            required: false,
+            minChars: 3,
+            maxChars: 255,
+            allowDuplicate: true,
+            allowSplCharacter: false,
+            autoComplte: true,
+            isPublic: false,
+            isEncrypted: false,
+            isExternal: false,
+            showTooltip: false,
+            options: [],
+            createFor: []
+          }
+        ],
+        center: [
+          {
+            id: crypto.randomUUID(),
+            type: "Currency",
+            label: "Expected Revenue",
+            placeholder: "Currency",
+            required: false,
+            options: [],
+            minDigits: "",
+            maxDigits: "",
+            decimalPlaces: "2",
+            rounding: "normal",
+            createFor: []
+          }
+        ],
+        right: [
+          {
+            id: crypto.randomUUID(),
+            type: "Date",
+            label: "Closing Date",
+            placeholder: "Enter Closing Date",
+            required: false,
+            allowPastDate: false,
+            noDuplicates: false,
+            isPublic: false,
+            isEncrypted: false,
+            showTooltip: false,
+            options: [],
+            createFor: []
+          }
+        ]
+      }
+    }
+
+
+
+
+]
+
 const Login = ({ mode }) => {
   // Vars
   const darkImg = '/images/pages/auth-v1-mask-dark.png'
@@ -612,12 +1107,20 @@ const Login = ({ mode }) => {
           sections: staticFiledForm
         }
 
+        const body3 = {
+          organization_id: resultsPayloadJson?.organization_id,
+          form_name: 'opportunities-form',
+          version: 1,
+          sections: staticFiledOpportunityForm
+        }
+
         const header1 = {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${resultsPayloadJson?.tokenAccess}`
         }
 
         const resultFields = await addFieldFormApi(body2, header1)
+        const resultOpporFields = await addFieldFormApi(body3, header1)
       }
 
       if (resultsPayloadJson?.c_version === 'Trial') {
