@@ -838,7 +838,7 @@ const LeadTable = () => {
                           }}
                         >
                           {
-                            hasEditPermission() ? 
+                            hasViewPermission() ? 
                              <Link
                             href={`/view/lead-form/${encodeURIComponent(encryptCryptoRes(row.lead_id))}`}
                             style={{ textDecoration: 'none' }}
