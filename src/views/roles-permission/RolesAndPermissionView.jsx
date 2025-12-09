@@ -9,7 +9,7 @@ import {
   postRolesAndPermissionAddApi,
   postRolesAndPermissionListApi
 } from '@/apiFunctions/ApiAction'
-import { Box, CardHeader, Checkbox, IconButton, MenuItem, TextField, Typography } from '@mui/material'
+import { Box, CardContent, CardHeader, Checkbox, IconButton, MenuItem, TextField, Typography } from '@mui/material'
 import Form from '@components/Form'
 import tableStyles from '@core/styles/table.module.css'
 import { decrypCryptoRequest, maskEmail } from '@/helper/frontendHelper'
@@ -21,6 +21,10 @@ import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
+import EmptyItems from '@/app/(dashboard)/view/empty-items/EmptyItems'
+
+import LoaderGif from '@assets/gif/loader.gif'
+import Image from 'next/image'
 
 const menu_privileges_status_array = [
   {
@@ -476,7 +480,54 @@ const RolesAndPermissionView = ({hasAddPermission, hasViewPermission, hasEditPer
        
       </Box>
 
-      <Form>
+      <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
+        {loader && (
+          <Box textAlign={'center'} width={'100%'}>
+            <Card className='w-full shadow-md rounded-lg'>
+              <CardContent className='text-center'>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '100vh', // full screen center
+                    width: '100vw',
+                    bgcolor: 'rgba(255, 255, 255, 0.7)', // semi-transparent overlay
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    zIndex: 1300 // above all dialogs
+                  }}
+                >
+                  <Image src={LoaderGif} alt='loading' width={100} height={100} />
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
+        )}
+
+        {!loader && Array.isArray(rolesData) && rolesData?.length === 0 && (
+          <EmptyItems
+            onAdd={() => router.push('/')}
+            primaryText='🚫 No Roles and Permission added'
+            secondaryText="You don't have any Roles and Permission yet. Click below to create your first item."
+            buttonText='Create Roles and Permission'
+          />
+          // <Box textAlign={'center'} width={'100%'}>
+          //   <Card className='w-full shadow-md rounded-lg'>
+          //     <CardContent className='text-center'>
+          //       <Box p={40}>
+          //         <p style={{ fontSize: '18px', borderBottom: '0px', textAlign: 'center' }}>No Users Found</p>
+          //       </Box>
+
+          //     </CardContent>
+          //   </Card>
+          // </Box>
+        )}
+      </Box>
+        {
+          (!loader &&  Array.isArray(rolesData) && rolesData?.length > 0) &&
+           <Form>
         <div className='overflow-x-auto'>
           <table className={tableStyles.table}>
             <thead>
@@ -494,7 +545,9 @@ const RolesAndPermissionView = ({hasAddPermission, hasViewPermission, hasEditPer
             </thead>
 
             <tbody>
-              {Array.isArray(rolesData) && hasViewPermission() &&
+              {
+              
+              Array.isArray(rolesData) && hasViewPermission() &&
                 rolesData.map((role, index) => (
                   <tr key={role.c_user_id || index}>
                     {/* USERNAME CLICK → OPEN MODAL */}
@@ -541,6 +594,9 @@ const RolesAndPermissionView = ({hasAddPermission, hasViewPermission, hasEditPer
           </table>
         </div>
       </Form>
+        }
+     
+
       {/* Modal for c_menu_privileges */}
       <Dialog open={openModal} onClose={() => handleCloseModel()} fullWidth maxWidth='xl'>
         <DialogTitle>Menu Privileges - {user}</DialogTitle>
@@ -603,6 +659,7 @@ const RolesAndPermissionView = ({hasAddPermission, hasViewPermission, hasEditPer
               </tr>
             </thead>
             <tbody>
+            
               {selectedRole?.map((menu, idx) => (
                 <tr key={idx}>
                   <td className='p-2 border'>{menu.menu_privileage_name}</td>

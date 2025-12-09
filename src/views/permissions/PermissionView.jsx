@@ -144,7 +144,7 @@ const PermissionView = () => {
 
   return (
     <Card>
-      <CardHeader title='User Role Permissions' subheader={<></>} />
+      <CardHeader title='User Role Permission' subheader={<></>} />
       <Form>
         <div className='overflow-x-auto'>
           <table className={tableStyles.table}>
