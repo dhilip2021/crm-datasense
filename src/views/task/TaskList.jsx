@@ -18,7 +18,7 @@ import GoogleCalandarList from './GoogleCalandarList'
 const priorities = ['Low', 'Medium', 'High']
 const statuses = ['Not Started', 'Deferred', 'In Progress', 'Completed', 'Waiting for input']
 
-export default function TaskList() {
+export default function TaskList({hasAddPermission, hasViewPermission, hasEditPermission, hasDeletePermission}) {
   const getToken = Cookies.get('_token')
   const organization_id = Cookies.get('organization_id')
   const loggedInUserId = Cookies.get('user_id')
@@ -112,7 +112,11 @@ export default function TaskList() {
               📋 Task List
             </Typography>
           </Grid>
-          <Grid item>
+
+          {
+            hasViewPermission() && 
+            <Grid item>
+            
             <Button variant='outlined' endIcon={<ArrowDropDownIcon />} onClick={e => setViewAnchor(e.currentTarget)}>
               {view === 'normal' ? 'Normal View' : view === 'table' ? 'Table View' : 'Calendar View'}
             </Button>
@@ -143,6 +147,8 @@ export default function TaskList() {
               </MenuItem>
             </Menu>
           </Grid>
+          }
+          
         </Grid>
 
         <Divider sx={{ mb: 3 }} />
@@ -236,7 +242,9 @@ export default function TaskList() {
         </Grid>
 
         {/* 🔹 Task Views */}
-        <Grid container>
+        {
+          hasViewPermission() && 
+          <Grid container>
           {view === 'normal' && <NormalList loading={loading} tasks={tasks} loggedInUserName ={loggedInUserName}/>}
           {view === 'table' && <TableTaskList loading={loading} tasks={tasks} />}
           {view === 'calendar' && (
@@ -250,6 +258,8 @@ export default function TaskList() {
           )}
           {view === 'google' && <GoogleCalandarList loading={loading} tasks={tasks} fetchTasks={fetchTasks} />}
         </Grid>
+        }
+        
       </Box>
     </LocalizationProvider>
   )

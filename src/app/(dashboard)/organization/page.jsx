@@ -58,12 +58,42 @@ const Organization = () => {
 
   const { payloadJson } = useSelector(state => state.menu)
 
-  const hasViewPermission = () => {
+  const hasAddPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Organization' && m.sub_menu_privileage_name === '')
+
+    return found?.add_status === true
+  }
+    const hasViewPermission = () => {
     if (!payloadJson || payloadJson.length === 0) return false
 
     const found = payloadJson.find(m => m.menu_privileage_name === 'Organization' && m.sub_menu_privileage_name === '')
 
     return found?.view_status === true
+  }
+    const hasEditPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Organization' && m.sub_menu_privileage_name === '')
+
+    return found?.edit_status === true
+  }
+ const hasImportPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Organization' && m.sub_menu_privileage_name === '')
+
+    return found?.import_status === true
+  }
+
+  
+    const hasDeletePermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Organization' && m.sub_menu_privileage_name === '')
+
+    return found?.delete_status === true
   }
 
   useEffect(() => {
@@ -403,7 +433,7 @@ const Organization = () => {
           </Typography>
         </Box>
 
-        {orgList ? (
+        {hasViewPermission() && orgList ? (
           <>
             {/* Logo Section */}
             <Grid container spacing={3} alignItems='center'>
@@ -434,16 +464,20 @@ const Organization = () => {
                   />
 
                   {/* Upload Button */}
-                  <Button
+                  {
+                    hasImportPermission() && 
+                     <Button
                     variant='outlined'
                     startIcon={<CloudUploadIcon />}
                     onClick={() => document.getElementById('logoUploadInput').click()}
                   >
                     Upload Logo
                   </Button>
+                  }
+                 
 
                   {/* Delete Button — only show if logo exists */}
-                  {orgList.organization_logo && (
+                  {hasDeletePermission() && orgList.organization_logo && (
                     <Button variant='outlined' color='error' onClick={handleLogoDelete}>
                       Delete Logo
                     </Button>
@@ -619,7 +653,7 @@ const Organization = () => {
                     size='large'
                     sx={{ py: 1.2, fontWeight: 600 }}
                     onClick={handleSave}
-                    disabled={updating || orgList?.companyType?.length === 0 || orgList?.organization_emp_count === ''}
+                    disabled={!hasEditPermission() ||updating || orgList?.companyType?.length === 0 || orgList?.organization_emp_count === ''}
                   >
                     {updating ? 'Updating...' : 'Save Changes'}
                   </Button>

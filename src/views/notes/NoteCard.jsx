@@ -46,10 +46,19 @@ const highlightText = (text, search) => {
   )
 }
 
-const NoteCard = ({ search, notes, onEdit, onAdd, initialLimit = 4, loadMoreStep = 4 }) => {
-
-  
-   const user_name = Cookies.get('user_name')
+const NoteCard = ({
+  search,
+  notes,
+  onEdit,
+  onAdd,
+  initialLimit = 4,
+  loadMoreStep = 4,
+  hasAddPermission,
+  hasViewPermission,
+  hasEditPermission,
+  hasDeletePermission
+}) => {
+  const user_name = Cookies.get('user_name')
 
   const filteredLeads = notes.filter(lead => Array.isArray(lead.values?.Notes) && lead.values.Notes.length > 0)
   const [limit, setLimit] = useState(initialLimit)
@@ -62,8 +71,7 @@ const NoteCard = ({ search, notes, onEdit, onAdd, initialLimit = 4, loadMoreStep
   const [editData, setEditData] = useState({ title: '', note: '' })
 
   // 🔹 Add Note button click
-  const handleAddClick = (lead_id) => {
-
+  const handleAddClick = lead_id => {
     setNoteType('Add Note')
     setLeadId(lead_id)
     setSelectedNote(null)
@@ -186,33 +194,35 @@ const NoteCard = ({ search, notes, onEdit, onAdd, initialLimit = 4, loadMoreStep
                 <Typography variant='body2' color='text.secondary' sx={{ mt: { xs: 1, sm: 0 } }}>
                   Total Notes: {lead.values.Notes.length}
                 </Typography>
-                <Button
-  variant='contained'
-  color='primary'
-  onClick={() => handleAddClick(lead.lead_id)}
-  startIcon={<AddIcon />}
-  sx={{
-    textTransform: 'none',
-    borderRadius: '12px',
-    fontWeight: 600,
-    px: 2.5,
-    py: 1,
-    boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-    transition: 'all 0.25s ease',
-    '&:hover': {
-      backgroundColor: '#2e7d32',
-      transform: 'translateY(-2px)',
-      boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
-    }
-  }}
->
-  Add Note
-</Button>
+                {hasAddPermission() && (
+                  <Button
+                    variant='contained'
+                    color='primary'
+                    onClick={() => handleAddClick(lead.lead_id)}
+                    startIcon={<AddIcon />}
+                    sx={{
+                      textTransform: 'none',
+                      borderRadius: '12px',
+                      fontWeight: 600,
+                      px: 2.5,
+                      py: 1,
+                      boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+                      transition: 'all 0.25s ease',
+                      '&:hover': {
+                        backgroundColor: '#2e7d32',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
+                      }
+                    }}
+                  >
+                    Add Note
+                  </Button>
+                )}
               </Box>
 
               {/* Notes List */}
               <Box sx={{ p: 2.5 }}>
-                {lead.values.Notes.map((note, index) => (
+                {hasViewPermission() && lead.values.Notes.map((note, index) => (
                   <Box key={note._id || index}>
                     <Box
                       sx={{
@@ -269,8 +279,9 @@ const NoteCard = ({ search, notes, onEdit, onAdd, initialLimit = 4, loadMoreStep
                           {highlightText(note.note, search)}
                         </Typography>
                       </Box>
-
-                      <Tooltip title='Edit Note'>
+                          {
+                            hasEditPermission() && 
+                             <Tooltip title='Edit Note'>
                         <IconButton
                           onClick={() => handleEditClick(note, lead.lead_id)}
                           size='small'
@@ -286,6 +297,8 @@ const NoteCard = ({ search, notes, onEdit, onAdd, initialLimit = 4, loadMoreStep
                           <EditIcon fontSize='small' />
                         </IconButton>
                       </Tooltip>
+                          }
+                     
                     </Box>
 
                     {index !== lead.values.Notes.length - 1 && <Divider sx={{ my: 1.5, borderColor: 'divider' }} />}
@@ -298,7 +311,7 @@ const NoteCard = ({ search, notes, onEdit, onAdd, initialLimit = 4, loadMoreStep
       </Grid>
 
       {/* Load More */}
-      {limit < filteredLeads.length && (
+      {hasViewPermission() && limit < filteredLeads.length && (
         <Box textAlign='center' mt={2}>
           <Button variant='contained' onClick={handleLoadMore}>
             Load More

@@ -9,10 +9,11 @@ import { Box, Button } from '@mui/material'
 import PreviewModal from '@/components/PreviewRenderer'
 import { toast, ToastContainer } from 'react-toastify'
 import Cookies from 'js-cookie'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { LoadingButton } from '@mui/lab'
 import LoaderGif from '@assets/gif/loader.gif'
 import Image from 'next/image'
+import { useSelector } from 'react-redux'
 
 const fieldOptions = [
   'Single Line',
@@ -39,13 +40,42 @@ const fieldOptions = [
 
 export default function LeadFormPage() {
   const organization_id = Cookies.get('organization_id')
-   const getToken = Cookies.get('_token')
+  const getToken = Cookies.get('_token')
   const { form } = useParams()
-
-  console.log(form,"<<<< LEAD FORMMMMMMMMM")
-
-
   const lead_form = form
+
+  const router = useRouter()
+  const { payloadJson } = useSelector(state => state.menu)
+
+  const hasAddPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Setup' && m.sub_menu_privileage_name === '')
+
+    return found?.add_status === true
+  }
+
+  const hasViewPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Setup' && m.sub_menu_privileage_name === '')
+
+    return found?.view_status === true
+  }
+  const hasEditPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Setup' && m.sub_menu_privileage_name === '')
+
+    return found?.edit_status === true
+  }
+  const hasDeletePermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Setup' && m.sub_menu_privileage_name === '')
+
+    return found?.delete_status === true
+  }
 
   const [sections, setSections] = useState([])
   const [formId, setFormId] = useState(null)
@@ -225,7 +255,7 @@ export default function LeadFormPage() {
       // update existing
       res = await fetch('/api/v1/admin/lead-form-template/update', {
         method: 'PUT',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${getToken}`
         },
@@ -235,7 +265,7 @@ export default function LeadFormPage() {
       // create new
       res = await fetch('/api/v1/admin/lead-form-template/save', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${getToken}`
         },
@@ -248,27 +278,27 @@ export default function LeadFormPage() {
     if (data?.success) {
       setLoader(false)
       toast.success(formId ? 'Form updated successfully!' : 'Form saved successfully!', {
-              autoClose: 500, // 1 second la close
-              position: 'bottom-center',
-              hideProgressBar: true, // progress bar venam na
-              closeOnClick: true,
-              pauseOnHover: false,
-              draggable: false,
-              progress: undefined
-            })
+        autoClose: 500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
 
       if (!formId) setFormId(data.data._id) // in case it's newly created
     } else {
       setLoader(false)
       toast.error('Form save/update failed!', {
-              autoClose: 500, // 1 second la close
-              position: 'bottom-center',
-              hideProgressBar: true, // progress bar venam na
-              closeOnClick: true,
-              pauseOnHover: false,
-              draggable: false,
-              progress: undefined
-            })
+        autoClose: 500, // 1 second la close
+        position: 'bottom-center',
+        hideProgressBar: true, // progress bar venam na
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined
+      })
     }
   }
 
@@ -276,7 +306,7 @@ export default function LeadFormPage() {
     const orgId = organization_id
     const formName = lead_form
     if (formName === 'lead-form') {
-       setLoader(true)
+      setLoader(true)
       const res = await fetch(`/api/v1/admin/lead-form-template/single?organization_id=${orgId}&form_name=${formName}`)
       setLoader(false)
       const json = await res.json()
@@ -290,10 +320,10 @@ export default function LeadFormPage() {
         console.error('Error:', json.error)
         setFormId(null)
       }
-    }else if (formName === 'opportunities-form') {
-       setLoader(true)
+    } else if (formName === 'opportunities-form') {
+      setLoader(true)
       const res = await fetch(`/api/v1/admin/lead-form-template/single?organization_id=${orgId}&form_name=${formName}`)
-     setLoader(false)
+      setLoader(false)
       const json = await res.json()
       if (json?.success) {
         if (json?.data?.sections?.length > 0) {
@@ -306,11 +336,11 @@ export default function LeadFormPage() {
         setFormId(null)
       }
     } else if (formName === 'customer-form') {
-       setLoader(true)
+      setLoader(true)
       const res = await fetch(
         `/api/v1/admin/customer-form-template/single?organization_id=${orgId}&form_name=${formName}`
       )
-       setLoader(false)
+      setLoader(false)
       const json = await res.json()
       if (json?.success) {
         if (json?.data?.sections?.length > 0) {
@@ -326,157 +356,162 @@ export default function LeadFormPage() {
   }
 
   useEffect(() => {
+    if (payloadJson.length > 0) {
+      if (!hasViewPermission()) {
+        router.push('/')
+      }
+    }
+  }, [payloadJson])
+
+  useEffect(() => {
     fetchFormByOrgAndName()
   }, [])
 
   return (
     <DndProvider backend={HTML5Backend}>
       {loader ? (
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: '100vh', // full screen center
-                  width: '100vw',
-                  bgcolor: 'rgba(255, 255, 255, 0.7)', // semi-transparent overlay
-                  position: 'fixed',
-                  top: 0,
-                  left: 0,
-                  zIndex: 1300 // above all dialogs
-                }}
-              >
-                <Image src={LoaderGif} alt='loading' width={100} height={100} />
-              </Box>
-            ) : !loader && sections.length === 0 ? (
-              <>
-              
-              </>
-            ) : (
-              <>
-              <div className='flex gap-6 p-6'>
-        <div className='w-[220px] bg-slate-900 text-white rounded p-4 space-y-2 max-h-[85vh] overflow-y-auto'>
-          <h2 className='text-lg font-semibold mb-2'>Lead Fields</h2>
-          <button
-            onClick={() => setShowLayoutPicker(true)}
-            className='w-full mt-4 py-2 bg-white text-black rounded text-sm font-medium'
-          >
-            ➕ New Section
-          </button>
-          {showLayoutPicker && (
-            <div className='mt-2 space-y-2'>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100vh', // full screen center
+            width: '100vw',
+            bgcolor: 'rgba(255, 255, 255, 0.7)', // semi-transparent overlay
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            zIndex: 1300 // above all dialogs
+          }}
+        >
+          <Image src={LoaderGif} alt='loading' width={100} height={100} />
+        </Box>
+      ) : !loader && sections.length === 0 ? (
+        <></>
+      ) : (
+        <>
+          <div className='flex gap-6 p-6'>
+            <div className='w-[220px] bg-slate-900 text-white rounded p-4 space-y-2 max-h-[85vh] overflow-y-auto'>
+              <h2 className='text-lg font-semibold mb-2'>Lead Fields</h2>
               <button
-                className='w-full px-3 py-2 bg-gray-200 rounded text-sm'
-                onClick={() => {
-                  setSections(prev => [
-                    ...prev,
-                    {
-                      id: crypto.randomUUID(),
-                      title: 'New Section',
-                      layout: 'single',
-                      fields: { left: [] }
-                    }
-                  ])
-                  setShowLayoutPicker(false)
-                }}
+                onClick={() => setShowLayoutPicker(true)}
+                className='w-full mt-4 py-2 bg-white text-black rounded text-sm font-medium'
               >
-                🟦 Single Column Section
+                ➕ New Section
               </button>
-              <button
-                className='w-full px-3 py-2 bg-gray-200 rounded text-sm'
-                onClick={() => {
-                  setSections(prev => [
-                    ...prev,
-                    {
-                      id: crypto.randomUUID(),
-                      title: 'New Section',
-                      layout: 'double',
-                      fields: { left: [], right: [] }
-                    }
-                  ])
-                  setShowLayoutPicker(false)
-                }}
-              >
-                🟨 Two Column Section
-              </button>
-              <button
-                className='w-full px-3 py-2 bg-gray-200 rounded text-sm'
-                onClick={() => {
-                  setSections(prev => [
-                    ...prev,
-                    {
-                      id: crypto.randomUUID(),
-                      title: 'New Section',
-                      layout: 'triple',
-                      fields: { left: [], center: [], right: [] }
-                    }
-                  ])
-                  setShowLayoutPicker(false)
-                }}
-              >
-                🟥 Three Column Section
-              </button>
-            </div>
-          )}
+              {showLayoutPicker && (
+                <div className='mt-2 space-y-2'>
+                  <button
+                    className='w-full px-3 py-2 bg-gray-200 rounded text-sm'
+                    onClick={() => {
+                      setSections(prev => [
+                        ...prev,
+                        {
+                          id: crypto.randomUUID(),
+                          title: 'New Section',
+                          layout: 'single',
+                          fields: { left: [] }
+                        }
+                      ])
+                      setShowLayoutPicker(false)
+                    }}
+                  >
+                    🟦 Single Column Section
+                  </button>
+                  <button
+                    className='w-full px-3 py-2 bg-gray-200 rounded text-sm'
+                    onClick={() => {
+                      setSections(prev => [
+                        ...prev,
+                        {
+                          id: crypto.randomUUID(),
+                          title: 'New Section',
+                          layout: 'double',
+                          fields: { left: [], right: [] }
+                        }
+                      ])
+                      setShowLayoutPicker(false)
+                    }}
+                  >
+                    🟨 Two Column Section
+                  </button>
+                  <button
+                    className='w-full px-3 py-2 bg-gray-200 rounded text-sm'
+                    onClick={() => {
+                      setSections(prev => [
+                        ...prev,
+                        {
+                          id: crypto.randomUUID(),
+                          title: 'New Section',
+                          layout: 'triple',
+                          fields: { left: [], center: [], right: [] }
+                        }
+                      ])
+                      setShowLayoutPicker(false)
+                    }}
+                  >
+                    🟥 Three Column Section
+                  </button>
+                </div>
+              )}
 
-          {fieldOptions.map((type, i) => (
-            <FieldItem
-              key={i}
-              type={type}
-              isPreview
-              removeField={removeField}
-              handleMakeRequired={handleMakeRequired}
-              handleSetPermission={handleSetPermission}
-            />
-          ))}
-        </div>
-
-        <div className='flex-1'>
-          <div className='max-h-[85vh] overflow-y-auto'>
-            {sections.map((section, index) => (
-              <>
-                <button
-                  onClick={() => handleDeleteSection(index)}
-                  className='float-right right-6 cursor-pointer text-red-500 text-sm'
-                >
-                  ❌
-                </button>
-                <SectionBlock
-                  key={section.id}
-                  section={section}
-                  index={index}
-                  onDropField={handleDropField}
-                  onUpdateSection={handleUpdateSection}
-                  onDeleteSection={handleDeleteSection}
+              {fieldOptions.map((type, i) => (
+                <FieldItem
+                  key={i}
+                  type={type}
+                  isPreview
+                  removeField={removeField}
+                  handleMakeRequired={handleMakeRequired}
+                  handleSetPermission={handleSetPermission}
                 />
-              </>
-            ))}
-          </div>
+              ))}
+            </div>
 
-          <Box display='flex' justifyContent={'flex-end'}  mt={2}>
-            {/* <Button variant='contained' color='success' onClick={() => setOpen(true)}>
+            <div className='flex-1'>
+              <div className='max-h-[85vh] overflow-y-auto'>
+                {sections.map((section, index) => (
+                  <>
+                    <button
+                      onClick={() => handleDeleteSection(index)}
+                      className='float-right right-6 cursor-pointer text-red-500 text-sm'
+                    >
+                      ❌
+                    </button>
+                    <SectionBlock
+                      key={section.id}
+                      section={section}
+                      index={index}
+                      onDropField={handleDropField}
+                      onUpdateSection={handleUpdateSection}
+                      onDeleteSection={handleDeleteSection}
+                    />
+                  </>
+                ))}
+              </div>
+
+              <Box display='flex' justifyContent={'flex-end'} mt={2}>
+                {/* <Button variant='contained' color='success' onClick={() => setOpen(true)}>
               Preview
             </Button> */}
-            {/* <Button onClick={handleSaveLayout} variant='contained' loadingPosition="start">
+                {/* <Button onClick={handleSaveLayout} variant='contained' loadingPosition="start">
               {formId ? 'Update' : 'Save'}
             </Button> */}
-            <LoadingButton
-              onClick={handleSaveLayout}
-              variant='contained'
-              loading={loader} // ← this should be a state (true/false)
-              loadingPosition='start'
-            >
-              {formId ? 'Update' : 'Save'}
-            </LoadingButton>
-          </Box>
+                <LoadingButton
+                  onClick={handleSaveLayout}
+                  disabled={formId ? !hasEditPermission() : !hasAddPermission()}
+                  variant='contained'
+                  loading={loader} // ← this should be a state (true/false)
+                  loadingPosition='start'
+                >
+                  {formId ? 'Update' : 'Save'}
+                </LoadingButton>
+              </Box>
 
-          <PreviewModal open={open} onClose={() => setOpen(false)} sections={sections} />
-        </div>
-      </div>
-              </>
-
-            )}
-      
+              <PreviewModal open={open} onClose={() => setOpen(false)} sections={sections} />
+            </div>
+          </div>
+        </>
+      )}
     </DndProvider>
   )
 }

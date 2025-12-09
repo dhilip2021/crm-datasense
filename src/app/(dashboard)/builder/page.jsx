@@ -37,32 +37,46 @@ export default function BuilderPage() {
   const [order, setOrder] = useState('asc')
   const [searchText, setSearchText] = useState('')
 
-
   const router = useRouter()
-    const { payloadJson } = useSelector(state => state.menu)
-  
+  const { payloadJson } = useSelector(state => state.menu)
+
+  const hasAddPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Setup' && m.sub_menu_privileage_name === '')
+
+    return found?.add_status === true
+  }
+
   const hasViewPermission = () => {
-    if (!payloadJson || payloadJson.length === 0) return false;
-  
-    const found = payloadJson.find(
-      m =>
-        m.menu_privileage_name === 'Setup' &&
-        m.sub_menu_privileage_name === ''
-    );
-  
-    return found?.view_status === true;
-  };
-  
-    useEffect(() => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Setup' && m.sub_menu_privileage_name === '')
+
+    return found?.view_status === true
+  }
+  const hasEditPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Setup' && m.sub_menu_privileage_name === '')
+
+    return found?.edit_status === true
+  }
+  const hasDeletePermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(m => m.menu_privileage_name === 'Setup' && m.sub_menu_privileage_name === '')
+
+    return found?.delete_status === true
+  }
+
+  useEffect(() => {
     if (payloadJson.length > 0) {
       if (!hasViewPermission()) {
-        router.push('/');
+        router.push('/')
       }
     }
-  }, [payloadJson]);
-
-
-
+  }, [payloadJson])
 
   const handleSort = property => {
     const isAsc = orderBy === property && order === 'asc'
@@ -136,26 +150,37 @@ export default function BuilderPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedData.map((row, index) => (
-              <TableRow key={row.id}>
-                <TableCell>{page * rowsPerPage + index + 1}</TableCell>
-                <TableCell>
-                  <Link href={row.href} style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <strong>{row.name}</strong>
-                  </Link>
-                </TableCell>
-                <TableCell>{row.module_name}</TableCell>
-                <TableCell align='right'>
-                  <IconButton color='primary' size='small' onClick={() => alert(`Edit ${row.name}`)}>
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton color='error' size='small' onClick={() => alert(`Delete ${row.name}`)}>
-                    <DeleteIcon />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-            {paginatedData.length === 0 && (
+            {hasViewPermission() &&
+              paginatedData.map((row, index) => (
+                <TableRow key={row.id}>
+                  <TableCell>{page * rowsPerPage + index + 1}</TableCell>
+                  <TableCell>
+                    {hasEditPermission() ? (
+                      <Link href={row.href} style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <strong>{row.name}</strong>
+                      </Link>
+                    ) : (
+                      row.name
+                    )}
+                  </TableCell>
+                  <TableCell>{row.module_name}</TableCell>
+                  <TableCell align='right'>
+                    {hasEditPermission() && (
+                      <Link href={row.href} style={{ textDecoration: 'none' }}>
+                        <IconButton color='primary' size='small'>
+                          <EditIcon />
+                        </IconButton>
+                      </Link>
+                    )}
+                    {hasDeletePermission() && (
+                      <IconButton color='error' size='small' onClick={() => alert(`Delete ${row.name}`)}>
+                        <DeleteIcon />
+                      </IconButton>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            {hasViewPermission() && paginatedData.length === 0 && (
               <TableRow>
                 <TableCell colSpan={4} align='center'>
                   No records found

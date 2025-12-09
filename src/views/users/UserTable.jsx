@@ -55,7 +55,7 @@ const isEmail = email => {
 
 const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@.#$!%*?&^])[A-Za-z\d@.#$!%*?&]{8,15}$/
 
-const UserTable = () => {
+const UserTable = ({hasAddPermission, hasViewPermission, hasEditPermission, hasDeletePermission,type}) => {
   const organization_id = Cookies.get('organization_id')
   const item_access = Cookies.get('item_access')
 
@@ -756,9 +756,26 @@ const UserTable = () => {
                       Cancel
                     </Button>
                   </Link>
-                  <Button variant='contained' type='submit' onClick={handleSubmit}>
+
+                    {
+                      type==="add" &&
+                       <Button 
+                    disabled={!hasAddPermission()}
+                    variant='contained' type='submit' onClick={handleSubmit}>
+                    Submit 
+                  </Button>
+                    }
+                     {
+                      type==="edit" &&
+                       <Button 
+                    disabled={!hasEditPermission()}
+                    variant='contained' type='submit' onClick={handleSubmit}>
                     Submit
                   </Button>
+                    }
+                   
+                  
+                  
                 </Box>
               </Grid>
             </Grid>

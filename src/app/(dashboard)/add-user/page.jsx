@@ -11,31 +11,56 @@ import { useEffect } from 'react'
 
 const AddUser = () => {
 
+
+
    const router = useRouter()
     const { payloadJson } = useSelector(state => state.menu)
   
-  const hasAddPermission = () => {
-    if (!payloadJson || payloadJson.length === 0) return false;
-  
+   const hasAddPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
     const found = payloadJson.find(
-      m =>
-        m.menu_privileage_name === 'Settings' &&
-        m.sub_menu_privileage_name === 'User List'
-    );
-  
-    return found?.add_status === true;
-  };
+      m => m.menu_privileage_name === 'Settings' && m.sub_menu_privileage_name === 'User List'
+    )
 
-    useEffect(() => {
+    return found?.add_status === true
+  }
+
+  const hasViewPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(
+      m => m.menu_privileage_name === 'Settings' && m.sub_menu_privileage_name === 'User List'
+    )
+
+    return found?.view_status === true
+  }
+  const hasEditPermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(
+      m => m.menu_privileage_name === 'Settings' && m.sub_menu_privileage_name === 'User List'
+    )
+
+    return found?.edit_status === true
+  }
+  const hasDeletePermission = () => {
+    if (!payloadJson || payloadJson.length === 0) return false
+
+    const found = payloadJson.find(
+      m => m.menu_privileage_name === 'Settings' && m.sub_menu_privileage_name === 'User List'
+    )
+
+    return found?.delete_status === true
+  }
+
+  useEffect(() => {
     if (payloadJson.length > 0) {
-
-      console.log(hasAddPermission(),"<<< PERRRRR")
-
-      if (!hasAddPermission()) {
-        router.push('/');
+      if (!hasViewPermission()) {
+        router.push('/')
       }
     }
-  }, [payloadJson]);
+  }, [payloadJson])
 
 
 
@@ -50,7 +75,13 @@ const AddUser = () => {
         </Breadcrumbs>
       </Grid>
       <Grid item xs={12} md={12}>
-        <UserTable />
+        <UserTable
+        hasAddPermission={hasAddPermission}
+        hasViewPermission={hasViewPermission}
+        hasEditPermission={hasEditPermission}
+        hasDeletePermission={hasDeletePermission}
+        type="add"
+        />
       </Grid>
       
     </Grid>

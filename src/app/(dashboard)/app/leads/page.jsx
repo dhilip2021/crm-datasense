@@ -837,7 +837,9 @@ const LeadTable = () => {
                             minWidth: isMobile? 50 : 250
                           }}
                         >
-                          <Link
+                          {
+                            hasEditPermission() ? 
+                             <Link
                             href={`/view/lead-form/${encodeURIComponent(encryptCryptoRes(row.lead_id))}`}
                             style={{ textDecoration: 'none' }}
                           >
@@ -851,7 +853,12 @@ const LeadTable = () => {
                                 </span>
                               </Tooltip>
                             </strong>
-                          </Link>
+                          </Link> :
+                          `${row.values['First Name'] || ''} ${row.values['Last Name'] || ''}`.trim() || ''
+                          }
+                         
+
+
                         </TableCell>
                         <TableCell
                           sx={{
@@ -905,33 +912,6 @@ const LeadTable = () => {
                             size='small'
                           />
                         </TableCell>
-                        {/* <TableCell>
-                          <Tooltip title={row.values['Lead Status'] === 'Closed Lost' ?  row.values['Loss Reasons'] : row.values['Lead Status'] === 'Closed Won' ?  row.values['Win Reasons'] : ''} arrow enterDelay={300} leaveDelay={150}>
-                            <Chip
-                            label={row.values['Lead Status'] || 'Unknown'}
-                            color={
-                              row.values['Lead Status'] === 'New / Attempted Contact'
-                                ? 'primary'
-                                  : row.values['Lead Status'] === 'Contacted / Qualification'
-                                    ? 'success'
-                                    : row.values['Lead Status'] === 'Demo / Proposal Stage'
-                                      ? 'secondary'
-                                      : row.values['Lead Status'] === 'Negotiation / Ready to Close'
-                                        ? 'default'
-                                        : row.values['Lead Status'] === 'Closed Lost'
-                                          ? 'warning'
-                                          : row.values['Lead Status'] === 'Closed Won'
-                                            ? 'success'
-                                            : row.values['Lead Status'] === 'Invalid / Junk / Wrong Contact'
-                                              ? 'warning'
-                                              : row.values['Lead Status'] === 'Call Back'
-                                                ? 'error' : 'default'
-                            }
-                            size='small'
-                          />
-                          </Tooltip>
-                          
-                        </TableCell> */}
                         <TableCell>
                           <Tooltip
                             title={

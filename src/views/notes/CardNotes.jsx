@@ -24,7 +24,7 @@ import LoaderGif from '@assets/gif/loader.gif'
 import NoteCard from './NoteCard'
 import NotesIcon from '@mui/icons-material/Notes'
 
-const CardNotes = () => {
+const CardNotes = ({ hasAddPermission, hasViewPermission, hasEditPermission, hasDeletePermission }) => {
   const getToken = Cookies.get('_token')
   const organization_id = Cookies.get('organization_id')
   const loggedInUserId = Cookies.get('user_id')
@@ -406,7 +406,16 @@ const CardNotes = () => {
           </Box>
         ) : (
           <Grid container spacing={2}>
-            <NoteCard search={search} notes={notes} onEdit={onEdit} onAdd={onAdd} />
+            <NoteCard
+              search={search}
+              notes={notes}
+              onEdit={onEdit}
+              onAdd={onAdd}
+              hasAddPermission={hasAddPermission}
+              hasViewPermission={hasViewPermission}
+              hasEditPermission={hasEditPermission}
+              hasDeletePermission={hasDeletePermission}
+            />
           </Grid>
         )}
       </Box>

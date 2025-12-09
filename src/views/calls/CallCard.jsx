@@ -43,7 +43,7 @@ const highlightText = (text, search) => {
   )
 }
 
-const CallCard = ({ search, calls, initialLimit = 4, loadMoreStep = 4 }) => {
+const CallCard = ({ search, calls, initialLimit = 4, loadMoreStep = 4,hasAddPermission, hasViewPermission, hasEditPermission, hasDeletePermission }) => {
   const user_name = Cookies.get('user_name')
   const [limit, setLimit] = useState(initialLimit)
 
@@ -84,7 +84,7 @@ const CallCard = ({ search, calls, initialLimit = 4, loadMoreStep = 4 }) => {
   return (
     <Box sx={{ width: '100%' }}>
       <Grid container spacing={2}>
-        {displayedLeads.map(lead => (
+        {hasViewPermission() && displayedLeads.map(lead => (
           <Grid item xs={12} sm={6} key={lead._id}>
             <Box
               sx={{
@@ -184,7 +184,7 @@ const CallCard = ({ search, calls, initialLimit = 4, loadMoreStep = 4 }) => {
       </Grid>
 
       {/* Load More */}
-      {limit < filteredLeads.length && (
+      {hasViewPermission() && limit < filteredLeads.length && (
         <Box textAlign='center' mt={2}>
           <Button variant='contained' onClick={() => setLimit(limit + loadMoreStep)}>
             Load More

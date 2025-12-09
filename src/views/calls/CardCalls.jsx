@@ -24,7 +24,7 @@ import LoaderGif from '@assets/gif/loader.gif'
 import NotesIcon from '@mui/icons-material/Notes'
 import CallCard from './CallCard'
 
-const CardCalls = () => {
+const CardCalls = ({ hasAddPermission, hasViewPermission, hasEditPermission, hasDeletePermission }) => {
   const getToken = Cookies.get('_token')
   const organization_id = Cookies.get('organization_id')
   const loggedInUserId = Cookies.get('user_id')
@@ -406,7 +406,16 @@ const CardCalls = () => {
           </Box>
         ) : (
           <Grid container spacing={2}>
-            <CallCard search={search} calls={calls} onEdit={onEdit} onAdd={onAdd} />
+            <CallCard
+              search={search}
+              calls={calls}
+              onEdit={onEdit}
+              onAdd={onAdd}
+              hasAddPermission={hasAddPermission}
+              hasViewPermission={hasViewPermission}
+              hasEditPermission={hasEditPermission}
+              hasDeletePermission={hasDeletePermission}
+            />
           </Grid>
         )}
       </Box>
