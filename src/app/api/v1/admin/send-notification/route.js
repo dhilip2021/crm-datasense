@@ -218,6 +218,8 @@ export async function POST(request) {
     // send
     const result = await sendNotificationsInBatches(registrationTokens, messages);
 
+    console.log(result,"<<< NOTIFICATION SEND RESULTSS")
+
     // remove invalid tokens from DB (if any)
     let deleteResult = null;
     if (result.invalidTokens && result.invalidTokens.length > 0) {
