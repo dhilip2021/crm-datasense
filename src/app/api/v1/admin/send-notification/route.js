@@ -6,68 +6,74 @@ import { NextResponse } from "next/server";
 import connectMongoDB from "@/libs/mongodb";
 import { FcmDeviceToken } from "@/models/fcmDeviceTokenModel";
 
-
+// -----------------------------------------------------
+//  FIXED FIREBASE INITIALIZATION (safe for Vercel)
+// -----------------------------------------------------
 function initFirebaseOnce() {
-  if (admin.apps && admin.apps.length) return;
+  // Prevent duplicate init
+  if (admin.apps.length > 0) return;
 
-  // If platform provides the env var GOOGLE_APPLICATION_CREDENTIALS, admin SDK will pick it up automatically on initializeApp()
-  // if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-  //   admin.initializeApp();
-  //   console.log("Firebase initialized using GOOGLE_APPLICATION_CREDENTIALS.");
-  //   return;
-  // }
+  // 1) GOOGLE_APPLICATION_CREDENTIALS (Vercel Secret)
+  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    admin.initializeApp({
+      credential: admin.credential.applicationDefault(),
+    });
+    console.log("Firebase initialized via GOOGLE_APPLICATION_CREDENTIALS");
+    return;
+  }
 
-  // If user provided JSON string of service account
+  // 2) SERVICE_ACCOUNT_JSON (Single-line JSON env)
   if (process.env.SERVICE_ACCOUNT_JSON) {
     try {
       const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT_JSON);
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
       });
-      console.log("Firebase initialized using SERVICE_ACCOUNT_JSON env.");
+      console.log("Firebase initialized via SERVICE_ACCOUNT_JSON");
       return;
     } catch (err) {
       console.error("Invalid SERVICE_ACCOUNT_JSON:", err);
-      // fallthrough
     }
   }
 
-  // fallback: look for file in project root: process.cwd()/service_key.json
-  const candidate = path.join(process.cwd(), "service_key.json");
-  if (fs.existsSync(candidate)) {
+  // 3) Local fallback: service_key.json
+  const localKeyPath = path.join(process.cwd(), "service_key.json");
+  if (fs.existsSync(localKeyPath)) {
     try {
-      const raw = fs.readFileSync(candidate, "utf8");
-      const serviceAccount = JSON.parse(raw);
+      const file = fs.readFileSync(localKeyPath, "utf8");
+      const serviceAccount = JSON.parse(file);
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
       });
-      console.log("Firebase initialized using service_key.json from project root.");
+      console.log("Firebase initialized via local service_key.json");
       return;
     } catch (err) {
-      console.error("Failed to parse service_key.json:", err);
+      console.error("Failed to parse local key:", err);
       throw err;
     }
   }
 
-  throw new Error(
-    "Firebase service account not found. Set GOOGLE_APPLICATION_CREDENTIALS or SERVICE_ACCOUNT_JSON or put service_key.json in project root."
-  );
+  throw new Error("No Firebase credentials found.");
 }
 
 initFirebaseOnce();
 
-/**
- * Helper: fetch tokens by device type in pages, dedupe result
- */
+// -----------------------------------------------------
+// Fetch tokens (paged, deduped)
+// -----------------------------------------------------
 async function fetchAllTokens(c_type, send_to) {
   const PAGE_SIZE = 1000;
   let page = 0;
   let tokens = [];
+
   while (true) {
-    const docs = await FcmDeviceToken.find({ c_fcm_device_type: c_type,c_user_id: { $in: send_to } })
+    const docs = await FcmDeviceToken.find({
+      c_fcm_device_type: c_type,
+      c_user_id: { $in: send_to },
+    })
       .skip(page * PAGE_SIZE)
       .limit(PAGE_SIZE)
-      .lean(); // lean for performance
+      .lean();
 
     if (!docs || docs.length === 0) break;
 
@@ -75,59 +81,53 @@ async function fetchAllTokens(c_type, send_to) {
     page++;
   }
 
-  // dedupe tokens
   return Array.from(new Set(tokens));
 }
 
-/**
- * Remove array of tokens from DB
- */
+// -----------------------------------------------------
+// Remove invalid tokens
+// -----------------------------------------------------
 async function removeTokensFromDatabase(tokensToRemove = []) {
-  if (!tokensToRemove || tokensToRemove.length === 0) return { deletedCount: 0 };
-
-  // remove where token is in array
-  const res = await FcmDeviceToken.deleteMany({
+  if (!tokensToRemove.length) return { deletedCount: 0 };
+  return await FcmDeviceToken.deleteMany({
     c_fcm_device_token: { $in: tokensToRemove },
   });
-  return res;
 }
 
-/**
- * Send notifications in batches and return aggregated stats & raw results summary
- */
-async function sendNotificationsInBatches(registrationTokens = [], messagePayload = {}) {
-  const BATCH_SIZE = 500; // FCM limit
+// -----------------------------------------------------
+// Send notifications in batches
+// -----------------------------------------------------
+async function sendNotificationsInBatches(registrationTokens, messagePayload) {
+  const BATCH_SIZE = 500;
+
   const aggregated = {
     totalTokens: registrationTokens.length,
     totalRequests: 0,
     successCount: 0,
     failureCount: 0,
     invalidTokens: new Set(),
-    responses: [], // keep a short summary per batch
+    responses: [],
   };
 
   for (let i = 0; i < registrationTokens.length; i += BATCH_SIZE) {
     const batch = registrationTokens.slice(i, i + BATCH_SIZE);
+
     try {
-      // Using sendEachForMulticast for batch token sending
       const response = await admin.messaging().sendEachForMulticast({
         tokens: batch,
-        notification: messagePayload.notification,
-        data: messagePayload.data,
-        android: messagePayload.android,
-        apns: messagePayload.apns,
-        webpush: messagePayload.webpush,
+        ...messagePayload,
       });
 
       aggregated.totalRequests++;
       aggregated.successCount += response.successCount;
       aggregated.failureCount += response.failureCount;
 
-      // Collect invalid tokens from this batch
       response.responses.forEach((res, idx) => {
-        if (!res.success && res.error && res.error.code) {
-          const errCode = res.error.code;
-          if (errCode === "messaging/registration-token-not-registered" || errCode === "messaging/invalid-registration-token") {
+        if (!res.success && res.error?.code) {
+          if (
+            res.error.code === "messaging/registration-token-not-registered" ||
+            res.error.code === "messaging/invalid-registration-token"
+          ) {
             aggregated.invalidTokens.add(batch[idx]);
           }
         }
@@ -140,38 +140,37 @@ async function sendNotificationsInBatches(registrationTokens = [], messagePayloa
         failureCount: response.failureCount,
       });
     } catch (err) {
-      // Log and continue with remaining batches
-      console.error("Error sending FCM batch:", err);
       aggregated.responses.push({
         batchStart: i,
         batchSize: batch.length,
-        error: String(err?.message || err),
+        error: err.message,
       });
     }
   }
 
-  // Convert Set to Array for output
   aggregated.invalidTokens = Array.from(aggregated.invalidTokens);
   return aggregated;
 }
 
-/**
- * The POST handler
- */
+// -----------------------------------------------------
+// POST handler
+// -----------------------------------------------------
 export async function POST(request) {
   try {
-    // connect DB early
     await connectMongoDB();
 
     const body = await request.json();
-    const { title, message, link, icon, c_type,send_to } = body ?? {};
+    const { title, message, link, icon, c_type, send_to } = body;
 
     if (!c_type) {
-      return NextResponse.json({ appStatusCode: 4, message: "c_type is required", error: "invalid_request" }, { status: 400 });
+      return NextResponse.json(
+        { appStatusCode: 4, message: "c_type is required", error: "invalid_request" },
+        { status: 400 }
+      );
     }
 
-    // Build message payload
-    const messages = {
+    // Build payload
+    const payload = {
       notification: {
         title: title || "",
         body: message || "",
@@ -179,13 +178,11 @@ export async function POST(request) {
       },
       data: {
         link: link || "",
-        imageUrl: icon || "",
         title: title || "",
         body: message || "",
+        imageUrl: icon || "",
       },
-      android: {
-        priority: "high",
-      },
+      android: { priority: "high" },
       apns: {
         headers: { "apns-priority": "10" },
         payload: {
@@ -200,10 +197,10 @@ export async function POST(request) {
       webpush: link ? { fcmOptions: { link } } : undefined,
     };
 
-    // fetch tokens
-    const registrationTokens = await fetchAllTokens(c_type,send_to);
+    // Fetch tokens
+    const registrationTokens = await fetchAllTokens(c_type, send_to);
 
-    if (!registrationTokens || registrationTokens.length === 0) {
+    if (!registrationTokens.length) {
       return NextResponse.json(
         {
           appStatusCode: 4,
@@ -215,34 +212,36 @@ export async function POST(request) {
       );
     }
 
-    // send
-    const result = await sendNotificationsInBatches(registrationTokens, messages);
+    // Send notification
+    const result = await sendNotificationsInBatches(registrationTokens, payload);
+    console.log(result, "<<< NOTIFICATION SEND RESULTSS");
 
-    console.log(result,"<<< NOTIFICATION SEND RESULTSS")
-
-    // remove invalid tokens from DB (if any)
+    // Remove invalid tokens
     let deleteResult = null;
-    if (result.invalidTokens && result.invalidTokens.length > 0) {
+    if (result.invalidTokens.length > 0) {
       deleteResult = await removeTokensFromDatabase(result.invalidTokens);
     }
 
-    // final response build
-    const sendResponse = {
-      appStatusCode: result.successCount > 0 ? 0 : 4,
-      message: result.successCount > 0 ? "Notification sent (partial/complete)" : "Notification send failure",
-      payloadJson: {
-        totalTokens: result.totalTokens,
-        successCount: result.successCount,
-        failureCount: result.failureCount,
-        invalidTokenCount: result.invalidTokens.length,
-        invalidTokensSample: result.invalidTokens.slice(0, 10),
-        batchSummaries: result.responses,
-        dbDeleteResult: deleteResult,
+    return NextResponse.json(
+      {
+        appStatusCode: result.successCount > 0 ? 0 : 4,
+        message:
+          result.successCount > 0
+            ? "Notification sent (partial/complete)"
+            : "Notification failed",
+        payloadJson: {
+          totalTokens: result.totalTokens,
+          successCount: result.successCount,
+          failureCount: result.failureCount,
+          invalidTokenCount: result.invalidTokens.length,
+          invalidTokensSample: result.invalidTokens.slice(0, 10),
+          batchSummaries: result.responses,
+          dbDeleteResult: deleteResult,
+        },
+        error: null,
       },
-      error: null,
-    };
-
-    return NextResponse.json(sendResponse, { status: result.successCount > 0 ? 200 : 400 });
+      { status: result.successCount > 0 ? 200 : 400 }
+    );
   } catch (err) {
     console.error("Send notification error:", err);
     return NextResponse.json(
@@ -250,7 +249,7 @@ export async function POST(request) {
         appStatusCode: 4,
         message: "Notification send failure",
         payloadJson: [],
-        error: String(err?.message || err),
+        error: err.message,
       },
       { status: 500 }
     );
