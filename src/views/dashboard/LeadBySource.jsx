@@ -10,7 +10,6 @@ import dayjs from 'dayjs'
 import { Box, Button, Menu, MenuItem, Skeleton } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import Cookies from 'js-cookie'
-import Link from '@components/Link'
 
 const LeadBySource = () => {
   const getToken = Cookies.get('_token')
@@ -117,7 +116,6 @@ const LeadBySource = () => {
       const json = await res.json()
       if (json.success) {
         const leads = json.data || []
-        console.log(leads, 'leads')
 
         // Step 1: Count leads by source
         const sourceCounts = leads.reduce((acc, lead) => {
@@ -172,7 +170,6 @@ const LeadBySource = () => {
           })
         }
 
-        console.log(updatedLeadsData, 'updatedLeadsData')
         setLeadSourceData(updatedLeadsData)
       }
     } catch (err) {
@@ -272,7 +269,6 @@ const LeadBySource = () => {
           })
         }
 
-        console.log(updatedOpportunityData, 'updatedOpportunityData')
         setOpportunitySourceData(updatedOpportunityData)
       }
     } catch (err) {
@@ -289,6 +285,11 @@ const LeadBySource = () => {
       fetchOpportunityData()
     }
   }, [leadSource, filters])
+
+
+    useEffect(() => {
+      if (filters.fromDate && filters.toDate) fetchData()
+    }, [filters])
 
   useEffect(() => {
     const { fromDate, toDate } = getDateRange(viewType)

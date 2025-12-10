@@ -137,7 +137,6 @@ const UserTable = ({hasAddPermission, hasViewPermission, hasEditPermission, hasD
       setLoader(true)
       const checkEmail = await checkMailApi(body)
       setLoader(false)
-      console.log(userId, '<<< user IDDDD')
 
       if (checkEmail?.appStatusCode === 4) {
         // user exists

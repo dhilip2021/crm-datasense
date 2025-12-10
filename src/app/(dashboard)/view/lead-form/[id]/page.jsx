@@ -156,7 +156,6 @@ const LeadDetailView = () => {
 
   const { payloadJson } = useSelector(state => state.menu)
 
-  console.log(payloadJson, '<<<< payloadJson 123456')
 
   const hasAddPermission = () => {
     if (!payloadJson || payloadJson.length === 0) return false

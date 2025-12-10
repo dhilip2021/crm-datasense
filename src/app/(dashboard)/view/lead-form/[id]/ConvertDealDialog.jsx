@@ -40,13 +40,11 @@ const ConvertDealDialog = ({
 }) => {
 
 
-  console.log(user_id,"<<< user Id")
 
   // const ownerName = leadData?.c_createdByName || 'Unknown'
   const stageOptions = fieldOpportunityConfig?.['Lead Status'] || []
   const [errors, setErrors] = useState({})
 
-  console.log(stageOptions,"<<< stageOptions")
 
   // 🧩 Prefill values from leadData
   useEffect(() => {

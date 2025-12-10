@@ -15,6 +15,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ReduxProvider } from './providers';
 import { ToastContainer } from 'react-toastify';
 import ReminderAlert from './(dashboard)/view/lead-form/[id]/ReminderAlert';
+import NotificationSetup from './NotificationSetup';
+import NotificationPopup from '@/components/NotificationPopup/NotificationPopup';
 
 export const metadata = {
   title: 'Lumivo CRM Admin - Datasense Technologies',
@@ -45,7 +47,10 @@ const RootLayout = ({ children }) => {
         draggable={false}
       />
       <ReminderAlert />
+      <NotificationSetup />
+      <NotificationPopup />
         </ReduxProvider>
+
       </body>
     </html>
   )

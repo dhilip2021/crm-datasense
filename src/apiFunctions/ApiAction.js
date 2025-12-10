@@ -1010,3 +1010,39 @@ export const deleteCategoryMasterApi = async (body,header) => {
       return err;
     });
 };
+
+
+export const getDeviceId = async () => {
+  return await axios
+    .get(`https://prod-analytics.qlitics.com/api/device-tracker-id`)
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const addDeviceNotify = async (body) => {
+  return await axios
+    .post(`/api/v1/web/fcm/add`, body)
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const sendNotification = async (body) => {
+  return await axios
+    .post(`/api/v1/admin/send-notification`, body, {
+      headers: AppHeader,
+    })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};

@@ -103,7 +103,6 @@ const Navigation = () => {
 
       dispatch(menuData(dispatchMenu))
 
-      console.log(result, '<<<< results getUserRoles')
       setLoader(false)
       setRoles(result?.payloadJson)
     } catch (err) {

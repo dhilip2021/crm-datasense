@@ -192,7 +192,6 @@ export default function DashboardWidgets({sections}) {
       const json = await res.json()
 
       if (json.success) {
-        console.log(json.data,"<<< DHILIP LEADss")
         setData(json.data)
       }
     } catch (err) {

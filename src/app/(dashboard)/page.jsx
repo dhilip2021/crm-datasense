@@ -204,7 +204,6 @@ const DashboardAnalytics = () => {
   }
 
   const leadsForStatus = useMemo(() => {
-    console.log(dataFilter, '<<< data Filter')
 
     // 🧠 If "Total" is selected → return everything
     if (selectedStatus === 'Total') return dataFilter || []

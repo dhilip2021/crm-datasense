@@ -27,7 +27,6 @@ const EditableField = ({
   hasEditPermission
 }) => {
 
-  console.log(hasEditPermission(),"<<< hasEditPermission")
 
 
   const [value, setValue] = useState(initialValue)

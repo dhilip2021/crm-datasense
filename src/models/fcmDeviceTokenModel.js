@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-
 var Schema = mongoose.Schema;
 
 const FcmDeviceTokenSchema = new Schema(
@@ -22,6 +21,11 @@ const FcmDeviceTokenSchema = new Schema(
     c_fcm_device_token: {
       type: String,
       required: [true, "FCM Device Token is required"],
+      trim: true,
+    },
+    c_user_id: {
+      type: String,
+      required: [true, "User Id is required"],
       trim: true,
     },
     n_status: {
