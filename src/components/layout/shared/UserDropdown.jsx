@@ -190,7 +190,8 @@ const UserDropdown = () => {
                           'organization_emp_count',
                           'user_id',
                           'c_version',
-                          'endedAt'
+                          'endedAt',
+                          'reminder'
                         ]
                         cookiesToClear.forEach(c => Cookies.remove(c))
 
