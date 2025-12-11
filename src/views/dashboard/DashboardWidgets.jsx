@@ -269,10 +269,11 @@ export default function DashboardWidgets({ sections }) {
     const results = await sendNotification(body)
 
     // console.log(results, '<<< resultsss')
-    // if (results?.appStatusCode === 0) {
-    // } else {
-    //   console.log(error)
-    // }
+    if (results?.appStatusCode === 0) {
+       Cookies.set('reminder', "1")
+    } else {
+      console.log(error)
+    }
   }
 
   useEffect(() => {
@@ -305,15 +306,15 @@ export default function DashboardWidgets({ sections }) {
         const lastName = lead.values?.['Last Name'] || ''
         const company = lead.values?.['Company'] || '— (No Company)'
         const leadId = lead.lead_id || ''
-
+        Cookies.set('reminder', "0")
         const msg = `
 Company: ${company}
 First Name: ${firstName}
 Last Name: ${lastName}
-    `
+    `   
         sendFollowUpNotiFn(msg, leadId)
       })
-      Cookies.set('reminder', "1")
+     
     }
     }
 
