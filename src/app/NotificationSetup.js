@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 
 const NotificationSetup = () => {
   const user_id = Cookies.get('user_id')
+const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
   const [device, setDevice] = useState('')
   const [fcmToken, setFcmToken] = useState('')
 
@@ -31,11 +32,17 @@ const NotificationSetup = () => {
     try {
       const body = {
         c_fcm_device_id: device,
-        c_fcm_device_type: 'web',
+        c_fcm_device_type: baseUrl ==="http://localhost:3000"? 'web' : 'web',
         c_fcm_device_token: fcmToken,
         c_user_id: user_id
       }
-      await addDeviceNotify(body)
+      if(user_id){
+        await addDeviceNotify(body)
+      }else{
+        console.log("user Id very must")
+      }
+
+      
     } catch (err) {
       console.log(err)
     }
@@ -43,6 +50,12 @@ const NotificationSetup = () => {
 
   // When token + device ID ready → save to DB
   useEffect(() => {
+
+    console.log(fcmToken,"<<< fcmToken")
+    console.log(device,"<<< device")
+    console.log(user_id,"<<< user_id")
+
+
     if (fcmToken && device) {
       SaveTokenToDB()
     }

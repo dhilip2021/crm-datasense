@@ -14,13 +14,13 @@ function initFirebaseOnce() {
   if (admin.apps.length > 0) return;
 
   // 1) GOOGLE_APPLICATION_CREDENTIALS (Vercel Secret)
-  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-    admin.initializeApp({
-      credential: admin.credential.applicationDefault(),
-    });
-    console.log("Firebase initialized via GOOGLE_APPLICATION_CREDENTIALS");
-    return;
-  }
+  // if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+  //   admin.initializeApp({
+  //     credential: admin.credential.applicationDefault(),
+  //   });
+  //   console.log("Firebase initialized via GOOGLE_APPLICATION_CREDENTIALS");
+  //   return;
+  // }
 
   // 2) SERVICE_ACCOUNT_JSON (Single-line JSON env)
   if (process.env.SERVICE_ACCOUNT_JSON) {
@@ -37,21 +37,21 @@ function initFirebaseOnce() {
   }
 
   // 3) Local fallback: service_key.json
-  const localKeyPath = path.join(process.cwd(), "service_key.json");
-  if (fs.existsSync(localKeyPath)) {
-    try {
-      const file = fs.readFileSync(localKeyPath, "utf8");
-      const serviceAccount = JSON.parse(file);
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-      });
-      console.log("Firebase initialized via local service_key.json");
-      return;
-    } catch (err) {
-      console.error("Failed to parse local key:", err);
-      throw err;
-    }
-  }
+  // const localKeyPath = path.join(process.cwd(), "service_key.json");
+  // if (fs.existsSync(localKeyPath)) {
+  //   try {
+  //     const file = fs.readFileSync(localKeyPath, "utf8");
+  //     const serviceAccount = JSON.parse(file);
+  //     admin.initializeApp({
+  //       credential: admin.credential.cert(serviceAccount),
+  //     });
+  //     console.log("Firebase initialized via local service_key.json");
+  //     return;
+  //   } catch (err) {
+  //     console.error("Failed to parse local key:", err);
+  //     throw err;
+  //   }
+  // }
 
   throw new Error("No Firebase credentials found.");
 }
@@ -212,9 +212,13 @@ export async function POST(request) {
       );
     }
 
+     console.log(registrationTokens, "<<< NOTIFICATION registrationTokens");
+     console.log(payload, "<<< NOTIFICATION payload");
+
+
     // Send notification
     const result = await sendNotificationsInBatches(registrationTokens, payload);
-    console.log(result, "<<< NOTIFICATION SEND RESULTSS");
+   
 
     // Remove invalid tokens
     let deleteResult = null;
