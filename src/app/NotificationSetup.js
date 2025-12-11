@@ -32,7 +32,7 @@ const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
     try {
       const body = {
         c_fcm_device_id: device,
-        c_fcm_device_type: baseUrl ==="http://localhost:3000"? 'web' : 'web',
+        c_fcm_device_type: baseUrl ==="http://localhost:3000"? 'web1' : 'web',
         c_fcm_device_token: fcmToken,
         c_user_id: user_id
       }

@@ -10,6 +10,9 @@ const NotificationPopup = () => {
     listenForForegroundNotifications((payload) => {
       const { title, body, image } = payload.notification;
 
+      console.log(title,"<<< NOTIFI title")
+      console.log(body,"<<< NOTIFI body")
+
       setPopup({
         title,
         body,
