@@ -60,6 +60,7 @@ const VerticalMenu = ({ scrollMenu, roles, fetchRolesPrevileges }) => {
     Cookies.remove('user_id')
     Cookies.remove('c_version')
     Cookies.remove('endedAt')
+    Cookies.remove('reminder')
     router.push('/login')
   }
 

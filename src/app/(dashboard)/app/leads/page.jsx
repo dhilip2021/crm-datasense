@@ -412,6 +412,10 @@ const LeadTable = () => {
   }
 
   const fetchData = async () => {
+
+    
+
+
     setLoading(true)
 
     const form_name = 'lead-form'

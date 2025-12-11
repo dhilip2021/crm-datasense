@@ -1061,6 +1061,8 @@ const Login = ({ mode }) => {
 
     let results = await LoginApi(dataValue)
 
+    
+
     if (results?.appStatusCode === 4) {
       setLoader(false)
       toast.error(results?.error, {
@@ -1080,6 +1082,10 @@ const Login = ({ mode }) => {
       }
     } else if (results?.appStatusCode === 0) {
       const resultsPayloadJson = decrypCryptoRequest(results.payloadJson)
+
+      console.log(resultsPayloadJson,"<<< login resultsPayloadJson")
+
+    // return null
 
       console.log(resultsPayloadJson, '<<< resultsPayloadJson')
 
@@ -1162,6 +1168,7 @@ const Login = ({ mode }) => {
           Cookies.set('role_name', resultsPayloadJson?.role)
           Cookies.set('user_name', resultsPayloadJson?.user_name)
           Cookies.set('privileges', JSON.stringify(dummyArray))
+          Cookies.set('reminder', "0")
 
           router.push('/')
           router.refresh()
@@ -1220,7 +1227,7 @@ const Login = ({ mode }) => {
         Cookies.set('role_name', resultsPayloadJson?.role)
         Cookies.set('user_name', resultsPayloadJson?.user_name)
         Cookies.set('privileges', JSON.stringify(dummyArray))
-
+        Cookies.set('reminder', "0")
         console.log(resultsPayloadJson, '<<< resultsPayloadJson 11')
 
         if (resultsPayloadJson?.c_role_id === '27f01165688z') {

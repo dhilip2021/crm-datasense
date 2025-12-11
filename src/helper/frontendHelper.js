@@ -52,6 +52,7 @@ export const removeCredentials = () => {
   Cookies.remove('user_id')
   Cookies.remove('c_version')
   Cookies.remove('endedAt')
+  Cookies.remove('reminder')
 }
 export function encryptCryptoResponse(data) {
   const secretPassphrase = `${process.env.NEXT_PUBLIC_ENCY_DECY_SECRET}`

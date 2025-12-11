@@ -61,6 +61,7 @@ const ChangePasswordView = () => {
     Cookies.remove('user_id')
     Cookies.remove('c_version')
     Cookies.remove('endedAt')
+    Cookies.remove('reminder')
   }
 
   // ✅ form submit

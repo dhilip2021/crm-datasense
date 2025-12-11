@@ -21,15 +21,17 @@ import { useEffect, useMemo, useState } from 'react'
 import Cookies from 'js-cookie'
 import dayjs from 'dayjs'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import { getUserListApi } from '@/apiFunctions/ApiAction'
+import { getUserListApi, sendNotification } from '@/apiFunctions/ApiAction'
 
-export default function DashboardWidgets({sections}) {
+export default function DashboardWidgets({ sections }) {
   const router = useRouter()
 
   const user_id = Cookies.get('user_id')
   const getToken = Cookies.get('_token')
-
   const organization_id = Cookies.get('organization_id')
+  const organization_logo = Cookies.get('organization_logo')
+  const reminder = Cookies.get('reminder')
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
 
   const [data, setData] = useState([])
   const [loader, setLoader] = useState(false)
@@ -155,9 +157,9 @@ export default function DashboardWidgets({sections}) {
     }
   }
 
-
-
   const fetchData = async () => {
+    console.log('fetch 1')
+
     setLoader(true)
 
     const form_name = 'lead-form'
@@ -248,13 +250,76 @@ export default function DashboardWidgets({sections}) {
     }
   }, [user_id])
 
+  const sendFollowUpNotiFn = async (msg, leadId) => {
 
+    console.log(msg,"<<< msg")
+    console.log(leadId,"<<< leadId")
+
+    const body = {
+      title: 'Follow-up Reminder 📌',
+      message: msg,
+      icon: organization_logo ? organization_logo : '/uploads/logos/1763798172005_DS-Logo.png',
+      link: leadId,
+      c_redirect_id: '',
+      c_type: baseUrl === 'http://localhost:3000' ? 'web1' : 'web',
+      send_to: [user_id]
+    }
+
+    console.log(body, '<<< BODYYYYYYY LISTSSS')
+    const results = await sendNotification(body)
+
+    // console.log(results, '<<< resultsss')
+    // if (results?.appStatusCode === 0) {
+    // } else {
+    //   console.log(error)
+    // }
+  }
 
   useEffect(() => {
     const { fromDate, toDate } = getDateRange(viewType)
     setFilters(prev => ({ ...prev, fromDate: fromDate, toDate: toDate }))
     setFetched(false)
   }, [viewType])
+
+  useEffect(() => {
+
+    if(data?.length > 0){
+      
+    const today = new Date().toISOString().split('T')[0]
+   
+    // Filter follow-up leads
+    const filtered = data.filter(item => {
+      const followUp = item.values?.['Next Follow-up Date']
+      const Assigned = item.values?.['Assigned To']
+      
+
+      // const followUp = item.values?.['Next Follow-up Date']
+      return followUp === today && Assigned === user_id
+    })
+     console.log(filtered,"<<< FILTREDDDD")
+
+    if (reminder === "0") {
+      // Loop through each lead and generate message
+      filtered.forEach(lead => {
+        const firstName = lead.values?.['First Name'] || ''
+        const lastName = lead.values?.['Last Name'] || ''
+        const company = lead.values?.['Company'] || '— (No Company)'
+        const leadId = lead.lead_id || ''
+
+        const msg = `
+Company: ${company}
+First Name: ${firstName}
+Last Name: ${lastName}
+    `
+        sendFollowUpNotiFn(msg, leadId)
+      })
+      Cookies.set('reminder', "1")
+    }
+    }
+
+
+
+  }, [data])
 
   return (
     <>
@@ -343,7 +408,7 @@ export default function DashboardWidgets({sections}) {
             <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => router('/leads/assignment')}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Avatar sx={{ bgcolor: 'primary.main' ,color:"#fff", mr: 2 }}>
+                  <Avatar sx={{ bgcolor: 'primary.main', color: '#fff', mr: 2 }}>
                     <PeopleIcon />
                   </Avatar>
                   <Typography variant='h6' fontWeight='bold'>
@@ -370,7 +435,7 @@ export default function DashboardWidgets({sections}) {
             <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => router.push('/leads/response-time')}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Avatar sx={{ bgcolor: 'primary.main',color:"#fff", mr: 2 }}>
+                  <Avatar sx={{ bgcolor: 'primary.main', color: '#fff', mr: 2 }}>
                     <AccessTimeIcon />
                   </Avatar>
                   <Typography variant='h6' fontWeight='bold'>
@@ -410,7 +475,7 @@ export default function DashboardWidgets({sections}) {
             <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={() => router('/leads/follow-ups')}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Avatar sx={{ bgcolor: 'info.main',color:"#fff", mr: 2 }}>
+                  <Avatar sx={{ bgcolor: 'info.main', color: '#fff', mr: 2 }}>
                     <EventAvailableIcon />
                   </Avatar>
                   <Typography variant='h6' fontWeight='bold'>
