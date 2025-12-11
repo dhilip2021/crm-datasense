@@ -212,8 +212,8 @@ export async function POST(request) {
       );
     }
 
-     console.log(registrationTokens, "<<< NOTIFICATION registrationTokens");
-     console.log(payload, "<<< NOTIFICATION payload");
+    //  console.log(registrationTokens, "<<< NOTIFICATION registrationTokens");
+    //  console.log(payload, "<<< NOTIFICATION payload");
 
 
     // Send notification
