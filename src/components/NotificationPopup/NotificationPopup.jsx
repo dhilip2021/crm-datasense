@@ -3,6 +3,9 @@ import { useState, useEffect } from "react";
 import { listenForForegroundNotifications } from "@/utils/firebaseForeground";
 
 const NotificationPopup = () => {
+
+  console.log("Notify Popup")
+
   const [popup, setPopup] = useState(null);
 
    const closePopup = () => setPopup(null);
