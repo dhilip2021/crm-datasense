@@ -1046,3 +1046,54 @@ export const sendNotification = async (body) => {
       return err;
     });
 };
+
+
+export const addNotification = async (body,header) => {
+  return await axios
+    .post(`/api/v1/admin/notification/add`, body, {
+      headers: header,
+    })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const listNotification = async (body,header) => {
+  return await axios
+    .post(`/api/v1/admin/notification/list`, body, {
+      headers: header,
+    })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+  export const getListNotification = async (uId,status,header) => {
+  return await axios
+    .get(`/api/v1/admin/notification/list?c_user_id=${uId}&c_read_status=${status}`,{ headers: header })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const clearAllNotification = async (body,header) => {
+    return await axios
+      .delete(`/api/v1/admin/notification/delete?id=${body}`, {
+        headers: header,
+      })
+      .then((res) => {
+        return res.data;
+      })
+      .catch((err) => {
+        return err;
+      });
+  };

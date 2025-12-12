@@ -170,7 +170,7 @@ export async function POST(request) {
     }
 
     // Build payload
-    const payload = {
+    const payload1 = {
       notification: {
         title: title || "",
         body: message || "",
@@ -197,6 +197,41 @@ export async function POST(request) {
       webpush: link ? { fcmOptions: { link } } : undefined,
     };
 
+
+     const payload = {
+    notification: {
+      title,
+      body: message,
+      image: icon || undefined, // only if icon provided
+    },
+    data: {
+      link: link || "",
+      imageUrl: icon || "",
+      title: title || "",
+      body: message || "",
+    },
+    android: {
+      priority: "high",
+    },
+    apns: {
+      headers: {
+        "apns-priority": "10",
+      },
+      payload: {
+        aps: {
+          alert: {
+            title,
+            body: message,
+          },
+          sound: "default",
+          badge: 1,
+          "content-available": 1, // ✅ correct key for iOS
+        },
+      },
+    },
+    webpush: link ? { fcmOptions: { link } } : undefined,
+  };
+
     // Fetch tokens
     const registrationTokens = await fetchAllTokens(c_type, send_to);
 
@@ -211,9 +246,6 @@ export async function POST(request) {
         { status: 200 }
       );
     }
-
-    //  console.log(registrationTokens, "<<< NOTIFICATION registrationTokens");
-    //  console.log(payload, "<<< NOTIFICATION payload");
 
 
     // Send notification

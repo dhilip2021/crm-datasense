@@ -21,7 +21,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Cookies from 'js-cookie'
 import dayjs from 'dayjs'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import { getUserListApi, sendNotification } from '@/apiFunctions/ApiAction'
+import { addNotification, getListNotification, getUserListApi, sendNotification } from '@/apiFunctions/ApiAction'
 
 export default function DashboardWidgets({ sections }) {
   const router = useRouter()
@@ -39,6 +39,8 @@ export default function DashboardWidgets({ sections }) {
   // const [fieldConfig, setFieldConfig] = useState({})
   const [anchorViewEl, setAnchorViewEl] = useState(null)
   const [viewType, setViewType] = useState('This Month')
+  const [notiFyStatus, setNotiFyStatus] = useState(false)
+
   const view = Boolean(anchorViewEl)
 
   const handleViewClick = event => {
@@ -158,8 +160,6 @@ export default function DashboardWidgets({ sections }) {
   }
 
   const fetchData = async () => {
-    console.log('fetch 1')
-
     setLoader(true)
 
     const form_name = 'lead-form'
@@ -250,29 +250,66 @@ export default function DashboardWidgets({ sections }) {
     }
   }, [user_id])
 
-  const sendFollowUpNotiFn = async (msg, leadId) => {
+  const sendFollowUpNotiFn = async data => {
+    console.log(data, '<<< notification data')
 
-    console.log(msg,"<<< msg")
-    console.log(leadId,"<<< leadId")
+    if (!Array.isArray(data)) return
 
-    const body = {
-      title: 'Follow-up Reminder 📌',
-      message: msg,
-      icon: organization_logo ? organization_logo : '/uploads/logos/1763798172005_DS-Logo.png',
-      link: leadId,
-      c_redirect_id: '',
-      c_type: baseUrl === 'http://localhost:3000' ? 'web1' : 'web',
-      send_to: [user_id]
+    for (const item of data) {
+      const body = {
+        title: item?.c_title,
+        message: item?.c_message,
+        icon: item?.c_icon ? item?.c_icon : '/uploads/logos/1763798172005_DS-Logo.png',
+        link: item?.c_link,
+        c_type: item?.c_type,
+        send_to: [item?.c_send_to?.[0]?.c_user_id],
+      }
+
+      try {
+        const results = await sendNotification(body)
+
+        if (results?.appStatusCode === 0) {
+         
+        } else {
+          console.log('Error Response:', results)
+        }
+      } catch (err) {
+        console.log('Notification Error:', err)
+      }
     }
+     Cookies.set('reminder', '1')
+  }
 
-    console.log(body, '<<< BODYYYYYYY LISTSSS')
-    const results = await sendNotification(body)
+  const addNotificationFn = async notification => {
+    const header = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken}`
+    }
+    try {
+      const results = await addNotification(notification, header)
+      setNotiFyStatus(true)
+    } catch (err) {
+      console.log(err)
+    }
+  }
 
-    // console.log(results, '<<< resultsss')
-    if (results?.appStatusCode === 0) {
-       Cookies.set('reminder', "1")
-    } else {
-      console.log(error)
+  const getNotification = async () => {
+    const header = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken}`
+    }
+    try {
+      const results = await getListNotification(user_id, 0, header)
+
+      if (results?.appStatusCode === 0) {
+        
+           sendFollowUpNotiFn(results?.payloadJson)
+        
+       
+      } else {
+      }
+    } catch (err) {
+      console.log(err)
     }
   }
 
@@ -283,43 +320,62 @@ export default function DashboardWidgets({ sections }) {
   }, [viewType])
 
   useEffect(() => {
+    if (notiFyStatus && reminder === "0") {
+      getNotification()
+    }
+  }, [notiFyStatus])
 
-    if(data?.length > 0){
-      
-    const today = new Date().toISOString().split('T')[0]
-   
-    // Filter follow-up leads
-    const filtered = data.filter(item => {
-      const followUp = item.values?.['Next Follow-up Date']
-      const Assigned = item.values?.['Assigned To']
-      
+  useEffect(() => {
+    if (data?.length > 0) {
+      const today = new Date().toISOString().split('T')[0]
 
-      // const followUp = item.values?.['Next Follow-up Date']
-      return followUp === today && Assigned === user_id
-    })
-     console.log(filtered,"<<< FILTREDDDD")
+      // Filter follow-up leads
+      const filtered = data.filter(item => {
+        const followUp = item.values?.['Next Follow-up Date']
+        const Assigned = item.values?.['Assigned To']
 
-    if (reminder === "0") {
-      // Loop through each lead and generate message
-      filtered.forEach(lead => {
-        const firstName = lead.values?.['First Name'] || ''
-        const lastName = lead.values?.['Last Name'] || ''
-        const company = lead.values?.['Company'] || '— (No Company)'
-        const leadId = lead.lead_id || ''
-        Cookies.set('reminder', "0")
-        const msg = `
-Company: ${company}
-First Name: ${firstName}
-Last Name: ${lastName}
-    `   
-        sendFollowUpNotiFn(msg, leadId)
+        // const followUp = item.values?.['Next Follow-up Date']
+        return followUp === today && Assigned === user_id
       })
-     
+
+      const notifications = filtered.map(item => ({
+        c_title: 'Follow-up Reminder 📌',
+        c_message: `\nCompany: ${item.values['Company']} \nFirst Name: ${item.values['First Name']}\nLast Name: ${item.values['Last Name']}\n`,
+        c_icon: organization_logo,
+        c_link: item.lead_id,
+        c_type: 'web1',
+        c_send_to: [
+          {
+            c_user_id: item.values['Assigned To'],
+            c_read_status: 0
+          }
+        ]
+      }))
+
+      addNotificationFn(notifications)
+
+      // if (reminder === '0') {
+
+      // }
+
+      //     if (reminder === "0") {
+      //       // Loop through each lead and generate message
+      //       filtered.forEach(lead => {
+      //         const firstName = lead.values?.['First Name'] || ''
+      //         const lastName = lead.values?.['Last Name'] || ''
+      //         const company = lead.values?.['Company'] || '— (No Company)'
+      //         const leadId = lead.lead_id || ''
+      //         Cookies.set('reminder', "0")
+      //         const msg = `
+      // Company: ${company}
+      // First Name: ${firstName}
+      // Last Name: ${lastName}
+      //     `
+      //         sendFollowUpNotiFn(msg, leadId)
+      //       })
+
+      //     }
     }
-    }
-
-
-
   }, [data])
 
   return (

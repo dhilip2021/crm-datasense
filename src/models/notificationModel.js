@@ -4,43 +4,50 @@ var Schema = mongoose.Schema;
 
 const NotificationSchema = new Schema(
   {
-
     c_notification_id: {
       type: String,
       required: [true, "Notification Id is required"],
       trim: true,
       unique: true,
     },
-    c_notification_title: {
+    c_title: {
       type: String,
       required: [true, "Notification Title is required"],
       trim: true,
     },
-    c_notification_content: {
+    c_message: {
       type: String,
-      required: [true, "Notification content is required"],
+      required: [true, "Notification message is required"],
       trim: true,
     },
-    c_notification_redirect_url: {
-      type: String,
-      trim: true,
-    },
-    c_notification_icon: {
+    c_icon: {
       type: String,
       trim: true,
     },
-    c_notification_list: [
+    c_link: {
+      type: String,
+      trim: true,
+    },
+    c_type: {
+      type: String,
+      trim: true,
+    },
+
+    // Correct structure for send_to array
+    c_send_to: [
       {
-        c_device_id: {
+        c_user_id: {
           type: String,
           trim: true,
         },
         c_read_status: {
-            type: Number,
-            trim: true,
-          },
+          type: Number,
+          default: 0,
+          trim: true,
+        },
       },
     ],
+
     c_createdBy: {
       type: String,
     },
@@ -50,6 +57,7 @@ const NotificationSchema = new Schema(
     c_deletedBy: {
       type: String,
     },
+
     n_status: {
       type: Number,
       required: true,
@@ -66,4 +74,20 @@ const NotificationSchema = new Schema(
   { strict: false, versionKey: false, timestamps: true }
 );
 
-export const Notification = mongoose.models.Notification || mongoose.model("Notification", NotificationSchema,"notifications");
+// ---------------------------------------------
+// 🔥 DUPLICATE PREVENTION INDEX
+// ---------------------------------------------
+NotificationSchema.index(
+  {
+    c_title: 1,
+    c_message: 1,
+    c_type: 1,
+    c_link: 1,
+    "c_send_to.c_user_id": 1
+  },
+  { unique: true, sparse: true }
+);
+
+export const Notification =
+  mongoose.models.Notification ||
+  mongoose.model("Notification", NotificationSchema, "notifications");
